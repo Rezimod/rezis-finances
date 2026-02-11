@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Rezis Finances">
+<meta name="theme-color" content="#0F0F0F">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Rezis Finances</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+  }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #0F0F0F;
+    color: #F8F4EF;
+    min-height: 100vh;
+    min-height: 100dvh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app-bg {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: linear-gradient(165deg, #0F0F0F 0%, #1A1510 40%, #0F0F0F 100%);
+  }
+  input[type="number"], input[type="text"] {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input:focus { outline: none; border-color: rgba(212,165,116,0.4) !important; }
+  button { font-family: 'DM Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+  button:active { transform: scale(0.97); }
+
+  .app { padding: 0 0 100px 0; }
+
+  .header {
+    padding-top: max(28px, env(safe-area-inset-top));
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-bottom: 20px;
+  }
+
+  .fade-in { animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .slide-up { animation: slideUp 0.35s cubic-bezier(0.4,0,0.2,1); }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+  .modal-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    display: flex; align-items: flex-end; justify-content: center; z-index: 100;
+  }
+  .modal-sheet {
+    background: linear-gradient(180deg, #1F1A15 0%, #141210 100%);
+    border-radius: 24px 24px 0 0;
+    padding: 28px 24px 40px;
+    padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+    width: 100%; max-width: 480px;
+    border: 1px solid rgba(255,255,255,0.08); border-bottom: none;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .history-modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+    display: flex; flex-direction: column; z-index: 100;
+  }
+
+  .period-btn { transition: all 0.25s ease; }
+  .tx-row { transition: background 0.15s; }
+  .tx-row:active { background: rgba(255,255,255,0.06) !important; }
+  .cat-btn { transition: all 0.15s; }
+  .cat-btn:active { transform: scale(0.95); }
+
+  .add-btn-main {
+    transition: all 0.2s;
+    background: linear-gradient(135deg, #D4A574 0%, #B8845A 100%);
+  }
+  .add-btn-main:disabled { opacity: 0.4; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+  /* Splash screen */
+  #splash {
+    position: fixed; inset: 0; z-index: 9999;
+    background: #0F0F0F;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 12px;
+    transition: opacity 0.4s ease;
+  }
+  #splash.hide { opacity: 0; pointer-events: none; }
+  #splash h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px; font-weight: 700;
+    background: linear-gradient(135deg, #F8F4EF 0%, #D4A574 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  #splash p { font-size: 13px; color: rgba(248,244,239,0.4); }
+</style>
+</head>
+<body>
+
+<!-- Splash screen prevents flash of unstyled content -->
+<div id="splash">
+  <h1>Rezis Finances</h1>
+  <p>პირადი ფინანსები</p>
+</div>
+
+<div id="app" class="app-bg"></div>
+
+<script>
+// Hide splash after load
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    const s = document.getElementById("splash");
+    if (s) { s.classList.add("hide"); setTimeout(() => s.remove(), 500); }
+  }, 600);
+});
+
+const CATEGORIES = {
+  food: { label: "საკვები", icon: "🍽", color: "#E8533F" },
+  transport: { label: "ტრანსპორტი", icon: "🚗", color: "#3B82F6" },
+  shopping: { label: "შოპინგი", icon: "🛍", color: "#A855F7" },
+  bills: { label: "გადასახადები", icon: "⚡", color: "#F59E0B" },
+  health: { label: "ჯანმრთელობა", icon: "💊", color: "#10B981" },
+  entertainment: { label: "გართობა", icon: "🎬", color: "#EC4899" },
+  income: { label: "შემოსავალი", icon: "💰", color: "#22C55E" },
+  other: { label: "სხვა", icon: "📦", color: "#6B7280" },
+};
+
+const PERIODS = ["day", "week", "month", "year"];
+const PERIOD_LABELS = { day: "დღეს", week: "ეს კვირა", month: "ეს თვე", year: "ეს წელი" };
+const PERIOD_TAB = { day: "დღიური", week: "კვირეული", month: "თვიური", year: "წლიური" };
+const STORAGE_KEY = "rezis-finances-v2";
+
+function formatLari(n) { return n.toFixed(2) + " ₾"; }
+
+let state = {
+  transactions: [],
+  period: "month",
+  showAdd: false,
+  showHistory: false,
+  newTx: { category: "food", amount: "", type: "expense", note: "" },
+};
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) state.transactions = JSON.parse(raw);
+  } catch(e) {}
+}
+
+function saveData() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.transactions)); } catch(e) {}
+}
+
+function getTodayStr() { return new Date().toISOString().split("T")[0]; }
+
+function filterTransactions() {
+  const today = new Date();
+  const todayStr = getTodayStr();
+  return state.transactions.filter(tx => {
+    const d = new Date(tx.date);
+    if (state.period === "day") return tx.date === todayStr;
+    if (state.period === "week") {
+      const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
+      return d >= weekAgo && d <= today;
+    }
+    if (state.period === "month") return d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+    return d.getFullYear() === today.getFullYear();
+  });
+}
+
+function computeStats(filtered) {
+  const expenses = filtered.filter(t => t.type === "expense");
+  const incomes = filtered.filter(t => t.type === "income");
+  const totalExpense = expenses.reduce((s, t) => s + t.amount, 0);
+  const totalIncome = incomes.reduce((s, t) => s + t.amount, 0);
+  const byCategory = {};
+  expenses.forEach(t => { byCategory[t.category] = (byCategory[t.category] || 0) + t.amount; });
+  const categoryBreakdown = Object.entries(byCategory).map(([cat, amount]) => ({ category: cat, amount, ...CATEGORIES[cat] })).sort((a, b) => b.amount - a.amount);
+  const dailyMap = {};
+  expenses.forEach(t => { dailyMap[t.date] = (dailyMap[t.date] || 0) + t.amount; });
+  const dailyTotals = Object.entries(dailyMap).sort(([a],[b]) => a.localeCompare(b)).map(([,v]) => v);
+  const uniqueDays = new Set(expenses.map(e => e.date)).size;
+  const avgDaily = uniqueDays > 0 ? totalExpense / uniqueDays : 0;
+  const biggest = expenses.length > 0 ? expenses.reduce((a, b) => a.amount > b.amount ? a : b) : null;
+  return { totalExpense, totalIncome, net: totalIncome - totalExpense, categoryBreakdown, dailyTotals, avgDaily, biggest, txCount: filtered.length };
+}
+
+function getInsights(stats) {
+  const msgs = [];
+  if (stats.txCount === 0) { msgs.push("📝 ჯერ ტრანზაქციები არ გაქვთ. დააჭირეთ + ღილაკს დასამატებლად."); return msgs; }
+  if (stats.categoryBreakdown.length > 0) {
+    const top = stats.categoryBreakdown[0];
+    msgs.push(top.icon + " " + top.label + " — ყველაზე დიდი ხარჯი: " + formatLari(top.amount));
+  }
+  if (stats.net > 0) msgs.push("✅ დადებითი ბალანსი! დანაზოგი: " + formatLari(stats.net));
+  else if (stats.net < 0) msgs.push("⚠️ შემოსავალზე მეტი დახარჯეთ: " + formatLari(Math.abs(stats.net)));
+  if (stats.avgDaily > 0) msgs.push("📊 საშუალო დღიური ხარჯი: " + formatLari(stats.avgDaily));
+  if (stats.biggest) msgs.push("💸 ყველაზე დიდი ხარჯი: " + formatLari(stats.biggest.amount) + " — " + CATEGORIES[stats.biggest.category].label + (stats.biggest.note ? " (" + stats.biggest.note + ")" : ""));
+  return msgs;
+}
+
+function sparkLineSVG(data, color, w, h) {
+  w = w || 120; h = h || 32;
+  if (!data || data.length < 2) return "";
+  var max = Math.max.apply(null, data), min = Math.min.apply(null, data), range = max - min || 1;
+  var pts = [];
+  for (var i = 0; i < data.length; i++) {
+    var x = (i / (data.length - 1)) * w;
+    var y = h - ((data[i] - min) / range) * (h - 4) - 2;
+    pts.push(x + "," + y);
+  }
+  var id = "sp-" + color.replace("#", "");
+  return '<svg width="' + w + '" height="' + h + '" style="display:block">' +
+    '<defs><linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0%" stop-color="' + color + '" stop-opacity="0.3"/>' +
+    '<stop offset="100%" stop-color="' + color + '" stop-opacity="0"/>' +
+    '</linearGradient></defs>' +
+    '<polygon points="0,' + h + ' ' + pts.join(" ") + ' ' + w + ',' + h + '" fill="url(#' + id + ')"/>' +
+    '<polyline points="' + pts.join(" ") + '" fill="none" stroke="' + color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function donutSVG(segments, size) {
+  size = size || 160;
+  var total = 0;
+  for (var i = 0; i < segments.length; i++) total += segments[i].value;
+  if (total === 0) return '<div style="width:' + size + 'px;height:' + size + 'px;margin:0 auto;display:flex;align-items:center;justify-content:center;border-radius:50%;border:3px solid rgba(255,255,255,0.06)"><div style="text-align:center"><div style="font-size:18px;font-weight:700;color:rgba(248,244,239,0.25)">0.00 ₾</div><div style="font-size:11px;color:rgba(248,244,239,0.2);margin-top:4px">ხარჯი არ არის</div></div></div>';
+  var r = size / 2 - 12, cx = size / 2, cy = size / 2, circ = 2 * Math.PI * r;
+  var offset = 0, circles = "";
+  for (var j = 0; j < segments.length; j++) {
+    var pct = segments[j].value / total, dash = pct * circ, gap = circ - dash;
+    circles += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + segments[j].color + '" stroke-width="20" stroke-dasharray="' + dash + ' ' + gap + '" stroke-dashoffset="' + (-offset) + '" style="transition:all 0.6s ease"/>';
+    offset += dash;
+  }
+  return '<svg width="' + size + '" height="' + size + '" style="display:block;margin:0 auto">' + circles +
+    '<text x="' + cx + '" y="' + (cy - 6) + '" text-anchor="middle" fill="#F8F4EF" font-size="16" font-weight="700" font-family="DM Sans,sans-serif">' + formatLari(total) + '</text>' +
+    '<text x="' + cx + '" y="' + (cy + 14) + '" text-anchor="middle" fill="rgba(248,244,239,0.45)" font-size="11" font-family="DM Sans,sans-serif">სულ ხარჯი</text></svg>';
+}
+
+function escHtml(s) {
+  if (!s) return "";
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function render() {
+  var filtered = filterTransactions();
+  var stats = computeStats(filtered);
+  var insights = getInsights(stats);
+  var maxCat = stats.categoryBreakdown.length > 0 ? stats.categoryBreakdown[0].amount : 0;
+  var donutSegs = stats.categoryBreakdown.map(function(c) { return { value: c.amount, color: c.color }; });
+
+  var h = '<div class="app fade-in">';
+
+  // Header
+  h += '<div class="header" style="display:flex;justify-content:space-between;align-items:center">' +
+    '<div>' +
+    '<h1 style="font-family:Playfair Display,serif;font-size:28px;font-weight:700;letter-spacing:-0.5px;background:linear-gradient(135deg,#F8F4EF 0%,#D4A574 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Rezis Finances</h1>' +
+    '<p style="margin:4px 0 0;font-size:13px;color:rgba(248,244,239,0.4);letter-spacing:0.5px">პირადი ფინანსები</p>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px">' +
+    '<button onclick="openHistory()" style="width:44px;height:44px;border-radius:14px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:rgba(248,244,239,0.5);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">📋</button>' +
+    '<button onclick="openAdd()" style="width:44px;height:44px;border-radius:14px;border:1px solid rgba(212,165,116,0.25);background:rgba(212,165,116,0.08);color:#D4A574;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>' +
+    '</div></div>';
+
+  // Period
+  h += '<div style="padding:0 24px;margin-bottom:24px"><div style="display:flex;background:rgba(255,255,255,0.04);border-radius:14px;padding:4px;border:1px solid rgba(255,255,255,0.06)">';
+  for (var pi = 0; pi < PERIODS.length; pi++) {
+    var p = PERIODS[pi];
+    var active = state.period === p;
+    h += '<button class="period-btn" onclick="setPeriod(\'' + p + '\')" style="flex:1;padding:10px 0;border-radius:11px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:' + (active ? "rgba(212,165,116,0.15)" : "transparent") + ';color:' + (active ? "#D4A574" : "rgba(248,244,239,0.4)") + ';letter-spacing:0.3px">' + PERIOD_TAB[p] + '</button>';
+  }
+  h += '</div></div>';
+
+  // Summary cards
+  h += '<div style="padding:0 24px;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">' +
+    '<div style="background:linear-gradient(145deg,rgba(232,83,63,0.12),rgba(232,83,63,0.04));border-radius:18px;padding:18px 16px;border:1px solid rgba(232,83,63,0.12)">' +
+    '<div style="font-size:11px;color:rgba(248,244,239,0.45);margin-bottom:6px;letter-spacing:0.8px;text-transform:uppercase">ხარჯი</div>' +
+    '<div style="font-size:22px;font-weight:700;color:#E8533F;letter-spacing:-0.5px">' + formatLari(stats.totalExpense) + '</div>' +
+    '<div style="margin-top:10px">' + sparkLineSVG(stats.dailyTotals, "#E8533F") + '</div></div>' +
+    '<div style="background:linear-gradient(145deg,rgba(34,197,94,0.12),rgba(34,197,94,0.04));border-radius:18px;padding:18px 16px;border:1px solid rgba(34,197,94,0.12)">' +
+    '<div style="font-size:11px;color:rgba(248,244,239,0.45);margin-bottom:6px;letter-spacing:0.8px;text-transform:uppercase">შემოსავალი</div>' +
+    '<div style="font-size:22px;font-weight:700;color:#22C55E;letter-spacing:-0.5px">' + formatLari(stats.totalIncome) + '</div>' +
+    '<div style="margin-top:12px;font-size:12px;color:' + (stats.net >= 0 ? "#22C55E" : "#E8533F") + '">' + (stats.net >= 0 ? "▲" : "▼") + ' ' + formatLari(Math.abs(stats.net)) + ' ბალანსი</div></div></div>';
+
+  // Donut
+  h += '<div style="margin:0 24px 24px;background:rgba(255,255,255,0.03);border-radius:20px;padding:24px 20px;border:1px solid rgba(255,255,255,0.06)">' +
+    '<h2 style="font-size:15px;font-weight:600;margin:0 0 20px;color:rgba(248,244,239,0.7)">ხარჯების განაწილება — ' + PERIOD_LABELS[state.period] + '</h2>' +
+    donutSVG(donutSegs) +
+    '<div style="margin-top:24px;display:flex;flex-direction:column;gap:14px">';
+  if (stats.categoryBreakdown.length === 0) {
+    h += '<p style="color:rgba(248,244,239,0.25);font-size:13px;text-align:center;padding:20px">ხარჯები ჯერ არ არის ჩაწერილი</p>';
+  } else {
+    for (var ci = 0; ci < stats.categoryBreakdown.length; ci++) {
+      var cat = stats.categoryBreakdown[ci];
+      var pctBar = maxCat > 0 ? (cat.amount / maxCat) * 100 : 0;
+      h += '<div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+        '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">' + cat.icon + '</span><span style="font-size:13px;font-weight:500;color:rgba(248,244,239,0.75)">' + cat.label + '</span></div>' +
+        '<span style="font-size:14px;font-weight:600;color:' + cat.color + '">' + formatLari(cat.amount) + '</span></div>' +
+        '<div style="width:100%;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden">' +
+        '<div style="width:' + Math.min(pctBar, 100) + '%;height:100%;background:' + cat.color + ';border-radius:3px;transition:width 0.6s"></div></div></div>';
+    }
+  }
+  h += '</div></div>';
+
+  // Insights
+  h += '<div style="margin:0 24px 24px"><h2 style="font-size:15px;font-weight:600;margin:0 0 14px;color:rgba(248,244,239,0.7)">💡 ანალიზი</h2><div style="display:flex;flex-direction:column;gap:10px">';
+  for (var ii = 0; ii < insights.length; ii++) {
+    h += '<div style="background:rgba(255,255,255,0.03);border-radius:14px;padding:14px 16px;border:1px solid rgba(255,255,255,0.06);font-size:13px;line-height:1.6;color:rgba(248,244,239,0.7)">' + insights[ii] + '</div>';
+  }
+  h += '</div></div>';
+
+  // Recent transactions
+  h += '<div style="margin:0 24px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">' +
+    '<h2 style="font-size:15px;font-weight:600;margin:0;color:rgba(248,244,239,0.7)">ბოლო ტრანზაქციები</h2>' +
+    '<span style="font-size:12px;color:rgba(248,244,239,0.3)">' + filtered.length + ' ჩანაწერი</span></div>';
+  if (filtered.length === 0) {
+    h += '<div style="text-align:center;padding:40px 20px;color:rgba(248,244,239,0.2)">' +
+      '<div style="font-size:40px;margin-bottom:12px">📭</div>' +
+      '<p style="font-size:14px;margin:0">ტრანზაქციები არ არის</p>' +
+      '<p style="font-size:12px;margin:8px 0 0;color:rgba(248,244,239,0.15)">დააჭირეთ + ღილაკს დასამატებლად</p></div>';
+  } else {
+    h += '<div style="display:flex;flex-direction:column;gap:2px">';
+    var recent = filtered.slice().reverse().slice(0, 20);
+    for (var ri = 0; ri < recent.length; ri++) {
+      var tx = recent[ri];
+      var tc = CATEGORIES[tx.category];
+      h += '<div class="tx-row" style="display:flex;justify-content:space-between;align-items:center;padding:13px 16px;background:' + (ri % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent") + ';border-radius:12px">' +
+        '<div style="display:flex;align-items:center;gap:12px">' +
+        '<span style="width:36px;height:36px;border-radius:10px;background:' + tc.color + '18;display:flex;align-items:center;justify-content:center;font-size:16px">' + tc.icon + '</span>' +
+        '<div><div style="font-size:13px;font-weight:500;color:rgba(248,244,239,0.8)">' + tc.label + (tx.note ? " — " + escHtml(tx.note) : "") + '</div>' +
+        '<div style="font-size:11px;color:rgba(248,244,239,0.3);margin-top:2px">' + tx.date + '</div></div></div>' +
+        '<span style="font-size:14px;font-weight:600;color:' + (tx.type === "income" ? "#22C55E" : "rgba(248,244,239,0.75)") + '">' + (tx.type === "income" ? "+" : "−") + formatLari(tx.amount) + '</span></div>';
+    }
+    h += '</div>';
+  }
+  h += '</div></div>';
+
+  // Modals
+  if (state.showAdd) {
+    h += renderAddModal();
+  }
+  if (state.showHistory) {
+    h += renderHistoryModal();
+  }
+
+  document.getElementById("app").innerHTML = h;
+
+  if (state.showAdd) {
+    var inp = document.getElementById("amountInput");
+    if (inp) setTimeout(function() { inp.focus(); }, 150);
+  }
+}
+
+function renderAddModal() {
+  var nt = state.newTx;
+  var m = '<div class="modal-bg" onclick="closeAdd()">' +
+    '<div class="modal-sheet slide-up" onclick="event.stopPropagation()">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">' +
+    '<h3 style="margin:0;font-size:18px;font-weight:700;font-family:Playfair Display,serif;color:#D4A574">ტრანზაქციის დამატება</h3>' +
+    '<button onclick="closeAdd()" style="background:none;border:none;color:rgba(248,244,239,0.4);font-size:20px;cursor:pointer">✕</button></div>';
+
+  // Type toggle
+  m += '<div style="display:flex;gap:8px;margin-bottom:20px">';
+  var types = [["expense", "ხარჯი", "#E8533F"], ["income", "შემოსავალი", "#22C55E"]];
+  for (var ti = 0; ti < types.length; ti++) {
+    var t = types[ti], act = nt.type === t[0];
+    m += '<button onclick="setTxType(\'' + t[0] + '\')" style="flex:1;padding:10px 0;border-radius:10px;border:1px solid ' + (act ? t[2] : "rgba(255,255,255,0.08)") + ';background:' + (act ? t[2] + "1a" : "transparent") + ';color:' + (act ? t[2] : "rgba(248,244,239,0.4)") + ';font-size:13px;font-weight:600;cursor:pointer">' + t[1] + '</button>';
+  }
+  m += '</div>';
+
+  // Amount
+  m += '<div style="margin-bottom:16px">' +
+    '<label style="font-size:11px;color:rgba(248,244,239,0.4);text-transform:uppercase;letter-spacing:0.8px">თანხა (₾)</label>' +
+    '<input id="amountInput" type="number" inputmode="decimal" step="0.01" placeholder="0.00" value="' + escHtml(nt.amount) + '" oninput="state.newTx.amount=this.value" style="width:100%;margin-top:8px;padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:#F8F4EF;font-size:20px;font-weight:700;font-family:DM Sans,sans-serif;box-sizing:border-box"></div>';
+
+  // Note
+  m += '<div style="margin-bottom:20px">' +
+    '<label style="font-size:11px;color:rgba(248,244,239,0.4);text-transform:uppercase;letter-spacing:0.8px">შენიშვნა</label>' +
+    '<input id="noteInput" type="text" placeholder="მაგ: სუპერმარკეტი, ხელფასი..." value="' + escHtml(nt.note) + '" oninput="state.newTx.note=this.value" style="width:100%;margin-top:8px;padding:12px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:#F8F4EF;font-size:14px;font-family:DM Sans,sans-serif;box-sizing:border-box"></div>';
+
+  // Categories
+  if (nt.type === "expense") {
+    m += '<div style="margin-bottom:24px"><label style="font-size:11px;color:rgba(248,244,239,0.4);text-transform:uppercase;letter-spacing:0.8px">კატეგორია</label>' +
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px">';
+    var keys = Object.keys(CATEGORIES);
+    for (var ki = 0; ki < keys.length; ki++) {
+      var k = keys[ki];
+      if (k === "income") continue;
+      var c = CATEGORIES[k], a = nt.category === k;
+      m += '<button class="cat-btn" onclick="setTxCat(\'' + k + '\')" style="padding:12px 4px;border-radius:12px;border:1px solid ' + (a ? c.color : "rgba(255,255,255,0.06)") + ';background:' + (a ? c.color + "18" : "rgba(255,255,255,0.02)") + ';cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">' +
+        '<span style="font-size:20px">' + c.icon + '</span>' +
+        '<span style="font-size:10px;color:rgba(248,244,239,0.5)">' + c.label + '</span></button>';
+    }
+    m += '</div></div>';
+  }
+
+  m += '<button class="add-btn-main" onclick="addTransaction()" ' + (nt.amount ? "" : "disabled") + ' style="width:100%;padding:16px 0;border-radius:14px;border:none;color:#0F0F0F;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.3px">დამატება</button>';
+  m += '</div></div>';
+  return m;
+}
+
+function renderHistoryModal() {
+  var m = '<div class="history-modal">' +
+    '<div style="padding:max(24px, env(safe-area-inset-top)) 24px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.06)">' +
+    '<h3 style="margin:0;font-size:18px;font-weight:700;font-family:Playfair Display,serif;color:#D4A574">სრული ისტორია</h3>' +
+    '<div style="display:flex;gap:12px;align-items:center">';
+  if (state.transactions.length > 0) {
+    m += '<button onclick="clearAll()" style="background:none;border:1px solid rgba(232,83,63,0.3);border-radius:8px;color:#E8533F;font-size:12px;padding:6px 12px;cursor:pointer">წაშლა ყველა</button>';
+  }
+  m += '<button onclick="closeHistory()" style="background:none;border:none;color:rgba(248,244,239,0.4);font-size:22px;cursor:pointer">✕</button></div></div>' +
+    '<div style="flex:1;overflow-y:auto;padding:16px 24px;-webkit-overflow-scrolling:touch">' +
+    '<p style="font-size:12px;color:rgba(248,244,239,0.3);margin-bottom:16px">სულ ' + state.transactions.length + ' ჩანაწერი</p>';
+
+  if (state.transactions.length === 0) {
+    m += '<div style="text-align:center;padding:60px 20px;color:rgba(248,244,239,0.2)"><div style="font-size:40px;margin-bottom:12px">📭</div><p style="font-size:14px">ისტორია ცარიელია</p></div>';
+  } else {
+    m += '<div style="display:flex;flex-direction:column;gap:4px">';
+    var all = state.transactions.slice().reverse();
+    for (var ai = 0; ai < all.length; ai++) {
+      var tx = all[ai], c = CATEGORIES[tx.category];
+      var time = tx.timestamp ? " · " + new Date(tx.timestamp).toLocaleTimeString("ka-GE", { hour: "2-digit", minute: "2-digit" }) : "";
+      m += '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(255,255,255,0.03);border-radius:12px">' +
+        '<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">' +
+        '<span style="font-size:16px;flex-shrink:0">' + c.icon + '</span>' +
+        '<div style="min-width:0"><div style="font-size:13px;font-weight:500;color:rgba(248,244,239,0.8);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + c.label + (tx.note ? " — " + escHtml(tx.note) : "") + '</div>' +
+        '<div style="font-size:11px;color:rgba(248,244,239,0.25);margin-top:2px">' + tx.date + time + '</div></div></div>' +
+        '<div style="display:flex;align-items:center;gap:10px;flex-shrink:0">' +
+        '<span style="font-size:14px;font-weight:600;color:' + (tx.type === "income" ? "#22C55E" : "rgba(248,244,239,0.75)") + '">' + (tx.type === "income" ? "+" : "−") + formatLari(tx.amount) + '</span>' +
+        '<button onclick="deleteTx(\'' + tx.id + '\')" style="background:none;border:none;color:rgba(248,244,239,0.2);font-size:16px;cursor:pointer;padding:2px 4px">🗑</button></div></div>';
+    }
+    m += '</div>';
+  }
+  m += '</div></div>';
+  return m;
+}
+
+// Action functions
+function openAdd() { state.showAdd = true; render(); }
+function closeAdd() { state.showAdd = false; render(); }
+function openHistory() { state.showHistory = true; render(); }
+function closeHistory() { state.showHistory = false; render(); }
+function setPeriod(p) { state.period = p; render(); }
+function setTxType(t) { state.newTx.type = t; state.newTx.category = t === "income" ? "income" : "food"; render(); }
+function setTxCat(c) { state.newTx.category = c; render(); }
+
+function addTransaction() {
+  var nt = state.newTx;
+  if (!nt.amount || parseFloat(nt.amount) <= 0) return;
+  state.transactions.push({
+    id: Date.now().toString(36) + Math.random().toString(36).substr(2, 6),
+    date: getTodayStr(),
+    category: nt.type === "income" ? "income" : nt.category,
+    amount: parseFloat(parseFloat(nt.amount).toFixed(2)),
+    type: nt.type,
+    note: (nt.note || "").trim(),
+    timestamp: new Date().toISOString(),
+  });
+  saveData();
+  state.newTx = { category: "food", amount: "", type: "expense", note: "" };
+  state.showAdd = false;
+  render();
+}
+
+function deleteTx(id) {
+  state.transactions = state.transactions.filter(function(t) { return t.id !== id; });
+  saveData();
+  render();
+}
+
+function clearAll() {
+  if (confirm("ნამდვილად გსურთ ყველა ჩანაწერის წაშლა?")) {
+    state.transactions = [];
+    saveData();
+    state.showHistory = false;
+    render();
+  }
+}
+
+// Register service worker
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function() {
+    navigator.serviceWorker.register("./sw.js").catch(function() {});
+  });
+}
+
+// Init
+loadData();
+render();
+</script>
+</body>
+</html>
