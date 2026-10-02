@@ -122,8 +122,7 @@ a{color:var(--brand)}
 .hkpi .val small{font-size:15px;color:var(--night-muted);font-weight:500;margin-left:3px}
 .hkpi .delta{font-size:12px;margin-top:3px;color:var(--night-muted)}
 .hkpi .up{color:#6EE0A6}.hkpi .down{color:#FF9389}
-.money{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:16px}
-@media (max-width:1250px){.money{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.money{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:16px}
 .mcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow);min-width:0;position:relative;overflow:hidden}
 .mcard::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--c,var(--brand))}
 .mcard .lbl{font-size:12px;color:var(--ink-2);display:flex;justify-content:space-between;gap:8px;align-items:baseline}
@@ -964,7 +963,9 @@ function liveBalances(){
   BAL_ACC.forEach(([a])=>{const b=bal[a];if(b&&b.asOf&&b.gel!=null&&b.gel!=='')out[a]={base:+b.gel,asOf:b.asOf,at:b.at||'',sales:0,spent:0,inn:0,now:0}});
   for(const s of S.sales.values()){if(!s.month||!s.rows)continue;
     for(const r of s.rows){const o=out[payAcct(r.pay)];if(!o)continue;const d=r.d||s.month+'-31';if(d>o.asOf)o.sales+=+r.a||0}}
-  for(const t of S.tx.values()){const o=out[t.account];if(!o||!t.date)continue;
+  // while cash has no balance of its own and cash sales go to Rezi, cash spending comes out of Rezi personal too
+  const cashToPers=!out.cash&&payAcct('cash')==='personal';
+  for(const t of S.tx.values()){const o=out[t.account==='cash'&&cashToPers?'personal':t.account];if(!o||!t.date)continue;
     const after=t.date>o.asOf||(t.date===o.asOf&&t.source!=='bank'&&o.at&&(t.createdAt||'')>o.at);if(!after)continue;
     const g=CAT[t.cat]?.g;if(g==='ignore')continue;if(g==='income'||g==='inflow')o.inn+=+t.gel||0;else o.spent+=+t.gel||0}
   Object.values(out).forEach(o=>o.now=o.base+o.sales+o.inn-o.spent);
@@ -977,7 +978,8 @@ function moneyNow(m,M){
     return `<div class="mcard" style="--c:${c}"><div class="lbl"><span>${t}</span><span class="hint">${o?'now':'not set'}</span></div><div class="val num ${o&&o.now<0?'neg':''}">${o?cu(o.now)+'<small>₾</small>':'—'}</div>
      <div class="parts">${o?`${gel(o.base)} on ${day(o.asOf)}${o.sales?' · <span class="up">+'+fmt(o.sales)+' sales</span>':''}${o.inn?' · <span class="up">+'+fmt(o.inn)+' in</span>':''}${o.spent?' · <span class="down">−'+fmt(o.spent)+' spent</span>':''}`:(a==='bog'||a==='tbc'?'Import a statement or type it in Settings.':'Type what is there now in Settings.')}</div></div>`};
   const tot=Object.values(B).reduce((x,o)=>x+o.now,0);
-  return `<div class="money">${BAL_ACC.map(card).join('')}
+  const fold=!B.cash&&payAcct('cash')==='personal';
+  return `<div class="money">${BAL_ACC.filter(x=>!(fold&&x[0]==='cash')).map(x=>fold&&x[0]==='personal'?[x[0],'Rezi personal + cash',x[2]]:x).map(card).join('')}
    <div class="mcard" style="--c:#7C5CDB"><div class="lbl"><span>${esc(L?.label||'Loan')}</span><span class="hint">kept separate</span></div>${L?`<div class="val num">${cu(L.left)}<small>₾ left</small></div><div class="bar2"><i style="width:${Math.min(100,L.spent/L.amount*100)}%"></i></div><div class="parts">Spent ${gel(L.spent)} of ${gel(L.amount)} · owed ${gel(L.owed)}</div>`:`<div class="val">—</div><div class="parts">Set the loan in Settings.</div>`}</div>
   </div>${Object.keys(B).length>1?`<p class="hint" style="margin:-8px 0 16px">All accounts together: <b class="num">${gel(tot)}</b>. Balances move with every sale and expense dated after the amount was set.</p>`:''}`;
 }
