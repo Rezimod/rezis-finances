@@ -65,6 +65,7 @@ nav.menu button{display:flex;align-items:center;gap:10px;background:transparent;
 nav.menu button:hover{background:rgba(255,255,255,.07);opacity:1;transform:translateX(2px)}
 nav.menu button[aria-current="page"]{background:rgba(245,166,35,.16);color:#FFD58A;opacity:1}
 nav.menu .sep{height:1px;background:rgba(255,255,255,.08);margin:8px 6px}
+nav.menu .grp{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--night-muted);padding:2px 10px 4px}
 .rail .foot{margin-top:auto;font-size:11.5px;color:var(--night-muted);padding-inline:6px;display:flex;flex-direction:column;gap:4px}
 .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#4CC38A;margin-right:6px;vertical-align:1px;box-shadow:0 0 0 0 rgba(76,195,138,.6);animation:pulse 2.4s infinite}
 .dot.off{background:#E2B04A;animation:none}
@@ -109,6 +110,7 @@ a{color:var(--brand)}
 .hero .top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}
 .hero .eyebrow{color:var(--night-muted)}
 .hero h1{margin:2px 0 0;font-size:26px;font-weight:700;letter-spacing:-.015em}
+.hero .hnote{margin-top:12px;font-size:12.5px;color:var(--night-muted);border-top:1px solid rgba(255,255,255,.1);padding-top:10px}.hero .hnote b{color:var(--night-ink);font-weight:600}
 .hero .lead{color:var(--night-muted);margin:4px 0 0;font-size:13px;max-width:56ch}
 .hero .btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:var(--night-ink)}
 .hero .btn:hover{border-color:var(--accent)}
@@ -265,6 +267,7 @@ tfoot td{font-weight:700;border-top:2px solid var(--ink);border-bottom:0}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:13.5px;z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:calc(100vw - 32px);animation:toastin .25s var(--ease) both}
 @keyframes toastin{from{opacity:0;transform:translate(-50%,12px)}}
 .chart svg{display:block;width:100%;height:auto;overflow:visible}
+.scrollx{overflow-x:auto;scrollbar-width:thin;margin-inline:-4px;padding-inline:4px}
 .chart text{fill:var(--muted);font-family:var(--f-num);font-size:11px}
 .legend{display:flex;gap:16px;font-size:12.5px;color:var(--ink-2);margin-bottom:8px;flex-wrap:wrap}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
@@ -534,8 +537,8 @@ const DEFAULT_RULES=[
  ['საკომისიო','bank_fees',''],['commission','bank_fees',''],['მომსახურების საფასური','bank_fees',''],
  ['ხაზინ','gezi','Treasury'],['treasury','gezi','Treasury'],
 ];
-const IC={overview:'M3 13h4v8H3zM10 3h4v18h-4zM17 9h4v12h-4z',sales:'M3 17l6-6 4 4 8-8M15 7h6v6',products:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',expenses:'M4 6h16M4 12h16M4 18h10',bank:'M3 10l9-6 9 6M5 10v9h14v-9M9 19v-5h6v5',pl:'M5 4h14v16H5zM9 9h6M9 13h6M9 17h3',imports:'M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7',settings:'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM4 12h2M18 12h2M12 4v2M12 18v2',more:'M5 12h.01M12 12h.01M19 12h.01'};
-const PAGES=[{id:'overview',t:'Overview'},{id:'sales',t:'Sales'},{id:'products',t:'Products'},{id:'expenses',t:'Expenses'},{id:'bank',t:'Bank import'},{id:'pl',t:'Profit & loss'},{id:'imports',t:'Imports'},{id:'settings',t:'Settings'}];
+const IC={overview:'M3 13h4v8H3zM10 3h4v18h-4zM17 9h4v12h-4z',sales:'M3 17l6-6 4 4 8-8M15 7h6v6',products:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',expenses:'M4 6h16M4 12h16M4 18h10',bank:'M3 10l9-6 9 6M5 10v9h14v-9M9 19v-5h6v5',pl:'M5 4h14v16H5zM9 9h6M9 13h6M9 17h3',imports:'M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7',settings:'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM4 12h2M18 12h2M12 4v2M12 18v2',more:'M5 12h.01M12 12h.01M19 12h.01',optimo:'M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10M7.5 5l9 4'};
+const PAGES=[{id:'overview',t:'Overview'},{id:'sales',t:'Sales'},{id:'products',t:'Products'},{id:'expenses',t:'Expenses'},{id:'bank',t:'Bank import'},{id:'pl',t:'Profit & loss'},{id:'imports',t:'Imports'},{id:'optimo',t:'Optimo'},{id:'settings',t:'Settings'}];
 const DEFAULT_FIXED=[
  {id:'rent',label:'Rent',cat:'rent',gel:1500,account:'bog',match:'',from:'2026-09'},
  {id:'accountant',label:'Accountant',cat:'accounting',gel:200,account:'bog',match:'',from:'2026-09'},
@@ -547,9 +550,9 @@ const DEFAULT_FIXED=[
 
 /* ============================== state ============================== */
 const S={db:null,user:null,canWrite:true,mcp:null,downloads:null,loaded:{},
-  tx:new Map(),sales:new Map(),ships:new Map(),rules:new Map(),items:new Map(),itemsYear:new Map(),cfg:{},range:null,mc:new Map(),
+  tx:new Map(),sales:new Map(),ships:new Map(),rules:new Map(),items:new Map(),itemsYear:new Map(),optimo:new Map(),cfg:{},range:null,mc:new Map(),
   view:'overview',month:null,draft:null,bank:null,opt:null,salesPreview:null,filters:{cat:'',acct:'',q:'',all:false},salesQ:'',
-  prod:{tab:'popular',sort:'p',dir:-1,q:'',all:false},animate:true};
+  prod:{tab:'popular',sort:'p',dir:-1,q:'',all:false},op:{tab:'overview',rank:'profit',period:'',q:'',cat:'',status:'',sort:'profit',dir:-1,full:false},animate:true};
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -798,14 +801,14 @@ function vConnect(){
 async function connectBackend(c){
   S.backend=backendDB(c.u,c.k);S.db=S.backend;S.canWrite=true;S.mcp=null;
   const sub=(path,key)=>S.db.collection(path).onSnapshot(snap=>{const m=new Map();snap.docs.forEach(d=>m.set(d.id,{id:d.id,...d.data()}));S[key]=m;S.loaded[key]=true;schedule()});
-  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');
+  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');
   S.db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()});
   S.backend.fromCache();
   try{await S.backend.load();S.backend.flush();autoSyncSales()}catch(e){if(e.code==='bad_key'){toast('Wrong secret key. Connect again.');S.view='connect';render();return}toast(errMsg(e));setConn(false,'Offline — showing saved copy')}
 }
 function backupDocs(){
   const out=[];const add=(c,m)=>m.forEach((v,id)=>{const d={...v};delete d.id;out.push({c,id,d})});
-  add('tx',S.tx);add('sales',S.sales);add('ships',S.ships);add('rules',S.rules);add('items',S.items);add('itemsYear',S.itemsYear);out.push({c:'cfg',id:'main',d:S.cfg});return out;
+  add('tx',S.tx);add('sales',S.sales);add('ships',S.ships);add('rules',S.rules);add('items',S.items);add('itemsYear',S.itemsYear);add('optimo',S.optimo);out.push({c:'cfg',id:'main',d:S.cfg});return out;
 }
 async function exportBackup(){
   const data=JSON.stringify({app:'astroman-finance',v:1,at:new Date().toISOString(),docs:backupDocs()});
@@ -831,7 +834,7 @@ async function boot(){
   if(user){try{const w=await user.can('data.write');if(w===false)S.canWrite=false}catch(e){}}
   if(!db){setConn(false,'Sign in to load data');S.loaded.none=true;render();return}
   const sub=(path,key)=>db.collection(path).onSnapshot(snap=>{const m=new Map();snap.docs.forEach(d=>m.set(d.id,{id:d.id,...d.data()}));S[key]=m;S.loaded[key]=true;setConn(true);schedule()},err=>{setConn(false,'Sync paused ('+err.code+')')});
-  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');
+  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');
   db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()},()=>{});
 }
 function setConn(ok,txt){$('#syncDot').className='dot'+(ok?'':' off');$('#syncTxt').textContent=txt||(ok?'Saved to cloud':'Offline')}
@@ -850,9 +853,9 @@ function errMsg(e){if(!e)return 'Something went wrong';if(e.code==='quota_exceed
 /* ============================== shell & routing ============================== */
 const svg=(d,s=16)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 function renderShell(){
-  $('#menu').innerHTML=PAGES.map((p,i)=>(i===5?'<div class="sep"></div>':'')+`<button data-go="${p.id}">${svg(IC[p.id])}${p.t}</button>`).join('');
-  $('#tabbar').innerHTML=[['overview','Overview'],['expenses','Expenses'],['add',''],['products','Products'],['more','More']].map(([id,t])=>id==='add'?`<button data-go="add" aria-label="Add expense"><span class="plus">+</span></button>`:`<button data-go="${id}">${svg(IC[id],22)}<span>${t}</span></button>`).join('');
-  $('#moreInner').innerHTML='<div class="grab"></div>'+[['sales','Sales'],['bank','Bank import'],['pl','Profit & loss'],['imports','Imports'],['settings','Settings']].map(([id,t])=>`<button data-go="${id}">${svg(IC[id],20)}${t}</button>`).join('');
+  $('#menu').innerHTML=PAGES.map((p,i)=>(i===5?'<div class="sep"></div>':p.id==='optimo'?'<div class="sep"></div><div class="grp">Store</div>':'')+`<button data-go="${p.id}">${svg(IC[p.id])}${p.t}</button>`).join('');
+  $('#tabbar').innerHTML=[['overview','Overview'],['expenses','Expenses'],['add',''],['optimo','Optimo'],['more','More']].map(([id,t])=>id==='add'?`<button data-go="add" aria-label="Add expense"><span class="plus">+</span></button>`:`<button data-go="${id}">${svg(IC[id],22)}<span>${t}</span></button>`).join('');
+  $('#moreInner').innerHTML='<div class="grab"></div>'+[['sales','Sales'],['products','Products'],['bank','Bank import'],['pl','Profit & loss'],['imports','Imports'],['settings','Settings']].map(([id,t])=>`<button data-go="${id}">${svg(IC[id],20)}${t}</button>`).join('');
   document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){e.preventDefault();if(g.dataset.go==='more'){$('#moreSheet').classList.add('open');return}$('#moreSheet').classList.remove('open');go(g.dataset.go)}});
   $('#moreSheet').addEventListener('click',e=>{if(e.target.id==='moreSheet')e.currentTarget.classList.remove('open')});
   $('#monthSel').addEventListener('change',e=>setMonth(e.target.value));
@@ -871,7 +874,7 @@ function go(v){fillMonthSel();S.view=v;try{history.replaceState(null,'','#'+v)}c
 function render(){
   S.renderedOnce=true;S.mc=new Map();
   document.querySelectorAll('#menu button,#tabbar button').forEach(b=>b.setAttribute('aria-current',b.dataset.go===S.view?'page':'false'));
-  const v={connect:vConnect,overview:vOverview,sales:vSales,products:vProducts,expenses:vExpenses,bank:vBank,pl:vPL,imports:vImports,settings:vSettings,add:vAdd}[S.view]||vOverview;
+  const v={connect:vConnect,overview:vOverview,sales:vSales,products:vProducts,expenses:vExpenses,bank:vBank,pl:vPL,imports:vImports,optimo:vOptimo,settings:vSettings,add:vAdd}[S.view]||vOverview;
   const main=$('#main');const y=window.scrollY;
   main.innerHTML=banner()+v();
   const anim=S.animate&&!reduced();main.classList.toggle('anim',anim);
@@ -908,15 +911,19 @@ function starfield(cv){
 function vOverview(){
   const m=S.month,M=metrics(m),P=metrics(addMonth(m,-1));
   const has=M.hasSales||M.list.length;
-  const d=(a,b,inv)=>{if(!b)return '';const ch=Math.round((a-b)/Math.abs(b)*100);const good=inv?ch<=0:ch>=0;return `<span class="${good?'up':'down'}">${ch>=0?'▲':'▼'} ${Math.abs(ch)}%</span> vs ${mShort(addMonth(m,-1))}`};
+  const d=(a,b,inv,lbl)=>{if(!b)return '';const ch=Math.round((a-b)/Math.abs(b)*100);const good=inv?ch<=0:ch>=0;return `<span class="${good?'up':'down'}">${ch>=0?'▲':'▼'} ${Math.abs(ch)}%</span> vs ${lbl||mShort(addMonth(m,-1))}`};
+  // the current month is compared with the same days of last month, not the whole of it
+  const live=m===thisMonth(),day=new Date().getDate(),dim=daysIn(m);
+  const prevSales=live?P.rows.filter(r=>+String(r.d).slice(8,10)<=day).reduce((a,r)=>a+(+r.a||0),0):P.sales;
+  const note=live?`<div class="hnote"><b>Month in progress, day ${day} of ${dim}.</b> ${M.fixed?`Fixed costs (${gel(M.fixed)}) are counted for the whole month, so profit looks low until sales catch up. `:''}${M.sales?`At this pace, about <b>${gel(M.sales/day*dim)}</b> in sales by the end of ${mShort(m)}.`:''}</div>`:'';
   const hero=`<section class="hero"><canvas id="stars" aria-hidden="true"></canvas><div class="top"><div><div class="eyebrow">${kaM(m)} · ${m.slice(0,4)}</div><h1>${mLabel(m)}</h1></div>
    <div class="actions"><button class="btn amber" data-act="report">▶ Monthly report</button><button class="btn" data-act="syncSheet" data-label="↻ Sync sales">↻ Sync sales</button><button class="btn" data-go="add">+ Expense</button></div></div>
    <div class="hkpis">
-    <div class="hkpi"><div class="lbl">Sales</div><div class="val num">${cu(M.sales)}<small>₾</small></div><div class="delta">${M.orders} orders ${d(M.sales,P.sales)?'· '+d(M.sales,P.sales):''}</div></div>
-    <div class="hkpi"><div class="lbl">Gross profit</div><div class="val num">${cu(M.gross)}<small>₾</small></div><div class="delta">${M.sales?pct(M.gross,M.sales)+'% margin':'—'}</div></div>
-    <div class="hkpi"><div class="lbl">Running costs</div><div class="val num">${cu(M.opex)}<small>₾</small></div><div class="delta">${d(M.opex,P.opex,true)}</div></div>
-    <div class="hkpi"><div class="lbl">Net profit</div><div class="val num" style="${M.net<0?'color:#FF9389':''}">${cu(M.net)}<small>₾</small></div><div class="delta">${d(M.net,P.net)}</div></div>
-   </div></section>`;
+    <div class="hkpi"><div class="lbl">Sales</div><div class="val num">${cu(M.sales)}<small>₾</small></div><div class="delta">${M.orders} orders ${d(M.sales,prevSales)?'· '+d(M.sales,prevSales,false,live?'1–'+day+' '+mShort(addMonth(m,-1)):''):''}</div></div>
+    <div class="hkpi"><div class="lbl">Gross profit</div><div class="val num">${cu(M.gross)}<small>₾</small></div><div class="delta">${M.sales?pct(M.gross,M.sales)+'% margin':'—'}${!M.accurate&&M.stock>M.sales*.5?' · '+gel(M.stock)+' of stock bought this month counts here':''}</div></div>
+    <div class="hkpi"><div class="lbl">Running costs</div><div class="val num">${cu(M.opex)}<small>₾</small></div><div class="delta">${live&&M.fixed?'incl. '+gel(M.fixed)+' fixed':live?'so far this month':d(M.opex,P.opex,true)}</div></div>
+    <div class="hkpi"><div class="lbl">Net profit</div><div class="val num" style="${M.net<0?'color:#FF9389':''}">${cu(M.net)}<small>₾</small></div><div class="delta">${live?'so far this month':d(M.net,P.net)}</div></div>
+   </div>${note}</section>`;
   if(!has&&(!S.db||S.loaded.tx)&&!S.tx.size&&!S.sales.size)return hero+`<div class="panel empty"><b>No records yet</b>Start by syncing sales from your order sheet, then import a BOG or TBC statement.</div>`;
   return loadingOr(hero+moneyNow(m,M)+periodPanel()+`<div class="grid g2 mt">${attention(m,M)}${breakdown(M,P)}</div>`);
 }
@@ -956,7 +963,7 @@ function trendChart(ms,cur){
   const cols=periodCols(ms);const multiY=new Set(ms.map(m=>m.slice(0,4))).size>1;
   const data=cols.map((c,i)=>Object.assign({},c.d,{m:c.key,lbl:c.isYear?c.label:(multiY&&(i===0||c.key.endsWith('-01'))?mShort(c.key)+" '"+c.key.slice(2,4):c.label),long:c.long,isYear:!!c.isYear}));
   if(!data.length)return '<div class="empty">No data</div>';
-  const W=720,H=300,pl=46,pr=8,pt=26,pb=46;const iw=W-pl-pr,ih=H-pt-pb;
+  const W=720,H=300,pl=46,pr=8,pt=26,pb=46;const iw=W-pl-pr,ih=H-pt-pb;const narrow=innerWidth<700;
   const max=Math.max(1000,...data.map(d=>Math.max(d.sales,d.cogs+d.opex+d.tax)));
   const raw=max/5,mag=Math.pow(10,Math.floor(Math.log10(raw))),step=[1,2,2.5,5,10].map(x=>x*mag).find(x=>x>=raw);const top=Math.ceil(max/step)*step;
   const sy=v=>pt+ih-(v/top)*ih;const gw=iw/data.length;const bw=Math.min(22,(gw-14)/2);
@@ -968,7 +975,7 @@ function trendChart(ms,cur){
     <text x="${cx}" y="${H-pb+33}" text-anchor="middle" style="fill:${d.net<0?'var(--bad)':'var(--good)'}">${d.net<0?'−':'+'}${fmt(Math.abs(d.net)/1000,1)}k</text>
     <rect class="hit hitbar" data-i="${i}" x="${pl+gw*i}" y="${pt-18}" width="${gw}" height="${ih+18+38}" fill="transparent"/></g>`});
   trendChart.data=data;
-  return `<div class="legend"><span><i style="background:var(--s1)"></i>Sales</span><span><i style="background:var(--s2)"></i>Spending</span>${data.some(d=>d.accurate&&!d.isYear)?'<span class="muted">● real item costs</span>':''}</div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Sales and spending over time" id="trendSvg">${g}${bars}</svg>`;
+  return `<div class="legend"><span><i style="background:var(--s1)"></i>Sales</span><span><i style="background:var(--s2)"></i>Spending</span>${data.some(d=>d.accurate&&!d.isYear)?'<span class="muted">● real item costs</span>':''}</div><div class="scrollx"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Sales and spending over time" id="trendSvg" style="min-width:${narrow?Math.max(560,data.length*62):0}px">${g}${bars}</svg></div>`;
 }
 function attention(m,M){
   const items=[];const list=M.list;
@@ -1488,7 +1495,7 @@ function statement(A,title,sub){
 }
 function netChart(ms){
   const cols=periodCols(ms);const D=cols.map(c=>Object.assign({},c.d,{m:c.key,lbl:c.label}));
-  const W=560,H=260,pl=8,pr=8,pt=26,pb=28,iw=W-pl-pr,ih=H-pt-pb;const mx=Math.max(1000,...D.map(d=>Math.abs(d.net)));const neg=D.some(d=>d.net<0);
+  const W=Math.max(300,D.length*44),H=220,pl=8,pr=8,pt=26,pb=28,iw=W-pl-pr,ih=H-pt-pb;const mx=Math.max(1000,...D.map(d=>Math.abs(d.net)));const neg=D.some(d=>d.net<0);
   const zero=neg?pt+ih*mx/(2*mx):pt+ih;const sc=v=>Math.abs(v)/mx*(neg?ih/2:ih);
   const gw=iw/D.length,bw=Math.min(34,gw-10);let g=`<line x1="${pl}" x2="${W-pr}" y1="${zero}" y2="${zero}" stroke="var(--line)"/>`;
   D.forEach((d,i)=>{const x=pl+gw*i+(gw-bw)/2,h=Math.max(1,sc(d.net)),cur=d.m===S.month;const y=d.net>=0?zero-h:zero;
@@ -1650,6 +1657,173 @@ function vSettings(){
    ${rules.length?`<div class="flow">${rules.map(r=>`<div class="ln"><span class="k">“${esc(r.match)}” → ${catChip(r.cat)}</span><span class="v"><button class="btn sm ghost" data-rmrule="${r.id}">Remove</button></span></div>`).join('')}</div>`:'<div class="muted">No custom rules yet. Built-in rules cover Wolt, Glovo, Facebook, Optimo, forwarders, Bresser, utilities, the accountant and bank fees.</div>'}</div></div>`;
 }
 
+/* ============================== Optimo control center ============================== */
+// Kept apart from the books: Optimo exports live in their own collection and never change the P&L.
+// Stock doc  optimo/stock          {kind:'stock',at,file,items:[[barcode,name,category,qty,min,cost,price,vat]]}
+// Sales doc  optimo/sales-<from>_<to> {kind:'sales',from,to,file,at,rows:[[barcode,name,qty,cost,revenue,vat]]}
+const OP_STATUS={reorder:['bad','Reorder'],soon:['warn','Order soon'],optional:['','Out · slow seller'],negative:['bad','Count is wrong'],dead:['warn','Never sold'],slow:['warn','Too much stock'],ok:['good','OK'],gone:['','Not in stock list']};
+function opDocs(){const out={stock:null,sales:[]};S.optimo.forEach((d,id)=>{if(d.kind==='stock')out.stock=d;else if(d.kind==='sales')out.sales.push({...d,id})});out.sales.sort((a,b)=>spanDays(b)-spanDays(a));return out}
+const spanDays=d=>Math.max(1,Math.round((Date.parse(d.to)-Date.parse(d.from))/864e5)+1);
+const dLabel=s=>{const [y,m,d]=s.split('-');return +d+' '+EN_MONTHS[+m-1].slice(0,3)+' '+y};
+function opSettings(){const c=S.cfg.optimo||{};return {cover:+c.cover||3,lead:+c.lead||1}}
+function opModel(){
+  if(S.mc.has('#op'))return S.mc.get('#op');
+  const D=opDocs();if(!D.stock&&!D.sales.length){S.mc.set('#op',null);return null}
+  const sel=D.sales.find(x=>x.id===S.op.period)||D.sales[0]||null;
+  // the sales rate behind reorder advice comes from the shortest recent export (≥ 30 days), else the selected one
+  const stockDay=D.stock?D.stock.at.slice(0,10):today();
+  const recent=D.sales.filter(x=>spanDays(x)>=30&&Math.abs(Date.parse(stockDay)-Date.parse(x.to))<=21*864e5).sort((a,b)=>spanDays(a)-spanDays(b));
+  const rateDoc=recent[0]||sel;const rateMonths=rateDoc?spanDays(rateDoc)/30.44:1;
+  const map=new Map();const get=(b,n)=>{let it=map.get(b);if(!it)map.set(b,it={b,n,cat:'',q:null,min:0,cost:0,price:0,vat:'',sq:0,rev:0,sc:0,sv:0,rq:0});if(n&&!it.n)it.n=n;return it};
+  (D.stock?.items||[]).forEach(([b,n,cat,q,min,cost,price,vat])=>{const it=get(b,n);it.n=n;Object.assign(it,{cat,q,min,cost,price,vat})});
+  (sel?.rows||[]).forEach(([b,n,q,cost,rev,vat])=>{const it=get(b,n);it.sq+=q;it.rev+=rev;it.sc+=cost;it.sv+=vat});
+  if(rateDoc)rateDoc.rows.forEach(([b,n,q])=>{get(b,n).rq+=q});
+  const {cover,lead}=opSettings();
+  const items=[...map.values()].map(it=>{
+    const profit=it.rev-it.sc-it.sv;const rate=it.rq/rateMonths;const inStock=it.q!=null;const q=it.q??0;
+    const netPrice=it.vat==='ჩვეულებრივი'?it.price/1.18:it.price;const unit=netPrice-it.cost;
+    let status='ok',order=0;const cov=rate>0?Math.max(q,0)/rate:null;
+    if(!inStock)status='gone';
+    else if(q<0)status='negative';
+    else if(q<=0&&rate>0&&rate<1/3)status='optional';
+    else if(rate>0&&(q<=0||q<it.min||cov<lead))status='reorder';
+    else if(rate>0&&cov<lead+1)status='soon';
+    else if(q>0&&it.rq===0&&it.sq===0)status='dead';
+    else if(cov!=null&&cov>12)status='slow';
+    if(['reorder','soon','negative','optional'].includes(status)&&rate>0)order=Math.max(Math.ceil(rate*cover)-Math.max(q,0),it.min-Math.max(q,0),1);
+    return {...it,q,inStock,profit,margin:it.rev?profit/it.rev:null,rate,cov,unit,markup:it.cost?unit/it.cost:null,value:Math.max(q,0)*it.cost,retail:Math.max(q,0)*netPrice,status,order,orderCost:order*it.cost};
+  });
+  const sum=(arr,k)=>arr.reduce((a,x)=>a+(x[k]||0),0);
+  const stocked=items.filter(x=>x.inStock);
+  const cats=new Map();items.forEach(x=>{const k=x.inStock?(x.cat||'Other'):'Not in stock list';const c=cats.get(k)||cats.set(k,{n:k,rev:0,profit:0,sq:0,value:0,items:0,reorder:0}).get(k);c.rev+=x.rev;c.profit+=x.profit;c.sq+=x.sq;c.value+=x.value;c.items++;if(x.status==='reorder')c.reorder++});
+  const M={D,sel,rateDoc,rateMonths,items,stocked,cats:[...cats.values()].sort((a,b)=>b.rev-a.rev),
+    rev:sum(items,'rev'),profit:sum(items,'profit'),sq:sum(items,'sq'),cost:sum(items,'sc'),vat:sum(items,'sv'),
+    value:sum(stocked,'value'),retail:sum(stocked,'retail'),units:stocked.reduce((a,x)=>a+Math.max(x.q,0),0),
+    reorder:items.filter(x=>x.status==='reorder'),soon:items.filter(x=>x.status==='soon'),optional:items.filter(x=>x.status==='optional'),negative:items.filter(x=>x.status==='negative'),
+    dead:items.filter(x=>x.status==='dead'),slow:items.filter(x=>x.status==='slow')};
+  M.orderCost=sum(M.reorder,'orderCost');M.deadValue=sum(M.dead,'value')+M.slow.reduce((a,x)=>a+Math.max(0,x.q-Math.ceil(x.rate*12))*x.cost,0);
+  S.mc.set('#op',M);return M;
+}
+function vOptimo(){
+  const M=opModel();const T=S.op.tab;
+  const tabs=[['overview','Overview'],['items','All items'],['stock','Stock & reorder'],['cats','Categories']];
+  const upBtn=S.canWrite?`<button class="btn amber" data-act="opPick">${svg('M12 16V4M7 9l5-5 5 5M4 20h16')} Upload Optimo files</button><input type="file" id="opFile" accept=".xlsx,.xls,.csv" multiple hidden>`:'';
+  if(!M)return loadingOr(`<div class="pagehead"><div><div class="eyebrow">Optimo · ოპტიმო</div><h1>Optimo control center</h1><p>Your best sellers, profit per item, stock value and what to order next, from your Optimo exports. Separate from the books: nothing here changes the profit &amp; loss.</p></div><div class="actions">${upBtn}</div></div>
+   <div class="grid g2"><div class="drop" data-act="opPick" role="button" tabindex="0">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',28)}<b>Drop your Optimo exports here</b><span>Sale history (გაყიდვების ისტორია) and stock list (StockItems), .xlsx</span></div>
+   <div class="panel"><h2>What to export from Optimo</h2><div class="flow"><div class="ln"><span class="k"><b>1.</b> Sale history for any period, for example since you started</span></div><div class="ln"><span class="k"><b>2.</b> Stock items list: what is on the shelf now</span></div><div class="ln"><span class="k"><b>3.</b> Optional: sale history for the last 90 days, for sharper reorder advice</span></div></div></div></div>`);
+  const per=M.sel?`${dLabel(M.sel.from)} – ${dLabel(M.sel.to)}`:'no sale history yet';
+  const periodSel=M.D.sales.length>1?`<select class="input" id="opPeriod" aria-label="Sales period">${M.D.sales.map(x=>`<option value="${esc(x.id)}" ${x.id===M.sel.id?'selected':''}>${dLabel(x.from)} – ${dLabel(x.to)}</option>`).join('')}</select>`:'';
+  const head=`<div class="pagehead"><div><div class="eyebrow">Optimo · ${esc(per)}</div><h1>Optimo control center</h1><p>${M.D.stock?'Stock counted '+dLabel(M.D.stock.at.slice(0,10))+'. ':''}Separate from the books.</p></div><div class="actions">${periodSel}${upBtn}</div></div>
+   <div class="tabs" role="tablist">${tabs.map(([k,t])=>`<button role="tab" aria-selected="${T===k}" data-act="opTab" data-v="${k}">${t}${k==='stock'&&M.reorder.length?` <span class="chip bad" style="padding:0 6px">${M.reorder.length}</span>`:''}</button>`).join('')}</div>`;
+  const body=T==='items'?opItems(M):T==='stock'?opStock(M):T==='cats'?opCats(M):opOverview(M);
+  return loadingOr(head+body);
+}
+function opOverview(M){
+  const mg=M.rev?M.profit/M.rev:0;const months=M.sel?spanDays(M.sel)/30.44:1;
+  const k1=`<div class="kpis"><div class="kpi"><div class="lbl">Sales in Optimo</div><div class="val num">${cu(M.rev)}<small>₾</small></div><div class="delta">${gel(M.rev/months)} a month on average</div></div>
+   <div class="kpi"><div class="lbl">Profit on items</div><div class="val num">${cu(M.profit)}<small>₾</small></div><div class="delta">after item cost${M.vat?' and '+gel(M.vat)+' VAT':''}</div></div>
+   <div class="kpi"><div class="lbl">Margin</div><div class="val num">${Math.round(mg*100)}<small>%</small></div><div class="delta">kept from every ₾ sold</div></div>
+   <div class="kpi"><div class="lbl">Pieces sold</div><div class="val num">${cu(M.sq)}</div><div class="delta">${M.items.filter(x=>x.sq>0).length} different items</div></div></div>`;
+  const k2=M.D.stock?`<div class="kpis"><div class="kpi"><div class="lbl">Stock value at cost</div><div class="val num">${cu(M.value)}<small>₾</small></div><div class="delta">${fmt(M.units)} pieces · ${M.stocked.filter(x=>x.q>0).length} items on the shelf</div></div>
+   <div class="kpi"><div class="lbl">Stock at selling price</div><div class="val num">${cu(M.retail)}<small>₾</small></div><div class="delta">${gel(M.retail-M.value)} profit waiting on the shelf</div></div>
+   <div class="kpi"><div class="lbl">To reorder now</div><div class="val num" style="${M.reorder.length?'color:var(--bad)':''}">${M.reorder.length}</div><div class="delta">${M.reorder.length?'about '+gel(M.orderCost)+' to restock':'nothing urgent'}</div></div>
+   <div class="kpi"><div class="lbl">Money stuck in slow stock</div><div class="val num">${cu(M.deadValue)}<small>₾</small></div><div class="delta">${M.dead.length} never sold · ${M.slow.length} over a year of stock</div></div></div>`:'';
+  const top=rankItems(M.items.filter(x=>x.sq>0).map(x=>({n:x.n,q:x.sq,r:x.rev,p:x.profit})),S.op.rank);
+  const rank=`<div class="panel"><div class="row" style="flex-wrap:wrap;gap:8px"><h2 style="margin:0">Top 10 items</h2><span class="spacer"></span><div class="seg" role="group" aria-label="Rank by">${[['profit','Profit'],['popular','Pieces'],['revenue','Sales'],['margin','Lowest margin']].map(([k,t])=>`<button data-act="opRank" data-v="${k}" aria-pressed="${S.op.rank===k}">${t}</button>`).join('')}</div></div><div class="bars mt" id="opRankBars">${rankBars(top,S.op.rank)}</div></div>`;
+  const re=M.reorder.slice().sort((a,b)=>b.rate*b.unit-a.rate*a.unit);
+  const reorder=`<div class="panel"><div class="row"><div><h2>Reorder now</h2><p class="sub" style="margin:0">Sells, and will run out within ${opSettings().lead} month${opSettings().lead>1?'s':''}. Best earners first.</p></div><span class="spacer"></span>${M.reorder.length?`<button class="btn sm" data-act="opTab" data-v="stock">See all</button>`:''}</div>
+   ${re.length?`<div class="flow mt">${re.slice(0,8).map(x=>`<div class="ln"><span class="k"><b>${esc(x.n)}</b><div class="small muted">${x.q<=0?'<span style="color:var(--bad)">out of stock</span>':fmt(x.q)+' left'} · sells ${rateTxt(x.rate)}</div></span><span class="v num">+${fmt(x.order)}<div class="small muted">${gel(x.orderCost)}</div></span></div>`).join('')}</div>`:'<div class="empty">Nothing needs ordering right now.</div>'}</div>`;
+  const cats=M.cats.filter(c=>c.rev>0).slice(0,9);const cmax=Math.max(1,...cats.map(c=>c.profit));
+  const catP=`<div class="panel"><h2>Profit by category</h2><p class="sub">${esc(M.sel?dLabel(M.sel.from)+' – '+dLabel(M.sel.to):'')}</p><div class="bars">${cats.map(c=>`<div class="bar"><div class="name" title="${esc(c.n)}">${esc(c.n)}<span>${pct(c.profit,c.rev)}%</span></div><div class="track"><div class="fill" style="width:${Math.max(2,c.profit/cmax*100)}%;background:var(--s1)"></div></div><div class="amt num">${gel(c.profit)}<small>${gel(c.rev)} sales</small></div></div>`).join('')}</div></div>`;
+  const att=[];
+  if(M.negative.length)att.push(['bad','!',`<b>${M.negative.length} items show less than zero in stock</b><div class="muted">Sold more than Optimo had. Recount them so stock and reorder advice are right.</div>`]);
+  if(M.dead.length)att.push(['warn','·',`<b>${M.dead.length} items never sold</b><div class="muted">${gel(M.dead.reduce((a,x)=>a+x.value,0))} of stock. Consider a discount or bundle.</div>`]);
+  if(M.slow.length)att.push(['warn','·',`<b>${M.slow.length} items have more than a year of stock</b><div class="muted">Stop reordering these for now.</div>`]);
+  const thin=M.items.filter(x=>x.sq>=3&&x.margin!=null&&x.margin<0.15);if(thin.length)att.push(['warn','%',`<b>${thin.length} selling items keep less than 15%</b><div class="muted">${thin.slice(0,3).map(x=>esc(x.n)).join(', ')}${thin.length>3?'…':''}. Check their price.</div>`]);
+  const gone=M.items.filter(x=>x.status==='gone'&&x.sq>0);if(gone.length&&M.D.stock)att.push(['','?',`<b>${gone.length} sold items are not in the stock list</b><div class="muted">Probably discontinued, or renamed with a new barcode.</div>`]);
+  if(M.rateDoc===M.sel&&M.sel&&spanDays(M.sel)>200)att.push(['','i',`<b>Reorder advice uses the ${Math.round(M.rateMonths)}-month average</b><div class="muted">Upload a sale history for the last 90 days to base it on recent sales.</div>`]);
+  const attP=`<div class="panel"><h2>Needs attention</h2><p class="sub">Things that cost money or make the numbers wrong.</p>${att.length?`<div class="alerts">${att.map(([c,i,h])=>`<div class="alert ${c||'info'}"><span class="ic">${i}</span><div>${h}</div><div></div></div>`).join('')}</div>`:'<div class="empty">All clear.</div>'}</div>`;
+  return k1+k2+`<div class="grid g2">${reorder}${rank}</div><div class="grid g2 mt">${catP}${attP}</div>`;
+}
+const rateTxt=r=>r>=0.95?fmt(r,r<10?1:0)+' a month':r>0?'1 every '+Math.max(2,Math.round(1/r))+' months':'no sales';
+const covTxt=(c,q)=>q<=0?'out':c==null?'—':c<1?Math.round(c*30)+' days':c>24?'2+ years':fmt(c,c<10?1:0)+' mo';
+function opFilter(M){const F=S.op;const q=F.q.toLowerCase();
+  return M.items.filter(x=>(!q||x.n.toLowerCase().includes(q)||String(x.b).includes(q))&&(!F.cat||(x.inStock?(x.cat||'Other'):'Not in stock list')===F.cat)&&(!F.status||x.status===F.status))}
+function opItems(M){
+  const F=S.op;const rows=opFilter(M);const val=(r,k)=>k==='n'?r.n:k==='margin'?(r.margin??-9):r[k]??-Infinity;
+  rows.sort((a,b)=>{const x=val(a,F.sort),y=val(b,F.sort);return (typeof x==='string'?x.localeCompare(y):x-y)*F.dir});
+  const cols=[['n','Item'],['q','In stock'],['sq','Sold'],['rev','Sales'],['profit','Profit'],['margin','Margin'],['rate','Per month'],['cov','Lasts'],['status','Status']];
+  const shown=F.full||F.q?rows:rows.slice(0,80);
+  return `<div class="toolbar"><input class="input grow" id="oQ" placeholder="Search item or barcode…" value="${esc(F.q)}">
+    <select class="input" id="oCat" aria-label="Category"><option value="">All categories</option>${M.cats.map(c=>`<option ${F.cat===c.n?'selected':''}>${esc(c.n)}</option>`).join('')}</select>
+    <select class="input" id="oStatus" aria-label="Status"><option value="">Any status</option>${Object.entries(OP_STATUS).map(([k,v])=>`<option value="${k}" ${F.status===k?'selected':''}>${v[1]}</option>`).join('')}</select><span class="muted small">${rows.length} items</span></div>
+   <div class="tablewrap"><table><thead><tr>${cols.map(([k,t])=>`<th class="sort ${k==='n'||k==='status'?'':'r'} ${F.sort===k?'sorted':''}" data-osort="${k}">${t}${F.sort===k?(F.dir>0?' ↑':' ↓'):''}</th>`).join('')}</tr></thead><tbody>
+   ${shown.map(x=>{const mg=x.margin==null?null:Math.round(x.margin*100);const st=OP_STATUS[x.status];return `<tr><td style="min-width:220px">${esc(x.n)}<div class="muted small">${esc(x.inStock?x.cat:'')} · ${esc(x.b)}</div></td><td class="r num ${x.q<0?'neg':''}">${x.inStock?fmt(x.q):'—'}</td><td class="r num">${fmt(x.sq)}</td><td class="r num">${gel(x.rev)}</td><td class="r num ${x.profit<0?'neg':''}">${gel(x.profit)}</td><td class="r">${mg==null?'<span class="muted">—</span>':`<span class="chip ${mg<15?'bad':mg<35?'warn':'good'}">${mg}%</span>`}</td><td class="r num">${x.rate?fmt(x.rate,x.rate<10?1:0):'—'}</td><td class="r num">${x.inStock?covTxt(x.cov,x.q):'—'}</td><td><span class="chip ${st[0]}">${st[1]}</span></td></tr>`}).join('')}
+   </tbody></table></div>${shown.length<rows.length?`<div class="row mt"><button class="btn sm" data-act="opFull">Show all ${rows.length} items</button></div>`:''}`;
+}
+function opStock(M){
+  const {cover,lead}=opSettings();
+  const list=M.reorder.concat(M.soon).sort((a,b)=>(a.status==='reorder'?0:1)-(b.status==='reorder'?0:1)||b.rate*b.unit-a.rate*a.unit);
+  const tot=list.reduce((a,x)=>a+x.orderCost,0);const cap=(rows,k)=>S.op['all'+k]?rows:rows.slice(0,15);const more=(rows,k)=>!S.op['all'+k]&&rows.length>15?`<div class="row mt"><button class="btn sm" data-act="opMore" data-v="${k}">Show all ${rows.length}</button></div>`:'';const stuck=M.dead.concat(M.slow).sort((a,b)=>b.value-a.value);
+  const tbl=(rows,cols)=>`<div class="tablewrap"><table><thead><tr>${cols.map(c=>`<th class="${c[2]||''}">${c[0]}</th>`).join('')}</tr></thead><tbody>${rows.map(x=>`<tr>${cols.map(c=>`<td class="${c[2]||''}">${c[1](x)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  const name=x=>`<span style="min-width:200px;display:inline-block">${esc(x.n)}</span><div class="muted small">${esc(x.cat||'')} · ${esc(x.b)}</div>`;
+  return `<div class="panel"><div class="row" style="flex-wrap:wrap;gap:10px;align-items:flex-end"><div><h2>Shopping list</h2><p class="sub" style="margin:0">Enough to last ${cover} months at the current pace. Based on sales ${M.rateDoc?dLabel(M.rateDoc.from)+' – '+dLabel(M.rateDoc.to):''}.</p></div><span class="spacer"></span>
+     <label class="field" style="width:120px"><span>Order for, months</span><input class="input num" id="opCover" inputmode="decimal" value="${cover}"></label>
+     <label class="field" style="width:130px"><span>Delivery takes, months</span><input class="input num" id="opLead" inputmode="decimal" value="${lead}"></label>
+     ${list.length?'<button class="btn" data-act="opExport">Download list (Excel)</button>':''}</div>
+   ${list.length?tbl(list,[['Item',name],['Status',x=>`<span class="chip ${OP_STATUS[x.status][0]}">${OP_STATUS[x.status][1]}</span>`],['In stock',x=>`<span class="num ${x.q<0?'neg':''}">${fmt(x.q)}</span>`,'r'],['Sells',x=>rateTxt(x.rate),'r'],['Order',x=>`<b class="num">${fmt(x.order)}</b>`,'r'],['Unit cost',x=>gel(x.cost),'r num'],['Order cost',x=>gel(x.orderCost),'r num']])+`<p class="row mt"><span class="spacer"></span><b>Total about ${gel(tot)}</b></p>`:'<div class="empty">Nothing needs ordering.</div>'}</div>
+   ${M.optional.length?`<div class="panel mt"><h2>Out of stock, but sell slowly</h2><p class="sub">Fewer than 4 a year. Restock only if you want them on the shelf.</p>${tbl(cap(M.optional,'opt'),[['Item',name],['Sells',x=>rateTxt(x.rate),'r'],['Unit cost',x=>gel(x.cost),'r num'],['Profit each',x=>gel(x.unit),'r num']])}${more(M.optional,'opt')}</div>`:''}
+   ${M.negative.length?`<div class="panel mt"><h2>Fix these counts in Optimo</h2><p class="sub">Optimo shows less than zero, so it sold items it didn't have on record. Recount and correct them.</p>${tbl(cap(M.negative,'neg'),[['Item',name],['In stock',x=>`<span class="num neg">${fmt(x.q)}</span>`,'r'],['Sold',x=>fmt(x.sq),'r num']])}${more(M.negative,'neg')}</div>`:''}
+   ${M.dead.length||M.slow.length?`<div class="panel mt"><h2>Money stuck on the shelf</h2><p class="sub">Never sold, or more than a year of stock at the current pace. Discount, bundle or stop reordering.</p>${tbl(cap(stuck,'stuck'),[['Item',name],['Why',x=>x.status==='dead'?'Never sold':'Lasts '+covTxt(x.cov,x.q)],['In stock',x=>fmt(x.q),'r num'],['Value at cost',x=>gel(x.value),'r num']])}${more(stuck,'stuck')}<p class="row mt"><span class="spacer"></span><b>${gel(stuck.reduce((a,x)=>a+x.value,0))} at cost</b></p></div>`:''}`;
+}
+function opCats(M){
+  return `<div class="tablewrap"><table><thead><tr><th>Category</th><th class="r">Items</th><th class="r">Sold</th><th class="r">Sales</th><th class="r">Profit</th><th class="r">Margin</th><th class="r">Stock value</th><th class="r">To reorder</th></tr></thead><tbody>
+  ${M.cats.map(c=>`<tr data-opcat="${esc(c.n)}" style="cursor:pointer"><td>${esc(c.n)}</td><td class="r num">${c.items}</td><td class="r num">${fmt(c.sq)}</td><td class="r num">${gel(c.rev)}</td><td class="r num">${gel(c.profit)}</td><td class="r">${c.rev?`<span class="chip ${pct(c.profit,c.rev)<15?'bad':pct(c.profit,c.rev)<35?'warn':'good'}">${pct(c.profit,c.rev)}%</span>`:'—'}</td><td class="r num">${gel(c.value)}</td><td class="r num">${c.reorder||''}</td></tr>`).join('')}
+  </tbody><tfoot><tr><td>Total</td><td class="r num">${M.items.length}</td><td class="r num">${fmt(M.sq)}</td><td class="r num">${gel(M.rev)}</td><td class="r num">${gel(M.profit)}</td><td class="r">${pct(M.profit,M.rev)}%</td><td class="r num">${gel(M.value)}</td><td class="r num">${M.reorder.length}</td></tr></tfoot></table></div><p class="hint mt">Tap a category to see its items.</p>`;
+}
+/* ---------- reading Optimo exports ---------- */
+function opParse(wb,file){
+  const aoa=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:''}).filter(r=>r.some(c=>c!==''));
+  const hi=aoa.findIndex(r=>r.some(c=>/ბარკოდი|barcode/i.test(String(c))));if(hi<0)throw {message:file.name+': no barcode column (ბარკოდი) found'};
+  const h=aoa[hi].map(c=>String(c).trim());const col=re=>h.findIndex(x=>re.test(x));const body=aoa.slice(hi+1);
+  const B=col(/ბარკოდი|barcode/i),N=col(/დასახელება|name/i),Q=col(/^რაოდენობა$|quantity/i),V=col(/დღგ-ს ტიპი/);
+  const num=v=>typeof v==='number'?v:parseNum(String(v).replace('%',''));
+  if(col(/მინიმალური მარაგი/)>=0){
+    const MIN=col(/მინიმალური მარაგი/),C=col(/^შესყიდვის ფასი$/),P=col(/^გასაყიდი ფასი$/),K=col(/კატეგორია/);
+    const items=body.filter(r=>String(r[B]).trim()).map(r=>[String(r[B]).trim(),String(r[N]).trim(),String(r[K]||'').trim(),num(r[Q]),num(r[MIN]),num(r[C]),num(r[P]),String(r[V]||'').trim()]);
+    const d=new Date(file.lastModified||Date.now());
+    return {kind:'stock',file:file.name,at:d.toISOString(),items};
+  }
+  const SC=col(/შესყიდვის ჯამი/),R=col(/ჯამური თანხა/),T=col(/ჯამური დღგ/);
+  if(SC<0||R<0)throw {message:file.name+' is not an Optimo sale history or stock list'};
+  const rows=body.filter(r=>String(r[B]).trim()&&num(r[Q])).map(r=>[String(r[B]).trim(),String(r[N]).trim(),num(r[Q]),num(r[SC]),num(r[R]),T>=0?num(r[T]):0]);
+  const m=file.name.match(/(\d{2})-(\d{2})-(\d{4})[^-]*-\s*(\d{2})-(\d{2})-(\d{4})/);
+  const from=m?`${m[3]}-${m[2]}-${m[1]}`:'',to=m?`${m[6]}-${m[5]}-${m[4]}`:today();
+  return {kind:'sales',file:file.name,at:new Date().toISOString(),from,to,rows};
+}
+function opUpload(files){
+  const out=[];let left=files.length;const errs=[];
+  [...files].forEach(f=>{const r=new FileReader();r.onload=async()=>{try{await xlsxReady();out.push(opParse(wbFromBytes(new Uint8Array(r.result)),f))}catch(e){errs.push(e.message||'Could not read '+f.name)}if(--left===0)opPreview(out,errs)};r.readAsArrayBuffer(f)});
+}
+function opPreview(docs,errs){
+  if(!docs.length){toast(errs[0]||'Nothing to import');return}
+  modal(`<h3>Add to Optimo</h3>${errs.map(e=>`<p class="small" style="color:var(--bad)">${esc(e)}</p>`).join('')}
+   <div class="flow mt">${docs.map((d,i)=>d.kind==='stock'?`<div class="ln"><span class="k"><b>Stock list</b> · ${d.items.length} items<div class="muted small">${esc(d.file)} · replaces the current stock list</div></span><span class="v num">${gel(d.items.reduce((a,x)=>a+Math.max(0,x[3])*x[5],0))}</span></div>`
+     :`<div class="ln"><span class="k"><b>Sale history</b> · ${d.rows.length} lines<div class="muted small">${esc(d.file)}</div><div class="row small" style="gap:6px;margin-top:6px">from <input type="date" class="input" style="width:auto" data-opf="${i}" value="${d.from}"> to <input type="date" class="input" style="width:auto" data-opt="${i}" value="${d.to}"></div></span><span class="v num">${gel(d.rows.reduce((a,x)=>a+x[4],0))}</span></div>`).join('')}</div>
+   <p class="hint mt">A sale history for the same dates replaces the earlier one. Your books are not changed.</p>
+   <div class="foot"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" id="opSave">Save</button></div>`,true);
+  $('#opSave').onclick=async()=>{
+    for(const [i,d] of docs.entries()){if(d.kind!=='sales')continue;d.from=document.querySelector(`[data-opf="${i}"]`).value;d.to=document.querySelector(`[data-opt="${i}"]`).value;if(!d.from||!d.to||d.from>d.to){toast('Set the dates of the sale history');return}}
+    for(const d of docs){const id=d.kind==='stock'?'stock':'sales-'+d.from+'_'+d.to;await S.db.doc('optimo/'+id).set(d);if(d.kind==='sales')S.op.period=id}
+    closeModal();toast('Optimo data saved');S.op.tab='overview';S.animate=true;render()};
+}
+async function opExport(){
+  const M=opModel();const list=M.reorder.concat(M.soon);
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Barcode','Item','Category','In stock','Sells a month','Order','Unit cost','Order cost']].concat(list.map(x=>[x.b,x.n,x.cat,x.q,+x.rate.toFixed(2),x.order,x.cost,+x.orderCost.toFixed(2)]))),'Order');
+  const data=XLSX.write(wb,{type:'array',bookType:'xlsx'});
+  await S.downloads.save({filename:'astroman-order-list-'+today()+'.xlsx',data:new Blob([data],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})});
+}
+
 /* ============================== modal & binding ============================== */
 function modal(html,wide){$('#modalRoot').innerHTML=`<div class="scrim" id="scrim"><div class="modal ${wide?'wide':''}" role="dialog" aria-modal="true">${html}</div></div>`;$('#scrim').addEventListener('click',e=>{if(e.target.id==='scrim'||e.target.closest('[data-close]'))closeModal()});document.addEventListener('keydown',escClose)}
 function escClose(e){if(e.key==='Escape')closeModal()}
@@ -1672,6 +1846,14 @@ function bindView(){
     if(!t){t=txOf(r.dataset.m).find(x=>x.id===id);if(!t)return;S.draft={date:t.date,cur:'GEL',amount:String(t.gel),fx:fx(),cat:t.cat,account:t.account,vendor:t.vendor,note:'',employee:t.employee||'',recId:t.recId,source:'fixed'}}
     else S.draft={...t,amount:String(t.cur==='USD'?t.orig:t.gel),fx:t.fx||fx(),employee:t.employee||'',vendor:t.vendor||'',note:t.note||'',account:t.account||'unknown'};
     S.view='add';S.animate=true;render();window.scrollTo({top:0})});
+  on('#opFile','change',e=>{if(e.target.files.length)opUpload(e.target.files)});
+  const opD=$('.drop[data-act="opPick"]');if(opD){opD.addEventListener('dragover',e=>{e.preventDefault();opD.classList.add('over')});opD.addEventListener('dragleave',()=>opD.classList.remove('over'));opD.addEventListener('drop',e=>{e.preventDefault();opD.classList.remove('over');if(e.dataTransfer.files.length)opUpload(e.dataTransfer.files)})}
+  searchBox('#oQ',v=>{S.op.q=v;S.op.full=false});
+  on('#oCat','change',e=>{S.op.cat=e.target.value;render()});on('#oStatus','change',e=>{S.op.status=e.target.value;render()});
+  on('#opPeriod','change',e=>{S.op.period=e.target.value;S.mc=new Map();render()});
+  const opNum=(id,k)=>on(id,'change',async e=>{const v=parseNum(e.target.value);if(!(v>0))return;try{await saveCfg({optimo:{...(S.cfg.optimo||{}),[k]:v}})}catch(x){toast(errMsg(x))}});opNum('#opCover','cover');opNum('#opLead','lead');
+  document.querySelectorAll('th[data-osort]').forEach(th=>th.onclick=()=>{const k=th.dataset.osort;if(S.op.sort===k)S.op.dir*=-1;else{S.op.sort=k;S.op.dir=k==='n'||k==='status'?1:-1}render()});
+  document.querySelectorAll('[data-opcat]').forEach(r=>r.onclick=()=>{S.op.cat=r.dataset.opcat;S.op.tab='items';S.op.status='';S.animate=true;render()});
   on('#backupFile','change',e=>{const f=e.target.files[0];if(f)importBackup(f)});
   on('#rYear','change',e=>{if(e.target.value)setRange({p:'year',y:e.target.value})});
   on('#rFrom','change',e=>setRange({p:'custom',from:e.target.value,to:$('#rTo').value}));
@@ -1703,6 +1885,12 @@ async function act(a,b){
   try{
   if(a==='syncSheet'){if(!S.mcp&&!S.backend){toast('Live sync needs Google Drive connected (in Claude) or the hosted version');return}return syncSheet(b)}
   if(a==='pickOrders')return $('#ordersFile').click();
+  if(a==='opPick')return $('#opFile')?$('#opFile').click():null;
+  if(a==='opTab'){S.op.tab=b.dataset.v;S.animate=true;render();window.scrollTo({top:0});return}
+  if(a==='opRank'){S.op.rank=b.dataset.v;return render()}
+  if(a==='opFull'){S.op.full=true;return render()}
+  if(a==='opMore'){S.op['all'+b.dataset.v]=true;return render()}
+  if(a==='opExport')return opExport();
   if(a==='bankReset'){S.bank=null;S.animate=true;return render()}
   if(a==='bankReview')return bankBuild();
   if(a==='bankSave')return bankSave(b);
