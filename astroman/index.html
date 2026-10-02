@@ -735,16 +735,22 @@ function backendDB(u,k){
     if(!c||c.u!==u||!Array.isArray(c.docs))return false;
     c.docs.forEach(([cc,id,d])=>col(cc).set(id,d));outbox.forEach(apply);since=c.at||0;loaded=true;emit();setConn(true,'Updating…');return true;
   }
+  // A quick check only adds or updates records, it never removes any: a read that lands while Google is
+  // rewriting a row can miss that row. Removals (an expense deleted on another device) arrive with the
+  // full reload, done on every open and every 30 minutes; a full reload that comes back much smaller
+  // than what we have is treated as a bad read and ignored.
+  let lastFull=0;
   async function load(full){
-    let r=null;
+    if(!full&&Date.now()-lastFull>30*60000)full=true;
+    let r=null,changed=!loaded;
     if(delta&&since&&!full){try{r=await gasCall(u,k,{action:'since',t:since-300000})}catch(e){if(e.code==='bad_key')throw e;if(/unknown action/.test(e.message||''))delta=false;else throw e}}
-    let changed=!loaded;
-    if(r&&r.keys){
-      const keep=new Set(r.keys);
-      cols.forEach((m,c)=>m.forEach((d,id)=>{if(!keep.has(c+'/'+id)){m.delete(id);changed=true}}));
-      (r.docs||[]).forEach(x=>{const id=docId(x),m=col(x.c);if(JSON.stringify(m.get(id))!==JSON.stringify(x.d)){m.set(id,x.d);changed=true}});
+    if(r&&Array.isArray(r.docs)){
+      r.docs.forEach(x=>{const id=docId(x),m=col(x.c);if(JSON.stringify(m.get(id))!==JSON.stringify(x.d)){m.set(id,x.d);changed=true}});
     }else{
-      r=await gasCall(u,k,{action:'all'});cols.clear();(r.docs||[]).forEach(x=>col(x.c).set(docId(x),x.d));changed=true;
+      r=await gasCall(u,k,{action:'all'});if(!Array.isArray(r.docs))throw {message:'Google sent an incomplete answer'};
+      let have=0;cols.forEach(m=>have+=m.size);
+      if(have>20&&r.docs.length<have*.8){lastFull=Date.now()-25*60000;throw {message:'Google sent an incomplete answer — keeping your data'}}
+      cols.clear();r.docs.forEach(x=>col(x.c).set(docId(x),x.d));changed=true;lastFull=Date.now();
     }
     outbox.forEach(apply);since=r.at||Date.now();loaded=true;saveCache();
     if(changed)emit();status();return r;
@@ -805,7 +811,7 @@ async function connectBackend(c){
   sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');
   S.db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()});
   S.backend.fromCache();
-  try{await S.backend.load();S.backend.flush();autoSyncSales()}catch(e){if(e.code==='bad_key'){toast('Wrong secret key. Connect again.');S.view='connect';render();return}toast(errMsg(e));setConn(false,'Offline — showing saved copy')}
+  try{await S.backend.load(true);S.backend.flush();autoSyncSales()}catch(e){if(e.code==='bad_key'){toast('Wrong secret key. Connect again.');S.view='connect';render();return}toast(errMsg(e));setConn(false,'Offline — showing saved copy')}
 }
 function backupDocs(){
   const out=[];const add=(c,m)=>m.forEach((v,id)=>{const d={...v};delete d.id;out.push({c,id,d})});
