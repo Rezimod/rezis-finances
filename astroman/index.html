@@ -675,10 +675,18 @@ function readCreds(){
   try{const c=JSON.parse(lsGet('af.backend')||'null');return c&&c.u&&c.k?c:null}catch(e){return null}
 }
 function phoneLink(){const c=readCreds();if(!c)return '';const b=btoa(unescape(encodeURIComponent(JSON.stringify({u:c.u,k:c.k})))).replace(/\+/g,'-').replace(/\//g,'_');return location.origin+location.pathname+'#connect='+b}
+// Google sometimes drops the body of a request and answers as if the address was just opened
+// ({ok,info}) or with an HTML error page; those answers are retried instead of taken as data.
 async function gasCall(u,k,body){
-  let r;try{r=await fetch(u,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...body,key:k})})}catch(e){throw {message:'Could not reach Google — check the internet connection'}}
-  const t=await r.text();let j;try{j=JSON.parse(t)}catch(e){throw {message:'The backend did not answer correctly. Check the web-app URL and that access is set to “Anyone”.'}}
-  if(j.error==='bad_key')throw {code:'bad_key',message:'Wrong secret key'};if(j.error)throw {message:j.error};return j;
+  let last;
+  for(let attempt=0;attempt<4;attempt++){
+    if(attempt)await new Promise(z=>setTimeout(z,1500*attempt));
+    let r;try{r=await fetch(u,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...body,key:k})})}catch(e){last={message:'Could not reach Google — check the internet connection'};continue}
+    const t=await r.text();let j;try{j=JSON.parse(t)}catch(e){last={message:'The backend did not answer correctly. Check the web-app URL and that access is set to “Anyone”.'};continue}
+    if(j.info||j.error==='bad_body'){last={message:'Google did not answer — try again'};continue}
+    if(j.error==='bad_key')throw {code:'bad_key',message:'Wrong secret key'};if(j.error)throw {message:j.error};return j;
+  }
+  throw last;
 }
 // Google rejects big requests unpredictably, so every save goes out in requests of at most ~28 KB;
 // a record bigger than that is sent in pieces that the backend puts back together.
@@ -764,7 +772,7 @@ function backendDB(u,k){
       get:async()=>{const d=col(c).get(id);return {id,exists:!!d,data:()=>d}},
       onSnapshot(cb){const l={kind:'d',path,cb};L.push(l);if(loaded)fire(l);return()=>{}}}},
     load,fromCache,flush,pending:()=>outbox.length||busy,
-    orders:sheetId=>gasCall(u,k,{action:'orders',sheetId}),
+    orders:async sheetId=>{const r=await gasCall(u,k,{action:'orders',sheetId});if(!Array.isArray(r.sheets))throw {message:'Google sent an incomplete answer — try again'};return r},
     importAll:async(docs,onStep)=>{busy=true;try{await writeOps(u,k,docs.map(x=>({op:'set',c:x.c,id:String(x.id),d:x.d})),onStep)}finally{busy=false}await load(true)},
   };
   // keep fresh: pick up changes when the app comes back to the foreground, and every 2 minutes while open
@@ -1324,6 +1332,8 @@ function parseOrdersWorkbook(wb,source,file){
       const st=stCol>=0?String(r[stCol]||''):'';if(/გაუქმ|cancel/i.test(st)){cancelled++;continue}
       const p=dateCol>=0?parseDateCell(r[dateCol]):null;
       let y=p?.y||tY||defY,m=p?.m||tym?.m,d=p?.d||null;if(!m){skipped++;continue}
+      // dates typed as numbers lose the trailing zero (2.10 shows as 2.1): inside the October tab that is 2 October, not 2 January
+      if(tym&&p&&!p.y&&p.m*10===tym.m)m=tym.m;
       if(tym&&p&&!p.y&&p.m===12&&tym.m===1)y=y-1;
       const key=y+'-'+String(m).padStart(2,'0');
       const row={d:d?key+'-'+String(d).padStart(2,'0'):'',c:String(custCol>=0?r[custCol]:'').trim().slice(0,80),p:String(prodCol>=0?r[prodCol]:'').trim().slice(0,140),pay:normPay(payCol>=0?r[payCol]:''),a:Math.round(a*100)/100};
