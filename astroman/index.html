@@ -122,7 +122,8 @@ a{color:var(--brand)}
 .hkpi .val small{font-size:15px;color:var(--night-muted);font-weight:500;margin-left:3px}
 .hkpi .delta{font-size:12px;margin-top:3px;color:var(--night-muted)}
 .hkpi .up{color:#6EE0A6}.hkpi .down{color:#FF9389}
-.money{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.money{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:16px}
+@media (max-width:1250px){.money{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .mcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow);min-width:0;position:relative;overflow:hidden}
 .mcard::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--c,var(--brand))}
 .mcard .lbl{font-size:12px;color:var(--ink-2);display:flex;justify-content:space-between;gap:8px;align-items:baseline}
@@ -951,20 +952,34 @@ function aggregate(D){const A={sales:0,otherInc:0,cogs:0,stock:0,opex:0,tax:0,ne
   A.accurate=D.some(d=>d.accurate);const DS=D.filter(d=>d.sales>0);A.firstM=D.reduce((x,d)=>!x||String(d.m||d.firstM)<x?String(d.m||d.firstM):x,'');A.allAccurate=DS.length>0&&DS.every(d=>d.accurate);A.srcs=D.flatMap(d=>d.srcs||(d.src?[d.src]:[]));A.aov=A.orders?A.sales/A.orders:0;return A}
 function ytdOf(m){const ms=yearMonths(m.slice(0,4)).filter(x=>x<=m);const D=ms.map(metrics);return {ms,D,A:aggregate(D)}}
 function loanInfo(){const L=S.cfg.loan;if(!L||!L.amount)return null;const spent=[...S.tx.values()].filter(t=>t.cat==='loan_spend').reduce((a,t)=>a+(+t.gel||0),0);return {...L,spent,left:L.amount-spent,owed:L.owed!=null?L.owed:L.amount}}
+/* ---------- live balances ---------- */
+// Each account starts from its last known amount (a statement's closing balance or a number typed in
+// Settings) and moves with everything dated after it: sales paid into it, expenses paid from it, money put in.
+const BAL_ACC=[['bog','BOG','#F05A28'],['tbc','TBC','#00A3E0'],['cash','Cash · სალარო','#1D8051'],['personal','Rezi personal','#E8A33B']];
+const DEFAULT_PAYACC={pos:'bog',bog:'bog',tbc:'tbc',cash:'cash',personal:'personal',cod:'cash',wolt:'bog',glovo:'bog',extra:'bog',installment:'bog',pending:'',other:'',unknown:''};
+const payAcct=p=>({...DEFAULT_PAYACC,...(S.cfg.payAcct||{})})[p]||'';
+function liveBalances(){
+  if(S.mc.has('#bal'))return S.mc.get('#bal');
+  const bal=S.cfg.balances||{};const out={};
+  BAL_ACC.forEach(([a])=>{const b=bal[a];if(b&&b.asOf&&b.gel!=null&&b.gel!=='')out[a]={base:+b.gel,asOf:b.asOf,at:b.at||'',sales:0,spent:0,inn:0,now:0}});
+  for(const s of S.sales.values()){if(!s.month||!s.rows)continue;
+    for(const r of s.rows){const o=out[payAcct(r.pay)];if(!o)continue;const d=r.d||s.month+'-31';if(d>o.asOf)o.sales+=+r.a||0}}
+  for(const t of S.tx.values()){const o=out[t.account];if(!o||!t.date)continue;
+    const after=t.date>o.asOf||(t.date===o.asOf&&t.source!=='bank'&&o.at&&(t.createdAt||'')>o.at);if(!after)continue;
+    const g=CAT[t.cat]?.g;if(g==='ignore')continue;if(g==='income'||g==='inflow')o.inn+=+t.gel||0;else o.spent+=+t.gel||0}
+  Object.values(out).forEach(o=>o.now=o.base+o.sales+o.inn-o.spent);
+  S.mc.set('#bal',out);return out;
+}
 function moneyNow(m,M){
-  const bal=S.cfg.balances||{};const L=loanInfo();
-  const PCH=[['cash','Cash'],['personal','პირადზე'],['cod','ადგილზე']];
-  const pm={};M.rows.forEach(r=>{if(pm[r.pay]!=null||PCH.some(c=>c[0]===r.pay))pm[r.pay]=(pm[r.pay]||0)+r.a});const pers=Object.values(pm).reduce((a,b)=>a+b,0);
-  const ytd=[...S.sales.values()].filter(s=>s.month&&s.month.startsWith(m.slice(0,4))&&s.month<=m).reduce((a,s)=>a+s.rows.filter(r=>PCH.some(c=>c[0]===r.pay)).reduce((x,r)=>x+r.a,0),0);
-  const asOf=b=>b&&b.asOf?'on '+new Date(b.asOf+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'not set';
-  const parts=b=>b&&b.parts&&b.parts.length>1?b.parts.map(x=>`${esc(x.n||x.cur)} ${x.cur&&x.cur!=='GEL'?fmt(x.orig,2)+' = ':''}${fmt(x.v,2)}`).join('<br>'):'';
-  const bank=(+bal.bog?.gel||0)+(+bal.tbc?.gel||0);
-  return `<div class="money">
-   <div class="mcard" style="--c:#F05A28"><div class="lbl"><span>BOG</span><span class="hint">${asOf(bal.bog)}</span></div><div class="val num">${bal.bog?cu(bal.bog.gel)+'<small>₾</small>':'—'}</div><div class="parts">${bal.bog?parts(bal.bog):'Import a BOG statement to set it.'}</div></div>
-   <div class="mcard" style="--c:#00A3E0"><div class="lbl"><span>TBC</span><span class="hint">${asOf(bal.tbc)}</span></div><div class="val num">${bal.tbc?cu(bal.tbc.gel)+'<small>₾</small>':'—'}</div><div class="parts">${bal.tbc?'Business card account':'Import a TBC statement to set it.'}${bank?` · banks together ${gel(bank)}`:''}</div></div>
-   <div class="mcard" style="--c:var(--accent)"><div class="lbl"><span>Rezi personal account</span><span class="hint">${mShort(m)} sales</span></div><div class="val num">${cu(pers)}<small>₾</small></div><div class="parts">${PCH.map(([k,t])=>`${t} ${fmt(pm[k]||0)}`).join(' · ')}<br>${m.slice(0,4)} so far: ${gel(ytd)}</div></div>
+  const B=liveBalances();const L=loanInfo();
+  const day=d=>new Date(d+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  const card=([a,t,c])=>{const o=B[a];
+    return `<div class="mcard" style="--c:${c}"><div class="lbl"><span>${t}</span><span class="hint">${o?'now':'not set'}</span></div><div class="val num ${o&&o.now<0?'neg':''}">${o?cu(o.now)+'<small>₾</small>':'—'}</div>
+     <div class="parts">${o?`${gel(o.base)} on ${day(o.asOf)}${o.sales?' · <span class="up">+'+fmt(o.sales)+' sales</span>':''}${o.inn?' · <span class="up">+'+fmt(o.inn)+' in</span>':''}${o.spent?' · <span class="down">−'+fmt(o.spent)+' spent</span>':''}`:(a==='bog'||a==='tbc'?'Import a statement or type it in Settings.':'Type what is there now in Settings.')}</div></div>`};
+  const tot=Object.values(B).reduce((x,o)=>x+o.now,0);
+  return `<div class="money">${BAL_ACC.map(card).join('')}
    <div class="mcard" style="--c:#7C5CDB"><div class="lbl"><span>${esc(L?.label||'Loan')}</span><span class="hint">kept separate</span></div>${L?`<div class="val num">${cu(L.left)}<small>₾ left</small></div><div class="bar2"><i style="width:${Math.min(100,L.spent/L.amount*100)}%"></i></div><div class="parts">Spent ${gel(L.spent)} of ${gel(L.amount)} · owed ${gel(L.owed)}</div>`:`<div class="val">—</div><div class="parts">Set the loan in Settings.</div>`}</div>
-  </div>`;
+  </div>${Object.keys(B).length>1?`<p class="hint" style="margin:-8px 0 16px">All accounts together: <b class="num">${gel(tot)}</b>. Balances move with every sale and expense dated after the amount was set.</p>`:''}`;
 }
 function trendChart(ms,cur){
   const cols=periodCols(ms);const multiY=new Set(ms.map(m=>m.slice(0,4))).size>1;
@@ -1206,7 +1221,7 @@ function bindAdd(){
     if(d.cur==='USD'){t.orig=a;t.fx=rate}
     if(d.cat==='salaries'&&d.employee)t.employee=d.employee.trim();
     if(d.bankKey)t.bankKey=d.bankKey;if(d.recId)t.recId=d.recId;if(d.shipId)t.shipId=d.shipId;
-    try{$('#fSave').disabled=true;await saveTx(t);lsSet('af.acct',d.account);toast((d.id?'Updated ':'Saved ')+gel(t.gel,2)+' · '+catLabel(t.cat));
+    try{$('#fSave').disabled=true;await saveTx(t);lsSet('af.acct',d.account);S.mc=new Map();const nb=liveBalances()[d.account];toast((d.id?'Updated ':'Saved ')+gel(t.gel,2)+' · '+catLabel(t.cat)+(nb?' · '+ACC[d.account].en+' now '+gel(nb.now):''));
       if(d.id||d.recId){go('expenses')}else{S.draft={date:d.date,cur:'GEL',amount:'',fx:fx(),cat:'',account:d.account,vendor:'',note:'',employee:''};S.animate=false;render()}
     }catch(e){toast(errMsg(e));$('#fSave').disabled=false}
   };
@@ -1461,7 +1476,7 @@ async function bankSave(btn){
   try{
     for(const r of rows){await saveTx({date:r.date,cat:r.cat,account:B.acct,vendor:r.vendor,note:(r.desc||'').slice(0,200),cur:'GEL',gel:Math.round(r.gel*100)/100,source:'bank',bankKey:r.key});n++}
     if(B.remember){const seen=new Set();for(const r of rows){if(!r.synthetic&&r.cat!==r.auto&&r.party&&!seen.has(r.party.toLowerCase())){seen.add(r.party.toLowerCase());const match=r.party.toLowerCase().slice(0,40);await S.db.doc('rules/'+hash(match)).set({match,cat:r.cat,vendor:r.party.slice(0,60),dir:r.dir,createdAt:new Date().toISOString()})}}}
-    if(B.saveBal&&B.closing&&B.closing.total!=null){const bal={...(S.cfg.balances||{})};let asOf=B.closing.end&&B.closing.end<=today()?B.closing.end:today();if(B.lastDate&&B.lastDate>asOf)asOf=B.lastDate;bal[B.acct]={gel:B.closing.total,asOf,parts:B.closing.parts,source:B.fileName};await saveCfg({balances:bal})}
+    if(B.saveBal&&B.closing&&B.closing.total!=null){const bal={...(S.cfg.balances||{})};let asOf=B.closing.end&&B.closing.end<=today()?B.closing.end:today();if(B.lastDate&&B.lastDate>asOf)asOf=B.lastDate;bal[B.acct]={gel:B.closing.total,asOf,at:new Date().toISOString(),parts:B.closing.parts,source:B.fileName};await saveCfg({balances:bal})}
     toast('Saved '+n+' rows from '+ACC[B.acct].en+(B.saveBal&&B.closing.total!=null?' · balance '+gel(B.closing.total,2):''));S.bank=null;go('expenses');
   }catch(e){toast(errMsg(e)+' — saved '+n+' of '+rows.length);btn.disabled=false;btn.textContent='Save'}
 }
@@ -1565,8 +1580,8 @@ function openReport(m){
   slides.push(a(0,`<div class="rk">Running costs &amp; taxes</div>`)+a(1,`<div class="rbig num">${n(M.opex+M.tax)}<small> ₾</small></div>`)+a(2,`<div class="rs">${ch(M.opex+M.tax,P.opex+P.tax,true)}${M.fixed?' · '+gel(M.fixed)+' were fixed costs':''}</div>`)+cats.map(([k,v],i)=>a(i+3,`<div class="rw c"><span>${esc(k)}</span><div class="rwb"><i style="width:${v/cmx*100}%"></i></div><b class="num">${fmt(v)}</b></div>`)).join(''));
   if(items&&items.rows?.length){const best=items.rows.slice().sort((x,y)=>y.p-x.p).slice(0,5);const thin=items.rows.filter(r=>r.r>=100).sort((x,y)=>x.p/x.r-y.p/y.r).slice(0,3);const bmx=Math.max(1,...best.map(r=>r.p));
     slides.push(a(0,`<div class="rk">Products</div>`)+a(1,`<h3 class="rh3">${fmt(items.qty)} items sold · ${pct(items.revenue-items.cost,items.revenue)}% margin</h3>`)+a(2,`<div class="rl">Made the most profit</div>`)+best.map((r,i)=>a(i+3,`<div class="rw s"><span>${esc(r.n)}</span><div class="rwb"><i style="width:${r.p/bmx*100}%"></i></div><b class="num">${fmt(r.p)}</b></div>`)).join('')+(thin.length?a(9,`<div class="rl" style="margin-top:18px">Thinnest margin</div><div class="rs">${thin.map(r=>esc(r.n)+' '+pct(r.p,r.r)+'%').join(' · ')}</div>`):''))}
-  const bank=(+bal.bog?.gel||0)+(+bal.tbc?.gel||0);const pers=M.rows.filter(r=>['cash','personal','cod'].includes(r.pay)).reduce((x,r)=>x+r.a,0);
-  slides.push(a(0,`<div class="rk">Money now</div>`)+a(1,`<div class="rbig num">${n(bank)}<small> ₾ in the bank</small></div>`)+a(2,`<div class="rgrid2"><div><span>BOG</span><b class="num">${gel(bal.bog?.gel||0)}</b></div><div><span>TBC</span><b class="num">${gel(bal.tbc?.gel||0)}</b></div><div><span>Your personal account (${mShort(m)} sales)</span><b class="num">${gel(pers)}</b></div>${L?`<div><span>${esc(L.label)} · left of ${fmt(L.amount)}</span><b class="num">${gel(L.left)}</b></div>`:''}</div>`)+a(4,`<div class="rs">Cash left in the business this month: <b class="num">${gel(M.cash)}</b></div>`));
+  const LB=liveBalances();const bank=(LB.bog?.now||0)+(LB.tbc?.now||0);const pers=LB.personal?LB.personal.now:M.rows.filter(r=>['cash','personal','cod'].includes(r.pay)).reduce((x,r)=>x+r.a,0);
+  slides.push(a(0,`<div class="rk">Money now</div>`)+a(1,`<div class="rbig num">${n(bank)}<small> ₾ in the bank</small></div>`)+a(2,`<div class="rgrid2"><div><span>BOG</span><b class="num">${gel(LB.bog?.now||0)}</b></div><div><span>TBC</span><b class="num">${gel(LB.tbc?.now||0)}</b></div><div><span>${LB.personal?'Your personal account now':'Your personal account ('+mShort(m)+' sales)'}</span><b class="num">${gel(pers)}</b></div>${L?`<div><span>${esc(L.label)} · left of ${fmt(L.amount)}</span><b class="num">${gel(L.left)}</b></div>`:''}</div>`)+a(4,`<div class="rs">Cash left in the business this month: <b class="num">${gel(M.cash)}</b></div>`));
   const yd=Y.D;const ymx=Math.max(1,...yd.map(d=>Math.abs(d.net)));
   slides.push(a(0,`<div class="rk">${m.slice(0,4)} so far</div>`)+a(1,`<div class="rgrid3"><div><b class="num">${n(A.sales+A.otherInc)}</b><span>₾ revenue</span></div><div><b class="num">${n(A.cogs+A.opex+A.tax)}</b><span>₾ expenses</span></div><div><b class="num ${A.net<0?'rdown':''}">${n(A.net)}</b><span>₾ net profit</span></div></div>`)+a(3,`<div class="rmonths">${yd.map((d,i)=>`<div><i class="${d.net<0?'neg':''}" style="height:${Math.max(3,Math.abs(d.net)/ymx*100)}%;--j:${i}"></i><span>${mShort(d.m)}</span></div>`).join('')}</div><div class="rhint">Net profit per month</div>`));
   const todo=[];if(!M.hasSales)todo.push('Sync sales from the order sheet');if(!items)todo.push('Upload the Optimo item report');if(items&&Math.abs(M.sales-items.revenue)>=50)todo.push(gel(Math.abs(M.sales-items.revenue))+' difference between Optimo and the order sheet');
@@ -1648,11 +1663,13 @@ function vSettings(){
    ${fixed.map((f,i)=>`<tr><td><input class="input" data-fx="${i}" data-k="label" value="${esc(f.label)}"></td><td><select class="input" data-fx="${i}" data-k="cat">${catOptions(f.cat)}</select></td><td><input class="input" data-fx="${i}" data-k="match" value="${esc(f.match||'')}" placeholder="any ${esc(catLabel(f.cat).toLowerCase())}"></td><td><input class="input" type="month" data-fx="${i}" data-k="from" value="${esc(f.from||'')}"></td><td><input class="input num" data-fx="${i}" data-k="gel" inputmode="decimal" value="${esc(f.gel)}" style="text-align:right;max-width:110px;margin-left:auto"></td><td class="r"><button class="btn sm ghost" data-rmfx="${i}" aria-label="Remove">✕</button></td></tr>`).join('')}
    </tbody></table></div>
    <div class="row mt"><button class="btn" data-act="addFixed" ${S.canWrite?'':'disabled'}>+ Add fixed cost</button><span class="spacer"></span><button class="btn primary" data-act="saveFixed" ${S.canWrite?'':'disabled'}>Save fixed costs</button></div></div>
-  <div class="panel stack"><h2>Bank balances &amp; loan</h2><p class="sub" style="margin:0">Balances update automatically when you import a statement. You can also type them here.</p>
-   <div class="formgrid"><label class="field"><span>BOG, all accounts in ₾</span><input class="input num" id="bBog" inputmode="decimal" value="${esc(S.cfg.balances?.bog?.gel??'')}"></label><label class="field"><span>TBC in ₾</span><input class="input num" id="bTbc" inputmode="decimal" value="${esc(S.cfg.balances?.tbc?.gel??'')}"></label><label class="field"><span>Balances as of</span><input class="input" type="date" id="bAsOf" value="${esc(S.cfg.balances?.bog?.asOf||today())}"></label></div>
+  <div class="panel stack"><h2>Balances &amp; loan</h2><p class="sub" style="margin:0">Type what is really in an account right now to correct it. From then on it moves by itself with every sale and expense. Importing a bank statement also sets BOG or TBC.</p>
+   <div class="tablewrap"><table><thead><tr><th>Account</th><th class="r">Now, ₾</th><th>Counted from</th></tr></thead><tbody>${BAL_ACC.map(([k,t])=>{const o=liveBalances()[k];return `<tr><td>${t}</td><td class="r"><input class="input num" data-bal="${k}" inputmode="decimal" value="${o?Math.round(o.now*100)/100:''}" placeholder="—" style="text-align:right;max-width:130px;margin-left:auto"></td><td class="small muted">${o?esc(o.asOf):'not set'}</td></tr>`}).join('')}</tbody></table></div>
    <div class="formgrid"><label class="field"><span>Loan name</span><input class="input" id="lLabel" value="${esc(S.cfg.loan?.label||'Loan')}"></label><label class="field"><span>Loan received, ₾</span><input class="input num" id="lAmt" inputmode="decimal" value="${esc(S.cfg.loan?.amount??'')}"></label><label class="field"><span>Still owed, ₾</span><input class="input num" id="lOwed" inputmode="decimal" value="${esc(S.cfg.loan?.owed??'')}"></label></div>
    <p class="hint" style="margin:0">To record spending from the loan, add an expense with the category “Paid from the loan”. It stays out of profit.</p>
    <div><button class="btn primary" data-act="saveBal" ${S.canWrite?'':'disabled'}>Save balances &amp; loan</button></div></div>
+  <div class="panel stack"><h2>Where each payment lands</h2><p class="sub" style="margin:0">Sales from the order sheet are added to this account's balance.</p>
+   <div class="flow">${Object.keys(DEFAULT_PAYACC).filter(p=>p!=='unknown').map(p=>`<div class="ln"><span class="k">${esc(PAYS[p]||p)}</span><span class="v"><select class="input" data-payacc="${p}">${[['','Not counted']].concat(BAL_ACC.map(x=>[x[0],x[1]])).map(([v,t])=>`<option value="${v}" ${payAcct(p)===v?'selected':''}>${t}</option>`).join('')}</select></span></div>`).join('')}</div></div>
   <div class="panel stack"><h2>General</h2>
    <label class="field"><span>Default exchange rate (₾ per $)</span><input class="input num" id="cFx" inputmode="decimal" value="${esc(S.cfg.fx||'2.70')}"></label>
    <label class="field"><span>How to calculate profit</span><select class="input" id="cMethod"><option value="auto" ${(S.cfg.method||'auto')==='auto'?'selected':''}>Use Optimo item costs when a report exists (recommended)</option><option value="cash" ${S.cfg.method==='cash'?'selected':''}>Always count stock when it's paid for</option></select></label>
@@ -1855,6 +1872,7 @@ function bindView(){
     if(!t){t=txOf(r.dataset.m).find(x=>x.id===id);if(!t)return;S.draft={date:t.date,cur:'GEL',amount:String(t.gel),fx:fx(),cat:t.cat,account:t.account,vendor:t.vendor,note:'',employee:t.employee||'',recId:t.recId,source:'fixed'}}
     else S.draft={...t,amount:String(t.cur==='USD'?t.orig:t.gel),fx:t.fx||fx(),employee:t.employee||'',vendor:t.vendor||'',note:t.note||'',account:t.account||'unknown'};
     S.view='add';S.animate=true;render();window.scrollTo({top:0})});
+  document.querySelectorAll('[data-payacc]').forEach(el=>el.onchange=async()=>{try{await saveCfg({payAcct:{...(S.cfg.payAcct||{}),[el.dataset.payacc]:el.value}});toast(PAYS[el.dataset.payacc]+' → '+(el.value?BAL_ACC.find(x=>x[0]===el.value)[1]:'not counted'))}catch(e){toast(errMsg(e))}});
   on('#opFile','change',e=>{if(e.target.files.length)opUpload(e.target.files)});
   const opD=$('.drop[data-act="opPick"]');if(opD){opD.addEventListener('dragover',e=>{e.preventDefault();opD.classList.add('over')});opD.addEventListener('dragleave',()=>opD.classList.remove('over'));opD.addEventListener('drop',e=>{e.preventDefault();opD.classList.remove('over');if(e.dataTransfer.files.length)opUpload(e.dataTransfer.files)})}
   searchBox('#oQ',v=>{S.op.q=v;S.op.full=false});
@@ -1920,8 +1938,9 @@ async function act(a,b){
   if(a==='filterCat'){S.filters.q=catLabel(b.dataset.cat);S.filters.all=false;return go('expenses')}
   if(a==='filterFixed'){S.filters.q='';S.filters.all=false;return go('expenses')}
   if(a==='saveGeneral'){await saveCfg({fx:parseNum($('#cFx').value)||2.7,method:$('#cMethod').value,sheetId:$('#cSheet').value.trim(),loanBalance:parseNum($('#cLoan').value)||null});return toast('Settings saved')}
-  if(a==='saveBal'){const bal={...(S.cfg.balances||{})};const asOf=$('#bAsOf').value||today();const b=parseNum($('#bBog').value),t=parseNum($('#bTbc').value);
-    if($('#bBog').value!=='')bal.bog={...(bal.bog||{}),gel:b,asOf,...(bal.bog&&Math.abs(bal.bog.gel-b)<0.01?{}:{parts:[]})};if($('#bTbc').value!=='')bal.tbc={...(bal.tbc||{}),gel:t,asOf};
+  if(a==='saveBal'){const bal={...(S.cfg.balances||{})};const LB=liveBalances();
+    // only an amount you changed restarts that account from today
+    document.querySelectorAll('[data-bal]').forEach(el=>{const k=el.dataset.bal;if(el.value.trim()==='')return;const v=parseNum(el.value);const o=LB[k];if(o&&Math.abs(o.now-v)<0.01)return;bal[k]={gel:v,asOf:today(),at:new Date().toISOString(),parts:[]}});
     await saveCfg({balances:bal,loan:{label:$('#lLabel').value.trim()||'Loan',amount:parseNum($('#lAmt').value),owed:parseNum($('#lOwed').value)}});return toast('Balances and loan saved')}
   if(a==='exportBackup')return exportBackup();
   if(a==='pickBackup')return $('#backupFile').click();
