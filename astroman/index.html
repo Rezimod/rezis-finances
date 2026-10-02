@@ -672,7 +672,7 @@ function readCreds(){
 }
 function phoneLink(){const c=readCreds();if(!c)return '';const b=btoa(unescape(encodeURIComponent(JSON.stringify({u:c.u,k:c.k})))).replace(/\+/g,'-').replace(/\//g,'_');return location.origin+location.pathname+'#connect='+b}
 async function gasCall(u,k,body){
-  const r=await fetch(u,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...body,key:k})});
+  let r;try{r=await fetch(u,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...body,key:k})})}catch(e){throw {message:'Could not reach Google — check the internet connection'}}
   const t=await r.text();let j;try{j=JSON.parse(t)}catch(e){throw {message:'The backend did not answer correctly. Check the web-app URL and that access is set to “Anyone”.'}}
   if(j.error==='bad_key')throw {code:'bad_key',message:'Wrong secret key'};if(j.error)throw {message:j.error};return j;
 }
@@ -697,7 +697,15 @@ function backendDB(u,k){
       onSnapshot(cb){const l={kind:'d',path,cb};L.push(l);if(loaded)fire(l);return()=>{}}}},
     load,pending:()=>queue.length||busy,
     orders:sheetId=>gasCall(u,k,{action:'orders',sheetId}),
-    importAll:async docs=>{for(let i=0;i<docs.length;i+=60){await gasCall(u,k,{action:'write',ops:docs.slice(i,i+60).map(x=>({op:'set',c:x.c,id:x.id,d:x.d}))})}await load()},
+    importAll:async(docs,onStep)=>{
+      // small batches (by count and size), each retried, so a slow moment at Google doesn't stop the import
+      const batches=[];let cur=[],size=0;for(const x of docs){const n=JSON.stringify(x.d).length;if(cur.length&&(cur.length>=40||size+n>350000)){batches.push(cur);cur=[];size=0}cur.push(x);size+=n}if(cur.length)batches.push(cur);
+      busy=true;let done=0;
+      try{for(const b of batches){let err;for(let attempt=0;attempt<5;attempt++){try{await gasCall(u,k,{action:'write',ops:b.map(x=>({op:'set',c:x.c,id:String(x.id),d:x.d}))});err=null;break}catch(e){err=e;if(e.code==='bad_key')break;await new Promise(r=>setTimeout(r,2500*(attempt+1)))}}
+        if(err)throw {message:'Stopped after '+done+' of '+docs.length+' records ('+(err.message||'Google did not answer')+'). Import the same file again — it continues where it stopped.'};
+        done+=b.length;if(onStep)onStep(done,docs.length)}}
+      finally{busy=false}
+      await load()},
   };
   // keep fresh: reload when the app comes back to the foreground, and every 3 minutes while open
   const refresh=()=>{if(!document.hidden&&!api.pending())load().catch(()=>{})};
@@ -730,10 +738,12 @@ async function exportBackup(){
   try{await S.downloads.save({filename:'astroman-finance-backup-'+today()+'.json',data:new Blob([data],{type:'application/json'})})}catch(e){if(e.code!=='declined')toast('Download unavailable here')}
 }
 function importBackup(file){
-  const r=new FileReader();r.onload=async()=>{try{const j=JSON.parse(r.result);if(!j.docs||!Array.isArray(j.docs))throw 0;
-    toast('Importing '+j.docs.length+' records…');
-    if(S.backend)await S.backend.importAll(j.docs);else{for(const x of j.docs)await S.db.doc(x.c+'/'+x.id).set(x.d)}
-    toast('Imported '+j.docs.length+' records');S.animate=true;render()}catch(e){toast('That file is not an Astroman Finance backup')}};r.readAsText(file);
+  const r=new FileReader();r.onload=async()=>{let j;try{j=JSON.parse(r.result);if(!j.docs||!Array.isArray(j.docs))throw 0}catch(e){toast('That file is not an Astroman Finance backup');return}
+    const st=$('#syncTxt');const show=(d,n)=>{const t='Importing '+d+' / '+n+'…';if(st)st.textContent=t;const b=$('#impMsg');if(b)b.textContent=t};
+    show(0,j.docs.length);toast('Importing '+j.docs.length+' records — keep this page open');
+    try{if(S.backend)await S.backend.importAll(j.docs,show);else{let d=0;for(const x of j.docs){await S.db.doc(x.c+'/'+x.id).set(x.d);show(++d,j.docs.length)}}
+      const b=$('#impMsg');if(b)b.textContent='Imported '+j.docs.length+' records';toast('Imported '+j.docs.length+' records');S.animate=true;render()}
+    catch(e){const b=$('#impMsg');if(b)b.textContent=e.message||'Import stopped';toast(e.message||'Import stopped — try again')}};r.readAsText(file);
 }
 
 /* ============================== db ============================== */
@@ -1560,7 +1570,7 @@ function vSettings(){
    <label class="field"><span>Loan balance still owed, ₾</span><input class="input num" id="cLoan" inputmode="decimal" value="${esc(S.cfg.loanBalance||'')}"></label>
    <div><button class="btn primary" data-act="saveGeneral" ${S.canWrite?'':'disabled'}>Save</button></div></div>
   <div class="panel stack"><h2>Backup &amp; devices</h2><p class="sub" style="margin:0">${S.hosted?'Your data is stored in your Google account (Apps Script).':'Your data is stored in your Claude account.'} A backup file moves everything between the Claude version and the hosted version.</p>
-   <div class="row"><button class="btn" data-act="exportBackup">Download backup</button>${S.canWrite?'<button class="btn" data-act="pickBackup">Import backup</button><input type="file" id="backupFile" accept=".json,application/json" hidden>':''}</div>
+   <div class="row"><button class="btn" data-act="exportBackup">Download backup</button>${S.canWrite?'<button class="btn" data-act="pickBackup">Import backup</button><input type="file" id="backupFile" accept=".json,application/json" hidden>':''}<span class="muted small" id="impMsg" aria-live="polite"></span></div>
    ${S.hosted&&readCreds()?`<label class="field"><span>Phone link: open it once on your phone to connect it (it contains your key, keep it private)</span><input class="input small" id="phLink" readonly value="${esc(phoneLink())}"></label><div class="row"><button class="btn" data-act="copyPhone">Copy phone link</button><button class="btn ghost" data-act="disconnect">Disconnect this device</button></div>`:''}</div>
   <div class="panel"><h2>Your bank sorting rules</h2><p class="sub">Created when you correct a category during bank import.</p>
    ${rules.length?`<div class="flow">${rules.map(r=>`<div class="ln"><span class="k">“${esc(r.match)}” → ${catChip(r.cat)}</span><span class="v"><button class="btn sm ghost" data-rmrule="${r.id}">Remove</button></span></div>`).join('')}</div>`:'<div class="muted">No custom rules yet. Built-in rules cover Wolt, Glovo, Facebook, Optimo, forwarders, Bresser, utilities, the accountant and bank fees.</div>'}</div></div>`;
