@@ -15,7 +15,8 @@
 <title>Astroman Finance</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 /* Layout: observatory logbook — night-sky rail + a starfield hero over a light working sheet; on phones a top month dial and a bottom tab bar with a central + button. */
 :root{
@@ -689,34 +690,101 @@ async function writeOps(u,k,ops,onStep){
   for(const r of reqs){let err;for(let attempt=0;attempt<5;attempt++){try{const j=await gasCall(u,k,{action:'write',ops:r});if(j&&j.error)throw {message:j.error};err=null;break}catch(e){err=e;if(e.code==='bad_key')break;await new Promise(z=>setTimeout(z,2000*(attempt+1)))}}
     if(err)throw {code:err.code,message:'Stopped after '+done+' of '+total+' records ('+(err.message||'Google did not answer')+'). Import the same file again — it continues where it stopped.'};
     done+=count(r);if(onStep)onStep(Math.min(done,total),total)}}
+// Every change goes into an outbox kept on this device until Google confirms it, so nothing is lost
+// if the page closes, the phone goes offline or Google fails. A copy of all records is cached on the
+// device so the app opens instantly; afterwards only records changed since the last visit are fetched.
+const OUTBOX='af.outbox',CACHE='af.cache';
 function backendDB(u,k){
-  const cols=new Map();const L=[];let loaded=false,queue=[],timer=0,busy=false;
+  const cols=new Map();const L=[];let loaded=false,busy=false,timer=0,since=0,fails=0,delta=true;
+  let outbox=[];try{outbox=JSON.parse(lsGet(OUTBOX)||'[]')}catch(e){}
+  let seq=outbox.reduce((m,o)=>Math.max(m,o.q||0),0);
   const col=c=>cols.get(c)||(cols.set(c,new Map()),cols.get(c));
   const fire=l=>{if(l.kind==='c')l.cb({docs:[...col(l.path)].map(([id,d])=>({id,exists:true,data:()=>d})),size:col(l.path).size,empty:!col(l.path).size});else{const [c,id]=l.path.split('/');const d=col(c).get(id);l.cb({id,exists:!!d,data:()=>d})}};
   const emit=()=>L.forEach(fire);
-  const status=t=>{const el=$('#syncTxt');if(el)el.textContent=t};
-  async function flush(){if(busy||!queue.length)return;busy=true;const ops=queue.splice(0,60);status('Saving…');
-    try{await writeOps(u,k,ops);busy=false;status(queue.length?'Saving…':'Saved to Google');if(queue.length)flush()}
-    catch(e){busy=false;toast('Could not save to Google. Check your connection — reloading your data.');queue=[];load()}}
-  function push(op){queue.push(op);clearTimeout(timer);timer=setTimeout(flush,350)}
-  async function load(){status('Loading…');const r=await gasCall(u,k,{action:'all'});cols.clear();(r.docs||[]).forEach(x=>{let id=String(x.id);if((x.c==='sales'||x.c==='items')&&x.d&&/^\d{4}-\d{2}$/.test(x.d.month||''))id=x.d.month;col(x.c).set(id,x.d)});loaded=true;emit();setConn(true,'Saved to Google');return r}
+  const saveOutbox=()=>{try{localStorage.setItem(OUTBOX,JSON.stringify(outbox))}catch(e){toast('This device is out of storage space. Keep the page open until it says “Saved to Google”.')}};
+  let cacheT=0;const saveCache=()=>{clearTimeout(cacheT);cacheT=setTimeout(()=>{const docs=[];cols.forEach((m,c)=>m.forEach((d,id)=>docs.push([c,id,d])));try{localStorage.setItem(CACHE,JSON.stringify({u,at:since,docs}))}catch(e){try{localStorage.removeItem(CACHE)}catch(e2){}}},800)};
+  const apply=op=>{if(op.op==='delete')col(op.c).delete(op.id);else col(op.c).set(op.id,op.d)};
+  const docId=x=>{let id=String(x.id);if((x.c==='sales'||x.c==='items')&&x.d&&/^\d{4}-\d{2}$/.test(x.d.month||''))id=x.d.month;return id};
+  function status(){
+    if(!loaded)return;
+    if(outbox.length)setConn(fails<2,fails?outbox.length+' change'+(outbox.length>1?'s':'')+' waiting — retrying':'Saving…');
+    else setConn(true,'Saved to Google');
+  }
+  async function flush(){
+    if(busy||!outbox.length)return;busy=true;status();
+    const batch=outbox.slice(0,60);
+    try{await writeOps(u,k,batch.map(({q,...op})=>op));
+      const done=new Set(batch.map(o=>o.q));outbox=outbox.filter(o=>!done.has(o.q));saveOutbox();fails=0;busy=false;status();
+      if(outbox.length)flush();}
+    catch(e){busy=false;fails++;status();
+      if(e.code==='bad_key'){toast('The secret key was changed. Connect again — your unsaved changes are kept on this device.');return}
+      clearTimeout(timer);timer=setTimeout(flush,Math.min(60000,5000*fails))}
+  }
+  function push(op){
+    op.q=++seq;const key=op.c+'/'+op.id;
+    // an older unsent change to the same record is replaced by this one (unless it is being sent right now)
+    if(!busy)outbox=outbox.filter(o=>o.c+'/'+o.id!==key);
+    outbox.push(op);saveOutbox();apply(op);emit();saveCache();status();
+    clearTimeout(timer);timer=setTimeout(flush,300);
+  }
+  function fromCache(){
+    let c;try{c=JSON.parse(lsGet(CACHE)||'null')}catch(e){}
+    if(!c||c.u!==u||!Array.isArray(c.docs))return false;
+    c.docs.forEach(([cc,id,d])=>col(cc).set(id,d));outbox.forEach(apply);since=c.at||0;loaded=true;emit();setConn(true,'Updating…');return true;
+  }
+  async function load(full){
+    let r=null;
+    if(delta&&since&&!full){try{r=await gasCall(u,k,{action:'since',t:since-300000})}catch(e){if(e.code==='bad_key')throw e;if(/unknown action/.test(e.message||''))delta=false;else throw e}}
+    let changed=!loaded;
+    if(r&&r.keys){
+      const keep=new Set(r.keys);
+      cols.forEach((m,c)=>m.forEach((d,id)=>{if(!keep.has(c+'/'+id)){m.delete(id);changed=true}}));
+      (r.docs||[]).forEach(x=>{const id=docId(x),m=col(x.c);if(JSON.stringify(m.get(id))!==JSON.stringify(x.d)){m.set(id,x.d);changed=true}});
+    }else{
+      r=await gasCall(u,k,{action:'all'});cols.clear();(r.docs||[]).forEach(x=>col(x.c).set(docId(x),x.d));changed=true;
+    }
+    outbox.forEach(apply);since=r.at||Date.now();loaded=true;saveCache();
+    if(changed)emit();status();return r;
+  }
   const api={
     collection:path=>({onSnapshot(cb,err){const l={kind:'c',path,cb,err};L.push(l);if(loaded)fire(l);return()=>{}}}),
     doc:path=>{const [c,id]=path.split('/');return {
-      set:async d=>{const v=JSON.parse(JSON.stringify(d));col(c).set(id,v);emit();push({op:'set',c,id,d:v})},
-      update:async d=>{const v={...(col(c).get(id)||{}),...JSON.parse(JSON.stringify(d))};col(c).set(id,v);emit();push({op:'set',c,id,d:v})},
-      delete:async()=>{col(c).delete(id);emit();push({op:'delete',c,id})},
+      set:async d=>push({op:'set',c,id,d:JSON.parse(JSON.stringify(d))}),
+      update:async d=>push({op:'set',c,id,d:{...(col(c).get(id)||{}),...JSON.parse(JSON.stringify(d))}}),
+      delete:async()=>push({op:'delete',c,id}),
       get:async()=>{const d=col(c).get(id);return {id,exists:!!d,data:()=>d}},
       onSnapshot(cb){const l={kind:'d',path,cb};L.push(l);if(loaded)fire(l);return()=>{}}}},
-    load,pending:()=>queue.length||busy,
+    load,fromCache,flush,pending:()=>outbox.length||busy,
     orders:sheetId=>gasCall(u,k,{action:'orders',sheetId}),
-    importAll:async(docs,onStep)=>{busy=true;try{await writeOps(u,k,docs.map(x=>({op:'set',c:x.c,id:String(x.id),d:x.d})),onStep)}finally{busy=false}await load()},
+    importAll:async(docs,onStep)=>{busy=true;try{await writeOps(u,k,docs.map(x=>({op:'set',c:x.c,id:String(x.id),d:x.d})),onStep)}finally{busy=false}await load(true)},
   };
-  // keep fresh: reload when the app comes back to the foreground, and every 3 minutes while open
-  const refresh=()=>{if(!document.hidden&&!api.pending())load().catch(()=>{})};
-  document.addEventListener('visibilitychange',refresh);setInterval(refresh,180000);
+  // keep fresh: pick up changes when the app comes back to the foreground, and every 2 minutes while open
+  const refresh=()=>{if(document.hidden)return;flush();if(!busy)load().then(autoSyncSales).catch(()=>{})};
+  document.addEventListener('visibilitychange',refresh);setInterval(refresh,120000);
+  addEventListener('online',()=>{fails=0;flush()});
+  addEventListener('beforeunload',e=>{if(outbox.length){e.preventDefault();e.returnValue=''}});
   return api;
 }
+// New orders in the order sheet flow in by themselves: whenever the app is open it re-reads the sheet
+// (at most every 15 minutes) and updates the months that changed. A month whose total went down is
+// left for you to check with “Sync from Google Sheet”.
+async function autoSyncSales(){
+  if(!S.backend||!S.canWrite||autoSyncSales.busy)return;
+  if(Date.now()-(+lsGet('af.salesAt')||0)<15*60000)return;
+  autoSyncSales.busy=true;
+  try{
+    await xlsxReady();
+    const r=await S.backend.orders(sheetId());const P=parseOrdersWorkbook(wbFromSheets(r.sheets),'Google Sheet (auto)');
+    const ch=P.months.filter(m=>m.pick&&(m.oldTotal==null||Math.abs(m.total-m.oldTotal)>=0.01||m.count!==m.oldCount));
+    for(const m of ch)await S.db.doc('sales/'+m.m).set(salesDoc(m,P.source));
+    lsSet('af.salesAt',String(Date.now()));
+    if(ch.length)toast('Sales updated from the order sheet: '+ch.map(m=>mShort(m.m)+' '+gel(m.total)).join(', '));
+  }catch(e){}finally{autoSyncSales.busy=false}
+}
+function xlsxReady(){return window.XLSX?Promise.resolve():new Promise(r=>addEventListener('load',r,{once:true}))}
+const sheetId=()=>S.cfg.sheetId||'1MXZq3Li7W6hfoDGVo9KMYPodS7haezf6TG1CwFmCtdk';
+function wbFromSheets(sheets){const wb=XLSX.utils.book_new();const used=new Set();(sheets||[]).forEach(x=>{let n=String(x.name).slice(0,31)||'Sheet';while(used.has(n))n=n.slice(0,28)+'_'+used.size;used.add(n);XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(x.values||[[]]),n)});return wb}
+const salesDoc=(m,source)=>({month:m.m,rows:m.rows,source,syncedAt:new Date().toISOString(),count:m.count,total:Math.round(m.total*100)/100});
 function localDownloads(){return {save:async({filename,data})=>{const blob=data instanceof Blob?data:new Blob([data]);const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},1500)}}}
 function vConnect(){
   const c=readCreds()||{};
@@ -732,7 +800,8 @@ async function connectBackend(c){
   const sub=(path,key)=>S.db.collection(path).onSnapshot(snap=>{const m=new Map();snap.docs.forEach(d=>m.set(d.id,{id:d.id,...d.data()}));S[key]=m;S.loaded[key]=true;schedule()});
   sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');
   S.db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()});
-  try{await S.backend.load()}catch(e){if(e.code==='bad_key'){try{await gasCall(c.u,c.k,{action:'ping'});await S.backend.load();return}catch(e2){if(e2.code==='bad_key'){toast('Wrong secret key. Connect again.');lsSet('af.backend','');S.view='connect';render();return}}}toast(errMsg(e));setConn(false,'Offline — tap to retry')}
+  S.backend.fromCache();
+  try{await S.backend.load();S.backend.flush();autoSyncSales()}catch(e){if(e.code==='bad_key'){toast('Wrong secret key. Connect again.');S.view='connect';render();return}toast(errMsg(e));setConn(false,'Offline — showing saved copy')}
 }
 function backupDocs(){
   const out=[];const add=(c,m)=>m.forEach((v,id)=>{const d={...v};delete d.id;out.push({c,id,d})});
@@ -1158,7 +1227,7 @@ function vExpenses(){
 function vSales(){
   const m=S.month,M=metrics(m),doc=S.sales.get(m);
   const q=S.salesQ.toLowerCase();const rows=(doc?.rows||[]).filter(r=>!q||[r.c,r.p,PAYS[r.pay]].join(' ').toLowerCase().includes(q));
-  const sid=S.cfg.sheetId||'1MXZq3Li7W6hfoDGVo9KMYPodS7haezf6TG1CwFmCtdk';const days=m===thisMonth()?new Date().getDate():daysIn(m);
+  const sid=sheetId();const days=m===thisMonth()?new Date().getDate():daysIn(m);
   return loadingOr(`<div class="pagehead"><div><div class="eyebrow">${kaM(m)} · ${m.slice(0,4)}</div><h1>Sales</h1><p>From your order sheet <a href="https://docs.google.com/spreadsheets/d/${esc(sid)}/edit" target="_blank" rel="noopener">ასტრომანის შეკვეთები</a>. Each order counts in the month of its order date.</p></div>
   <div class="actions">${S.mcp||S.backend?`<button class="btn primary" data-act="syncSheet">↻ Sync from Google Sheet</button>`:''}<button class="btn" data-act="pickOrders">Upload orders file</button><input type="file" id="ordersFile" accept=".xlsx,.xls,.csv,.ods,.txt,text/plain" hidden></div></div>
   <div class="kpis"><div class="kpi"><div class="lbl">Sales</div><div class="val num">${cu(M.sales)}<small>₾</small></div><div class="delta">${doc?('Updated '+new Date(doc.syncedAt).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})):'Not loaded yet'}</div></div>
@@ -1253,7 +1322,7 @@ function wbFromText(text){
 function wbFromBytes(u8){if(u8[0]===0x50&&u8[1]===0x4B)return XLSX.read(u8,{type:'array',cellDates:true});if(u8[0]===0xD0&&u8[1]===0xCF)return XLSX.read(u8,{type:'array',cellDates:true});const t=new TextDecoder('utf-8').decode(u8);return wbFromText(t)}
 function readFile(file,cb){const r=new FileReader();r.onload=()=>{try{cb(wbFromBytes(new Uint8Array(r.result)))}catch(e){toast('Couldn’t read that file. Save it as .xlsx or .csv and try again.')}};r.readAsArrayBuffer(file)}
 async function syncSheet(btn){
-  const sid=S.cfg.sheetId||'1MXZq3Li7W6hfoDGVo9KMYPodS7haezf6TG1CwFmCtdk';
+  const sid=sheetId();
   btn.disabled=true;btn.textContent='Reading sheet…';
   try{
     const fetchWb=async(input)=>{
@@ -1263,7 +1332,7 @@ async function syncSheet(btn){
       if(b64){const bin=atob(b64);const u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);return wbFromBytes(u8)}
       return null};
     let wb=null;
-    if(S.backend){const r=await S.backend.orders(sid);wb=XLSX.utils.book_new();const used=new Set();(r.sheets||[]).forEach(x=>{let n=String(x.name).slice(0,31)||'Sheet';while(used.has(n))n=n.slice(0,28)+'_'+used.size;used.add(n);XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(x.values||[[]]),n)});S.salesPreview=parseOrdersWorkbook(wb,'Google Sheet (live)');openSalesPreview();return}
+    if(S.backend){const r=await S.backend.orders(sid);wb=wbFromSheets(r.sheets);lsSet('af.salesAt',String(Date.now()));S.salesPreview=parseOrdersWorkbook(wb,'Google Sheet (live)');openSalesPreview();return}
     try{wb=await fetchWb({fileId:sid,exportMimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})}catch(e){if(['server_not_connected','needs_reauth','not_in_manifest','blocked_by_policy'].includes(e&&e.code))throw e}
     if(!wb||!wb.SheetNames.length)wb=await fetchWb({fileId:sid});
     if(!wb||!wb.SheetNames.length)throw {message:'The sheet came back in a format this page can’t read. Use “Upload orders file” instead.'};
@@ -1282,7 +1351,7 @@ function openSalesPreview(){
   <div class="foot"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" id="spSave" ${S.canWrite?'':'disabled'}>Update selected months</button></div>`,true);
   document.querySelectorAll('[data-pi]').forEach(c=>c.onchange=()=>{P.months[+c.dataset.pi].pick=c.checked});
   $('#spSave').onclick=async()=>{const pick=P.months.filter(m=>m.pick);if(!pick.length){toast('Tick at least one month');return}$('#spSave').disabled=true;
-    try{for(const m of pick){await S.db.doc('sales/'+m.m).set({month:m.m,rows:m.rows,source:P.source,syncedAt:new Date().toISOString(),count:m.count,total:Math.round(m.total*100)/100})}
+    try{for(const m of pick){await S.db.doc('sales/'+m.m).set(salesDoc(m,P.source))}
       closeModal();toast('Updated '+pick.length+' month'+(pick.length>1?'s':''));S.animate=true;render()}catch(e){toast(errMsg(e));$('#spSave').disabled=false}};
 }
 
@@ -1571,10 +1640,10 @@ function vSettings(){
   <div class="panel stack"><h2>General</h2>
    <label class="field"><span>Default exchange rate (₾ per $)</span><input class="input num" id="cFx" inputmode="decimal" value="${esc(S.cfg.fx||'2.70')}"></label>
    <label class="field"><span>How to calculate profit</span><select class="input" id="cMethod"><option value="auto" ${(S.cfg.method||'auto')==='auto'?'selected':''}>Use Optimo item costs when a report exists (recommended)</option><option value="cash" ${S.cfg.method==='cash'?'selected':''}>Always count stock when it's paid for</option></select></label>
-   <label class="field"><span>Order sheet ID (Google Sheets)</span><input class="input num small" id="cSheet" value="${esc(S.cfg.sheetId||'1MXZq3Li7W6hfoDGVo9KMYPodS7haezf6TG1CwFmCtdk')}"></label>
+   <label class="field"><span>Order sheet ID (Google Sheets)</span><input class="input num small" id="cSheet" value="${esc(sheetId())}"></label>
    <label class="field"><span>Loan balance still owed, ₾</span><input class="input num" id="cLoan" inputmode="decimal" value="${esc(S.cfg.loanBalance||'')}"></label>
    <div><button class="btn primary" data-act="saveGeneral" ${S.canWrite?'':'disabled'}>Save</button></div></div>
-  <div class="panel stack"><h2>Backup &amp; devices</h2><p class="sub" style="margin:0">${S.hosted?'Your data is stored in your Google account (Apps Script).':'Your data is stored in your Claude account.'} A backup file moves everything between the Claude version and the hosted version.</p>
+  <div class="panel stack"><h2>Backup &amp; devices</h2><p class="sub" style="margin:0">${S.hosted?'Your data is stored in your Google account (Apps Script). Every change waits on this device until Google confirms it, every change is also written to a permanent log, and a full copy of the data goes to the “Astroman Finance backups” folder in your Drive every night (kept 90 days).':'Your data is stored in your Claude account.'} A backup file moves everything between the Claude version and the hosted version.</p>
    <div class="row"><button class="btn" data-act="exportBackup">Download backup</button>${S.canWrite?'<button class="btn" data-act="pickBackup">Import backup</button><input type="file" id="backupFile" accept=".json,application/json" hidden>':''}<span class="muted small" id="impMsg" aria-live="polite"></span></div>
    ${S.hosted&&readCreds()?`<label class="field"><span>Phone link: open it once on your phone to connect it (it contains your key, keep it private)</span><input class="input small" id="phLink" readonly value="${esc(phoneLink())}"></label><div class="row"><button class="btn" data-act="copyPhone">Copy phone link</button><button class="btn ghost" data-act="disconnect">Disconnect this device</button></div>`:''}</div>
   <div class="panel"><h2>Your bank sorting rules</h2><p class="sub">Created when you correct a category during bank import.</p>
@@ -1660,7 +1729,7 @@ async function act(a,b){
   if(a==='exportBackup')return exportBackup();
   if(a==='pickBackup')return $('#backupFile').click();
   if(a==='copyPhone'){const v=$('#phLink').value;try{await navigator.clipboard.writeText(v);toast('Phone link copied')}catch(e){$('#phLink').select();toast('Select and copy the link')}return}
-  if(a==='disconnect'){lsSet('af.backend','');location.reload();return}
+  if(a==='disconnect'){if(S.backend&&S.backend.pending()){toast('Some changes are still saving. Wait until it says “Saved to Google”.');return}lsSet('af.backend','');lsSet(CACHE,'');location.reload();return}
   if(a==='connect'){return}
   if(a==='addFixed'){const f=readFixedForm();f.push({id:uid('f'),label:'New fixed cost',cat:'misc',gel:0,account:'bog',match:'',from:thisMonth()});S.cfg={...S.cfg,fixed:f};return render()}
   if(a==='saveFixed'){const f=readFixedForm().filter(x=>x.label);await saveCfg({fixed:f});return toast('Fixed costs saved · '+gel(f.reduce((s,x)=>s+(+x.gel||0),0))+' a month')}
