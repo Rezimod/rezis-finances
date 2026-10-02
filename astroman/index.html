@@ -676,6 +676,19 @@ async function gasCall(u,k,body){
   const t=await r.text();let j;try{j=JSON.parse(t)}catch(e){throw {message:'The backend did not answer correctly. Check the web-app URL and that access is set to “Anyone”.'}}
   if(j.error==='bad_key')throw {code:'bad_key',message:'Wrong secret key'};if(j.error)throw {message:j.error};return j;
 }
+// Google rejects big requests unpredictably, so every save goes out in requests of at most ~28 KB;
+// a record bigger than that is sent in pieces that the backend puts back together.
+const REQ_BYTES=28000,PIECE=7000;const utf8=s=>new TextEncoder().encode(s).length;
+function packOps(ops){
+  const flat=[];for(const op of ops){if(op.op!=='set'){flat.push(op);continue}const json=JSON.stringify(op.d);
+    if(utf8(json)<=REQ_BYTES-600){flat.push(op);continue}
+    const n=Math.ceil(json.length/PIECE);for(let i=0;i<n;i++)flat.push({op:'part',c:op.c,id:String(op.id),i,n,s:json.slice(i*PIECE,(i+1)*PIECE)})}
+  const reqs=[];let cur=[],size=0;for(const op of flat){const b=utf8(JSON.stringify(op))+20;if(cur.length&&(size+b>REQ_BYTES||cur.length>=40)){reqs.push(cur);cur=[];size=0}cur.push(op);size+=b}if(cur.length)reqs.push(cur);return reqs}
+async function writeOps(u,k,ops,onStep){
+  const reqs=packOps(ops);let done=0;const total=ops.length;const count=r=>r.filter(o=>o.op!=='part'||o.i===o.n-1).length;
+  for(const r of reqs){let err;for(let attempt=0;attempt<5;attempt++){try{const j=await gasCall(u,k,{action:'write',ops:r});if(j&&j.error)throw {message:j.error};err=null;break}catch(e){err=e;if(e.code==='bad_key')break;await new Promise(z=>setTimeout(z,2000*(attempt+1)))}}
+    if(err)throw {code:err.code,message:'Stopped after '+done+' of '+total+' records ('+(err.message||'Google did not answer')+'). Import the same file again — it continues where it stopped.'};
+    done+=count(r);if(onStep)onStep(Math.min(done,total),total)}}
 function backendDB(u,k){
   const cols=new Map();const L=[];let loaded=false,queue=[],timer=0,busy=false;
   const col=c=>cols.get(c)||(cols.set(c,new Map()),cols.get(c));
@@ -683,8 +696,8 @@ function backendDB(u,k){
   const emit=()=>L.forEach(fire);
   const status=t=>{const el=$('#syncTxt');if(el)el.textContent=t};
   async function flush(){if(busy||!queue.length)return;busy=true;const ops=queue.splice(0,60);status('Saving…');
-    for(let attempt=0;attempt<3;attempt++){try{await gasCall(u,k,{action:'write',ops});busy=false;status(queue.length?'Saving…':'Saved to Google');if(queue.length)flush();return}catch(e){await new Promise(r=>setTimeout(r,1500*(attempt+1)))}}
-    busy=false;toast('Could not save to Google. Check your connection — reloading your data.');queue=[];load()}
+    try{await writeOps(u,k,ops);busy=false;status(queue.length?'Saving…':'Saved to Google');if(queue.length)flush()}
+    catch(e){busy=false;toast('Could not save to Google. Check your connection — reloading your data.');queue=[];load()}}
   function push(op){queue.push(op);clearTimeout(timer);timer=setTimeout(flush,350)}
   async function load(){status('Loading…');const r=await gasCall(u,k,{action:'all'});cols.clear();(r.docs||[]).forEach(x=>{let id=String(x.id);if((x.c==='sales'||x.c==='items')&&x.d&&/^\d{4}-\d{2}$/.test(x.d.month||''))id=x.d.month;col(x.c).set(id,x.d)});loaded=true;emit();setConn(true,'Saved to Google');return r}
   const api={
@@ -697,15 +710,7 @@ function backendDB(u,k){
       onSnapshot(cb){const l={kind:'d',path,cb};L.push(l);if(loaded)fire(l);return()=>{}}}},
     load,pending:()=>queue.length||busy,
     orders:sheetId=>gasCall(u,k,{action:'orders',sheetId}),
-    importAll:async(docs,onStep)=>{
-      // small batches (by count and size), each retried, so a slow moment at Google doesn't stop the import
-      const batches=[];let cur=[],size=0;for(const x of docs){const n=JSON.stringify(x.d).length;if(cur.length&&(cur.length>=40||size+n>350000)){batches.push(cur);cur=[];size=0}cur.push(x);size+=n}if(cur.length)batches.push(cur);
-      busy=true;let done=0;
-      try{for(const b of batches){let err;for(let attempt=0;attempt<5;attempt++){try{await gasCall(u,k,{action:'write',ops:b.map(x=>({op:'set',c:x.c,id:String(x.id),d:x.d}))});err=null;break}catch(e){err=e;if(e.code==='bad_key')break;await new Promise(r=>setTimeout(r,2500*(attempt+1)))}}
-        if(err)throw {message:'Stopped after '+done+' of '+docs.length+' records ('+(err.message||'Google did not answer')+'). Import the same file again — it continues where it stopped.'};
-        done+=b.length;if(onStep)onStep(done,docs.length)}}
-      finally{busy=false}
-      await load()},
+    importAll:async(docs,onStep)=>{busy=true;try{await writeOps(u,k,docs.map(x=>({op:'set',c:x.c,id:String(x.id),d:x.d})),onStep)}finally{busy=false}await load()},
   };
   // keep fresh: reload when the app comes back to the foreground, and every 3 minutes while open
   const refresh=()=>{if(!document.hidden&&!api.pending())load().catch(()=>{})};
@@ -727,7 +732,7 @@ async function connectBackend(c){
   const sub=(path,key)=>S.db.collection(path).onSnapshot(snap=>{const m=new Map();snap.docs.forEach(d=>m.set(d.id,{id:d.id,...d.data()}));S[key]=m;S.loaded[key]=true;schedule()});
   sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');
   S.db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()});
-  try{await S.backend.load()}catch(e){toast(e.code==='bad_key'?'Wrong secret key. Connect again.':errMsg(e));if(e.code==='bad_key'){lsSet('af.backend','');S.view='connect';render()}else setConn(false,'Offline — tap to retry')}
+  try{await S.backend.load()}catch(e){if(e.code==='bad_key'){try{await gasCall(c.u,c.k,{action:'ping'});await S.backend.load();return}catch(e2){if(e2.code==='bad_key'){toast('Wrong secret key. Connect again.');lsSet('af.backend','');S.view='connect';render();return}}}toast(errMsg(e));setConn(false,'Offline — tap to retry')}
 }
 function backupDocs(){
   const out=[];const add=(c,m)=>m.forEach((v,id)=>{const d={...v};delete d.id;out.push({c,id,d})});
