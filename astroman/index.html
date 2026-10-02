@@ -213,6 +213,15 @@ tfoot td{font-weight:700;border-top:2px solid var(--ink);border-bottom:0}
 .bigamount{display:flex;align-items:baseline;gap:8px;border-bottom:2px solid var(--ink);padding-bottom:6px}
 .bigamount input{border:0;background:transparent;font-family:var(--f-num);font-size:42px;font-weight:600;width:100%;min-width:0;padding:0}
 .bigamount input:focus{outline:none}
+.pbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:2px 0 14px}
+.pbar .seg{max-width:100%;overflow-x:auto;scrollbar-width:none}
+.pbar .seg::-webkit-scrollbar{display:none}
+.pbar .seg button{white-space:nowrap}
+.pbar .pyear{width:auto;min-width:96px;flex:none;padding-top:7px;padding-bottom:7px}
+.hm{}
+@media (max-width:640px){.hm{display:none}}
+.pcustom{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pcustom .input{width:auto;padding-top:7px;padding-bottom:7px}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--surface);flex:none}
 .seg button{border:0;background:transparent;padding:6px 12px;cursor:pointer;color:var(--ink-2);font-weight:500;transition:background .15s}
 .seg button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink)}
@@ -537,7 +546,7 @@ const DEFAULT_FIXED=[
 
 /* ============================== state ============================== */
 const S={db:null,user:null,canWrite:true,mcp:null,downloads:null,loaded:{},
-  tx:new Map(),sales:new Map(),ships:new Map(),rules:new Map(),items:new Map(),cfg:{},
+  tx:new Map(),sales:new Map(),ships:new Map(),rules:new Map(),items:new Map(),itemsYear:new Map(),cfg:{},range:null,mc:new Map(),
   view:'overview',month:null,draft:null,bank:null,opt:null,salesPreview:null,filters:{cat:'',acct:'',q:'',all:false},salesQ:'',
   prod:{tab:'popular',sort:'p',dir:-1,q:'',all:false},animate:true};
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
@@ -573,7 +582,7 @@ function parseNum(v){if(typeof v==='number')return v;let s=String(v??'').replace
 
 /* ============================== fixed costs ============================== */
 function fixedList(){return Array.isArray(S.cfg.fixed)?S.cfg.fixed:[]}
-function realTxOf(m){return [...S.tx.values()].filter(t=>t.month===m)}
+function realTxOf(m){let ix=S.mc.get('#tx');if(!ix){ix=new Map();for(const t of S.tx.values()){if(!t.month)continue;let a=ix.get(t.month);if(!a)ix.set(t.month,a=[]);a.push(t)}S.mc.set('#tx',ix)}return ix.get(m)||[]}
 function fixedMatches(f,t){if(t.recId===f.id)return true;if(t.recId)return false;if(t.cat!==f.cat)return false;if(!f.match)return true;return [t.vendor,t.employee,t.note].join(' ').toLowerCase().includes(f.match.toLowerCase())}
 function fixedFor(m,real){
   if(m>thisMonth())return [];
@@ -584,22 +593,76 @@ function allTx(){const ms=new Set([...S.tx.values()].map(t=>t.month));fixedList(
 
 /* ============================== metrics ============================== */
 function optimoOf(m){const d=S.items.get(m);return d&&d.hasCost&&d.revenue>0?d:null}
+// a whole-period Optimo export (e.g. all of 2025) that has no per-month split
+function yearOptimoFor(m){for(const d of S.itemsYear.values()){if(d.hasCost&&d.revenue>0&&d.from&&d.to&&m>=d.from&&m<=d.to)return d}return null}
+// old order sheets (2021–2023) carry a cost per order line
+function rowCostRatio(rows,sales){if(!sales)return null;let a=0,k=0;for(const r of rows){if(r.k!=null&&r.k!==''&&!isNaN(+r.k)){a+=+r.a||0;k+=+r.k}}return a>=sales*.9&&a>0?k/a:null}
+const COGS_SRC={optimo:'Optimo item costs',year:'Optimo yearly cost ratio',sheet:'cost per order in the sheet'};
 function metrics(m){
+  const hit=S.mc.get(m);if(hit)return hit;
   const s=S.sales.get(m);const rows=s?.rows||[];
   const sales=rows.reduce((a,r)=>a+(+r.a||0),0);
   const list=txOf(m);const by={};for(const t of list){by[t.cat]=(by[t.cat]||0)+(+t.gel||0)}
   const sum=g=>CATS.filter(c=>c.g===g).reduce((a,c)=>a+(by[c.id]||0),0);
   const stock=sum('goods'),opex=sum('opex'),tax=sum('tax'),below=sum('below'),otherInc=by.other_income||0,ownerIn=by.owner_in||0;
-  const O=optimoOf(m);const accurate=(S.cfg.method||'auto')!=='cash'&&!!O;
-  const ratio=O?O.cost/O.revenue:null;
+  let ratio=null,src=null;const O=optimoOf(m);
+  if(O){ratio=O.cost/O.revenue;src='optimo'}else{const Y=yearOptimoFor(m);if(Y){ratio=Y.cost/Y.revenue;src='year'}else{const rc=rowCostRatio(rows,sales);if(rc!=null){ratio=rc;src='sheet'}}}
+  const accurate=(S.cfg.method||'auto')!=='cash'&&ratio!=null;if(!accurate)src=null;
   const cogs=accurate?sales*ratio:stock;
   const gross=sales-cogs;const operating=gross+otherInc-opex;const net=operating-tax;
   const stockOut=accurate?stock:0;const cash=net-below-stockOut+ownerIn;
   const fixed=list.filter(t=>t.virtual).reduce((a,t)=>a+t.gel,0);
-  return {m,sales,orders:rows.length,aov:rows.length?sales/rows.length:0,by,stock,cogs,accurate,ratio,opex,tax,below,stockOut,otherInc,ownerIn,gross,operating,net,cash,fixed,hasSales:!!s,rows,list};
+  const M={m,sales,orders:rows.length,aov:rows.length?sales/rows.length:0,by,stock,cogs,accurate,allAccurate:accurate,srcs:src?[src]:[],ratio,src,opex,tax,below,stockOut,otherInc,ownerIn,gross,operating,net,cash,fixed,hasSales:!!s,rows,list};
+  S.mc.set(m,M);return M;
 }
 function monthsAvailable(){const set=new Set([thisMonth()]);for(const t of S.tx.values())if(t.month)set.add(t.month);for(const k of S.sales.keys())set.add(k);for(const k of S.items.keys())set.add(k);return [...set].sort()}
 function yearMonths(y){const out=[];for(let i=1;i<=12;i++){const m=y+'-'+String(i).padStart(2,'0');if(m<=thisMonth()||S.sales.has(m)||realTxOf(m).length)out.push(m)}return out}
+
+/* ============================== period filter (any range since 2021) ============================== */
+const monthsBetween=(a,b)=>{const out=[];if(!a||!b)return out;let m=a;while(m<=b&&out.length<600){out.push(m);m=addMonth(m,1)}return out};
+function firstMonth(){const ms=monthsAvailable().filter(m=>S.sales.has(m)||realTxOf(m).length);return ms.length?ms[0]:thisMonth()}
+function dataYears(){const ys=new Set();monthsAvailable().forEach(m=>ys.add(m.slice(0,4)));return [...ys].sort().reverse()}
+function getRange(){if(!S.range){try{S.range=JSON.parse(lsGet('af.range')||'null')}catch(e){}if(!S.range||!S.range.p)S.range={p:'ytd'}}return S.range}
+function setRange(R){S.range=R;lsSet('af.range',JSON.stringify(R));S.animate=true;render()}
+function rangeMonths(R=getRange()){
+  const now=thisMonth(),cur=S.month||now;
+  if(R.p==='month')return [cur];
+  if(R.p==='ytd')return monthsBetween(cur.slice(0,4)+'-01',cur);
+  if(R.p==='12m')return monthsBetween(addMonth(cur,-11),cur);
+  if(R.p==='year'){const y=R.y||cur.slice(0,4);const end=y+'-12'<now?y+'-12':now;return monthsBetween(y+'-01',end<y+'-01'?y+'-12':end)}
+  if(R.p==='all')return monthsBetween(firstMonth(),now);
+  if(R.p==='custom'){let a=R.from||firstMonth(),b=R.to||now;if(a>b)[a,b]=[b,a];return monthsBetween(a,b)}
+  return [cur];
+}
+function rangeLabel(R=getRange()){
+  const ms=rangeMonths(R);if(!ms.length)return '—';const a=ms[0],b=ms[ms.length-1];
+  if(R.p==='ytd')return a.slice(0,4)+' so far';if(R.p==='year')return R.y+(b<R.y+'-12'?' so far':'');if(R.p==='month')return mLabel(a);
+  const lab=m=>mShort(m)+' '+m.slice(0,4);return (R.p==='all'?'All time · ':'')+(a===b?lab(a):lab(a)+' – '+lab(b));
+}
+function rangeSub(ms){return ms.length+' month'+(ms.length>1?'s':'')+(ms.length>1?' · '+mShort(ms[0])+' '+ms[0].slice(0,4)+' to '+mShort(ms[ms.length-1])+' '+ms[ms.length-1].slice(0,4):'')}
+function rangeAgg(ms){const D=ms.map(metrics);return {ms,D,A:aggregate(D)}}
+// columns for charts/tables: months when short, whole years when long
+function periodCols(ms){
+  if(ms.length<=15)return ms.map(m=>({key:m,label:mShort(m),long:mLabel(m),months:[m],d:metrics(m)}));
+  const by=new Map();ms.forEach(m=>{const y=m.slice(0,4);if(!by.has(y))by.set(y,[]);by.get(y).push(m)});
+  return [...by].map(([y,list])=>{const A=aggregate(list.map(metrics));A.m=y;const part=list.length<12;return {key:y,isYear:true,label:y+(part?'*':''),long:y+(part?' ('+mShort(list[0])+'–'+mShort(list[list.length-1])+')':''),months:list,d:A,part}});
+}
+function periodBar(opts={}){
+  const R=getRange();const ys=dataYears();const all=monthsAvailable();
+  const b=(p,t,extra='')=>`<button data-act="range" data-p="${p}" ${extra} aria-pressed="${R.p===p}">${t}</button>`;
+  const mopt=sel=>all.slice().reverse().map(m=>`<option value="${m}" ${m===sel?'selected':''}>${mShort(m)} ${m.slice(0,4)}</option>`).join('');
+  const ms=rangeMonths(R);
+  return `<div class="pbar">${opts.noMonth?'':`<div class="seg" role="group" aria-label="Period">${b('month',mShort(S.month)+' '+S.month.slice(0,4))}</div>`}
+   <div class="seg" role="group" aria-label="Range">${b('ytd','Year to date')}${b('12m','12 months')}${b('all','All time')}${b('custom','Custom')}</div>
+   <select class="input pyear" id="rYear" aria-label="Pick a year"><option value="">Year…</option>${ys.map(y=>`<option value="${y}" ${R.p==='year'&&R.y===y?'selected':''}>${y}</option>`).join('')}</select>
+   ${R.p==='custom'?`<span class="pcustom"><select class="input" id="rFrom" aria-label="From month">${mopt(ms[0])}</select><span class="muted">to</span><select class="input" id="rTo" aria-label="To month">${mopt(ms[ms.length-1])}</select></span>`:''}</div>`;
+}
+function yearTable(ms){
+  const cols=periodCols(ms);if(cols.length<2||ms.length<=15)return '';
+  return `<div class="tablewrap mt"><table class="pl"><thead><tr><th>Year</th><th class="r">Revenue</th><th class="r hm">Cost of goods</th><th class="r hm">Running costs</th><th class="r hm">Taxes</th><th class="r">Net profit</th><th class="r">Margin</th><th class="r hm">Orders</th><th class="r hm">Owner took out</th></tr></thead><tbody>
+   ${cols.map(c=>{const d=c.d;const rev=d.sales+d.otherInc;return `<tr><td>${esc(c.long)}</td><td class="r num">${fmt(rev)}</td><td class="r num hm">${fmt(d.cogs)}</td><td class="r num hm">${fmt(d.opex)}</td><td class="r num hm">${fmt(d.tax)}</td><td class="r num ${d.net<0?'neg':''}"><b>${fmt(d.net)}</b></td><td class="r num">${rev?pct(d.net,rev):0}%</td><td class="r num hm">${fmt(d.orders)}</td><td class="r num hm">${fmt((d.by.owner_draw||0)+(d.by.owner_salary||0))}</td></tr>`}).join('')}
+  </tbody></table></div>${cols.some(c=>c.part)?'<p class="hint" style="margin-top:6px">* part of the year only.</p>':''}`;
+}
 
 /* ============================== hosted mode (GitHub Pages + Google Apps Script) ============================== */
 function readCreds(){
@@ -654,13 +717,13 @@ function vConnect(){
 async function connectBackend(c){
   S.backend=backendDB(c.u,c.k);S.db=S.backend;S.canWrite=true;S.mcp=null;
   const sub=(path,key)=>S.db.collection(path).onSnapshot(snap=>{const m=new Map();snap.docs.forEach(d=>m.set(d.id,{id:d.id,...d.data()}));S[key]=m;S.loaded[key]=true;schedule()});
-  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');
+  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');
   S.db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()});
   try{await S.backend.load()}catch(e){toast(e.code==='bad_key'?'Wrong secret key. Connect again.':errMsg(e));if(e.code==='bad_key'){lsSet('af.backend','');S.view='connect';render()}else setConn(false,'Offline — tap to retry')}
 }
 function backupDocs(){
   const out=[];const add=(c,m)=>m.forEach((v,id)=>{const d={...v};delete d.id;out.push({c,id,d})});
-  add('tx',S.tx);add('sales',S.sales);add('ships',S.ships);add('rules',S.rules);add('items',S.items);out.push({c:'cfg',id:'main',d:S.cfg});return out;
+  add('tx',S.tx);add('sales',S.sales);add('ships',S.ships);add('rules',S.rules);add('items',S.items);add('itemsYear',S.itemsYear);out.push({c:'cfg',id:'main',d:S.cfg});return out;
 }
 async function exportBackup(){
   const data=JSON.stringify({app:'astroman-finance',v:1,at:new Date().toISOString(),docs:backupDocs()});
@@ -684,11 +747,11 @@ async function boot(){
   if(user){try{const w=await user.can('data.write');if(w===false)S.canWrite=false}catch(e){}}
   if(!db){setConn(false,'Sign in to load data');S.loaded.none=true;render();return}
   const sub=(path,key)=>db.collection(path).onSnapshot(snap=>{const m=new Map();snap.docs.forEach(d=>m.set(d.id,{id:d.id,...d.data()}));S[key]=m;S.loaded[key]=true;setConn(true);schedule()},err=>{setConn(false,'Sync paused ('+err.code+')')});
-  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');
+  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');
   db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()},()=>{});
 }
 function setConn(ok,txt){$('#syncDot').className='dot'+(ok?'':' off');$('#syncTxt').textContent=txt||(ok?'Saved to cloud':'Offline')}
-let rq=0;function schedule(){if(rq)return;rq=requestAnimationFrame(()=>{rq=0;fillMonthSel();if(S.view!=='add'||!S.renderedOnce)render()})}
+let rq=0;function schedule(){S.mc=new Map();if(rq)return;rq=requestAnimationFrame(()=>{rq=0;S.mc=new Map();fillMonthSel();if(S.view!=='add'||!S.renderedOnce)render()})}
 async function saveTx(t){
   if(!S.db)throw {message:'Not connected — open this page in Claude while signed in'};
   const id=t.id&&!String(t.id).startsWith('fx-')?t.id:uid('t');const body={...t};delete body.id;delete body.virtual;
@@ -722,7 +785,7 @@ function fillMonthSel(){
 function route(){const h=(location.hash||'').slice(1);if(PAGES.some(p=>p.id===h)||h==='add'){S.view=h}S.animate=true;render()}
 function go(v){fillMonthSel();S.view=v;try{history.replaceState(null,'','#'+v)}catch(e){}if(v==='add')S.draft=null;S.animate=true;render();$('#main').focus({preventScroll:true});window.scrollTo({top:0})}
 function render(){
-  S.renderedOnce=true;
+  S.renderedOnce=true;S.mc=new Map();
   document.querySelectorAll('#menu button,#tabbar button').forEach(b=>b.setAttribute('aria-current',b.dataset.go===S.view?'page':'false'));
   const v={connect:vConnect,overview:vOverview,sales:vSales,products:vProducts,expenses:vExpenses,bank:vBank,pl:vPL,imports:vImports,settings:vSettings,add:vAdd}[S.view]||vOverview;
   const main=$('#main');const y=window.scrollY;
@@ -771,22 +834,24 @@ function vOverview(){
     <div class="hkpi"><div class="lbl">Net profit</div><div class="val num" style="${M.net<0?'color:#FF9389':''}">${cu(M.net)}<small>₾</small></div><div class="delta">${d(M.net,P.net)}</div></div>
    </div></section>`;
   if(!has&&(!S.db||S.loaded.tx)&&!S.tx.size&&!S.sales.size)return hero+`<div class="panel empty"><b>No records yet</b>Start by syncing sales from your order sheet, then import a BOG or TBC statement.</div>`;
-  return loadingOr(hero+moneyNow(m,M)+ytdPanel(m)+`<div class="grid g2 mt">${attention(m,M)}${breakdown(M,P)}</div>`);
+  return loadingOr(hero+moneyNow(m,M)+periodPanel()+`<div class="grid g2 mt">${attention(m,M)}${breakdown(M,P)}</div>`);
 }
-function aggregate(D){const A={sales:0,otherInc:0,cogs:0,stock:0,opex:0,tax:0,net:0,gross:0,operating:0,below:0,stockOut:0,ownerIn:0,cash:0,orders:0,fixed:0,by:{}};
-  for(const d of D){for(const k in A)if(typeof A[k]==='number')A[k]+=d[k]||0;for(const c in d.by)A.by[c]=(A.by[c]||0)+d.by[c]}
-  A.accurate=D.some(d=>d.accurate);A.allAccurate=D.length&&D.every(d=>d.accurate);A.aov=A.orders?A.sales/A.orders:0;return A}
-function ytdOf(m){const ms=yearMonths(m.slice(0,4)).filter(x=>x<=m);const D=ms.map(metrics);return {ms,D,A:aggregate(D)}}
-function ytdPanel(m){
-  const {ms,A}=ytdOf(m);const exp=A.cogs+A.opex+A.tax;const rev=A.sales+A.otherInc;
-  return `<div class="panel"><div class="row" style="align-items:flex-start"><div><h2>${m.slice(0,4)} so far</h2><p class="sub">January to ${EN_MONTHS[+m.slice(5)-1]}, ${ms.length} months.</p></div><span class="spacer"></span><button class="btn sm" data-act="plYtd">See details</button></div>
+function periodPanel(){
+  const R=getRange();const ms=rangeMonths(R.p==='month'?{p:'ytd'}:R);const {A}=rangeAgg(ms);const exp=A.cogs+A.opex+A.tax;const rev=A.sales+A.otherInc;
+  const title=R.p==='month'?rangeLabel({p:'ytd'}):rangeLabel(R);
+  return `<div class="panel"><div class="row" style="align-items:flex-start;flex-wrap:wrap;gap:10px"><div><h2>${esc(title)}</h2><p class="sub">${rangeSub(ms)}. Pick any period since 2021.</p></div><span class="spacer"></span><button class="btn sm" data-act="plRange">See details</button></div>
+   ${periodBar({noMonth:true})}
    <div class="ytd">
     <div><span>Revenue</span><b class="num">${cu(rev)}<small> ₾</small></b><em>${fmt(A.orders)} orders</em></div>
     <div><span>Expenses</span><b class="num">${cu(exp)}<small> ₾</small></b><em>goods ${fmt(A.cogs)} · running ${fmt(A.opex)} · tax ${fmt(A.tax)}</em></div>
     <div><span>Net profit</span><b class="num ${A.net<0?'neg':''}">${cu(A.net)}<small> ₾</small></b><em>${gel(A.net/Math.max(1,ms.length))} a month on average</em></div>
     <div><span>Margin</span><b class="num">${rev?pct(A.net,rev):0}<small>%</small></b><em>of every ₾ sold, kept as profit</em></div>
-   </div><div class="chart" style="margin-top:14px">${trendChart(m)}</div></div>`;
+   </div><div class="chart" style="margin-top:14px">${trendChart(ms,S.month)}</div>${yearTable(ms)}</div>`;
 }
+function aggregate(D){const A={sales:0,otherInc:0,cogs:0,stock:0,opex:0,tax:0,net:0,gross:0,operating:0,below:0,stockOut:0,ownerIn:0,cash:0,orders:0,fixed:0,by:{}};
+  for(const d of D){for(const k in A)if(typeof A[k]==='number')A[k]+=d[k]||0;for(const c in d.by)A.by[c]=(A.by[c]||0)+d.by[c]}
+  A.accurate=D.some(d=>d.accurate);const DS=D.filter(d=>d.sales>0);A.firstM=D.reduce((x,d)=>!x||String(d.m||d.firstM)<x?String(d.m||d.firstM):x,'');A.allAccurate=DS.length>0&&DS.every(d=>d.accurate);A.srcs=D.flatMap(d=>d.srcs||(d.src?[d.src]:[]));A.aov=A.orders?A.sales/A.orders:0;return A}
+function ytdOf(m){const ms=yearMonths(m.slice(0,4)).filter(x=>x<=m);const D=ms.map(metrics);return {ms,D,A:aggregate(D)}}
 function loanInfo(){const L=S.cfg.loan;if(!L||!L.amount)return null;const spent=[...S.tx.values()].filter(t=>t.cat==='loan_spend').reduce((a,t)=>a+(+t.gel||0),0);return {...L,spent,left:L.amount-spent,owed:L.owed!=null?L.owed:L.amount}}
 function moneyNow(m,M){
   const bal=S.cfg.balances||{};const L=loanInfo();
@@ -803,32 +868,33 @@ function moneyNow(m,M){
    <div class="mcard" style="--c:#7C5CDB"><div class="lbl"><span>${esc(L?.label||'Loan')}</span><span class="hint">kept separate</span></div>${L?`<div class="val num">${cu(L.left)}<small>₾ left</small></div><div class="bar2"><i style="width:${Math.min(100,L.spent/L.amount*100)}%"></i></div><div class="parts">Spent ${gel(L.spent)} of ${gel(L.amount)} · owed ${gel(L.owed)}</div>`:`<div class="val">—</div><div class="parts">Set the loan in Settings.</div>`}</div>
   </div>`;
 }
-function trendChart(cur){
-  const y=cur.slice(0,4);const ms=yearMonths(y);const data=ms.map(metrics);
+function trendChart(ms,cur){
+  const cols=periodCols(ms);const multiY=new Set(ms.map(m=>m.slice(0,4))).size>1;
+  const data=cols.map((c,i)=>Object.assign({},c.d,{m:c.key,lbl:c.isYear?c.label:(multiY&&(i===0||c.key.endsWith('-01'))?mShort(c.key)+" '"+c.key.slice(2,4):c.label),long:c.long,isYear:!!c.isYear}));
   if(!data.length)return '<div class="empty">No data</div>';
   const W=720,H=300,pl=46,pr=8,pt=26,pb=46;const iw=W-pl-pr,ih=H-pt-pb;
   const max=Math.max(1000,...data.map(d=>Math.max(d.sales,d.cogs+d.opex+d.tax)));
-  const step=max>40000?10000:max>15000?5000:2500;const top=Math.ceil(max/step)*step;
+  const raw=max/5,mag=Math.pow(10,Math.floor(Math.log10(raw))),step=[1,2,2.5,5,10].map(x=>x*mag).find(x=>x>=raw);const top=Math.ceil(max/step)*step;
   const sy=v=>pt+ih-(v/top)*ih;const gw=iw/data.length;const bw=Math.min(22,(gw-14)/2);
-  let g='';for(let v=0;v<=top;v+=step){g+=`<line x1="${pl}" x2="${W-pr}" y1="${sy(v)}" y2="${sy(v)}" stroke="var(--grid)" stroke-width="1"/><text x="${pl-8}" y="${sy(v)+4}" text-anchor="end">${v?fmt(v/1000)+'k':'0'}</text>`}
+  let g='';for(let v=0;v<=top;v+=step){g+=`<line x1="${pl}" x2="${W-pr}" y1="${sy(v)}" y2="${sy(v)}" stroke="var(--grid)" stroke-width="1"/><text x="${pl-8}" y="${sy(v)+4}" text-anchor="end">${v?fmt(v/1000,v%1000?1:0)+'k':'0'}</text>`}
   let bars='';data.forEach((d,i)=>{const cx=pl+gw*i+gw/2;const sp=d.cogs+d.opex+d.tax;const isCur=d.m===cur;
     const bar=(x,v,c)=>{const h=Math.max(0,ih*(v/top));if(h<1)return '';const r=Math.min(4,h);return `<path class="gy" d="M${x},${pt+ih} v${-(h-r)} q0,${-r} ${r},${-r} h${bw-2*r} q${r},0 ${r},${r} v${h-r} z" fill="${c}"/>`};
     bars+=`<g>${isCur?`<rect x="${pl+gw*i+2}" y="${pt-18}" width="${gw-4}" height="${ih+18+38}" rx="7" fill="var(--surface-2)"/>`:''}${bar(cx-bw-1,d.sales,'var(--s1)')}${bar(cx+1,sp,'var(--s2)')}
-    <text x="${cx}" y="${H-pb+17}" text-anchor="middle" style="fill:var(--ink-2);font-family:var(--f-ui);font-weight:${isCur?700:400}">${mShort(d.m)}${d.accurate?' ●':''}</text>
+    <text x="${cx}" y="${H-pb+17}" text-anchor="middle" style="fill:var(--ink-2);font-family:var(--f-ui);font-weight:${isCur?700:400}">${esc(d.lbl)}${d.accurate&&!d.isYear?' ●':''}</text>
     <text x="${cx}" y="${H-pb+33}" text-anchor="middle" style="fill:${d.net<0?'var(--bad)':'var(--good)'}">${d.net<0?'−':'+'}${fmt(Math.abs(d.net)/1000,1)}k</text>
     <rect class="hit hitbar" data-i="${i}" x="${pl+gw*i}" y="${pt-18}" width="${gw}" height="${ih+18+38}" fill="transparent"/></g>`});
   trendChart.data=data;
-  return `<div class="legend"><span><i style="background:var(--s1)"></i>Sales</span><span><i style="background:var(--s2)"></i>Spending</span>${data.some(d=>d.accurate)?'<span class="muted">● uses Optimo costs</span>':''}</div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Monthly sales and spending" id="trendSvg">${g}${bars}</svg>`;
+  return `<div class="legend"><span><i style="background:var(--s1)"></i>Sales</span><span><i style="background:var(--s2)"></i>Spending</span>${data.some(d=>d.accurate&&!d.isYear)?'<span class="muted">● real item costs</span>':''}</div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Sales and spending over time" id="trendSvg">${g}${bars}</svg>`;
 }
 function attention(m,M){
   const items=[];const list=M.list;
   if(!M.hasSales)items.push(['bad','!',`<b>No sales loaded for ${mLabel(m)}</b><div class="muted">Sync from your order sheet.</div>`,`<button class="btn sm" data-go="sales">Sync</button>`]);
   const fx=list.filter(t=>t.virtual);
   if(fx.length)items.push(['info','↻',`<b>${gel(fx.reduce((a,t)=>a+t.gel,0))} fixed costs added automatically</b><div class="muted">${fx.map(t=>esc(t.vendor)).join(' · ')}. A real payment from the bank replaces its line.</div>`,`<button class="btn sm" data-act="filterFixed">See</button>`]);
-  if(!S.items.get(m)&&m<=thisMonth())items.push(['warn','▦',`<b>No Optimo item report for ${mLabel(m)}</b><div class="muted">Upload it to get exact item profit and best sellers.</div>`,`<button class="btn sm" data-go="products">Upload</button>`]);
+  if(!S.items.get(m)&&m<=thisMonth()&&m>='2026-01'&&!M.accurate)items.push(['warn','▦',`<b>No Optimo item report for ${mLabel(m)}</b><div class="muted">Upload it to get exact item profit and best sellers.</div>`,`<button class="btn sm" data-go="products">Upload</button>`]);
   const OD=S.items.get(m);if(OD&&M.hasSales){const diff=M.sales-OD.revenue;if(Math.abs(diff)>=Math.max(50,M.sales*.01))items.push(['warn','≠',diff>0?`<b>${gel(diff)} of sheet orders aren't in Optimo</b><div class="muted">Optimo ${gel(OD.revenue)} vs order sheet ${gel(M.sales)}. Optimo stock counts will be off.</div>`:`<b>Optimo shows ${gel(-diff)} more than the order sheet</b><div class="muted">Some sales were rung up in Optimo but not written in the sheet.</div>`,`<button class="btn sm" data-go="products">Compare</button>`])}
   const unk=M.rows.filter(r=>r.pay==='unknown');
-  if(unk.length)items.push(['warn','?',`<b>${unk.length} sale${unk.length>1?'s':''} without payment method</b><div class="muted">${gel(unk.reduce((a,r)=>a+r.a,0))}. These can't be matched to a bank.</div>`,`<button class="btn sm" data-go="sales">View</button>`]);
+  if(unk.length&&m>='2026-01')items.push(['warn','?',`<b>${unk.length} sale${unk.length>1?'s':''} without payment method</b><div class="muted">${gel(unk.reduce((a,r)=>a+r.a,0))}. These can't be matched to a bank.</div>`,`<button class="btn sm" data-go="sales">View</button>`]);
   const no=M.rows.filter(r=>r.no);
   if(no.length)items.push(['warn','≠',`<b>${no.length} order${no.length>1?'s':''} marked “not in Optimo”</b><div class="muted">${gel(no.reduce((a,r)=>a+r.a,0))}. Optimo stock counts will be off.</div>`,`<button class="btn sm" data-go="products">Compare</button>`]);
   const pers=M.rows.filter(r=>['personal','cash','cod'].includes(r.pay));
@@ -857,43 +923,52 @@ function topItemsPanel(M){
 }
 
 /* ============================== products (Optimo) ============================== */
-function prodData(){
-  const P=S.prod;
-  if(!P.all){const d=S.items.get(S.month);return d?{rows:d.rows,hasCost:d.hasCost,revenue:d.revenue,cost:d.cost,qty:d.qty,source:d.source,uploadedAt:d.uploadedAt,months:[S.month]}:null}
-  const docs=[...S.items.values()].filter(d=>d.rows?.length);if(!docs.length)return null;
-  const map=new Map();for(const d of docs)for(const r of d.rows){const k=(r.c||'')+'|'+r.n.toLowerCase().trim();const o=map.get(k)||{n:r.n,c:r.c,q:0,r:0,k:0,p:0};o.q+=r.q;o.r+=r.r;o.k+=r.k;o.p+=r.p;map.set(k,o)}
-  const rows=[...map.values()];return {rows,hasCost:docs.every(d=>d.hasCost),revenue:rows.reduce((a,r)=>a+r.r,0),cost:rows.reduce((a,r)=>a+r.k,0),qty:rows.reduce((a,r)=>a+r.q,0),months:docs.map(d=>d.month).sort()};
+const hasK=r=>r.k!=null&&r.k!==''&&!isNaN(+r.k);
+function prodData(ms){
+  const parts=[];const covered=new Set();const inMs=new Set(ms);
+  for(const m of ms){const d=S.items.get(m);if(d&&d.rows?.length){parts.push({src:'optimo',rows:d.rows.map(r=>({...r,k:d.hasCost?r.k:null,p:d.hasCost?r.p:null})),source:d.source,uploadedAt:d.uploadedAt});covered.add(m)}}
+  for(const d of S.itemsYear.values()){if(!d.rows?.length||!d.from||!d.to)continue;const span=monthsBetween(d.from,d.to);if(span.every(m=>inMs.has(m)&&!covered.has(m))){parts.push({src:'year',rows:d.rows.map(r=>({...r,k:d.hasCost?r.k:null,p:d.hasCost?r.p:null})),source:d.source});span.forEach(m=>covered.add(m))}}
+  const sheetMonths=[];const map=new Map();
+  for(const m of ms){if(covered.has(m))continue;const s=S.sales.get(m);if(!s?.rows?.length)continue;sheetMonths.push(m);
+    for(const r of s.rows){const n=String(r.p||'').trim().replace(/\s+/g,' ');if(!n)continue;const key=n.toLowerCase();const o=map.get(key)||{n,c:'',q:0,r:0,kk:0,rk:0};o.q+=+r.q||1;o.r+=+r.a||0;if(hasK(r)){o.kk+=+r.k;o.rk+=+r.a||0}map.set(key,o)}}
+  if(map.size){const rows=[...map.values()].map(o=>{const ok=o.r>0&&o.rk>=o.r*.9;const k=ok?(o.rk?o.kk/o.rk*o.r:0):null;return {n:o.n,c:'',q:o.q,r:o.r,k,p:k==null?null:o.r-k}});parts.push({src:'sheet',rows,source:'Order sheet product names'})}
+  if(!parts.length)return null;
+  const all=new Map();for(const P of parts)for(const r of P.rows){const key=(r.c||'')+'|'+String(r.n).toLowerCase().trim();const o=all.get(key);if(!o){all.set(key,{n:r.n,c:r.c,q:+r.q||0,r:+r.r||0,k:r.k==null?null:+r.k,p:r.p==null?null:+r.p});continue}
+    o.q+=+r.q||0;o.r+=+r.r||0;if(o.k==null||r.k==null){o.k=null;o.p=null}else{o.k+=+r.k;o.p+=+r.p}}
+  const rows=[...all.values()];const costed=rows.filter(r=>r.k!=null);
+  return {rows,hasCost:costed.length>0,revenue:rows.reduce((a,r)=>a+r.r,0),cost:costed.reduce((a,r)=>a+r.k,0),costRev:costed.reduce((a,r)=>a+r.r,0),qty:rows.reduce((a,r)=>a+r.q,0),
+    months:ms.filter(m=>covered.has(m)||sheetMonths.includes(m)),srcs:[...new Set(parts.map(p=>p.src))],source:parts.length===1?parts[0].source:'',uploadedAt:parts.length===1?parts[0].uploadedAt:null,onlyOptimo:parts.every(p=>p.src==='optimo')};
 }
 function vProducts(){
   if(S.opt)return vOptImport();
-  const m=S.month,P=S.prod,D=prodData();const M=metrics(m);
-  const head=`<div class="pagehead"><div><div class="eyebrow">${P.all?'All uploaded months':kaM(m)+' · '+m.slice(0,4)}</div><h1>Products</h1><p>From your Optimo sales report by item. It shows which items sell, which make money and which don't, and how Optimo compares with your order sheet.</p></div>
-   <div class="actions"><div class="seg" role="group" aria-label="Period"><button data-act="prodAll" data-v="0" aria-pressed="${!P.all}">${mShort(m)}</button><button data-act="prodAll" data-v="1" aria-pressed="${P.all}">All months</button></div><button class="btn amber" data-act="optStart">Upload Optimo report</button></div></div>`;
+  const m=S.month,P=S.prod,ms=P.all?rangeMonths():[m],D=prodData(ms);const M=metrics(m);const OD=P.all?null:(S.items.get(m)?D:null);
+  const head=`<div class="pagehead"><div><div class="eyebrow">${P.all?esc(rangeLabel()):kaM(m)+' · '+m.slice(0,4)}</div><h1>Products</h1><p>Which items sell, which make money and which don't. Uses your Optimo report by item; months without one use the product names in the order sheet${D&&D.srcs.includes('sheet')&&D.hasCost?' and the cost written next to each order':''}.</p></div>
+   <div class="actions"><div class="seg" role="group" aria-label="Period"><button data-act="prodAll" data-v="0" aria-pressed="${!P.all}">${mShort(m)} ${m.slice(0,4)}</button><button data-act="prodAll" data-v="1" aria-pressed="${P.all}">Period</button></div><button class="btn amber" data-act="optStart">Upload Optimo report</button></div></div>${P.all?periodBar({noMonth:true}):''}`;
   if(!D)return loadingOr(head+`<div class="grid g2"><div class="panel stack"><div><h2>No Optimo report for ${mLabel(m)} yet</h2><p class="sub">In Optimo, open the sales report by item (პროდუქციის მიხედვით), pick ${mLabel(m)}, and export it to Excel. Include the cost price column (თვითღირებულება) so profit can be calculated.</p></div><div class="drop" data-act="optStart" role="button" tabindex="0">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',28)}<b>Upload the Optimo report</b><span>.xlsx, .xls or .csv</span></div></div>${reconPanel(m,M,null)}</div>`);
   const rows=D.rows.filter(r=>!P.q||r.n.toLowerCase().includes(P.q.toLowerCase())||(r.c||'').toLowerCase().includes(P.q.toLowerCase()));
-  const gp=D.revenue-D.cost;
-  const kpis=`<div class="kpis"><div class="kpi"><div class="lbl">Revenue in Optimo</div><div class="val num">${cu(D.revenue)}<small>₾</small></div><div class="delta">${D.rows.length} different items</div></div>
+  const gp=D.costRev-D.cost;const part=D.hasCost&&D.costRev<D.revenue*.98;
+  const kpis=`<div class="kpis"><div class="kpi"><div class="lbl">${D.onlyOptimo?'Revenue in Optimo':'Revenue'}</div><div class="val num">${cu(D.revenue)}<small>₾</small></div><div class="delta">${D.rows.length} different items</div></div>
    <div class="kpi"><div class="lbl">Items sold</div><div class="val num">${cu(D.qty)}</div><div class="delta">avg ${gel(D.qty?D.revenue/D.qty:0)} per item</div></div>
-   <div class="kpi"><div class="lbl">Gross profit</div><div class="val num">${D.hasCost?cu(gp)+'<small>₾</small>':'—'}</div><div class="delta">${D.hasCost?'cost of items '+gel(D.cost):'report has no cost column'}</div></div>
-   <div class="kpi"><div class="lbl">Margin</div><div class="val num">${D.hasCost?pct(gp,D.revenue)+'<small>%</small>':'—'}</div><div class="delta">${D.hasCost?'on everything sold in Optimo':'re-export with თვითღირებულება'}</div></div></div>`;
+   <div class="kpi"><div class="lbl">Gross profit</div><div class="val num">${D.hasCost?cu(gp)+'<small>₾</small>':'—'}</div><div class="delta">${D.hasCost?'cost of items '+gel(D.cost)+(part?' · cost known for '+pct(D.costRev,D.revenue)+'% of sales':''):'no cost data for this period'}</div></div>
+   <div class="kpi"><div class="lbl">Margin</div><div class="val num">${D.hasCost?pct(gp,D.costRev)+'<small>%</small>':'—'}</div><div class="delta">${D.hasCost?(part?'on items with a known cost':'on everything sold'):'upload Optimo with თვითღირებულება'}</div></div></div>`;
   const tabs=[['popular','Most popular'],['profit','Most profit'],['least','Least profit'],['margin','Lowest margin'],['revenue','Top revenue']].filter(t=>D.hasCost||['popular','revenue'].includes(t[0]));
   if(!tabs.some(t=>t[0]===P.tab))P.tab='popular';
   const ranked=rankItems(D.rows,P.tab);
   const rank=`<div class="panel"><div class="tabs" role="tablist">${tabs.map(([k,t])=>`<button role="tab" aria-selected="${P.tab===k}" data-act="prodTab" data-v="${k}">${t}</button>`).join('')}</div>
    <div class="bars" id="rankBars">${rankBars(ranked,P.tab)}</div></div>`;
   const cols=[['n','Item'],['q','Sold'],['r','Revenue'],['k','Cost'],['p','Profit'],['mg','Margin']].filter(c=>D.hasCost||!['k','p','mg'].includes(c[0]));
-  const val=(r,k)=>k==='mg'?(r.r?r.p/r.r:-1):r[k];
+  const val=(r,k)=>k==='mg'?(r.r&&r.p!=null?r.p/r.r:-1):(r[k]==null?-Infinity:r[k]);
   const sorted=rows.slice().sort((a,b)=>{const x=val(a,P.sort),y=val(b,P.sort);return (typeof x==='string'?x.localeCompare(y):x-y)*P.dir});
   const table=`<div class="toolbar mt"><input class="input grow" id="pQ" placeholder="Search item or code…" value="${esc(P.q)}"><span class="muted small">${rows.length} items</span></div>
    <div class="tablewrap"><table><thead><tr>${cols.map(([k,t])=>`<th class="sort ${k==='n'?'':'r'} ${P.sort===k?'sorted':''}" data-sort="${k}">${t}${P.sort===k?(P.dir>0?' ↑':' ↓'):''}</th>`).join('')}</tr></thead><tbody>
-   ${sorted.map(r=>{const mg=r.r?Math.round(r.p/r.r*100):0;return `<tr><td style="min-width:220px">${esc(r.n)}${r.c?` <span class="muted small">${esc(r.c)}</span>`:''}</td><td class="r num">${fmt(r.q)}</td><td class="r num">${gel(r.r)}</td>${D.hasCost?`<td class="r num">${gel(r.k)}</td><td class="r num ${r.p<0?'neg':''}">${gel(r.p)}</td><td class="r"><span class="chip ${mg<15?'bad':mg<35?'warn':'good'}">${mg}%</span></td>`:''}</tr>`}).join('')}
-   </tbody></table></div>`;
-  return loadingOr(head+kpis+`<div class="grid g3">${D.hasCost?`<div class="panel chart"><h2>Margin map</h2><p class="sub">Each dot is an item. Right = sells more, up = higher margin, bigger = more profit. Hover for details.</p>${marginMap(D.rows)}</div>`:`<div class="panel"><h2>No cost data</h2><p class="sub">This report has quantities and revenue but no cost price, so profit per item can't be calculated. Export the Optimo report again with the თვითღირებულება column.</p></div>`}${P.all?rank:reconPanel(m,M,D)}</div>
+   ${(P.full||P.q?sorted:sorted.slice(0,60)).map(r=>{const mg=r.r?Math.round(r.p/r.r*100):0;return `<tr><td style="min-width:220px">${esc(r.n)}${r.c?` <span class="muted small">${esc(r.c)}</span>`:''}</td><td class="r num">${fmt(r.q)}</td><td class="r num">${gel(r.r)}</td>${D.hasCost?(r.k==null?'<td class="r muted">—</td><td class="r muted">—</td><td class="r muted">—</td>':`<td class="r num">${gel(r.k)}</td><td class="r num ${r.p<0?'neg':''}">${gel(r.p)}</td><td class="r"><span class="chip ${mg<15?'bad':mg<35?'warn':'good'}">${mg}%</span></td>`):''}</tr>`}).join('')}
+   </tbody></table></div>${!P.full&&!P.q&&sorted.length>60?`<div class="row mt"><button class="btn sm" data-act="prodFull">Show all ${sorted.length} items</button></div>`:''}`;
+  return loadingOr(head+kpis+`<div class="grid g3">${D.hasCost&&D.rows.filter(r=>r.p!=null).length>2?`<div class="panel chart"><h2>Margin map</h2><p class="sub">Each dot is an item. Right = sells more, up = higher margin, bigger = more profit. Hover for details.</p>${marginMap(D.rows)}</div>`:`<div class="panel"><h2>No cost data</h2><p class="sub">This report has quantities and revenue but no cost price, so profit per item can't be calculated. Export the Optimo report again with the თვითღირებულება column.</p></div>`}${P.all?rank:reconPanel(m,M,OD)}</div>
    ${P.all?'':`<div class="mt">${rank}</div>`}${table}
-   <p class="hint" style="margin-top:10px">${D.source?'Source: '+esc(D.source)+' · ':''}${P.all?'Months: '+D.months.map(mShort).join(', '):''}${!P.all&&S.canWrite?' <button class="btn sm ghost" data-act="optDelete">Remove this month’s report</button>':''}</p>`);
+   <p class="hint" style="margin-top:10px">${D.source?'Source: '+esc(D.source)+' · ':'Sources: '+D.srcs.map(x=>({optimo:'Optimo monthly reports',year:'Optimo yearly export',sheet:'order sheet'}[x])).join(' + ')+' · '}${P.all?rangeSub(D.months):''}${!P.all&&OD&&S.canWrite?' <button class="btn sm ghost" data-act="optDelete">Remove this month’s report</button>':''}</p>`);
 }
 function rankItems(rows,tab){
-  const r=rows.slice();
+  const r=['profit','least','margin'].includes(tab)?rows.filter(x=>x.p!=null):rows.slice();
   if(tab==='popular')return r.sort((a,b)=>b.q-a.q).slice(0,10).map(x=>({...x,v:x.q,lbl:fmt(x.q)+' pcs',sub:gel(x.r)}));
   if(tab==='revenue')return r.sort((a,b)=>b.r-a.r).slice(0,10).map(x=>({...x,v:x.r,lbl:gel(x.r),sub:fmt(x.q)+' pcs'}));
   if(tab==='profit')return r.sort((a,b)=>b.p-a.p).slice(0,10).map(x=>({...x,v:x.p,lbl:gel(x.p),sub:pct(x.p,x.r)+'% margin'}));
@@ -906,7 +981,7 @@ function rankBars(list,tab){
   return list.map((x,i)=>`<div class="bar"><div class="name" title="${esc(x.n)}"><span style="margin:0 6px 0 0" class="num">${i+1}</span>${esc(x.n)}</div><div class="track"><div class="fill" style="width:${Math.max(2,Math.abs(x.v)/max*100)}%;background:${x.bad?'var(--bad)':(tab==='least'||tab==='margin')?'var(--s2)':'var(--s1)'}"></div></div><div class="amt num ${x.bad?'neg':''}">${x.lbl}<small>${x.sub}</small></div></div>`).join('');
 }
 function marginMap(rows){
-  const pts=rows.filter(r=>r.r>0&&r.q>0);if(!pts.length)return '<div class="empty">Not enough data.</div>';
+  const pts=rows.filter(r=>r.r>0&&r.q>0&&r.p!=null);if(!pts.length)return '<div class="empty">Not enough data.</div>';
   const W=640,H=330,pl=42,pr=14,pt=14,pb=34,iw=W-pl-pr,ih=H-pt-pb;
   const maxQ=Math.max(...pts.map(r=>r.q));const sx=q=>pl+Math.sqrt(q/maxQ)*iw;
   const mgs=pts.map(r=>r.p/r.r*100);const lo=Math.min(0,Math.floor(Math.min(...mgs)/10)*10),hi=Math.max(60,Math.ceil(Math.max(...mgs)/10)*10);
@@ -934,7 +1009,7 @@ function reconPanel(m,M,D){
    <div class="flow mt"><div class="ln"><span class="k">Order sheet (${M.orders} orders)</span><span class="v num">${gel(sheet)}</span></div><div class="ln"><span class="k">Optimo (${fmt(D.qty)} items)</span><span class="v num">${gel(opt)}</span></div><div class="ln total"><span class="k">Difference</span><span class="v num ${Math.abs(diff)>=50?'neg':''}">${diff>0?'+':''}${gel(diff)}</span></div></div>
    <div class="alert ${verdict[0]} mt"><span class="ic">${verdict[0]==='good'?'✓':'≠'}</span><div>${verdict[1]}</div><div></div></div>
    ${no.length?`<p class="small" style="margin:12px 0 4px"><b>Marked “not in Optimo” in the sheet:</b></p><div class="flow">${no.slice(0,8).map(r=>`<div class="ln minor"><span class="k">${esc(r.d||'')} · ${esc(r.p)}</span><span class="v num">${gel(r.a)}</span></div>`).join('')}</div>`:''}
-   ${M.accurate?`<p class="hint mt">Profit for ${mShort(m)} uses Optimo's cost ratio (${Math.round(M.ratio*100)}% of sales) applied to all ${gel(sheet)} of sheet sales.</p>`:''}</div>`;
+   ${M.accurate?`<p class="hint mt">Profit for ${mShort(m)} uses the ${COGS_SRC[M.src]} (${Math.round(M.ratio*100)}% of sales) applied to all ${gel(sheet)} of sheet sales.</p>`:''}</div>`;
 }
 /* ---- Optimo import ---- */
 const OKW={name:/დასახელ|პროდუქ|საქონ|ნივთ|item|name|product|наимен|товар/i,code:/კოდ|ბარკოდ|ბარ-კოდ|code|sku|артикул|barcode|შტრიხ/i,qty:/რაოდ|qty|quant|кол|count|ცალ/i,
@@ -1043,7 +1118,7 @@ function bindAdd(){
 
 /* ============================== expenses ledger ============================== */
 function vExpenses(){
-  const f=S.filters;const y=S.month.slice(0,4);const months=f.all?yearMonths(y).filter(x=>x<=S.month):[S.month];
+  const f=S.filters;const y=S.month.slice(0,4);const months=f.all?rangeMonths():[S.month];
   let list=months.flatMap(txOf);
   if(f.q){const q=f.q.toLowerCase();list=list.filter(t=>[t.vendor,t.note,t.employee,catLabel(t.cat),CAT[t.cat]?.ka].join(' ').toLowerCase().includes(q))}
   const spendG=['opex','goods','tax'];const order=['opex','goods','tax','below','loanfund','income','inflow'];
@@ -1057,8 +1132,9 @@ function vExpenses(){
   const groups=order.map(g=>{const cats=CATS.filter(c=>c.g===g&&byCat[c.id]?.length).map(c=>({c,items:byCat[c.id].sort((a,b)=>(b.date||'').localeCompare(a.date||'')),v:sumOf(byCat[c.id])})).sort((a,b)=>b.v-a.v);
     if(!cats.length)return '';
     return `<section class="eg"><div class="eg-h"><span>${titles[g]}</span><b class="num">${gel(gTot(g))}</b></div>${cats.map(({c,items,v})=>`<details class="ecat" ${f.q?'open':''}><summary><span class="nm">${esc(c.en)}<small>${esc(c.ka)}</small></span><span class="cnt">${items.length}</span><span class="eb">${spendG.includes(g)?`<i class="fill" style="width:${v/max*100}%"></i>`:''}</span><b class="num">${gel(v)}</b></summary><div class="elist">${items.map(row).join('')}</div></details>`).join('')}</section>`}).join('');
-  return loadingOr(`<div class="pagehead"><div><div class="eyebrow">${f.all?y+' so far':kaM(S.month)+' · '+y}</div><h1>Expenses</h1></div><div class="actions"><button class="btn" data-go="bank">Import bank statement</button><button class="btn amber" data-go="add">+ Expense</button></div></div>
-   <div class="toolbar"><div class="seg" role="group" aria-label="Period"><button data-act="expMode" data-v="0" aria-pressed="${!f.all}">${mShort(S.month)}</button><button data-act="expMode" data-v="1" aria-pressed="${f.all}">Year to date</button></div><input class="input grow" id="xQ" placeholder="Search…" value="${esc(f.q)}"></div>
+  return loadingOr(`<div class="pagehead"><div><div class="eyebrow">${f.all?esc(rangeLabel()):kaM(S.month)+' · '+y}</div><h1>Expenses</h1></div><div class="actions"><button class="btn" data-go="bank">Import bank statement</button><button class="btn amber" data-go="add">+ Expense</button></div></div>
+   <div class="toolbar"><div class="seg" role="group" aria-label="Period"><button data-act="expMode" data-v="0" aria-pressed="${!f.all}">${mShort(S.month)}</button><button data-act="expMode" data-v="1" aria-pressed="${f.all}">Period</button></div><input class="input grow" id="xQ" placeholder="Search…" value="${esc(f.q)}"></div>
+   ${f.all?periodBar({noMonth:true}):''}
    <div class="esum"><div><span>Total spending</span><b class="num">${cu(total)}<small> ₾</small></b></div><div class="esplit">${spendG.map(g=>`<span><i style="background:${g==='goods'?'var(--s2)':g==='tax'?'var(--bad)':'var(--s1)'}"></i>${titles[g]} <b class="num">${fmt(gTot(g))}</b></span>`).join('')}</div></div>
    ${groups||`<div class="panel empty"><b>No expenses ${f.q?'match':'yet'}</b>${f.q?'Try another search.':'Import a bank statement or add one by hand.'}</div>`}
    <p class="hint" style="margin-top:12px">Tap a category to see its payments, then tap a payment to change it.</p>`);
@@ -1139,7 +1215,7 @@ function parseOrdersWorkbook(wb,source){
     }
     tabs.push({name,n,skipped,cancelled,tym});
   }
-  const months=Object.keys(out).sort().map(k=>{const rows=out[k].rows.sort((a,b)=>(a.d||'').localeCompare(b.d||''));const total=rows.reduce((a,r)=>a+r.a,0);const old=S.sales.get(k);const oldTotal=old?old.rows.reduce((a,r)=>a+r.a,0):null;return {m:k,rows,total,count:rows.length,tabs:[...out[k].tabs],oldTotal,oldCount:old?old.rows.length:null,pick:k.startsWith(String(defY))&&[...out[k].tabs].some(t=>tabYM(t,defY))&&!(oldTotal!=null&&total<oldTotal-1)}});
+  const months=Object.keys(out).sort().map(k=>{const rows=out[k].rows.sort((a,b)=>(a.d||'').localeCompare(b.d||''));const total=rows.reduce((a,r)=>a+r.a,0);const old=S.sales.get(k);const oldTotal=old?old.rows.reduce((a,r)=>a+r.a,0):null;return {m:k,rows,total,count:rows.length,tabs:[...out[k].tabs],oldTotal,oldCount:old?old.rows.length:null,pick:!(old&&old.hist)&&k.startsWith(String(defY))&&[...out[k].tabs].some(t=>tabYM(t,defY))&&!(oldTotal!=null&&total<oldTotal-1)}});
   return {months,tabs,source};
 }
 function findSheetText(x,d=0){if(d>6||x==null)return null;if(typeof x==='string')return x.includes('## Sheet name:')?x:null;if(typeof x==='object'){for(const k of Object.keys(x)){const r=findSheetText(x[k],d+1);if(r)return r}}return null}
@@ -1292,19 +1368,19 @@ async function bankSave(btn){
 function updBankTotal(){const inc=S.bank.items.filter(r=>r.include);const t=$('#bTot');if(t)t.textContent=inc.length+' rows · '+gel(inc.reduce((a,r)=>a+r.gel,0),2);const b=$('#bSaveBtn');if(b&&!b.disabled)b.textContent='Save '+inc.length+' rows'}
 
 /* ============================== P&L ============================== */
-function plModel(y){
-  const ms=yearMonths(y);const D=ms.map(metrics);
+function plModel(ms){
+  const cols=periodCols(ms);const D=cols.map(c=>c.d);
   const used=g=>CATS.filter(c=>c.g===g&&D.some(d=>d.by[c.id]));
   const rows=[];const R=(label,f,cls='',ka='')=>rows.push({label,ka,vals:D.map(f),cls});
   rows.push({sec:'Revenue'});R('Sales (orders)',d=>d.sales,'ind');R('Other income',d=>d.otherInc,'ind');R('Total revenue',d=>d.sales+d.otherInc,'sum');
   rows.push({sec:'Cost of goods'});R('Cost of goods sold',d=>d.cogs,'ind');R('Gross profit',d=>d.gross+d.otherInc,'sum');R('Gross margin %',d=>d.sales?Math.round(d.gross/d.sales*100):0,'pctrow');
   rows.push({sec:'Running costs'});used('opex').forEach(c=>R(c.en,d=>d.by[c.id]||0,'ind',c.ka));R('Total running costs',d=>d.opex,'sum');R('of which fixed (automatic)',d=>d.fixed,'info');R('Operating profit',d=>d.operating,'sum');
   rows.push({sec:'Taxes'});used('tax').forEach(c=>R(c.en,d=>d.by[c.id]||0,'ind',c.ka));R('Net profit',d=>d.net,'sum big');
-  rows.push({sec:'Money taken out'});R('Stock bought (Optimo months)',d=>d.stockOut,'ind');['loan','owner_draw','personal'].forEach(id=>R(CAT[id].en,d=>d.by[id]||0,'ind',CAT[id].ka));R('Owner money in',d=>d.ownerIn,'ind');R('Cash left in Astroman',d=>d.cash,'sum big');
+  rows.push({sec:'Money taken out'});R('Stock bought (months with item costs)',d=>d.stockOut,'ind');['loan','owner_draw','personal'].forEach(id=>R(CAT[id].en,d=>d.by[id]||0,'ind',CAT[id].ka));R('Owner money in',d=>d.ownerIn,'ind');R('Cash left in Astroman',d=>d.cash,'sum big');
   if(S.cfg.loan){rows.push({sec:'Loan (kept separate, not in profit)'});R('Paid from the loan',d=>d.by.loan_spend||0,'ind info')}
   rows.push({sec:'Stock paid for (all months)'});used('goods').forEach(c=>R(c.en,d=>d.by[c.id]||0,'ind info',c.ka));
   rows.push({sec:'Orders'});R('Number of orders',d=>d.orders,'ind cnt');R('Average order',d=>d.aov,'ind avg');
-  return {ms,D,rows};
+  return {ms,cols,D,rows};
 }
 function statement(A,title,sub){
   const z=v=>v?'−'+gel(v):'0 ₾';
@@ -1314,7 +1390,7 @@ function statement(A,title,sub){
   const rev=A.sales+A.otherInc;
   return `<div class="panel stmt"><h2>${title}</h2><p class="sub">${sub}</p>
    ${L('Revenue',gel(rev),'',det([['Sales ('+fmt(A.orders)+' orders)',A.sales],['Other income',A.otherInc]]))}
-   ${L('Cost of goods sold',z(A.cogs),'',A.allAccurate?`<div class="sdl"><span>Real cost of the items sold, from Optimo</span><span class="num">${pct(A.cogs,A.sales)}% of sales</span></div>`:det(cats('goods'))+(A.accurate?'<div class="sdl muted">Months with an Optimo report use the real cost of items sold.</div>':''))}
+   ${L('Cost of goods sold',z(A.cogs),'',A.allAccurate?`<div class="sdl"><span>Real cost of the items sold (${[...new Set(A.srcs||[])].map(x=>COGS_SRC[x]).join(', ')})</span><span class="num">${pct(A.cogs,A.sales)}% of sales</span></div>`:det(cats('goods'))+(A.accurate?'<div class="sdl muted">Months with item costs (Optimo, or cost per order in old sheets) use the real cost of items sold; other months count stock when it was paid for.</div>':''))}
    ${L('Gross profit',gel(A.gross+A.otherInc),'tot',`<div class="sdl"><span>Margin</span><span class="num">${pct(A.gross,A.sales)}%</span></div>`)}
    ${L('Running costs',z(A.opex),'',det(cats('opex')))}
    ${L('Taxes',z(A.tax),'',det(cats('tax')))}
@@ -1322,46 +1398,51 @@ function statement(A,title,sub){
    <div class="sgap"></div>
    ${L('Taken out of the business',z(A.below+A.stockOut),'',det([['Stock bought (imports, freight)',A.stockOut],...['loan','owner_draw','personal'].map(id=>[CAT[id].en,A.by[id]||0]),['Money you put in',-A.ownerIn]]))}
    ${L('Cash left in Astroman',gel(A.cash),'tot '+(A.cash<0?'neg':''),null)}
+   ${A.firstM&&A.firstM<'2026-09'?'<p class="hint" style="margin:8px 0 0">Before September 2026 the books don’t record money you put in yourself (for example your own dollars used for imports), so “cash left” is only a rough guide for those months. Profit figures are not affected.</p>':''}
    ${A.by.loan_spend?L('Paid from the loan (separate)',gel(A.by.loan_spend),'muted',null):''}
   </div>`;
 }
-function netChart(cur){
-  const ms=yearMonths(cur.slice(0,4));const D=ms.map(metrics);
+function netChart(ms){
+  const cols=periodCols(ms);const D=cols.map(c=>Object.assign({},c.d,{m:c.key,lbl:c.label}));
   const W=560,H=260,pl=8,pr=8,pt=26,pb=28,iw=W-pl-pr,ih=H-pt-pb;const mx=Math.max(1000,...D.map(d=>Math.abs(d.net)));const neg=D.some(d=>d.net<0);
   const zero=neg?pt+ih*mx/(2*mx):pt+ih;const sc=v=>Math.abs(v)/mx*(neg?ih/2:ih);
   const gw=iw/D.length,bw=Math.min(34,gw-10);let g=`<line x1="${pl}" x2="${W-pr}" y1="${zero}" y2="${zero}" stroke="var(--line)"/>`;
   D.forEach((d,i)=>{const x=pl+gw*i+(gw-bw)/2,h=Math.max(1,sc(d.net)),cur=d.m===S.month;const y=d.net>=0?zero-h:zero;
     g+=`<rect class="gy" x="${x}" y="${y}" width="${bw}" height="${h}" rx="4" fill="${d.net<0?'var(--bad)':'var(--s1)'}" opacity="${cur?1:.75}"/>`;
-    g+=`<text x="${x+bw/2}" y="${d.net>=0?y-6:y+h+13}" text-anchor="middle" style="fill:var(--ink-2);font-weight:${cur?700:400}">${fmt(d.net/1000,1)}k</text>`;
-    g+=`<text x="${x+bw/2}" y="${H-8}" text-anchor="middle" style="font-family:var(--f-ui);fill:${cur?'var(--ink)':'var(--muted)'};font-weight:${cur?700:400}">${mShort(d.m)}</text>`});
-  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Net profit per month">${g}</svg>`;
+    g+=`<text x="${x+bw/2}" y="${d.net>=0?y-6:y+h+13}" text-anchor="middle" style="fill:var(--ink-2);font-weight:${cur?700:400}">${fmt(d.net/1000,Math.abs(d.net)>=100000?0:1)}k</text>`;
+    g+=`<text x="${x+bw/2}" y="${H-8}" text-anchor="middle" style="font-family:var(--f-ui);fill:${cur?'var(--ink)':'var(--muted)'};font-weight:${cur?700:400}">${esc(d.lbl)}</text>`});
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Net profit over time">${g}</svg>`;
 }
 function vPL(){
-  const mode=S.plMode||'month';const y=S.month.slice(0,4);
-  const head=`<div class="pagehead"><div><div class="eyebrow">${mode==='ytd'?y+' so far':mode==='table'?y+' month by month':kaM(S.month)+' · '+y}</div><h1>Profit &amp; loss</h1></div><div class="actions"><button class="btn amber" data-act="report">▶ Monthly report</button>${S.downloads?'<button class="btn" data-act="exportXlsx">Download Excel</button>':''}</div></div>
-   <div class="toolbar"><div class="seg" role="group" aria-label="View"><button data-act="plMode" data-v="month" aria-pressed="${mode==='month'}">${mShort(S.month)}</button><button data-act="plMode" data-v="ytd" aria-pressed="${mode==='ytd'}">Year to date</button><button data-act="plMode" data-v="table" aria-pressed="${mode==='table'}">All months</button></div></div>`;
-  if(mode==='table')return loadingOr(head+plTable(y));
-  const A=mode==='ytd'?ytdOf(S.month).A:metrics(S.month);
-  const sub=mode==='ytd'?'January to '+EN_MONTHS[+S.month.slice(5)-1]+'. Tap a line to see what is inside.':'Tap a line to see what is inside.';
-  return loadingOr(head+`<div class="grid g3">${statement(A,mode==='ytd'?y+' so far':mLabel(S.month),sub)}<div class="panel chart" style="align-self:start"><h2>Net profit by month</h2><p class="sub">${y}. Red means a loss.</p>${netChart(S.month)}</div></div>`);
+  let mode=S.plMode||'month';if(mode==='ytd')mode='range';
+  const ms=rangeMonths();const many=ms.length>15;
+  const head=`<div class="pagehead"><div><div class="eyebrow">${mode==='month'?kaM(S.month)+' · '+S.month.slice(0,4):esc(rangeLabel())}</div><h1>Profit &amp; loss</h1></div><div class="actions"><button class="btn amber" data-act="report">▶ Monthly report</button>${S.downloads?'<button class="btn" data-act="exportXlsx">Download Excel</button>':''}</div></div>
+   <div class="toolbar"><div class="seg" role="group" aria-label="View"><button data-act="plMode" data-v="month" aria-pressed="${mode==='month'}">${mShort(S.month)} ${S.month.slice(0,4)}</button><button data-act="plMode" data-v="range" aria-pressed="${mode==='range'}">Period</button><button data-act="plMode" data-v="table" aria-pressed="${mode==='table'}">${many?'Year by year':'Month by month'}</button></div></div>
+   ${mode==='month'?'':periodBar({noMonth:true})}`;
+  if(mode==='table')return loadingOr(head+plTable(ms));
+  if(mode==='month'){const M=metrics(S.month);const yms=rangeMonths({p:'ytd'});
+    return loadingOr(head+`<div class="grid g3">${statement(M,mLabel(S.month),'Tap a line to see what is inside.'+(M.src?' Cost of goods from '+COGS_SRC[M.src]+'.':''))}<div class="panel chart" style="align-self:start"><h2>Net profit by month</h2><p class="sub">${S.month.slice(0,4)}. Red means a loss.</p>${netChart(yms)}</div></div>`)}
+  const {A}=rangeAgg(ms);
+  return loadingOr(head+`<div class="grid g3">${statement(A,esc(rangeLabel()),rangeSub(ms)+'. Tap a line to see what is inside.')}<div class="panel chart" style="align-self:start"><h2>Net profit by ${many?'year':'month'}</h2><p class="sub">${many?'Whole years; * marks a part year.':'Red means a loss.'}</p>${netChart(ms)}</div></div>${yearTable(ms)}`);
 }
-function plTable(y){
-  const {ms,D,rows}=plModel(y);
+function plTable(range){
+  const {cols,D,rows}=plModel(range);const ms=cols.map(c=>c.key);
   const tot=r=>r.cls.includes('pctrow')?'':r.cls.includes('avg')?fmt(D.reduce((a,d)=>a+d.sales,0)/Math.max(1,D.reduce((a,d)=>a+d.orders,0))):fmt(r.vals.reduce((a,b)=>a+b,0));
-  return `<div class="tablewrap"><table class="pl"><thead><tr><th>${y}</th>${ms.map((m,i)=>`<th class="r">${mShort(m)}${D[i].accurate?'<span class="odot"></span>':''}</th>`).join('')}<th class="r">Total</th></tr></thead><tbody>
+  return `<div class="tablewrap"><table class="pl"><thead><tr><th>${esc(rangeLabel())}</th>${cols.map((c,i)=>`<th class="r">${esc(c.isYear?c.label:mShort(c.key)+(new Set(range.map(m=>m.slice(0,4))).size>1?" '"+c.key.slice(2,4):''))}${D[i].allAccurate&&D[i].sales?'<span class="odot"></span>':''}</th>`).join('')}<th class="r">Total</th></tr></thead><tbody>
   ${rows.map(r=>r.sec?`<tr class="sec"><td colspan="${ms.length+2}">${r.sec}</td></tr>`:`<tr class="${r.cls}"><td>${esc(r.label)}</td>${r.vals.map((v,i)=>`<td class="r num ${ms[i]===S.month?'cur':''} ${v<0?'neg':''}">${v?(r.cls.includes('pctrow')?v+'%':fmt(v)):'<span class="muted">·</span>'}</td>`).join('')}<td class="r num">${tot(r)}</td></tr>`).join('')}
-  </tbody></table></div><p class="hint" style="margin-top:10px">All amounts in ₾. <span class="odot"></span> months use Optimo item costs.</p>`;
+  </tbody></table></div><p class="hint" style="margin-top:10px">All amounts in ₾. <span class="odot"></span> uses real item costs (Optimo, or cost per order in the old sheets).${cols.some(c=>c.part)?' * part of the year only.':''}</p>`;
 }
 async function exportXlsx(){
-  const y=S.month.slice(0,4);const {ms,rows}=plModel(y);const wb=XLSX.utils.book_new();
-  const pl=[['Astroman P&L '+y,...ms.map(mShort),'Total']];rows.forEach(r=>{if(r.sec)pl.push([r.sec]);else pl.push([r.label,...r.vals.map(v=>Math.round(v*100)/100),r.cls.includes('pctrow')?'':Math.round(r.vals.reduce((a,b)=>a+b,0)*100)/100])});
+  const range=(S.view==='pl'&&(S.plMode||'month')==='month')?rangeMonths({p:'ytd'}):rangeMonths();const inR=m=>!!m&&m>=range[0]&&m<=range[range.length-1];
+  const {cols,rows}=plModel(range);const wb=XLSX.utils.book_new();const y=range[0]===range[range.length-1]?range[0]:range[0]+'_'+range[range.length-1];
+  const pl=[['Astroman P&L '+y,...cols.map(c=>c.isYear?c.label:mShort(c.key)+' '+c.key.slice(0,4)),'Total']];rows.forEach(r=>{if(r.sec)pl.push([r.sec]);else pl.push([r.label,...r.vals.map(v=>Math.round(v*100)/100),r.cls.includes('pctrow')?'':Math.round(r.vals.reduce((a,b)=>a+b,0)*100)/100])});
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(pl),'P&L');
   const tx=[['Date','Category','ქართ.','Group','Paid to','Employee','Account','Amount ₾','Currency','Original','FX','Note','Source']];
-  allTx().filter(t=>t.month?.startsWith(y)).sort((a,b)=>a.date.localeCompare(b.date)).forEach(t=>tx.push([t.date,catLabel(t.cat),CAT[t.cat]?.ka||'',GROUPS[CAT[t.cat]?.g]||'',t.vendor||'',t.employee||'',ACC[t.account]?.en||'',t.gel,t.cur||'GEL',t.orig||'',t.fx||'',t.note||'',t.virtual?'fixed (auto)':t.source||'']));
+  allTx().filter(t=>inR(t.month)).sort((a,b)=>a.date.localeCompare(b.date)).forEach(t=>tx.push([t.date,catLabel(t.cat),CAT[t.cat]?.ka||'',GROUPS[CAT[t.cat]?.g]||'',t.vendor||'',t.employee||'',ACC[t.account]?.en||'',t.gel,t.cur||'GEL',t.orig||'',t.fx||'',t.note||'',t.virtual?'fixed (auto)':t.source||'']));
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(tx),'Expenses');
-  const sl=[['Date','Customer','Product','Payment','Amount ₾']];[...S.sales.values()].filter(s=>s.month?.startsWith(y)).sort((a,b)=>a.month.localeCompare(b.month)).forEach(s=>s.rows.forEach(r=>sl.push([r.d,r.c,r.p,PAYS[r.pay]||r.pay,r.a])));
+  const sl=[['Date','Customer','Product','Payment','Amount ₾']];[...S.sales.values()].filter(s=>inR(s.month)).sort((a,b)=>a.month.localeCompare(b.month)).forEach(s=>s.rows.forEach(r=>sl.push([r.d,r.c,r.p,PAYS[r.pay]||r.pay,r.a])));
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sl),'Sales');
-  const it=[['Month','Item','Code','Qty','Revenue ₾','Cost ₾','Profit ₾','Margin %']];[...S.items.values()].filter(d=>d.month?.startsWith(y)).forEach(d=>d.rows.forEach(r=>it.push([d.month,r.n,r.c,r.q,r.r,r.k,r.p,r.r?Math.round(r.p/r.r*100):''])));
+  const it=[['Month','Item','Code','Qty','Revenue ₾','Cost ₾','Profit ₾','Margin %']];[...S.items.values()].filter(d=>inR(d.month)).forEach(d=>d.rows.forEach(r=>it.push([d.month,r.n,r.c,r.q,r.r,r.k,r.p,r.r?Math.round(r.p/r.r*100):''])));
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(it),'Products');
   const buf=XLSX.write(wb,{bookType:'xlsx',type:'array'});
   try{await S.downloads.save({filename:'Astroman-finance-'+y+'.xlsx',data:new Blob([buf])})}catch(e){if(e.code!=='declined')toast('Download unavailable here')}
@@ -1494,7 +1575,7 @@ function bindView(){
   if($('#stars'))starfield($('#stars'));
   const tip=$('#tip');const showTip=(e,html)=>{tip.innerHTML=html;tip.hidden=false;const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8),y=Math.min(e.clientY+14,innerHeight-tip.offsetHeight-8);tip.style.left=Math.max(8,x)+'px';tip.style.top=Math.max(8,y)+'px'};
   const hide=()=>tip.hidden=true;
-  document.querySelectorAll('#trendSvg .hit').forEach(h=>{h.addEventListener('pointermove',e=>{const d=trendChart.data[+h.dataset.i];showTip(e,`<div class="t">${mLabel(d.m)}${d.accurate?' · Optimo costs':''}</div><div class="r"><span>Sales</span><b class="num">${gel(d.sales)}</b></div><div class="r"><span>Cost of goods</span><span class="num">${gel(d.cogs)}</span></div><div class="r"><span>Running costs</span><span class="num">${gel(d.opex)}</span></div><div class="r"><span>Taxes</span><span class="num">${gel(d.tax)}</span></div><div class="r"><span>Net profit</span><b class="num ${d.net<0?'neg':''}">${gel(d.net)}</b></div>`)});h.addEventListener('pointerleave',hide);h.addEventListener('click',()=>{hide();setMonth(trendChart.data[+h.dataset.i].m)})});
+  document.querySelectorAll('#trendSvg .hit').forEach(h=>{h.addEventListener('pointermove',e=>{const d=trendChart.data[+h.dataset.i];showTip(e,`<div class="t">${esc(d.long)}${d.src?' · '+COGS_SRC[d.src]:''}</div><div class="r"><span>Sales</span><b class="num">${gel(d.sales)}</b></div><div class="r"><span>Cost of goods</span><span class="num">${gel(d.cogs)}</span></div><div class="r"><span>Running costs</span><span class="num">${gel(d.opex)}</span></div><div class="r"><span>Taxes</span><span class="num">${gel(d.tax)}</span></div><div class="r"><span>Net profit</span><b class="num ${d.net<0?'neg':''}">${gel(d.net)}</b></div>`)});h.addEventListener('pointerleave',hide);h.addEventListener('click',()=>{hide();const d=trendChart.data[+h.dataset.i];if(d.isYear)setRange({p:'year',y:d.m});else setMonth(d.m)})});
   document.querySelectorAll('#dailySvg .dhit').forEach(h=>{h.addEventListener('pointermove',e=>showTip(e,`<div class="t">${h.dataset.d} ${mLabel(S.month)}</div><div class="r"><span>Sales</span><b class="num">${gel(+h.dataset.v)}</b></div><div class="r"><span>vs 1,000 ₾ target</span><span class="num">${pct(+h.dataset.v,1000)}%</span></div>`));h.addEventListener('pointerleave',hide)});
   document.querySelectorAll('#mapSvg .mdot').forEach(c=>{c.addEventListener('pointermove',e=>{const r=marginMap.pts[+c.dataset.i];showTip(e,`<div class="t">${esc(r.n)}</div><div class="r"><span>Sold</span><span class="num">${fmt(r.q)} pcs</span></div><div class="r"><span>Revenue</span><span class="num">${gel(r.r)}</span></div><div class="r"><span>Cost</span><span class="num">${gel(r.k)}</span></div><div class="r"><span>Profit</span><b class="num ${r.p<0?'neg':''}">${gel(r.p)}</b></div><div class="r"><span>Margin</span><b class="num">${pct(r.p,r.r)}%</b></div>`);c.setAttribute('fill-opacity','.9')});c.addEventListener('pointerleave',()=>{hide();c.setAttribute('fill-opacity','.55')})});
   hide();
@@ -1508,6 +1589,9 @@ function bindView(){
     else S.draft={...t,amount:String(t.cur==='USD'?t.orig:t.gel),fx:t.fx||fx(),employee:t.employee||'',vendor:t.vendor||'',note:t.note||'',account:t.account||'unknown'};
     S.view='add';S.animate=true;render();window.scrollTo({top:0})});
   on('#backupFile','change',e=>{const f=e.target.files[0];if(f)importBackup(f)});
+  on('#rYear','change',e=>{if(e.target.value)setRange({p:'year',y:e.target.value})});
+  on('#rFrom','change',e=>setRange({p:'custom',from:e.target.value,to:$('#rTo').value}));
+  on('#rTo','change',e=>setRange({p:'custom',from:$('#rFrom').value,to:e.target.value}));
   on('#cnGo','click',async()=>{const u=$('#cnU').value.trim(),k=$('#cnK').value.trim();const msg=$('#cnMsg');if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(u)){msg.textContent='That doesn’t look like an Apps Script web-app URL';return}msg.textContent='Checking…';
     try{await gasCall(u,k,{action:'ping'});lsSet('af.backend',JSON.stringify({u,k}));msg.textContent='Connected';S.view='overview';connectBackend({u,k});render()}catch(e){msg.textContent=e.message||'Could not connect'}});
   on('#ordersFile','change',e=>{const f=e.target.files[0];if(f)readFile(f,wb=>{S.salesPreview=parseOrdersWorkbook(wb,f.name);openSalesPreview()})});
@@ -1544,11 +1628,13 @@ async function act(a,b){
   if(a==='optCancel'||a==='optReset'){S.opt=a==='optReset'?{stage:'upload',month:S.opt.month}:null;S.animate=true;return render()}
   if(a==='optSave')return optSave(b);
   if(a==='optDelete'){if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Tap again to remove';return}await delDoc('items/'+S.month);return toast('Removed the Optimo report for '+mLabel(S.month))}
-  if(a==='prodAll'){S.prod.all=b.dataset.v==='1';S.animate=true;return render()}
-  if(a==='prodTab'){S.prod.tab=b.dataset.v;const D=prodData();document.querySelectorAll('[data-act="prodTab"]').forEach(x=>x.setAttribute('aria-selected',x===b));const el=$('#rankBars');el.innerHTML=rankBars(rankItems(D.rows,S.prod.tab),S.prod.tab);if(!reduced()){el.parentElement.classList.add('anim');el.querySelectorAll('.fill').forEach((f,j)=>f.style.setProperty('--j',j))}return}
+  if(a==='prodFull'){S.prod.full=true;return render()}
+  if(a==='prodAll'){S.prod.full=false;S.prod.all=b.dataset.v==='1';S.animate=true;return render()}
+  if(a==='prodTab'){S.prod.tab=b.dataset.v;const D=prodData(S.prod.all?rangeMonths():[S.month]);document.querySelectorAll('[data-act="prodTab"]').forEach(x=>x.setAttribute('aria-selected',x===b));const el=$('#rankBars');el.innerHTML=rankBars(rankItems(D.rows,S.prod.tab),S.prod.tab);if(!reduced()){el.parentElement.classList.add('anim');el.querySelectorAll('.fill').forEach((f,j)=>f.style.setProperty('--j',j))}return}
   if(a==='report')return openReport(S.month);
   if(a==='plMode'){S.plMode=b.dataset.v;S.animate=true;return render()}
-  if(a==='plYtd'){S.plMode='ytd';return go('pl')}
+  if(a==='plYtd'||a==='plRange'){S.plMode='range';return go('pl')}
+  if(a==='range'){const p=b.dataset.p;const R={p};if(p==='custom'){const ms=rangeMonths();R.from=ms[0];R.to=ms[ms.length-1]}if(p==='month'&&S.view==='pl'){S.plMode='month'}return setRange(R)}
   if(a==='expMode'){S.filters.all=b.dataset.v==='1';S.animate=true;return render()}
   if(a==='filterCat'){S.filters.q=catLabel(b.dataset.cat);S.filters.all=false;return go('expenses')}
   if(a==='filterFixed'){S.filters.q='';S.filters.all=false;return go('expenses')}
