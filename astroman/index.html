@@ -686,7 +686,7 @@ function backendDB(u,k){
     for(let attempt=0;attempt<3;attempt++){try{await gasCall(u,k,{action:'write',ops});busy=false;status(queue.length?'Saving…':'Saved to Google');if(queue.length)flush();return}catch(e){await new Promise(r=>setTimeout(r,1500*(attempt+1)))}}
     busy=false;toast('Could not save to Google. Check your connection — reloading your data.');queue=[];load()}
   function push(op){queue.push(op);clearTimeout(timer);timer=setTimeout(flush,350)}
-  async function load(){status('Loading…');const r=await gasCall(u,k,{action:'all'});cols.clear();(r.docs||[]).forEach(x=>col(x.c).set(String(x.id),x.d));loaded=true;emit();setConn(true,'Saved to Google');return r}
+  async function load(){status('Loading…');const r=await gasCall(u,k,{action:'all'});cols.clear();(r.docs||[]).forEach(x=>{let id=String(x.id);if((x.c==='sales'||x.c==='items')&&x.d&&/^\d{4}-\d{2}$/.test(x.d.month||''))id=x.d.month;col(x.c).set(id,x.d)});loaded=true;emit();setConn(true,'Saved to Google');return r}
   const api={
     collection:path=>({onSnapshot(cb,err){const l={kind:'c',path,cb,err};L.push(l);if(loaded)fire(l);return()=>{}}}),
     doc:path=>{const [c,id]=path.split('/');return {
