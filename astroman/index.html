@@ -787,7 +787,8 @@ async function autoSyncSales(){
 function xlsxReady(){return window.XLSX?Promise.resolve():new Promise(r=>addEventListener('load',r,{once:true}))}
 const sheetId=()=>S.cfg.sheetId||'1MXZq3Li7W6hfoDGVo9KMYPodS7haezf6TG1CwFmCtdk';
 function wbFromSheets(sheets){const wb=XLSX.utils.book_new();const used=new Set();(sheets||[]).forEach(x=>{let n=String(x.name).slice(0,31)||'Sheet';while(used.has(n))n=n.slice(0,28)+'_'+used.size;used.add(n);XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(x.values||[[]]),n)});return wb}
-const salesDoc=(m,source)=>({month:m.m,rows:m.rows,source,syncedAt:new Date().toISOString(),count:m.count,total:Math.round(m.total*100)/100});
+// a month uploaded from a file is locked: syncing from the Google Sheet never replaces it
+const salesDoc=(m,source,locked)=>({month:m.m,rows:m.rows,source,syncedAt:new Date().toISOString(),count:m.count,total:Math.round(m.total*100)/100,...(locked?{locked:true}:{})});
 function localDownloads(){return {save:async({filename,data})=>{const blob=data instanceof Blob?data:new Blob([data]);const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},1500)}}}
 function vConnect(){
   const c=readCreds()||{};
@@ -1239,7 +1240,7 @@ function vSales(){
   <div class="actions">${S.mcp||S.backend?`<button class="btn primary" data-act="syncSheet">↻ Sync from Google Sheet</button>`:''}<button class="btn" data-act="pickOrders">Upload orders file</button><input type="file" id="ordersFile" accept=".xlsx,.xls,.csv,.ods,.txt,text/plain" hidden></div></div>
   <div class="kpis"><div class="kpi"><div class="lbl">Sales</div><div class="val num">${cu(M.sales)}<small>₾</small></div><div class="delta">${doc?('Updated '+new Date(doc.syncedAt).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})):'Not loaded yet'}</div></div>
   <div class="kpi"><div class="lbl">Orders</div><div class="val num">${cu(M.orders)}</div><div class="delta">${(M.orders/Math.max(1,days)).toFixed(1)} per day</div></div>
-  <div class="kpi"><div class="lbl">Average order</div><div class="val num">${cu(M.aov)}<small>₾</small></div><div class="delta">${esc(doc?.source||'')}</div></div>
+  <div class="kpi"><div class="lbl">Average order</div><div class="val num">${cu(M.aov)}<small>₾</small></div><div class="delta">${esc(doc?.source||'')}${doc?.locked?' · kept, sheet sync never replaces it':''}</div></div>
   <div class="kpi"><div class="lbl">Per day</div><div class="val num">${cu(M.sales/Math.max(1,days))}<small>₾</small></div><div class="delta">target 1,000 ₾ · ${pct(M.sales/Math.max(1,days),1000)}%</div></div></div>
   <div class="grid g3"><div class="panel chart"><h2>Sales by day</h2><p class="sub">Hover or tap a bar for the day's total. Dashed line is the 1,000 ₾/day target.</p>${dailyChart(M)}</div>${channels(M)}</div>
   <div class="toolbar mt"><input class="input grow" id="sQ" placeholder="Search customer, product, payment…" value="${esc(S.salesQ)}"><span class="muted small">${rows.length} of ${M.orders} orders</span></div>
@@ -1271,10 +1272,12 @@ function parseDateCell(v){
   if(mt){const dd=+mt[1],mm=+mt[2];if(dd<1||dd>31||mm<1||mm>12)return null;let y=mt[3]?+mt[3]:null;if(y&&y<100)y+=2000;return {y,m:mm,d:dd}}
   const iso=s.match(/^(\d{4})-(\d{2})-(\d{2})/);if(iso)return {y:+iso[1],m:+iso[2],d:+iso[3]};return null;
 }
-function parseOrdersWorkbook(wb,source){
+function parseOrdersWorkbook(wb,source,file){
   const defY=new Date().getFullYear();const out={};const tabs=[];
   for(const name of wb.SheetNames){
+    if(/იმპორტ|import|report/i.test(name))continue;   // shipment and report tabs are not orders
     const ws=wb.Sheets[name];const aoa=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:''});if(!aoa.length)continue;
+    if(/income statement|შემოსავლები/i.test(aoa.slice(0,8).flat().join(' ')))continue;   // monthly income-statement tabs
     const tym=tabYM(name,defY);
     let hi=-1;for(let i=0;i<Math.min(8,aoa.length);i++){if(aoa[i].some(c=>/თანხა|amount|price|ფასი/i.test(String(c)))){hi=i;break}}
     const hdr=hi>=0?aoa[hi].map(c=>String(c).toLowerCase()):[];
@@ -1306,8 +1309,8 @@ function parseOrdersWorkbook(wb,source){
     }
     tabs.push({name,n,skipped,cancelled,tym});
   }
-  const months=Object.keys(out).sort().map(k=>{const rows=out[k].rows.sort((a,b)=>(a.d||'').localeCompare(b.d||''));const total=rows.reduce((a,r)=>a+r.a,0);const old=S.sales.get(k);const oldTotal=old?old.rows.reduce((a,r)=>a+r.a,0):null;return {m:k,rows,total,count:rows.length,tabs:[...out[k].tabs],oldTotal,oldCount:old?old.rows.length:null,pick:!(old&&old.hist)&&k.startsWith(String(defY))&&[...out[k].tabs].some(t=>tabYM(t,defY))&&!(oldTotal!=null&&total<oldTotal-1)}});
-  return {months,tabs,source};
+  const months=Object.keys(out).sort().map(k=>{const rows=out[k].rows.sort((a,b)=>(a.d||'').localeCompare(b.d||''));const total=rows.reduce((a,r)=>a+r.a,0);const old=S.sales.get(k);const oldTotal=old?old.rows.reduce((a,r)=>a+r.a,0):null;return {m:k,rows,total,count:rows.length,tabs:[...out[k].tabs],oldTotal,oldCount:old?old.rows.length:null,locked:!!(old&&old.locked),pick:file?!old&&k.startsWith(String(defY)):!(old&&(old.hist||old.locked))&&k.startsWith(String(defY))&&[...out[k].tabs].some(t=>tabYM(t,defY))&&!(oldTotal!=null&&(total<oldTotal-1||rows.length<old.rows.length))}});
+  return {months,tabs,source,file:!!file};
 }
 function findSheetText(x,d=0){if(d>6||x==null)return null;if(typeof x==='string')return x.includes('## Sheet name:')?x:null;if(typeof x==='object'){for(const k of Object.keys(x)){const r=findSheetText(x[k],d+1);if(r)return r}}return null}
 function findB64(x,depth=0){
@@ -1353,12 +1356,12 @@ function openSalesPreview(){
   const P=S.salesPreview;if(!P.months.length){toast('No orders found in that file');return}
   modal(`<h3>Update sales from ${esc(P.source)}</h3><p class="muted small">Found ${P.months.reduce((a,m)=>a+m.count,0)} orders in ${P.months.length} months. Ticked months replace what's stored now.</p>
   <div class="tablewrap" style="margin-top:12px"><table><thead><tr><th></th><th>Month</th><th>From tab</th><th class="r">Orders</th><th class="r">Total</th><th class="r">Stored now</th><th class="r">Change</th></tr></thead><tbody>
-  ${P.months.map((m,i)=>{const ch=m.oldTotal==null?null:m.total-m.oldTotal;return `<tr><td><input type="checkbox" data-pi="${i}" ${m.pick?'checked':''} aria-label="Update ${mLabel(m.m)}"></td><td>${mLabel(m.m)}</td><td class="small muted">${esc(m.tabs.join(', '))}</td><td class="r num">${m.count}</td><td class="r num">${gel(m.total)}</td><td class="r num muted">${m.oldTotal==null?'—':gel(m.oldTotal)}</td><td class="r num ${ch>0?'up':ch<0?'down':''}">${ch==null?'new':Math.abs(ch)<1?'same':(ch>0?'+':'')+fmt(ch)}${ch<-1?'<div class="hint">Sheet has less than stored. Check before updating.</div>':''}</td></tr>`}).join('')}
+  ${P.months.map((m,i)=>{const ch=m.oldTotal==null?null:m.total-m.oldTotal;return `<tr><td><input type="checkbox" data-pi="${i}" ${m.pick?'checked':''} ${m.locked&&!P.file?'disabled':''} aria-label="Update ${mLabel(m.m)}"></td><td>${mLabel(m.m)}${m.locked?' <span class="chip">uploaded from file, kept</span>':''}</td><td class="small muted">${esc(m.tabs.join(', '))}</td><td class="r num">${m.count}</td><td class="r num">${gel(m.total)}</td><td class="r num muted">${m.oldTotal==null?'—':gel(m.oldTotal)}</td><td class="r num ${ch>0?'up':ch<0?'down':''}">${ch==null?'new':Math.abs(ch)<1?'same':(ch>0?'+':'')+fmt(ch)}${ch<-1?'<div class="hint">Sheet has less than stored. Check before updating.</div>':''}</td></tr>`}).join('')}
   </tbody></table></div>
   <div class="foot"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" id="spSave" ${S.canWrite?'':'disabled'}>Update selected months</button></div>`,true);
   document.querySelectorAll('[data-pi]').forEach(c=>c.onchange=()=>{P.months[+c.dataset.pi].pick=c.checked});
   $('#spSave').onclick=async()=>{const pick=P.months.filter(m=>m.pick);if(!pick.length){toast('Tick at least one month');return}$('#spSave').disabled=true;
-    try{for(const m of pick){await S.db.doc('sales/'+m.m).set(salesDoc(m,P.source))}
+    try{for(const m of pick){await S.db.doc('sales/'+m.m).set(salesDoc(m,P.source,P.file))}
       closeModal();toast('Updated '+pick.length+' month'+(pick.length>1?'s':''));S.animate=true;render()}catch(e){toast(errMsg(e));$('#spSave').disabled=false}};
 }
 
@@ -1860,7 +1863,7 @@ function bindView(){
   on('#rTo','change',e=>setRange({p:'custom',from:$('#rFrom').value,to:e.target.value}));
   on('#cnGo','click',async()=>{const u=$('#cnU').value.trim(),k=$('#cnK').value.trim();const msg=$('#cnMsg');if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(u)){msg.textContent='That doesn’t look like an Apps Script web-app URL';return}msg.textContent='Checking…';
     try{await gasCall(u,k,{action:'ping'});lsSet('af.backend',JSON.stringify({u,k}));msg.textContent='Connected';S.view='overview';connectBackend({u,k});render()}catch(e){msg.textContent=e.message||'Could not connect'}});
-  on('#ordersFile','change',e=>{const f=e.target.files[0];if(f)readFile(f,wb=>{S.salesPreview=parseOrdersWorkbook(wb,f.name);openSalesPreview()})});
+  on('#ordersFile','change',e=>{const f=e.target.files[0];if(f)readFile(f,wb=>{S.salesPreview=parseOrdersWorkbook(wb,f.name,true);openSalesPreview()})});
   document.querySelectorAll('th[data-sort]').forEach(th=>th.onclick=()=>{const k=th.dataset.sort;if(S.prod.sort===k)S.prod.dir*=-1;else{S.prod.sort=k;S.prod.dir=k==='n'?1:-1}render()});
   // drop zones
   const dz=(dropSel,fileSel,handler)=>{const d=$(dropSel);if(!d)return;const pick=()=>$(fileSel).click();d.addEventListener('click',pick);d.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick()}});
