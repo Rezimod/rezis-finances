@@ -320,6 +320,11 @@ tfoot td{font-weight:700;border-top:2px solid var(--ink);border-bottom:0}
 .erow>span{display:flex;flex-direction:column;min-width:0}
 .erow .et{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .erow small{font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recent{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:6px;overflow:hidden}
+.rrow{display:flex;align-items:center;border-bottom:1px solid var(--line)}.rrow:last-child{border-bottom:0}
+.rrow .erow{border-bottom:0;padding-left:14px}
+.rdel{flex:none;background:transparent;border:0;border-left:1px solid var(--line);color:var(--muted);font-size:13px;padding:10px 14px;cursor:pointer;white-space:nowrap}
+.rdel:hover,.rdel[data-sure]{color:var(--bad);background:var(--surface-2)}
 @media (max-width:600px){.ecat summary{grid-template-columns:minmax(0,1fr) auto}.ecat .cnt,.ecat .eb{display:none}}
 /* ---------- statement ---------- */
 .stmt .sl{display:block;border-bottom:1px solid var(--line)}
@@ -1279,11 +1284,15 @@ function vExpenses(){
   const groups=order.map(g=>{const cats=CATS.filter(c=>c.g===g&&byCat[c.id]?.length).map(c=>({c,items:byCat[c.id].sort((a,b)=>(b.date||'').localeCompare(a.date||'')),v:sumOf(byCat[c.id])})).sort((a,b)=>b.v-a.v);
     if(!cats.length)return '';
     return `<section class="eg"><div class="eg-h"><span>${titles[g]}</span><b class="num">${gel(gTot(g))}</b></div>${cats.map(({c,items,v})=>`<details class="ecat" ${f.q?'open':''}><summary><span class="nm">${esc(c.en)}<small>${esc(c.ka)}</small></span><span class="cnt">${items.length}</span><span class="eb">${spendG.includes(g)?`<i class="fill" style="width:${v/max*100}%"></i>`:''}</span><b class="num">${gel(v)}</b></summary><div class="elist">${items.map(row).join('')}</div></details>`).join('')}</section>`}).join('');
+  // the last entries you touched, newest first, so a mistake is one tap away from being fixed or deleted
+  const stamp=t=>t.updatedAt||t.createdAt||t.date||'';
+  const recent=list.filter(t=>!t.virtual).sort((a,b)=>stamp(b).localeCompare(stamp(a))).slice(0,8);
+  const latest=recent.length?`<section class="eg"><div class="eg-h"><span>Latest entries</span><b>newest first · tap to edit</b></div><div class="recent">${recent.map(t=>`<div class="rrow"><button class="erow" data-edit="${t.id}" data-m="${t.month}"><span><span class="et">${esc(t.vendor||t.employee||catLabel(t.cat))}</span><small>${esc(t.date)} · ${esc(catLabel(t.cat))}${t.note?' · '+esc(t.note.slice(0,40)):''}</small></span><b class="num">${t.skipped?'skipped':gel(t.gel)}</b></button><button class="rdel" data-del="${t.id}" aria-label="Delete this entry">Delete</button></div>`).join('')}</div></section>`:'';
   return loadingOr(`<div class="pagehead"><div><div class="eyebrow">${f.all?esc(rangeLabel()):kaM(S.month)+' · '+y}</div><h1>Expenses</h1></div><div class="actions"><button class="btn" data-go="bank">Import bank statement</button><button class="btn amber" data-go="add">+ Expense</button></div></div>
    <div class="toolbar"><div class="seg" role="group" aria-label="Period"><button data-act="expMode" data-v="0" aria-pressed="${!f.all}">${mShort(S.month)}</button><button data-act="expMode" data-v="1" aria-pressed="${f.all}">Period</button></div><input class="input grow" id="xQ" placeholder="Search…" value="${esc(f.q)}"></div>
    ${f.all?periodBar({noMonth:true}):''}
    <div class="esum"><div><span>Total spending</span><b class="num">${cu(total)}<small> ₾</small></b></div><div class="esplit">${spendG.map(g=>`<span><i style="background:${g==='goods'?'var(--s2)':g==='tax'?'var(--bad)':'var(--s1)'}"></i>${titles[g]} <b class="num">${fmt(gTot(g))}</b></span>`).join('')}</div></div>
-   ${groups||`<div class="panel empty"><b>No expenses ${f.q?'match':'yet'}</b>${f.q?'Try another search.':'Import a bank statement or add one by hand.'}</div>`}
+   ${latest}${groups||`<div class="panel empty"><b>No expenses ${f.q?'match':'yet'}</b>${f.q?'Try another search.':'Import a bank statement or add one by hand.'}</div>`}
    <p class="hint" style="margin-top:12px">Tap a category to see its payments, then tap a payment to change it.</p>`);
 }
 /* ============================== sales ============================== */
@@ -1915,6 +1924,7 @@ function bindView(){
   const searchBox=(id,setter)=>{let t;on(id,'input',e=>{clearTimeout(t);t=setTimeout(()=>{setter(e.target.value);render();const x=$(id);x.focus();x.setSelectionRange(x.value.length,x.value.length)},250)})};
   searchBox('#xQ',v=>S.filters.q=v);searchBox('#sQ',v=>S.salesQ=v);searchBox('#pQ',v=>S.prod.q=v);
   on('#xCat','change',e=>{S.filters.cat=e.target.value;render()});on('#xAcct','change',e=>{S.filters.acct=e.target.value;render()});on('#xAll','change',e=>{S.filters.all=e.target.checked;render()});
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Tap again';setTimeout(()=>{delete b.dataset.sure;b.textContent='Delete'},4000);return}try{await delDoc('tx/'+b.dataset.del);toast('Deleted')}catch(e){toast(errMsg(e))}});
   document.querySelectorAll('[data-edit]').forEach(r=>r.onclick=()=>{
     const id=r.dataset.edit;let t=S.tx.get(id);
     if(!t){t=txOf(r.dataset.m).find(x=>x.id===id);if(!t)return;S.draft={date:t.date,cur:'GEL',amount:String(t.gel),fx:fx(),cat:t.cat,account:t.account,vendor:t.vendor,note:'',employee:t.employee||'',recId:t.recId,source:'fixed'}}
