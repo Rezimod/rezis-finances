@@ -573,7 +573,7 @@ const kaM=m=>KA_MONTHS[+m.slice(5)-1];
 const addMonth=(m,k)=>{let [y,mm]=m.split('-').map(Number);mm+=k;while(mm>12){mm-=12;y++}while(mm<1){mm+=12;y--}return y+'-'+String(mm).padStart(2,'0')};
 const daysIn=m=>new Date(+m.slice(0,4),+m.slice(5),0).getDate();
 const pct=(a,b)=>b?Math.round(a/b*100):0;
-function toast(msg){const r=$('#toastRoot');r.innerHTML=`<div class="toast" role="status">${esc(msg)}</div>`;clearTimeout(toast.t);toast.t=setTimeout(()=>r.innerHTML='',3400)}
+function toast(msg,ms){const r=$('#toastRoot');r.innerHTML=`<div class="toast" role="status">${esc(msg)}</div>`;clearTimeout(toast.t);toast.t=setTimeout(()=>r.innerHTML='',ms||3400)}
 function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)}
 function catLabel(id){const c=CAT[id];return c?c.en:'Uncategorized'}
 function catChip(id){const c=CAT[id];const cls=c?(c.g==='goods'?'goods':c.g==='tax'?'tax':c.g==='below'?'below':''):'warn';return `<span class="chip ${cls}">${esc(c?c.en:'Uncategorized')}</span>`}
@@ -782,20 +782,44 @@ function backendDB(u,k){
   addEventListener('beforeunload',e=>{if(outbox.length){e.preventDefault();e.returnValue=''}});
   return api;
 }
-// New orders in the order sheet flow in by themselves: whenever the app is open it re-reads the sheet
-// (at most every 15 minutes) and updates the months that changed. A month whose total went down is
-// left for you to check with “Sync from Google Sheet”.
+// One sync makes the app match the order sheet: every month of this year that comes from a monthly tab is
+// replaced by what the sheet holds now, a month that is no longer in the sheet is removed, and months
+// uploaded from a file or kept as history are left alone. The automatic sync (whenever the app is open,
+// at most every 15 minutes) skips a month that shrank by more than a third, in case Google sent a partial
+// read; the Sync button replaces it anyway, so what you see is always what the sheet says.
+async function applySheet(P,manual){
+  const y=String(new Date().getFullYear());
+  const months=P.months.filter(m=>m.m.startsWith(y)&&m.tabs.some(t=>tabYM(t,+y)));
+  const seen=new Set(months.map(m=>m.m));const done=[],held=[];
+  for(const m of months){
+    const old=S.sales.get(m.m);
+    if(old&&(old.locked||old.hist))continue;
+    if(old&&m.oldTotal!=null&&Math.abs(m.total-m.oldTotal)<0.01&&m.count===m.oldCount)continue;
+    if(!manual&&old&&m.count<old.rows.length*0.67){held.push(m);continue}
+    await S.db.doc('sales/'+m.m).set(salesDoc(m,'Google Sheet'));done.push(m);
+  }
+  for(const [k,old] of [...S.sales]){
+    if(k.startsWith(y)&&!seen.has(k)&&/^Google Sheet/.test(old.source||'')&&!old.locked&&!old.hist){await S.db.doc('sales/'+k).delete();done.push({m:k,gone:true})}
+  }
+  lsSet('af.salesAt',String(Date.now()));
+  return {done,held,typos:P.typos||0};
+}
+function syncSummary(r,manual){
+  const parts=[];
+  if(r.done.length)parts.push('Synced with the sheet: '+r.done.map(m=>m.gone?mShort(m.m)+' removed':mShort(m.m)+' '+m.count+' orders · '+gel(m.total)).join(', '));
+  else if(manual)parts.push('Already in sync with the sheet');
+  if(r.typos)parts.push(r.typos+' order'+(r.typos>1?'s have':' has')+' a mistyped month in the sheet; counted by tab');
+  if(manual&&r.held.length)parts.push('Not replaced: '+r.held.map(m=>mShort(m.m)).join(', '));
+  return parts.join('. ');
+}
 async function autoSyncSales(){
   if(!S.backend||!S.canWrite||autoSyncSales.busy)return;
   if(Date.now()-(+lsGet('af.salesAt')||0)<15*60000)return;
   autoSyncSales.busy=true;
   try{
     await xlsxReady();
-    const r=await S.backend.orders(sheetId());const P=parseOrdersWorkbook(wbFromSheets(r.sheets),'Google Sheet (auto)');
-    const ch=P.months.filter(m=>m.pick&&(m.oldTotal==null||Math.abs(m.total-m.oldTotal)>=0.01||m.count!==m.oldCount));
-    for(const m of ch)await S.db.doc('sales/'+m.m).set(salesDoc(m,P.source));
-    lsSet('af.salesAt',String(Date.now()));
-    if(ch.length)toast('Sales updated from the order sheet: '+ch.map(m=>mShort(m.m)+' '+gel(m.total)).join(', '));
+    const r=await S.backend.orders(sheetId());const P=parseOrdersWorkbook(wbFromSheets(r.sheets),'Google Sheet');
+    const res=await applySheet(P,false);const msg=syncSummary(res,false);if(msg)toast(msg,6000);
   }catch(e){}finally{autoSyncSales.busy=false}
 }
 function xlsxReady(){return window.XLSX?Promise.resolve():new Promise(r=>addEventListener('load',r,{once:true}))}
@@ -1267,15 +1291,15 @@ function vSales(){
   const m=S.month,M=metrics(m),doc=S.sales.get(m);
   const q=S.salesQ.toLowerCase();const rows=(doc?.rows||[]).filter(r=>!q||[r.c,r.p,PAYS[r.pay]].join(' ').toLowerCase().includes(q));
   const sid=sheetId();const days=m===thisMonth()?new Date().getDate():daysIn(m);
-  return loadingOr(`<div class="pagehead"><div><div class="eyebrow">${kaM(m)} · ${m.slice(0,4)}</div><h1>Sales</h1><p>From your order sheet <a href="https://docs.google.com/spreadsheets/d/${esc(sid)}/edit" target="_blank" rel="noopener">ასტრომანის შეკვეთები</a>. Each order counts in the month of its order date.</p></div>
-  <div class="actions">${S.mcp||S.backend?`<button class="btn primary" data-act="syncSheet">↻ Sync from Google Sheet</button>`:''}<button class="btn" data-act="pickOrders">Upload orders file</button><input type="file" id="ordersFile" accept=".xlsx,.xls,.csv,.ods,.txt,text/plain" hidden></div></div>
+  return loadingOr(`<div class="pagehead"><div><div class="eyebrow">${kaM(m)} · ${m.slice(0,4)}</div><h1>Sales</h1><p>From your order sheet <a href="https://docs.google.com/spreadsheets/d/${esc(sid)}/edit" target="_blank" rel="noopener">ასტრომანის შეკვეთები</a>. Each month is its tab in the sheet; one sync makes every month match the sheet.</p></div>
+  <div class="actions">${S.mcp||S.backend?`<button class="btn primary" data-act="syncSheet" data-label="↻ Sync now">↻ Sync now</button>`:''}<button class="btn" data-act="pickOrders">Upload orders file</button><input type="file" id="ordersFile" accept=".xlsx,.xls,.csv,.ods,.txt,text/plain" hidden></div></div>
   <div class="kpis"><div class="kpi"><div class="lbl">Sales</div><div class="val num">${cu(M.sales)}<small>₾</small></div><div class="delta">${doc?('Updated '+new Date(doc.syncedAt).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})):'Not loaded yet'}</div></div>
   <div class="kpi"><div class="lbl">Orders</div><div class="val num">${cu(M.orders)}</div><div class="delta">${(M.orders/Math.max(1,days)).toFixed(1)} per day</div></div>
   <div class="kpi"><div class="lbl">Average order</div><div class="val num">${cu(M.aov)}<small>₾</small></div><div class="delta">${esc(doc?.source||'')}${doc?.locked?' · kept, sheet sync never replaces it':''}</div></div>
   <div class="kpi"><div class="lbl">Per day</div><div class="val num">${cu(M.sales/Math.max(1,days))}<small>₾</small></div><div class="delta">target 1,000 ₾ · ${pct(M.sales/Math.max(1,days),1000)}%</div></div></div>
   <div class="grid g3"><div class="panel chart"><h2>Sales by day</h2><p class="sub">Hover or tap a bar for the day's total. Dashed line is the 1,000 ₾/day target.</p>${dailyChart(M)}</div>${channels(M)}</div>
   <div class="toolbar mt"><input class="input grow" id="sQ" placeholder="Search customer, product, payment…" value="${esc(S.salesQ)}"><span class="muted small">${rows.length} of ${M.orders} orders</span></div>
-  ${rows.length?`<div class="tablewrap"><table><thead><tr><th>Date</th><th>Customer</th><th>Product</th><th>Payment</th><th class="r">Amount</th></tr></thead><tbody>${rows.slice().reverse().map(r=>`<tr><td class="num">${esc(r.d||'—')}</td><td>${esc(r.c)}</td><td style="min-width:200px">${esc(r.p)}${r.no?' <span class="chip warn">not in Optimo</span>':''}</td><td>${r.pay==='unknown'?'<span class="chip warn">Not recorded</span>':r.pay==='personal'?'<span class="chip">Rezi personal</span>':esc(PAYS[r.pay]||r.pay)}</td><td class="r num">${gel(r.a)}</td></tr>`).join('')}</tbody></table></div>`:`<div class="panel empty"><b>No sales for ${mLabel(m)}</b>${S.mcp?'Press “Sync from Google Sheet” to pull them in.':'Download your order sheet and upload it here.'}</div>`}`);
+  ${rows.length?`<div class="tablewrap"><table><thead><tr><th>Date</th><th>Customer</th><th>Product</th><th>Payment</th><th class="r">Amount</th></tr></thead><tbody>${rows.slice().reverse().map(r=>`<tr><td class="num">${esc(r.d||'—')}</td><td>${esc(r.c)}</td><td style="min-width:200px">${esc(r.p)}${r.no?' <span class="chip warn">not in Optimo</span>':''}</td><td>${r.pay==='unknown'?'<span class="chip warn">Not recorded</span>':r.pay==='personal'?'<span class="chip">Rezi personal</span>':esc(PAYS[r.pay]||r.pay)}</td><td class="r num">${gel(r.a)}</td></tr>`).join('')}</tbody></table></div>`:`<div class="panel empty"><b>No sales for ${mLabel(m)}</b>${S.mcp||S.backend?'Press “Sync now” to pull them in.':'Download your order sheet and upload it here.'}</div>`}`);
 }
 function dailyChart(M){
   const days=daysIn(M.m);const v=Array(days).fill(0);
@@ -1294,12 +1318,13 @@ function normPay(s){s=String(s||'').trim().toLowerCase();if(!s||s==='აირ�
   const map=[['ტერმინ','pos'],['terminal','pos'],['საქართველოს ბანკ','bog'],['bog','bog'],['თბს','tbc'],['tbc','tbc'],['wolt','wolt'],['ვოლტ','wolt'],['გლოვო','glovo'],['glovo','glovo'],['ნაღდ','cash'],['cash','cash'],['პირად','personal'],['ექსტრ','extra'],['extra','extra'],['ადგილზე','cod'],['ჩასარიცხ','pending'],['ნაწილ','installment'],['განვად','installment']];
   for(const [k,v] of map)if(s.includes(k))return v;return 'other'}
 function tabYear(name){const y=(name.match(/20\d\d/)||[])[0];return y?+y:null}
-function tabYM(name,defY){let m=0;KA_MONTHS.forEach((k,i)=>{if(name.includes(k))m=i+1});const y=(name.match(/20\d\d/)||[])[0];return m?{y:y?+y:defY,m}:null}
+// a monthly tab without a year ("ოქტომბერი") is this year's, unless that month is still ahead of us: then it is last year's
+function tabYM(name,defY){let m=0;KA_MONTHS.forEach((k,i)=>{if(name.includes(k))m=i+1});const y=(name.match(/20\d\d/)||[])[0];return m?{y:y?+y:(m>new Date().getMonth()+1?defY-1:defY),m}:null}
 function parseDateCell(v){
   if(v instanceof Date&&!isNaN(v)){const d=new Date(v.getTime()+12*3600e3);return {y:d.getFullYear(),m:d.getMonth()+1,d:d.getDate()}}
   if(typeof v==='number'){if(v>30000&&v<80000){const d=new Date(Math.round((v-25569)*864e5)+12*3600e3);return {y:d.getUTCFullYear(),m:d.getUTCMonth()+1,d:d.getUTCDate()}}
     if(v>=1&&v<32&&!Number.isInteger(+v.toFixed(4))){const dd=Math.floor(v);let mm=Math.round((v-dd)*100);if(mm<1||mm>12)return null;return {y:null,m:mm,d:dd}}return null}
-  const s=String(v||'').trim();const mt=s.match(/^(\d{1,2})[./](\d{1,2})\.?(?:[./](\d{2,4}))?\.?$/);
+  const s=String(v||'').trim();const mt=s.match(/^(\d{1,2})[./,](\d{1,2})\.?(?:[./,](\d{2,4}))?\.?$/);
   if(mt){const dd=+mt[1],mm=+mt[2];if(dd<1||dd>31||mm<1||mm>12)return null;let y=mt[3]?+mt[3]:null;if(y&&y<100)y+=2000;return {y,m:mm,d:dd}}
   const iso=s.match(/^(\d{4})-(\d{2})-(\d{2})/);if(iso)return {y:+iso[1],m:+iso[2],d:+iso[3]};return null;
 }
@@ -1326,24 +1351,30 @@ function parseOrdersWorkbook(wb,source,file){
     if(prodCol<0&&custCol>=0)prodCol=custCol+1;
     let stCol=-1;hdr.forEach((h,i)=>{if(/სტატუს|status/.test(h))stCol=i});if(stCol<0)stCol=best(score(v=>/დასრულ|მიმდინარ|გამზად/.test(String(v))));
     if(amtCol<0)continue;if(hi<0&&!tym)continue;if(!tym&&dateCol<0)continue;
-    const tY=tabYear(name);let n=0,skipped=0,cancelled=0;
+    const tY=tabYear(name);let n=0,skipped=0,cancelled=0,typos=0;
     for(const r of body){
       const raw=r[amtCol];const a=typeof raw==='number'?raw:parseNum(raw);if(!a||a<=0)continue;
       const st=stCol>=0?String(r[stCol]||''):'';if(/გაუქმ|cancel/i.test(st)){cancelled++;continue}
       const p=dateCol>=0?parseDateCell(r[dateCol]):null;
-      let y=p?.y||tY||defY,m=p?.m||tym?.m,d=p?.d||null;if(!m){skipped++;continue}
-      // dates typed as numbers lose the trailing zero (2.10 shows as 2.1): inside the October tab that is 2 October, not 2 January
-      if(tym&&p&&!p.y&&p.m*10===tym.m)m=tym.m;
-      if(tym&&p&&!p.y&&p.m===12&&tym.m===1)y=y-1;
+      let y=p?.y||tY||defY,m=p?.m,d=p?.d||null;
+      if(tym){
+        // Inside a monthly tab the tab decides the month and the year; the typed date only gives the day.
+        // Typos like 14.11 or 2.20 in the October tab, and 2.1 for 2.10, all stay in October.
+        if(p&&p.m!==tym.m&&p.m*10!==tym.m)typos++;
+        y=tym.y;m=tym.m;
+        if(!d){const dd=+(String(r[dateCol]||'').match(/^\s*(\d{1,2})\b/)||[])[1];if(dd>=1&&dd<=31)d=dd}
+        if(d>daysIn(y+'-'+String(m).padStart(2,'0')))d=null;
+      }
+      if(!m){skipped++;continue}
       const key=y+'-'+String(m).padStart(2,'0');
       const row={d:d?key+'-'+String(d).padStart(2,'0'):'',c:String(custCol>=0?r[custCol]:'').trim().slice(0,80),p:String(prodCol>=0?r[prodCol]:'').trim().slice(0,140),pay:normPay(payCol>=0?r[payCol]:''),a:Math.round(a*100)/100};
       if(r.some(c=>/ოპტიმოში\s*(არ|არა)|ოპტიმოში\s+არ/i.test(String(c))))row.no=1;
       (out[key]||(out[key]={rows:[],tabs:new Set()})).rows.push(row);out[key].tabs.add(name);n++;
     }
-    tabs.push({name,n,skipped,cancelled,tym});
+    tabs.push({name,n,skipped,cancelled,typos,tym});
   }
   const months=Object.keys(out).sort().map(k=>{const rows=out[k].rows.sort((a,b)=>(a.d||'').localeCompare(b.d||''));const total=rows.reduce((a,r)=>a+r.a,0);const old=S.sales.get(k);const oldTotal=old?old.rows.reduce((a,r)=>a+r.a,0):null;return {m:k,rows,total,count:rows.length,tabs:[...out[k].tabs],oldTotal,oldCount:old?old.rows.length:null,locked:!!(old&&old.locked),pick:file?!old&&k.startsWith(String(defY)):!(old&&(old.hist||old.locked))&&k.startsWith(String(defY))&&[...out[k].tabs].some(t=>tabYM(t,defY))&&!(oldTotal!=null&&(total<oldTotal-1||rows.length<old.rows.length))}});
-  return {months,tabs,source,file:!!file};
+  return {months,tabs,source,file:!!file,typos:tabs.reduce((a,t)=>a+t.typos,0)};
 }
 function findSheetText(x,d=0){if(d>6||x==null)return null;if(typeof x==='string')return x.includes('## Sheet name:')?x:null;if(typeof x==='object'){for(const k of Object.keys(x)){const r=findSheetText(x[k],d+1);if(r)return r}}return null}
 function findB64(x,depth=0){
@@ -1375,15 +1406,20 @@ async function syncSheet(btn){
       if(b64){const bin=atob(b64);const u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);return wbFromBytes(u8)}
       return null};
     let wb=null;
-    if(S.backend){const r=await S.backend.orders(sid);wb=wbFromSheets(r.sheets);lsSet('af.salesAt',String(Date.now()));S.salesPreview=parseOrdersWorkbook(wb,'Google Sheet (live)');openSalesPreview();return}
-    try{wb=await fetchWb({fileId:sid,exportMimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})}catch(e){if(['server_not_connected','needs_reauth','not_in_manifest','blocked_by_policy'].includes(e&&e.code))throw e}
-    if(!wb||!wb.SheetNames.length)wb=await fetchWb({fileId:sid});
-    if(!wb||!wb.SheetNames.length)throw {message:'The sheet came back in a format this page can’t read. Use “Upload orders file” instead.'};
-    S.salesPreview=parseOrdersWorkbook(wb,'Google Sheet');openSalesPreview();
+    await xlsxReady();
+    if(S.backend){const r=await S.backend.orders(sid);wb=wbFromSheets(r.sheets)}
+    else{
+      try{wb=await fetchWb({fileId:sid,exportMimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})}catch(e){if(['server_not_connected','needs_reauth','not_in_manifest','blocked_by_policy'].includes(e&&e.code))throw e}
+      if(!wb||!wb.SheetNames.length)wb=await fetchWb({fileId:sid});
+      if(!wb||!wb.SheetNames.length)throw {message:'The sheet came back in a format this page can’t read. Use “Upload orders file” instead.'};
+    }
+    const P=parseOrdersWorkbook(wb,'Google Sheet');if(!P.months.length)throw {message:'No orders found in the sheet'};
+    btn.textContent='Updating…';
+    const res=await applySheet(P,true);toast(syncSummary(res,true),7000);if(res.done.length){S.animate=true;render()}
   }catch(e){
     const c=e&&e.code;const msg=c==='server_not_connected'?'Google Drive isn’t connected. Add it in claude.ai Settings → Connectors, or upload the file.':c==='needs_reauth'?'Reconnect Google Drive in claude.ai Settings → Connectors.':c==='not_in_manifest'?'Google Drive access was declined for this page.':c==='tool_error'?('Google Drive refused: '+(e.message||'')):errMsg(e);
     toast(msg);
-  }finally{btn.disabled=false;btn.textContent=btn.dataset.label||'↻ Sync from Google Sheet'}
+  }finally{btn.disabled=false;btn.textContent=btn.dataset.label||'↻ Sync now'}
 }
 function openSalesPreview(){
   const P=S.salesPreview;if(!P.months.length){toast('No orders found in that file');return}

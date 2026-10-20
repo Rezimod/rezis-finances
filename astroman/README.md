@@ -10,7 +10,7 @@ This folder holds only the app. It contains **no business data**. All records ar
 
 - Records are cached on each device, so the app opens instantly; afterwards it fetches only what changed.
 - Every change sits in an outbox on the device until Google confirms it. Closing the page, losing the connection or a Google error does not lose it; it is retried until it is saved.
-- New orders in the order sheet are pulled in automatically whenever the app is open (at most every 15 minutes).
+- Sales come from the order sheet. Each month is its tab in the sheet; the typed date only sets the day, so a mistyped month (14.11 in the October tab) still counts in October. New orders are pulled in automatically whenever the app is open (at most every 15 minutes), and “Sync now” makes every month of this year match the sheet in one press.
 - The backend keeps a permanent log of every change (sheet `log`) and copies the data sheet to the Drive folder "Astroman Finance backups" every night, keeping 90 days.
 
 ## Optimo control center
