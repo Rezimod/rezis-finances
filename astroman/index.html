@@ -104,8 +104,9 @@ a{color:var(--brand)}
 .grid{display:grid;gap:16px}
 .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .g3{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+.g3b{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr)}
 .mt{margin-top:16px}
-@media (max-width:1100px){.g3{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:1100px){.g3,.g3b{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:820px){.g2{grid-template-columns:minmax(0,1fr)}}
 /* ---------- hero ---------- */
 .hero{position:relative;border-radius:18px;overflow:hidden;background:radial-gradient(120% 140% at 85% -10%,#2A3F95 0%,var(--night-2) 38%,var(--night) 75%);border:1px solid var(--line);color:var(--night-ink);padding:24px 24px 18px;margin-bottom:16px;isolation:isolate;box-shadow:0 30px 60px -40px rgba(42,63,149,.8)}
@@ -288,6 +289,67 @@ select.input option{color:#111;background:#fff}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .spacer{flex:1}
 
+/* ---------- today ---------- */
+.today{background:radial-gradient(90% 120% at 100% 0%,color-mix(in srgb,var(--accent) 10%,transparent),transparent 60%),var(--glass);border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line));border-radius:18px;padding:18px 20px 14px;margin-bottom:16px;box-shadow:var(--shadow)}
+.today .th{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.today .th h2{margin:2px 0 0;font-family:var(--f-display);font-weight:600;font-size:24px;line-height:1.15}
+.today .eyebrow .dot{margin-right:7px}
+.today .ago{font-size:12px;color:var(--muted);align-self:center;margin-right:4px}.today .ago b{color:var(--ink-2);font-weight:500}
+.spacer{flex:1}
+.tgrid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:18px;margin-top:14px}
+.tbig{display:flex;justify-content:space-between;align-items:center;gap:14px}
+.tbig .lbl{font-size:12px;color:var(--ink-2)}
+.tbig .val{font-size:46px;font-weight:600;line-height:1.05;letter-spacing:-.03em}
+.tbig .val small{font-size:20px;color:var(--muted);margin-left:4px;font-weight:500}
+.tsub{font-size:13px;color:var(--ink-2);margin-top:4px}.tsub b{color:var(--ink);font-weight:600}
+.tring{position:relative;width:86px;height:86px;flex:none;display:grid;place-items:center;text-align:center}
+.tring .ring{position:absolute;inset:0;width:100%;height:100%}
+.tring span{font-size:17px;font-weight:600;line-height:1;margin-top:-6px}.tring small{position:absolute;bottom:22px;font-size:9.5px;color:var(--muted)}
+.cmps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:14px}
+.cmp{background:var(--surface);padding:10px 12px;display:flex;flex-direction:column;gap:1px;min-width:0}
+.cmp span{font-size:11.5px;color:var(--muted)}.cmp b{font-size:15px;font-weight:600}
+em.up,em.down,em.flat{font-style:normal;font-size:11.5px;font-weight:600}em.up{color:var(--good)}em.down{color:var(--bad)}em.flat{color:var(--muted);font-weight:500}
+.tpays{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.tpays span{position:relative;font-size:12.5px;color:var(--ink-2);padding:5px 10px;border-radius:8px;background:var(--surface-2);overflow:hidden;display:flex;justify-content:space-between;gap:10px}
+.tpays span i{position:absolute;inset:0 auto 0 0;background:color-mix(in srgb,var(--s1) 22%,transparent);z-index:0}
+.tpays span b{position:relative;color:var(--ink);font-weight:600}.tpays span{isolation:isolate}.tpays span i{z-index:-1}
+.tlist{background:var(--surface);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;min-height:0;max-height:300px}
+.tlh{display:flex;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}.tlh b{font-weight:500;letter-spacing:0;text-transform:none}
+.olist{overflow:auto}
+.orow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line)}.orow:last-child{border-bottom:0}
+.orow .ob{display:flex;flex-direction:column;min-width:0}.orow .op{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.orow small{font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.orow b{font-weight:600;min-width:64px;text-align:right}
+.oempty{display:flex;flex-direction:column;gap:6px;padding:22px 16px;color:var(--muted);font-size:12.5px;justify-content:center;flex:1}.oempty b{color:var(--ink);font-size:14px;font-weight:600}
+.strip{display:grid;grid-template-columns:repeat(14,minmax(38px,1fr));gap:4px;margin-top:14px;overflow-x:auto;padding-bottom:2px}
+.sd{background:transparent;border:1px solid transparent;border-radius:9px;padding:6px 2px 5px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;color:var(--muted);transition:background .15s,border-color .15s}
+.sd:hover{background:var(--surface-2)}.sd.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,transparent);color:var(--ink)}
+.sd .sb{height:40px;width:14px;display:flex;align-items:flex-end;background:var(--surface-2);border-radius:4px;overflow:hidden}.sd .sb i{display:block;width:100%;background:var(--s1);border-radius:4px 4px 0 0}
+.sd.hit .sb i{background:var(--s2)}
+.sd .sl{font-size:10.5px;display:flex;flex-direction:column;align-items:center;line-height:1.2}.sd .sl b{font-size:12.5px;color:var(--ink-2);font-weight:600}.sd.on .sl b{color:var(--ink)}
+.sd .sa{font-size:10.5px}
+@media (max-width:900px){.tgrid{grid-template-columns:minmax(0,1fr)}.tlist{max-height:260px}}
+@media (max-width:560px){.today{padding:14px 14px 10px;border-radius:14px}.today .th h2{font-size:19px}.today .ago{width:100%;order:-1;margin:0}.tbig .val{font-size:36px}.cmps{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)}.cmp{padding:8px}.cmp b{font-size:13px}.strip{grid-template-columns:repeat(14,40px)}}
+/* ---------- sparklines, pace, calendar ---------- */
+.spark{display:block;width:100%;height:26px;margin-top:6px;color:#8FB0FF;opacity:.9}.spark.neg{color:#FF9389}.spark.amb{color:#FFC46B}
+.pstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px 16px;margin-bottom:12px}
+.pstats>div{display:flex;flex-direction:column;min-width:0}.pstats span{font-size:11.5px;color:var(--muted)}.pstats b{font-size:17px;font-weight:600}
+#paceSvg{width:100%;height:auto;display:block}#paceSvg text{font-size:11px;fill:var(--muted);font-family:var(--f-num)}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cw{font-size:10.5px;color:var(--muted);text-align:center;padding-bottom:2px}
+.cd{aspect-ratio:1.15;border:1px solid transparent;border-radius:8px;padding:4px 6px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;cursor:pointer;color:var(--ink-2);min-width:0;transition:transform .12s,border-color .15s}
+.cd span{font-size:11px;line-height:1}.cd b{font-size:11px;font-weight:600;color:var(--ink);align-self:flex-end;line-height:1}
+.cd.hot span,.cd.hot b{color:#1A1300}
+.cd:hover:not(:disabled){transform:translateY(-1px);border-color:var(--brand)}
+.cd.blank{background:none;cursor:default}.cd.fut{border:1px dashed var(--line);cursor:default;opacity:.6}
+.cd.now{box-shadow:inset 0 0 0 1.5px var(--ink)}.cd.on{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 40%,transparent)}
+.wk{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+.wkh{grid-column:1/-1;display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-bottom:4px}.wkh b{color:var(--accent);font-weight:600}
+.wkc{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;color:var(--muted)}
+.wkc .wb{height:44px;width:60%;max-width:26px;display:flex;align-items:flex-end;background:var(--surface-2);border-radius:5px;overflow:hidden}.wkc .wb i{display:block;width:100%;background:var(--s1);border-radius:5px 5px 0 0}
+.wkc.best .wb i{background:var(--accent)}.wkc b{font-size:11px;color:var(--ink-2);font-weight:500}
+@media (max-width:560px){.cd{padding:3px 4px;border-radius:6px}.cd b{font-size:9.5px}}
+/* sales table day groups */
+tr.dayrow td{background:var(--surface-2);font-size:12px;color:var(--ink-2);padding-top:7px;padding-bottom:7px}tr.dayrow b{color:var(--ink);font-weight:600}tr.dayrow .r{float:right}
 /* ---------- year to date ---------- */
 .ytd{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .ytd>div{background:var(--glass);padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -796,7 +858,7 @@ function backendDB(u,k){
 // One sync makes the app match the order sheet: every month of this year that comes from a monthly tab is
 // replaced by what the sheet holds now, a month that is no longer in the sheet is removed, and months
 // uploaded from a file or kept as history are left alone. The automatic sync (whenever the app is open,
-// at most every 15 minutes) skips a month that shrank by more than a third, in case Google sent a partial
+// at most every 5 minutes) skips a month that shrank by more than a third, in case Google sent a partial
 // read; the Sync button replaces it anyway, so what you see is always what the sheet says.
 async function applySheet(P,manual){
   const y=String(new Date().getFullYear());
@@ -825,7 +887,7 @@ function syncSummary(r,manual){
 }
 async function autoSyncSales(){
   if(!S.backend||!S.canWrite||autoSyncSales.busy)return;
-  if(Date.now()-(+lsGet('af.salesAt')||0)<15*60000)return;
+  if(Date.now()-(+lsGet('af.salesAt')||0)<5*60000)return;
   autoSyncSales.busy=true;
   try{
     await xlsxReady();
@@ -971,6 +1033,7 @@ function skyfield(){
   ctx.globalAlpha=1;
 }
 function applyTheme(t){document.documentElement.dataset.theme=t==='light'?'light':'dark';document.querySelector('meta[name=theme-color]').content=t==='light'?'#0B1533':'#070B18';skyfield()}
+setInterval(()=>{const a=$('#todayAgo');if(a)a.textContent=agoTxt(lastCheck())},30000);
 {let rt=0;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(skyfield,200)})}
 
 /* ============================== overview ============================== */
@@ -982,21 +1045,102 @@ function vOverview(){
   const live=m===thisMonth(),day=new Date().getDate(),dim=daysIn(m);
   const prevSales=live?P.rows.filter(r=>+String(r.d).slice(8,10)<=day).reduce((a,r)=>a+(+r.a||0),0):P.sales;
   const note=live?`<div class="hnote"><b>Month in progress, day ${day} of ${dim}.</b> ${M.fixed?`Fixed costs (${gel(M.fixed)}) are counted for the whole month, so profit looks low until sales catch up. `:''}${M.sales?`At this pace, about <b>${gel(M.sales/day*dim)}</b> in sales by the end of ${mShort(m)}.`:''}</div>`:'';
+  const ms12=Array.from({length:12},(_,i)=>metrics(addMonth(m,i-11)));const sp=(k,c)=>sparkline(ms12.map(x=>x[k]),c);
   const hero=`<section class="hero"><canvas id="stars" aria-hidden="true"></canvas><div class="top"><div><div class="eyebrow">${kaM(m)} · ${m.slice(0,4)}</div><h1>${mLabel(m)}</h1></div>
    <div class="actions"><button class="btn amber" data-act="report">▶ Monthly report</button><button class="btn" data-act="syncSheet" data-label="↻ Sync sales">↻ Sync sales</button><button class="btn" data-go="add">+ Expense</button></div></div>
    <div class="hkpis">
-    <div class="hkpi"><div class="lbl">Sales</div><div class="val num">${cu(M.sales)}<small>₾</small></div><div class="delta">${M.orders} orders ${d(M.sales,prevSales)?'· '+d(M.sales,prevSales,false,live?'1–'+day+' '+mShort(addMonth(m,-1)):''):''}</div></div>
-    <div class="hkpi"><div class="lbl">Gross profit</div><div class="val num">${cu(M.gross)}<small>₾</small></div><div class="delta">${M.sales?pct(M.gross,M.sales)+'% margin':'—'}${!M.accurate&&M.stock>M.sales*.5?' · '+gel(M.stock)+' of stock bought this month counts here':''}</div></div>
-    <div class="hkpi"><div class="lbl">Running costs</div><div class="val num">${cu(M.opex)}<small>₾</small></div><div class="delta">${live&&M.fixed?'incl. '+gel(M.fixed)+' fixed':live?'so far this month':d(M.opex,P.opex,true)}</div></div>
-    <div class="hkpi"><div class="lbl">Net profit</div><div class="val num" style="${M.net<0?'color:#FF9389':''}">${cu(M.net)}<small>₾</small></div><div class="delta">${live?'so far this month':d(M.net,P.net)}</div></div>
-   </div>${note}</section>`;
+    <div class="hkpi"><div class="lbl">Sales</div><div class="val num">${cu(M.sales)}<small>₾</small></div><div class="delta">${M.orders} orders ${d(M.sales,prevSales)?'· '+d(M.sales,prevSales,false,live?'1–'+day+' '+mShort(addMonth(m,-1)):''):''}</div>${sp('sales')}</div>
+    <div class="hkpi"><div class="lbl">Gross profit</div><div class="val num">${cu(M.gross)}<small>₾</small></div><div class="delta">${M.sales?pct(M.gross,M.sales)+'% margin':'—'}${!M.accurate&&M.stock>M.sales*.5?' · '+gel(M.stock)+' of stock bought this month counts here':''}</div>${sp('gross')}</div>
+    <div class="hkpi"><div class="lbl">Running costs</div><div class="val num">${cu(M.opex)}<small>₾</small></div><div class="delta">${live&&M.fixed?'incl. '+gel(M.fixed)+' fixed':live?'so far this month':d(M.opex,P.opex,true)}</div>${sp('opex','amb')}</div>
+    <div class="hkpi"><div class="lbl">Net profit</div><div class="val num" style="${M.net<0?'color:#FF9389':''}">${cu(M.net)}<small>₾</small></div><div class="delta">${live?'so far this month':d(M.net,P.net)}</div>${sp('net',M.net<0?'neg':'')}</div>
+   </div>${note}<div class="hnote" style="border:0;padding-top:0;margin-top:6px">Lines show the last 12 months, ending with ${mShort(m)}.</div></section>`;
   if(!has&&(!S.db||S.loaded.tx)&&!S.tx.size&&!S.sales.size)return hero+`<div class="panel empty"><b>No records yet</b>Start by syncing sales from your order sheet, then import a BOG or TBC statement.</div>`;
-  return loadingOr(hero+moneyNow(m,M)+dailyPanel(m,M)+periodPanel()+`<div class="grid g2 mt">${attention(m,M)}${breakdown(M,P)}</div>`);
+  return loadingOr(todayPanel()+hero+moneyNow(m,M)+`<div class="grid g3b">${pacePanel(m,M)}${calendarPanel(m,M)}</div><div class="grid g2 mt" style="margin-bottom:16px">${channels(M)}${topItemsPanel(M)}</div>`+periodPanel()+`<div class="grid g2 mt">${attention(m,M)}${breakdown(M,P)}</div>`);
 }
-function dailyPanel(m,M){
-  if(!M.rows.length)return '';const live=m===thisMonth();const days=live?new Date().getDate():daysIn(m);
-  const td=M.rows.filter(r=>r.d===today()).reduce((a,r)=>a+(+r.a||0),0);
-  return `<div class="panel chart" style="margin-bottom:16px"><div class="row" style="align-items:flex-start;flex-wrap:wrap;gap:10px"><div><h2>Sales by day</h2><p class="sub">${live?`Today so far <b class="num">${gel(td)}</b> · `:''}${gel(M.sales/Math.max(1,days))} a day on average in ${mShort(m)}. Tap a bar for the day.</p></div><span class="spacer"></span><button class="btn sm" data-go="sales">All orders</button></div>${dailyChart(M)}</div>`;
+/* ---------- today, pace, calendar ---------- */
+const DAY_TARGET=1000;
+const KA_DAYS=['კვირა','ორშაბათი','სამშაბათი','ოთხშაბათი','ხუთშაბათი','პარასკევი','შაბათი'];
+const addDay=(d,k)=>{const x=new Date(d+'T12:00');x.setDate(x.getDate()+k);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+const dLong=d=>new Date(d+'T12:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+const dShort=d=>new Date(d+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+function dayIndex(){let ix=S.mc.get('#days');if(ix)return ix;ix=new Map();
+  for(const s of S.sales.values())for(const r of s.rows||[]){if(!r.d)continue;let o=ix.get(r.d);if(!o)ix.set(r.d,o={a:0,n:0,rows:[]});o.a+=+r.a||0;o.n++;o.rows.push(r)}
+  S.mc.set('#days',ix);return ix}
+const dayOf=d=>dayIndex().get(d)||{a:0,n:0,rows:[]};
+function lastCheck(){const doc=S.sales.get(thisMonth());return Math.max(+lsGet('af.salesAt')||0,doc&&doc.syncedAt?Date.parse(doc.syncedAt):0)}
+function agoTxt(t){if(!t)return 'not synced yet';const s=(Date.now()-t)/1000;if(s<60)return 'just now';if(s<3600)return Math.round(s/60)+' min ago';if(s<86400)return Math.round(s/3600)+' h ago';return dShort(new Date(t).toISOString().slice(0,10))}
+const pctChip=(a,b)=>{if(!b)return '<em class="flat">—</em>';const ch=Math.round((a-b)/b*100);return `<em class="${ch>=0?'up':'down'}">${ch>=0?'▲':'▼'} ${Math.abs(ch)}%</em>`};
+function payChip(p){return p==='unknown'?'<span class="chip warn">Not recorded</span>':`<span class="chip">${esc(PAYS[p]||p)}</span>`}
+function ring(v,max){const r=30,c=2*Math.PI*r,k=Math.min(1,v/max);return `<svg class="ring" viewBox="0 0 76 76" aria-hidden="true"><circle cx="38" cy="38" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="7"/>${k>0?`<circle cx="38" cy="38" r="${r}" fill="none" stroke="${v>=max?'var(--good)':'var(--accent)'}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${c*k} ${c}" transform="rotate(-90 38 38)"/>`:''}</svg>`}
+function todayPanel(){
+  const t=today();const d=S.day&&S.day<=t?S.day:t;const isT=d===t;
+  const D=dayOf(d),Y=dayOf(addDay(d,-1)),W=dayOf(addDay(d,-7));
+  let s30=0,n30=0;for(let i=1;i<=30;i++){const x=dayOf(addDay(d,-i));s30+=x.a;n30+=x.n}const avg=s30/30;
+  const wd=new Date(d+'T12:00').getDay();const pc=(a,b)=>isT&&!a?'<em class="flat">no sales yet</em>':pctChip(a,b);
+  const pays={};D.rows.forEach(r=>{const o=pays[r.pay]||(pays[r.pay]={n:0,a:0});o.n++;o.a+=+r.a||0});
+  let last=null;if(!D.n)for(let i=1;i<60;i++){const x=dayOf(addDay(d,-i));if(x.n){last={d:addDay(d,-i),...x};break}}
+  const list=D.n?`<div class="olist">${D.rows.slice().reverse().map(r=>`<div class="orow"><span class="ob"><span class="op">${esc(r.p||'—')}</span><small>${esc(r.c||'—')}</small></span>${payChip(r.pay)}<b class="num">${gel(r.a,r.a%1?2:0)}</b></div>`).join('')}</div>`
+    :`<div class="oempty"><b>${isT?'No orders in the sheet yet today':'No orders on this day'}</b>${last?`<span>Last orders: ${dShort(last.d)} · ${last.n} order${last.n>1?'s':''} · ${gel(last.a)}</span>`:''}${isT?'<span>New rows show up here within 5 minutes of being typed in the sheet, or press Refresh.</span>':''}</div>`;
+  const end=d>=addDay(t,-13)?t:addDay(d,6);const strip=[];for(let i=13;i>=0;i--)strip.push(addDay(end,-i));
+  const smax=Math.max(DAY_TARGET,...strip.map(x=>dayOf(x).a));
+  return `<section class="today" id="today"><div class="th"><div><div class="eyebrow"><span class="dot"></span>${isT?'Today':'Day view'} · ${KA_DAYS[wd]}</div><h2>${dLong(d)}</h2></div><span class="spacer"></span>
+   <div class="actions"><span class="ago">Sheet checked <b id="todayAgo">${agoTxt(lastCheck())}</b></span><button class="btn sm" data-day="${addDay(d,-1)}" aria-label="Previous day">‹</button>${isT?'':`<button class="btn sm" data-day="${t}">Today</button>`}<button class="btn sm" data-day="${addDay(d,1)}" aria-label="Next day" ${isT?'disabled':''}>›</button>${S.mcp||S.backend?`<button class="btn sm amber" data-act="syncSheet" data-label="↻ Refresh">↻ Refresh</button>`:''}</div></div>
+   <div class="tgrid"><div class="tmain">
+    <div class="tbig"><div><div class="lbl">Sales${isT?' so far':''}</div><div class="val num">${cu(D.a)}<small>₾</small></div><div class="tsub"><b class="num">${D.n}</b> order${D.n===1?'':'s'}${D.n?` · avg <b class="num">${gel(D.a/D.n)}</b>`:''}</div></div>
+     <div class="tring">${ring(D.a,DAY_TARGET)}<span class="num">${pct(D.a,DAY_TARGET)}%</span><small>of ${fmt(DAY_TARGET)} ₾</small></div></div>
+    <div class="cmps"><div class="cmp"><span>Yesterday</span><b class="num">${gel(Y.a)}</b>${pc(D.a,Y.a)}</div><div class="cmp"><span>Last ${new Date(d+'T12:00').toLocaleDateString('en-GB',{weekday:'short'})}</span><b class="num">${gel(W.a)}</b>${pc(D.a,W.a)}</div><div class="cmp"><span>30-day average</span><b class="num">${gel(avg)}</b>${pc(D.a,avg)}</div></div>
+    ${Object.keys(pays).length?`<div class="tpays">${Object.entries(pays).sort((a,b)=>b[1].a-a[1].a).map(([k,o])=>`<span><i style="width:${o.a/Math.max(1,D.a)*100}%"></i>${esc(PAYS[k]||k)} <b class="num">${gel(o.a)}</b></span>`).join('')}</div>`:''}
+   </div><div class="tlist"><div class="tlh"><span>Orders</span><b>${D.n?'newest first':''}</b></div>${list}</div></div>
+   <div class="strip" role="list">${strip.map(x=>{const o=dayOf(x);const dd=new Date(x+'T12:00');return `<button role="listitem" class="sd ${x===d?'on':''} ${o.a>=DAY_TARGET?'hit':''}" data-day="${x}" title="${dLong(x)} · ${gel(o.a)}"><span class="sb"><i style="height:${Math.max(o.a?6:0,o.a/smax*100)}%"></i></span><span class="sl">${dd.toLocaleDateString('en-GB',{weekday:'narrow'})}<b>${dd.getDate()}</b></span><span class="sa num">${o.a?fmt(o.a/1000,1)+'k':'—'}</span></button>`}).join('')}</div>
+  </section>`;
+}
+function sparkline(vals,cls){
+  if(vals.length<2)return '';const W=120,H=30;const mn=Math.min(0,...vals),mx=Math.max(1,...vals);const sx=i=>i/(vals.length-1)*W,sy=v=>H-2-(v-mn)/(mx-mn||1)*(H-4);
+  const p=vals.map((v,i)=>`${sx(i).toFixed(1)},${sy(v).toFixed(1)}`).join(' ');const L=vals.length-1;
+  return `<svg class="spark ${cls||''}" viewBox="-3 0 ${W+6} ${H}" preserveAspectRatio="none" aria-hidden="true">${mn<0?`<line x1="0" x2="${W}" y1="${sy(0)}" y2="${sy(0)}" stroke="rgba(255,255,255,.2)" stroke-dasharray="2 3"/>`:''}<polyline points="${p}" fill="none" stroke="currentColor" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linejoin="round"/><circle cx="${sx(L)}" cy="${sy(vals[L])}" r="2.6" fill="currentColor"/></svg>`;
+}
+function pacePanel(m,M){
+  const live=m===thisMonth(),dim=daysIn(m),pm=addMonth(m,-1),P=metrics(pm),pdim=daysIn(pm);
+  const cum=(rows,mm,n)=>{const v=Array(n).fill(0);rows.forEach(r=>{if(r.d&&r.d.startsWith(mm)){const i=+r.d.slice(8)-1;if(i<n)v[i]+=+r.a||0}});for(let i=1;i<n;i++)v[i]+=v[i-1];return v};
+  const cur=cum(M.rows,m,dim),prev=cum(P.rows,pm,pdim);const upto=live?new Date().getDate():dim;
+  const fc=live&&upto?M.sales/upto*dim:M.sales;const tgt=DAY_TARGET*dim;
+  const W=640,H=240,pl=44,pr=14,pt=14,pb=26,iw=W-pl-pr,ih=H-pt-pb;
+  const max=Math.max(1000,fc,tgt,prev[pdim-1]||0,cur[dim-1]);const raw=max/4,mag=Math.pow(10,Math.floor(Math.log10(raw))),step=[1,2,2.5,5,10].map(x=>x*mag).find(x=>x>=raw);const top=Math.ceil(max/step)*step;
+  const sx=i=>pl+i/(Math.max(dim,pdim)-1)*iw,sy=v=>pt+ih-v/top*ih;
+  let g='';for(let v=0;v<=top;v+=step)g+=`<line x1="${pl}" x2="${W-pr}" y1="${sy(v)}" y2="${sy(v)}" stroke="var(--grid)"/><text x="${pl-6}" y="${sy(v)+4}" text-anchor="end">${v?fmt(v/1000,v%1000?1:0)+'k':'0'}</text>`;
+  [1,8,15,22,29].filter(x=>x<=dim).forEach(x=>g+=`<text x="${sx(x-1)}" y="${H-6}" text-anchor="middle">${x}</text>`);
+  const line=v=>v.map((y,i)=>`${i?'L':'M'}${sx(i).toFixed(1)},${sy(y).toFixed(1)}`).join('');
+  const curV=cur.slice(0,upto);const area=curV.length?`${line(curV)}L${sx(upto-1)},${sy(0)}L${sx(0)},${sy(0)}Z`:'';
+  let hits='';for(let i=0;i<dim;i++)hits+=`<rect class="phit" data-i="${i}" x="${sx(i)-iw/dim/2}" y="${pt}" width="${iw/dim}" height="${ih}" fill="transparent"/>`;
+  pacePanel.data={m,pm,cur,prev,upto,live};
+  const svgc=`<svg viewBox="0 0 ${W} ${H}" id="paceSvg" role="img" aria-label="Cumulative sales this month against last month and the target"><defs><linearGradient id="paceG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--s1)" stop-opacity=".35"/><stop offset="1" stop-color="var(--s1)" stop-opacity="0"/></linearGradient></defs>${g}
+   <line x1="${sx(0)}" y1="${sy(DAY_TARGET)}" x2="${sx(dim-1)}" y2="${sy(tgt)}" stroke="var(--accent)" stroke-width="1.3" stroke-dasharray="5 4" opacity=".8"/>
+   <path d="${line(prev)}" fill="none" stroke="var(--muted)" stroke-width="1.6" opacity=".75"/>
+   ${area?`<path d="${area}" fill="url(#paceG)"/><path d="${line(curV)}" fill="none" stroke="var(--s1)" stroke-width="2.4" stroke-linejoin="round"/>`:''}
+   ${live&&upto<dim&&upto?`<line x1="${sx(upto-1)}" y1="${sy(cur[upto-1])}" x2="${sx(dim-1)}" y2="${sy(fc)}" stroke="var(--s1)" stroke-width="1.8" stroke-dasharray="3 4"/><circle cx="${sx(dim-1)}" cy="${sy(fc)}" r="3.5" fill="none" stroke="var(--s1)" stroke-width="1.6"/>`:''}
+   ${upto?`<circle cx="${sx(upto-1)}" cy="${sy(cur[upto-1])}" r="4.5" fill="var(--s1)" stroke="var(--bg)" stroke-width="2"/>`:''}
+   <line id="paceX" x1="0" x2="0" y1="${pt}" y2="${pt+ih}" stroke="var(--ink-2)" stroke-width="1" opacity="0"/>${hits}</svg>`;
+  const same=prev[Math.min(upto,pdim)-1]||0;
+  return `<div class="panel lift"><div class="row" style="align-items:flex-start;gap:10px;flex-wrap:wrap"><div><h2>${live?'Month pace':'Month vs '+mShort(pm)}</h2><p class="sub">Sales added up day by day. ${live?'Dashed blue is where the month ends at this pace.':''}</p></div></div>
+   <div class="pstats"><div><span>${live?'So far':'Total'}</span><b class="num">${gel(M.sales)}</b></div><div><span>${mShort(pm)} by day ${Math.min(upto,pdim)}</span><b class="num">${gel(same)}</b>${pctChip(cur[upto-1]||0,same)}</div>${live?`<div><span>Forecast</span><b class="num">${gel(fc)}</b><em class="flat">${gel(fc/dim)} a day</em></div>`:''}<div><span>Target</span><b class="num">${gel(tgt)}</b><em class="${M.sales>=tgt?'up':'flat'}">${pct(M.sales,tgt)}% reached</em></div></div>
+   <div class="legend"><span><i style="background:var(--s1)"></i>${mShort(m)}</span><span><i style="background:var(--muted)"></i>${mShort(pm)}</span><span><i style="background:var(--accent)"></i>${fmt(DAY_TARGET)} ₾ a day</span></div>${svgc}</div>`;
+}
+function calendarPanel(m,M){
+  const dim=daysIn(m),off=(new Date(m+'-01T12:00').getDay()+6)%7,t=today();
+  const v=Array(dim).fill(0),n=Array(dim).fill(0);M.rows.forEach(r=>{if(r.d&&r.d.startsWith(m)){const i=+r.d.slice(8)-1;v[i]+=+r.a||0;n[i]++}});
+  const max=Math.max(DAY_TARGET,...v);const sel=S.day||t;
+  let cells='';for(let i=0;i<off;i++)cells+='<span class="cd blank"></span>';
+  for(let i=0;i<dim;i++){const d=m+'-'+String(i+1).padStart(2,'0');const fut=d>t;const lvl=v[i]/max;
+    const bg=fut?'transparent':v[i]?`color-mix(in srgb,var(--accent) ${Math.round(14+lvl*70)}%,var(--surface-2))`:'var(--surface-2)';
+    cells+=`<button class="cd ${fut?'fut':''} ${d===t?'now':''} ${d===sel?'on':''} ${lvl>.55?'hot':''}" ${fut?'disabled':''} data-day="${d}" style="background:${bg}" title="${dLong(d)} · ${n[i]} orders · ${gel(v[i])}"><span>${i+1}</span>${!fut&&v[i]?`<b class="num">${v[i]>=1000?fmt(v[i]/1000,1)+'k':fmt(v[i])}</b>`:''}</button>`}
+  // weekday averages over the last 12 weeks
+  const endD=m===thisMonth()?t:m+'-'+String(dim).padStart(2,'0');const wk=Array(7).fill(0),wc=Array(7).fill(0);
+  for(let i=0;i<84;i++){const d=addDay(endD,-i);const k=(new Date(d+'T12:00').getDay()+6)%7;wk[k]+=dayOf(d).a;wc[k]++}
+  const wa=wk.map((x,i)=>x/Math.max(1,wc[i]));const wmax=Math.max(1,...wa);const best=wa.indexOf(Math.max(...wa));const NAMES=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const hitDays=v.filter(x=>x>=DAY_TARGET).length,sold=v.filter(x=>x>0).length;
+  return `<div class="panel lift"><h2>Sales calendar</h2><p class="sub">${sold} selling day${sold===1?'':'s'} · ${hitDays} at ${fmt(DAY_TARGET)} ₾ or more. Tap a day to open it.</p>
+   <div class="cal">${NAMES.map(x=>`<span class="cw">${x[0]}</span>`).join('')}${cells}</div>
+   <div class="wk"><div class="wkh"><span>Average by weekday, last 12 weeks</span><b>Best: ${NAMES[best]}</b></div>${wa.map((x,i)=>`<div class="wkc ${i===best?'best':''}"><span class="wb"><i style="height:${x/wmax*100}%"></i></span><span>${NAMES[i]}</span><b class="num">${fmt(x)}</b></div>`).join('')}</div></div>`;
 }
 function periodPanel(){
   const R=getRange();const ms=rangeMonths(R.p==='month'?{p:'ytd'}:R);const {A}=rangeAgg(ms);const exp=A.cogs+A.opex+A.tax;const rev=A.sales+A.otherInc;
@@ -1335,8 +1479,9 @@ function vSales(){
   <div class="kpi"><div class="lbl">Per day</div><div class="val num">${cu(M.sales/Math.max(1,days))}<small>₾</small></div><div class="delta">target 1,000 ₾ · ${pct(M.sales/Math.max(1,days),1000)}%</div></div></div>
   <div class="grid g3"><div class="panel chart"><h2>Sales by day</h2><p class="sub">Hover or tap a bar for the day's total. Dashed line is the 1,000 ₾/day target.</p>${dailyChart(M)}</div>${channels(M)}</div>
   <div class="toolbar mt"><input class="input grow" id="sQ" placeholder="Search customer, product, payment…" value="${esc(S.salesQ)}"><span class="muted small">${rows.length} of ${M.orders} orders</span></div>
-  ${rows.length?`<div class="tablewrap"><table><thead><tr><th>Date</th><th>Customer</th><th>Product</th><th>Payment</th><th class="r">Amount</th></tr></thead><tbody>${rows.slice().reverse().map(r=>`<tr><td class="num">${esc(r.d||'—')}</td><td>${esc(r.c)}</td><td style="min-width:200px">${esc(r.p)}${r.no?' <span class="chip warn">not in Optimo</span>':''}</td><td>${r.pay==='unknown'?'<span class="chip warn">Not recorded</span>':r.pay==='personal'?'<span class="chip">Rezi personal</span>':esc(PAYS[r.pay]||r.pay)}</td><td class="r num">${gel(r.a)}</td></tr>`).join('')}</tbody></table></div>`:`<div class="panel empty"><b>No sales for ${mLabel(m)}</b>${S.mcp||S.backend?'Press “Sync now” to pull them in.':'Download your order sheet and upload it here.'}</div>`}`);
+  ${rows.length?`<div class="tablewrap"><table><thead><tr><th>Date</th><th>Customer</th><th>Product</th><th>Payment</th><th class="r">Amount</th></tr></thead><tbody>${rows.slice().reverse().map((r,i,A)=>(i===0||A[i-1].d!==r.d?dayHead(r.d,A):'')+`<tr><td class="num">${esc(r.d||'—')}</td><td>${esc(r.c)}</td><td style="min-width:200px">${esc(r.p)}${r.no?' <span class="chip warn">not in Optimo</span>':''}</td><td>${r.pay==='unknown'?'<span class="chip warn">Not recorded</span>':r.pay==='personal'?'<span class="chip">Rezi personal</span>':esc(PAYS[r.pay]||r.pay)}</td><td class="r num">${gel(r.a)}</td></tr>`).join('')}</tbody></table></div>`:`<div class="panel empty"><b>No sales for ${mLabel(m)}</b>${S.mcp||S.backend?'Press “Sync now” to pull them in.':'Download your order sheet and upload it here.'}</div>`}`);
 }
+function dayHead(d,A){const R=A.filter(x=>x.d===d);return `<tr class="dayrow"><td colspan="5">${d?esc(new Date(d+'T12:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})):'No date'}${d===today()?' · <b>today</b>':''} · ${R.length} order${R.length>1?'s':''}<b class="num r">${gel(R.reduce((a,x)=>a+x.a,0))}</b></td></tr>`}
 function dailyChart(M){
   const days=daysIn(M.m);const v=Array(days).fill(0);
   M.rows.forEach(r=>{if(r.d&&r.d.startsWith(M.m)){v[+r.d.slice(8)-1]+=r.a}});
@@ -2040,6 +2185,10 @@ function bindView(){
   const hide=()=>tip.hidden=true;
   document.querySelectorAll('#trendSvg .hit').forEach(h=>{h.addEventListener('pointermove',e=>{const d=trendChart.data[+h.dataset.i];showTip(e,`<div class="t">${esc(d.long)}${d.src?' · '+COGS_SRC[d.src]:''}</div><div class="r"><span>Sales</span><b class="num">${gel(d.sales)}</b></div><div class="r"><span>Cost of goods</span><span class="num">${gel(d.cogs)}</span></div><div class="r"><span>Running costs</span><span class="num">${gel(d.opex)}</span></div><div class="r"><span>Taxes</span><span class="num">${gel(d.tax)}</span></div><div class="r"><span>Net profit</span><b class="num ${d.net<0?'neg':''}">${gel(d.net)}</b></div>`)});h.addEventListener('pointerleave',hide);h.addEventListener('click',()=>{hide();const d=trendChart.data[+h.dataset.i];if(d.isYear)setRange({p:'year',y:d.m});else setMonth(d.m)})});
   document.querySelectorAll('#dailySvg .dhit').forEach(h=>{h.addEventListener('pointermove',e=>showTip(e,`<div class="t">${h.dataset.d} ${mLabel(S.month)}</div><div class="r"><span>Sales</span><b class="num">${gel(+h.dataset.v)}</b></div><div class="r"><span>vs 1,000 ₾ target</span><span class="num">${pct(+h.dataset.v,1000)}%</span></div>`));h.addEventListener('pointerleave',hide)});
+  const PD=pacePanel.data;document.querySelectorAll('#paceSvg .phit').forEach(h=>{const i=+h.dataset.i;h.addEventListener('pointermove',e=>{const x=$('#paceX');if(x){const X=+h.getAttribute('x')+ +h.getAttribute('width')/2;x.setAttribute('x1',X);x.setAttribute('x2',X);x.setAttribute('opacity','.35')}
+    const c=i<PD.upto?PD.cur[i]:null,p=PD.prev[i];showTip(e,`<div class="t">Day ${i+1}</div>${c!=null?`<div class="r"><span>${mShort(PD.m)} so far</span><b class="num">${gel(c)}</b></div>`:''}${p!=null?`<div class="r"><span>${mShort(PD.pm)} by then</span><span class="num">${gel(p)}</span></div>`:''}${c!=null&&p?`<div class="r"><span>Difference</span><b class="num ${c<p?'neg':''}">${c>=p?'+':''}${gel(c-p)}</b></div>`:''}<div class="r"><span>Target by then</span><span class="num">${gel(DAY_TARGET*(i+1))}</span></div>`)});h.addEventListener('pointerleave',()=>{hide();const x=$('#paceX');if(x)x.setAttribute('opacity','0')})});
+  const st=$('.strip');if(st)st.scrollLeft=st.scrollWidth;
+  document.querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{S.day=b.dataset.day;render();if(!b.closest('#today'))$('#today').scrollIntoView({behavior:reduced()?'auto':'smooth',block:'start'})});
   document.querySelectorAll('#mapSvg .mdot').forEach(c=>{c.addEventListener('pointermove',e=>{const r=marginMap.pts[+c.dataset.i];showTip(e,`<div class="t">${esc(r.n)}</div><div class="r"><span>Sold</span><span class="num">${fmt(r.q)} pcs</span></div><div class="r"><span>Revenue</span><span class="num">${gel(r.r)}</span></div><div class="r"><span>Cost</span><span class="num">${gel(r.k)}</span></div><div class="r"><span>Profit</span><b class="num ${r.p<0?'neg':''}">${gel(r.p)}</b></div><div class="r"><span>Margin</span><b class="num">${pct(r.p,r.r)}%</b></div>`);c.setAttribute('fill-opacity','.9')});c.addEventListener('pointerleave',()=>{hide();c.setAttribute('fill-opacity','.55')})});
   hide();
   const on=(sel,ev,fn)=>{const el=$(sel);if(el)el.addEventListener(ev,fn)};
