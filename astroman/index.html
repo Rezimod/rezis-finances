@@ -412,20 +412,27 @@ tr.dayrow td{background:var(--surface-2);font-size:12px;color:var(--ink-2);paddi
 .stmt .sdl small{color:var(--muted)}
 .sgap{height:18px}
 /* ---------- monthly report ---------- */
-.rep{position:fixed;inset:0;z-index:80;background:radial-gradient(120% 90% at 80% 0%,#2A3F95 0%,#101C4A 40%,#060B1A 85%);color:#EEF2FF;display:flex;flex-direction:column;animation:fade .3s both;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.rep{--ink:#EEF2FF;--ink-2:#C8D3F5;--muted:#93A1CB;--line:rgba(176,196,255,.16);--surface:#0E152A;--surface-2:rgba(255,255,255,.08);--glass:rgba(14,21,42,.62);--grid:rgba(176,196,255,.1);--good:#5BD398;--warn:#E8B860;--bad:#FF8A7E;--good-bg:#12301F;--warn-bg:#33270F;--bad-bg:#3A1714;--s1:#7B9CF5;--s2:#D9A03A;--c1:#7B9CF5;--c2:#5BD398;--c3:#F5A623;--c4:#B18CFF;--c5:#4FC9D9;--c6:#FF8FB1;--c7:#E8D27A;--c8:#8EA0C8;color-scheme:dark;position:fixed;inset:0;z-index:80;background:radial-gradient(120% 90% at 80% 0%,#2A3F95 0%,#101C4A 40%,#060B1A 85%);color:#EEF2FF;display:flex;flex-direction:column;animation:fade .3s both;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 .rep canvas{position:absolute;inset:0;width:100%;height:100%}
-.rep-bar{position:relative;display:flex;gap:5px;padding:14px 18px 0;z-index:2}
-.rep-bar i{flex:1;height:3px;background:rgba(255,255,255,.22);border-radius:2px;overflow:hidden}
-.rep-bar i b{display:block;height:100%;width:0;background:#F5A623}
-.rep-bar i.done b{width:100%}
-.rep-bar i.cur b{animation:repfill 7s linear forwards}
-.rep.paused .rep-bar i.cur b{animation-play-state:paused}
-@keyframes repfill{to{width:100%}}
-.rep-top{position:relative;z-index:2;display:flex;align-items:center;gap:8px;padding:10px 18px;font-size:13px;color:#AFC0EE}
+.rep-bar{position:relative;display:flex;gap:5px;padding:4px 18px 0;z-index:2;max-width:960px;width:100%;margin:0 auto;box-sizing:border-box}
+.rep-bar button{flex:1;height:18px;background:none;border:0;padding:7px 0;cursor:pointer}
+.rep-bar button b{display:block;height:4px;border-radius:2px;background:rgba(255,255,255,.2);transition:background .3s}
+.rep-bar button.done b{background:rgba(245,166,35,.55)}.rep-bar button.cur b{background:#F5A623}
+.rep-bar button:hover b{background:rgba(255,255,255,.4)}
+.rep-top{position:relative;z-index:2;display:flex;align-items:center;gap:8px;padding:14px 18px 6px;max-width:960px;width:100%;margin:0 auto;box-sizing:border-box;font-size:13px;color:#AFC0EE}
 .rep-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:999px;width:36px;height:36px;cursor:pointer;font-size:13px}
 .rep-btn:hover{background:rgba(255,255,255,.2)}
 .rep-stage{position:relative;flex:1;z-index:1}
-.slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:20px clamp(22px,8vw,120px) 60px;max-width:900px;margin:0 auto;opacity:0;pointer-events:none;transition:opacity .4s}
+.slide{position:absolute;inset:0;overflow-y:auto;opacity:0;pointer-events:none;transition:opacity .35s;overscroll-behavior:contain}
+.slide-in{min-height:100%;display:flex;flex-direction:column;justify-content:center;padding:16px clamp(18px,6vw,60px) 24px;max-width:900px;margin:0 auto;box-sizing:border-box}
+.rcard{background:rgba(9,15,40,.55);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px 18px;backdrop-filter:blur(6px)}
+.rep .rstory{color:#DCE4FF;font-size:16px}
+.rep-foot{position:relative;z-index:3;display:flex;align-items:center;gap:12px;padding:12px 18px 16px;max-width:960px;width:100%;margin:0 auto;box-sizing:border-box;border-top:1px solid rgba(255,255,255,.1)}
+.rep-count{flex:1;text-align:center;font-size:13px;color:#AFC0EE;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rep-count b{color:#fff}
+.rep .rep-back{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#fff}.rep .rep-back:disabled{opacity:.35;cursor:default}
+.rep .rep-next{min-width:130px;justify-content:center;font-size:15px;padding:11px 18px}
+.rmonths b{font-size:10.5px;color:#C8D3F5;font-weight:500}.rmonths i.s{background:#7B9CF5}
+@media (max-width:560px){.rep .rep-next{min-width:0}.rep-count span{display:none}}
 .slide.on{opacity:1;pointer-events:auto}
 .slide .ra{opacity:0}
 .slide.on .ra{opacity:1;animation:rise .7s var(--ease) both;animation-delay:var(--d)}
@@ -450,27 +457,14 @@ tr.dayrow td{background:var(--surface-2);font-size:12px;color:var(--ink-2);paddi
 .rdays i{flex:1;background:#6B8FF0;border-radius:3px 3px 0 0;transform-origin:bottom}
 .rdays i.hi{background:#F5A623}
 .slide.on .rdays i{animation:growy .7s var(--ease) both;animation-delay:calc(600ms + var(--j)*18ms)}
-.rw{display:grid;grid-template-columns:minmax(0,170px) minmax(0,1fr) 90px;gap:14px;align-items:center;margin:9px 0;font-size:15px}
-.rw>span{color:#C8D3F5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rw b{text-align:right;font-weight:600}
-.rwb{height:14px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
-.rwb i{display:block;height:100%;border-radius:999px;background:#6B8FF0;transform-origin:left}
-.rw.c .rwb i{background:#E0A13A}.rw.t .rwb i{background:#4CC38A}.rw.t span,.rw.t b{color:#fff;font-weight:700}
-.slide.on .rwb i{animation:growx 1s var(--ease) both;animation-delay:calc(var(--d) + 200ms)}
-@media (max-width:560px){.rw{grid-template-columns:minmax(0,1fr) 80px}.rwb{grid-column:1/-1;grid-row:2}}
 .rmonths{display:flex;align-items:flex-end;gap:8px;height:150px;margin-top:20px}
 .rmonths>div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;font-size:11px;color:#AFC0EE}
 .rmonths i{width:100%;max-width:34px;background:#4CC38A;border-radius:4px 4px 0 0;transform-origin:bottom}
 .rmonths i.neg{background:#FF9389}
 .slide.on .rmonths i{animation:growy .8s var(--ease) both;animation-delay:calc(500ms + var(--j)*80ms)}
-.rtodo{display:flex;gap:14px;align-items:center;font-size:17px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.12)}
-.rtodo i{font-style:normal;width:30px;height:30px;border-radius:50%;background:rgba(245,166,35,.18);color:#FFD58A;display:grid;place-items:center;font-size:14px;font-weight:700;flex:none}
-.rep-nav{position:absolute;top:90px;bottom:0;width:30%;background:transparent;border:0;cursor:pointer;z-index:3}
-.rep.last .rep-nav{display:none}
-.rep-nav.prev{left:0}.rep-nav.next{right:0}
 .slide.on{z-index:2}
 .slide .btn{position:relative;z-index:3}
-@media (prefers-reduced-motion:reduce){.slide.on .ra,.slide.on .rwb i,.slide.on .rdays i,.slide.on .rmonths i{animation:none;opacity:1}.rep-bar i.cur b{animation:none;width:100%}}
+@media (prefers-reduced-motion:reduce){.slide.on .ra,.slide.on .rdays i,.slide.on .rmonths i{animation:none;opacity:1}}
 /* ---------- motion ---------- */
 @media (prefers-reduced-motion:no-preference){
   .anim .rise{animation:rise .5s var(--ease) both;animation-delay:calc(var(--i,0) * 55ms)}
@@ -1035,11 +1029,11 @@ function fillMonthSel(){
   $('#monthSel').innerHTML=ms.slice().reverse().map(m=>`<option value="${m}" ${m===S.month?'selected':''}>${mShort(m)} ${m.slice(0,4)}</option>`).join('');
 }
 function route(){const h=(location.hash||'').slice(1);if(PAGES.some(p=>p.id===h)||h==='add'){S.view=h}S.animate=true;render()}
-function go(v){fillMonthSel();S.view=v;try{history.replaceState(null,'','#'+v)}catch(e){}if(v==='add')S.draft=null;S.animate=true;render();$('#main').focus({preventScroll:true});window.scrollTo({top:0})}
+function go(v){if(REP)closeRecap();if(v==='recap'){$('#moreSheet').classList.remove('open');return openRecap('month')}fillMonthSel();S.view=v;try{history.replaceState(null,'','#'+v)}catch(e){}if(v==='add')S.draft=null;S.animate=true;render();$('#main').focus({preventScroll:true});window.scrollTo({top:0})}
 function render(){
   S.renderedOnce=true;S.mc=new Map();
   document.querySelectorAll('#menu button,#tabbar button').forEach(b=>b.setAttribute('aria-current',b.dataset.go===S.view?'page':'false'));
-  const v={connect:vConnect,overview:vOverview,recap:vRecap,sales:vSales,products:vProducts,expenses:vExpenses,bank:vBank,pl:vPL,imports:vImports,loan:vLoan,optimo:vOptimo,settings:vSettings,add:vAdd}[S.view]||vOverview;
+  const v={connect:vConnect,overview:vOverview,sales:vSales,products:vProducts,expenses:vExpenses,bank:vBank,pl:vPL,imports:vImports,loan:vLoan,optimo:vOptimo,settings:vSettings,add:vAdd}[S.view]||vOverview;
   const main=$('#main');const y=window.scrollY;
   main.innerHTML=banner()+v();
   const anim=S.animate&&!reduced();main.classList.toggle('anim',anim);
@@ -1049,7 +1043,7 @@ function render(){
 }
 function countUp(root){
   const els=root.querySelectorAll('.cu');if(!els.length)return;const t0=performance.now(),D=900;
-  const step=t=>{const k=Math.min(1,(t-t0)/D),e=1-Math.pow(1-k,3);els.forEach(el=>{el.textContent=fmt(+el.dataset.v*e)});if(k<1)requestAnimationFrame(step)};
+  const step=t=>{const k=Math.min(1,Math.max(0,(t-t0)/D)),e=1-Math.pow(1-k,3);els.forEach(el=>{el.textContent=fmt(+el.dataset.v*e)});if(k<1)requestAnimationFrame(step)};
   els.forEach(el=>el.textContent='0');requestAnimationFrame(step);
 }
 function banner(){
@@ -1090,7 +1084,7 @@ setInterval(()=>{const a=$('#todayAgo');if(a)a.textContent=agoTxt(lastCheck())},
 
 /* ============================== overview ============================== */
 function recapCta(){const last=addMonth(thisMonth(),-1);
-  return `<button class="recapcta" data-go="recap"><span class="rcic">${svg(IC.recap,28)}</span><span class="rct"><b>Recap</b><small>${esc(mLabel(last))} and ${thisMonth().slice(0,4)} so far: real profit, where the money came from and where it went</small></span><span class="rcgo">→</span></button>`}
+  return `<button class="recapcta" data-act="recap"><span class="rcic">${svg(IC.recap,28)}</span><span class="rct"><b>Recap</b><small>${esc(mLabel(last))} and ${thisMonth().slice(0,4)} so far: real profit, where the money came from and where it went</small></span><span class="rcgo">→</span></button>`}
 function vOverview(){
   const m=S.month,M=metrics(m),P=metrics(addMonth(m,-1));
   const has=M.hasSales||M.list.length;
@@ -1101,7 +1095,7 @@ function vOverview(){
   const note=live?`<div class="hnote"><b>Month in progress, day ${day} of ${dim}.</b> ${M.fixed?`Fixed costs (${gel(M.fixed)}) are counted for the whole month, so profit looks low until sales catch up. `:''}${M.sales?`At this pace, about <b>${gel(M.sales/day*dim)}</b> in sales by the end of ${mShort(m)}.`:''}</div>`:'';
   const ms12=Array.from({length:12},(_,i)=>metrics(addMonth(m,i-11)));const sp=(k,c)=>sparkline(ms12.map(x=>x[k]),c);
   const hero=`<section class="hero"><canvas id="stars" aria-hidden="true"></canvas><div class="top"><div><div class="eyebrow">${kaM(m)} · ${m.slice(0,4)}</div><h1>${mLabel(m)}</h1></div>
-   <div class="actions"><button class="btn amber" data-act="report">▶ Monthly report</button><button class="btn" data-act="syncSheet" data-label="↻ Sync sales">↻ Sync sales</button><button class="btn" data-go="add">+ Expense</button></div></div>
+   <div class="actions"><button class="btn amber" data-act="report">▶ ${mLabel(m)} recap</button><button class="btn" data-act="syncSheet" data-label="↻ Sync sales">↻ Sync sales</button><button class="btn" data-go="add">+ Expense</button></div></div>
    <div class="hkpis">
     <div class="hkpi"><div class="lbl">Sales</div><div class="val num">${cu(M.sales)}<small>₾</small></div><div class="delta">${M.orders} orders ${d(M.sales,prevSales)?'· '+d(M.sales,prevSales,false,live?'1–'+day+' '+mShort(addMonth(m,-1)):''):''}</div>${sp('sales')}</div>
     <div class="hkpi"><div class="lbl">Gross profit</div><div class="val num">${cu(M.gross)}<small>₾</small></div><div class="delta">${M.sales?pct(M.gross,M.sales)+'% margin':'—'}${M.est&&M.sales?' · cost estimated':''}${!M.accurate&&M.stock>M.sales*.5?' · '+gel(M.stock)+' of stock bought this month counts here':''}</div>${sp('gross')}</div>
@@ -1881,7 +1875,7 @@ function netChart(ms){
 function vPL(){
   let mode=S.plMode||'month';if(mode==='ytd')mode='range';
   const ms=rangeMonths();const many=ms.length>15;
-  const head=`<div class="pagehead"><div><div class="eyebrow">${mode==='month'?kaM(S.month)+' · '+S.month.slice(0,4):esc(rangeLabel())}</div><h1>Profit &amp; loss</h1></div><div class="actions"><button class="btn amber" data-go="recap">Recap</button><button class="btn" data-act="report">▶ Monthly report</button>${S.downloads?'<button class="btn" data-act="exportXlsx">Download Excel</button>':''}</div></div>
+  const head=`<div class="pagehead"><div><div class="eyebrow">${mode==='month'?kaM(S.month)+' · '+S.month.slice(0,4):esc(rangeLabel())}</div><h1>Profit &amp; loss</h1></div><div class="actions"><button class="btn amber" data-act="report">▶ Recap</button>${S.downloads?'<button class="btn" data-act="exportXlsx">Download Excel</button>':''}</div></div>
    <div class="toolbar"><div class="seg" role="group" aria-label="View"><button data-act="plMode" data-v="month" aria-pressed="${mode==='month'}">${mShort(S.month)} ${S.month.slice(0,4)}</button><button data-act="plMode" data-v="range" aria-pressed="${mode==='range'}">Period</button><button data-act="plMode" data-v="table" aria-pressed="${mode==='table'}">${many?'Year by year':'Month by month'}</button></div></div>
    ${mode==='month'?'':periodBar({noMonth:true})}`;
   if(mode==='table')return loadingOr(head+plTable(ms));
@@ -1916,13 +1910,12 @@ async function exportXlsx(){
 /* ============================== recap ============================== */
 // Last finished month and this year so far: where the money came from, where it went, and the real profit
 // (sales − cost of the items sold − running costs − taxes). Stock bought is shown as an asset.
-function recapPeriod(mode){
+function recapPeriod(mode,m){
   const last=addMonth(thisMonth(),-1);
-  if(mode==='month'){const P=[addMonth(last,-1)];return {ms:[last],label:mLabel(last),eyebrow:'Last month',sub:'1 – '+daysIn(last)+' '+EN_MONTHS[+last.slice(5)-1],cmp:P,cmpLbl:mShort(P[0])}}
-  let y=thisMonth().slice(0,4);let ms=yearMonths(y).filter(m=>m<thisMonth());if(!ms.length){y=String(+y-1);ms=yearMonths(y)}
-  const cmp=ms.map(m=>addMonth(m,-12));
-  const open=ms[ms.length-1]<y+'-12';
-  return {ms,label:y+(open?' so far':''),eyebrow:'This year',sub:mShort(ms[0])+' – '+mShort(ms[ms.length-1])+' '+y+(open?' · '+EN_MONTHS[+thisMonth().slice(5)-1]+' is still running, so it is left out':''),cmp,cmpLbl:mShort(cmp[0])+'–'+mShort(cmp[cmp.length-1])+' '+cmp[0].slice(0,4)}
+  if(mode==='month'){m=m||last;const live=m===thisMonth();const P=[addMonth(m,-1)];return {ms:[m],label:mLabel(m),eyebrow:live?'This month so far':'Monthly recap',sub:live?'1 – '+new Date().getDate()+' '+EN_MONTHS[+m.slice(5)-1]+', month still running':'1 – '+daysIn(m)+' '+EN_MONTHS[+m.slice(5)-1],cmp:P,cmpLbl:mShort(P[0])}}
+  let y=thisMonth().slice(0,4);let ms=yearMonths(y).filter(x=>x<thisMonth());if(!ms.length){y=String(+y-1);ms=yearMonths(y)}
+  const cmp=ms.map(x=>addMonth(x,-12));const open=ms[ms.length-1]<y+'-12';
+  return {ms,label:y+(open?' so far':''),eyebrow:'Year recap',sub:mShort(ms[0])+' – '+mShort(ms[ms.length-1])+' '+y+(open?' · '+EN_MONTHS[+thisMonth().slice(5)-1]+' is still running, so it is left out':''),cmp,cmpLbl:mShort(cmp[0])+'–'+mShort(cmp[cmp.length-1])+' '+cmp[0].slice(0,4)}
 }
 function waterfall(A){
   const st=[];let run=0;
@@ -1952,18 +1945,18 @@ function donut(parts,label){
 }
 function dlegend(parts){const tot=parts.reduce((a,p)=>a+p.v,0);
   return `<div class="dleg">${parts.map(p=>`<div class="li"><i style="background:${p.c}"></i><div class="n">${esc(p.k)}${p.tag?` <span class="rtag ${p.tag[0]}">${p.tag[1]}</span>`:''}${p.sub?`<small>${p.sub}</small>`:''}</div><div class="v">${gel(p.v)}<small>${pct(p.v,tot)}%</small></div></div>`).join('')}</div>`}
-function vRecap(){
-  const mode=S.recap||(S.recap=lsGet('af.recap')==='year'?'year':'month');const R=recapPeriod(mode);const D=R.ms.map(metrics);const A=aggregate(D);A.rows=D.flatMap(d=>d.rows);
-  const C=R.cmp.map(metrics),PA=aggregate(C);const hasCmp=PA.sales>0;
+// Everything the recap window shows for one period: real profit (sales − cost of items sold − running costs −
+// taxes), where the money came from, where it went, and stock as an asset.
+function recapModel(mode,m){
+  const R=recapPeriod(mode,m);const D=R.ms.map(metrics);const A=aggregate(D);A.rows=D.flatMap(d=>d.rows);
+  const PA=aggregate(R.cmp.map(metrics));const hasCmp=PA.sales>0;
   const inR=d=>d&&d.slice(0,7)>=R.ms[0]&&d.slice(0,7)<=R.ms[R.ms.length-1];
   const ch=(a,b,inv)=>{if(!hasCmp||!b)return '';const c=Math.round((a-b)/Math.abs(b)*100);const good=inv?c<=0:c>=0;return `<span class="${good?'up':'down'}">${c>=0?'▲':'▼'} ${Math.abs(c)}%</span> vs ${esc(R.cmpLbl)}`};
   const COL=['var(--c1)','var(--c5)','var(--c4)','var(--c6)','var(--c7)','var(--c8)'];
-  // money in: sales by how customers paid, then other income
   const pays={};A.rows.forEach(r=>{pays[r.pay]=(pays[r.pay]||0)+(+r.a||0)});
   let pin=Object.entries(pays).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);if(pin.length>6){const rest=pin.slice(5).reduce((a,[,v])=>a+v,0);pin=pin.slice(0,5).concat([['other',rest]])}
   const inParts=pin.map(([k,v],i)=>({k:'Sales · '+(k==='unknown'?'payment not recorded':k==='other'?'other ways':PAYS[k]||k),v,c:COL[i]}));
   if(A.otherInc)inParts.push({k:'Other income',v:A.otherInc,c:'var(--c2)'});
-  // money out: stock (an asset), running costs, taxes, loan repayments, owner, and what the loan paid for
   const top3=g=>CATS.filter(c=>c.g===g&&A.by[c.id]).sort((x,y)=>A.by[y.id]-A.by[x.id]).slice(0,3).map(c=>esc(c.en)+' '+fmt(A.by[c.id])).join(' · ');
   const loanSp=[...S.loan.values()].filter(e=>e.kind==='spend'&&inR(e.date));const loanBy={};loanSp.forEach(e=>{const u=LUSE[e.purpose]?.en||'Other';loanBy[u]=(loanBy[u]||0)+(+e.gel||0)});const loanTot=loanSp.reduce((a,e)=>a+(+e.gel||0),0);
   const outParts=[
@@ -1974,97 +1967,76 @@ function vRecap(){
     {k:'Owner & non-Astroman',v:(A.by.owner_draw||0)+(A.by.personal||0),c:'var(--c6)',sub:'Kept out of profit'},
     {k:'Paid from the loan',v:loanTot,c:'var(--c8)',tag:['est','outside profit'],sub:Object.entries(loanBy).sort((a,b)=>b[1]-a[1]).map(([k,v])=>esc(k)+' '+fmt(v)).join(' · ')}
   ].filter(p=>p.v>0);
-  // the stock story
-  const grew=A.stock-A.cogs;
-  const goods=allTx().filter(t=>inR(t.date)&&CAT[t.cat]?.g==='goods');const sup={};goods.forEach(t=>{const k=(t.vendor||catLabel(t.cat)).trim()||catLabel(t.cat);sup[k]=(sup[k]||0)+(+t.gel||0)});
-  const sups=Object.entries(sup).sort((a,b)=>b[1]-a[1]).slice(0,6);const smx=Math.max(1,...sups.map(s=>s[1]));
+  const goods=allTx().filter(t=>inR(t.date)&&CAT[t.cat]?.g==='goods');const sup={};goods.forEach(t=>{const k=(t.vendor||'').trim()||catLabel(t.cat);sup[k]=(sup[k]||0)+(+t.gel||0)});
+  const sups=Object.entries(sup).sort((a,b)=>b[1]-a[1]).slice(0,6);
   let op=null;try{op=opModel()}catch(e){}
-  // costs by category
-  const cats=CATS.filter(c=>['opex','tax'].includes(c.g)&&A.by[c.id]>0).map(c=>({c,v:A.by[c.id],p:PA.by[c.id]||0})).sort((a,b)=>b.v-a.v);const cmx=Math.max(1,...cats.map(r=>r.v));
-  // products from the item reports in this period
+  const cats=CATS.filter(c=>['opex','tax'].includes(c.g)&&A.by[c.id]>0).map(c=>({c,v:A.by[c.id],p:PA.by[c.id]||0})).sort((a,b)=>b.v-a.v);
   // a sale history covering the period beats single monthly reports
   const yd=mode==='year'?[...S.itemsYear.values()].find(d=>d.hasCost&&d.from>=R.ms[0]&&d.to<=R.ms[R.ms.length-1]):null;
   const it=new Map();const addRows=rows=>(rows||[]).forEach(r=>{const k=(r.c||'')+'|'+r.n.toLowerCase();const o=it.get(k)||{n:r.n,q:0,r:0,p:0};o.q+=+r.q||0;o.r+=+r.r||0;o.p+=+r.p||0;it.set(k,o)});
-  if(yd)addRows(yd.rows);else R.ms.forEach(m=>{const d=S.items.get(m);if(d&&d.hasCost)addRows(d.rows)});
-  const best=[...it.values()].sort((a,b)=>b.p-a.p).slice(0,6);const bmx=Math.max(1,...best.map(r=>r.p));const itMs=yd?[]:R.ms.filter(m=>S.items.get(m)?.hasCost);
-  const est=D.filter(d=>d.est&&d.sales>0);
-  const neg=A.net<0;
+  if(yd)addRows(yd.rows);else R.ms.forEach(x=>{const d=S.items.get(x);if(d&&d.hasCost)addRows(d.rows)});
+  const best=[...it.values()].sort((a,b)=>b.p-a.p).slice(0,6);const itMs=yd?[]:R.ms.filter(x=>S.items.get(x)?.hasCost);
+  const est=D.filter(d=>d.est&&d.sales>0);const neg=A.net<0;
   const story=`You sold <b>${gel(A.sales)}</b> of goods in ${fmt(A.orders)} orders. Those items cost about <b>${gel(A.cogs)}</b> to buy${est.length?' (estimated)':''}, leaving <b>${gel(A.gross)}</b> gross profit. Running the shop cost <b>${gel(A.opex)}</b> and taxes <b>${gel(A.tax)}</b>${A.otherInc?`, other income added <b>${gel(A.otherInc)}</b>`:''}, so Astroman ${neg?'lost':'made'} <b>${gel(Math.abs(A.net))}</b>.${A.accurate&&A.stock?` You also put <b>${gel(A.stock)}</b> into new stock. That is on the shelf, not lost.`:''}`;
-  const hero=`<section class="hero"><canvas id="stars" aria-hidden="true"></canvas><div class="top"><div><div class="eyebrow">Recap · ${esc(R.eyebrow)}</div><h1>${esc(R.label)}</h1><p class="lead">${esc(R.sub)}</p></div>
-    <div class="rtog" role="group" aria-label="Recap period"><button data-act="recapMode" data-v="month" aria-pressed="${mode==='month'}">${esc(mLabel(addMonth(thisMonth(),-1)))}</button><button data-act="recapMode" data-v="year" aria-pressed="${mode==='year'}">This year</button></div></div>
-    <div class="rnet"><div><div class="lbl">Real profit</div><div class="big num ${neg?'neg':''}">${cu(A.net)}<small>₾</small></div></div><div class="rnetd">${ch(A.net,PA.net)||'&nbsp;'}<br>${A.sales?pct(A.net,A.sales)+'% of every ₾ sold was kept':''}</div></div>
-    <p class="rstory">${story}</p>
-    <div class="hkpis">
-     <div class="hkpi"><div class="lbl">Sales</div><div class="val num">${cu(A.sales+A.otherInc)}<small>₾</small></div><div class="delta">${ch(A.sales,PA.sales)||fmt(A.orders)+' orders'}</div></div>
-     <div class="hkpi"><div class="lbl">Gross profit</div><div class="val num">${cu(A.gross)}<small>₾</small></div><div class="delta">${A.sales?pct(A.gross,A.sales)+'% margin':'—'}${est.length?' · cost estimated':''}</div></div>
-     <div class="hkpi"><div class="lbl">Running costs</div><div class="val num">${cu(A.opex)}<small>₾</small></div><div class="delta">${ch(A.opex,PA.opex,true)||(A.fixed?'incl. '+gel(A.fixed)+' fixed':'')}</div></div>
-     <div class="hkpi"><div class="lbl">Taxes</div><div class="val num">${cu(A.tax)}<small>₾</small></div><div class="delta">${ch(A.tax,PA.tax,true)}</div></div>
-    </div></section>`;
-  const wf=`<div class="panel"><h2>How the profit was made</h2><p class="sub">Start with sales, take away what the sold items cost, then the costs of running the shop and taxes.</p>${waterfall(A)}</div>`;
-  const io=`<div class="grid g2 mt">
-    <div class="panel"><h2>Money in</h2><p class="sub">What customers paid, by how they paid.${A.ownerIn?' Not counted: '+gel(A.ownerIn)+' you put in yourself.':''}</p>${A.sales+A.otherInc?`<div class="donutwrap">${donut(inParts,'income')}${dlegend(inParts)}</div>`:'<div class="empty">No sales in this period.</div>'}</div>
-    <div class="panel"><h2>Where the money went</h2><p class="sub">Everything that left Astroman's accounts. Only running costs and taxes reduce profit, plus the cost of the items sold.</p>${outParts.length?`<div class="donutwrap">${donut(outParts,'out')}${dlegend(outParts)}</div>`:'<div class="empty">Nothing spent in this period.</div>'}</div></div>`;
-  const stock=`<div class="panel mt"><h2>Stock: an asset, not a loss</h2><p class="sub">Goods you buy fill the shelf. They count against profit only when they are sold.</p>
-    <div class="stockflow"><div><div class="k">Bought</div><div class="v num">${cu(A.stock)}<small> ₾</small></div><em>imports, local buys, freight</em></div>
-     <div><div class="k">Sold, at cost</div><div class="v num">${cu(A.cogs)}<small> ₾</small></div><em>${est.length?'estimated, ':''}what the sold items cost</em></div>
-     <div class="${grew>=0?'pos':'negb'}"><div class="k">${grew>=0?'Added to stock':'Taken from stock'}</div><div class="v num">${cu(Math.abs(grew))}<small> ₾</small></div><em>${grew>=0?'more on the shelf than at the start':'sold more than you bought'}</em></div></div>
-    ${sups.length?`<h3 class="rsub">Biggest suppliers</h3><div class="bars">${sups.map(([k,v])=>`<div class="bar"><div class="name">${esc(k)}</div><div class="track"><div class="fill" style="width:${v/smx*100}%;background:var(--c3)"></div></div><div class="amt num">${gel(v)}</div></div>`).join('')}</div>`:''}
-    ${op&&op.value?`<div class="rshelf"><span>On the shelf now (Optimo stock list${op.D.stock?.at?', '+dLabel(op.D.stock.at.slice(0,10)):''})</span><b class="num">${gel(op.value)}</b><em>at cost · ${fmt(op.units)} pieces · ${gel(op.retail)} at shelf prices</em></div>`:''}
-    ${A.accurate?'':'<p class="hint mt">Settings are set to count stock as a cost when it is paid for. Change “How to calculate profit” in Settings to treat it as an asset.</p>'}</div>`;
-  const costs=`<div class="panel mt"><h2>Running costs and taxes</h2><p class="sub">${gel(A.opex+A.tax)} in total${A.fixed?', including '+gel(A.fixed)+' of fixed monthly costs added automatically':''}.${hasCmp?' Change vs '+esc(R.cmpLbl)+'.':''}</p>${cats.length?`<div class="bars">${cats.map(r=>{const d=r.v-r.p;return `<div class="bar"><div class="name">${esc(r.c.en)}<span>${esc(r.c.ka)}</span></div><div class="track"><div class="fill" style="width:${r.v/cmx*100}%;background:${r.c.g==='tax'?'var(--c4)':'var(--c1)'}"></div></div><div class="amt num">${gel(r.v)}<small>${A.sales?pct(r.v,A.sales)+'% of sales':''}${hasCmp?(r.p?' · '+(d>0?'▲ ':d<0?'▼ ':'')+fmt(Math.abs(d)):' · new'):''}</small></div></div>`}).join('')}</div>`:'<div class="empty">No costs recorded.</div>'}</div>`;
-  const prods=best.length?`<div class="panel mt"><h2>Products that made the most</h2><p class="sub">Profit per item, ${yd?'from the Optimo sale history '+mShort(yd.from)+' – '+mShort(yd.to)+' '+yd.to.slice(0,4):'from the product report'+(itMs.length>1?'s':'')+' for '+itMs.map(mShort).join(', ')}.</p><div class="bars">${best.map(r=>`<div class="bar"><div class="name">${esc(r.n)}</div><div class="track"><div class="fill" style="width:${r.p/bmx*100}%;background:var(--c2)"></div></div><div class="amt num">${gel(r.p)}<small>${fmt(r.q)} sold · ${pct(r.p,r.r)}%</small></div></div>`).join('')}</div></div>`:'';
-  const months=mode==='year'?`<div class="panel mt"><h2>Month by month</h2><p class="sub">Sales against all spending that counts in profit. Below each month: its net profit.</p><div class="chart">${trendChart(R.ms,null)}</div>
-    <div class="tablewrap mt"><table><thead><tr><th>Month</th><th class="r">Sales</th><th class="r">Gross profit</th><th class="r">Running + tax</th><th class="r">Net profit</th><th>Cost of goods</th></tr></thead><tbody>${D.map(d=>`<tr><td>${esc(mLabel(d.m))}</td><td class="r num">${gel(d.sales)}</td><td class="r num">${gel(d.gross)}</td><td class="r num">${gel(d.opex+d.tax)}</td><td class="r num ${d.net<0?'neg':''}">${gel(d.net)}</td><td>${!d.sales?'<span class="muted">—</span>':d.allAccurate?'<span class="rtag">real</span>':d.est?`<span class="rtag est">est. ${Math.round(d.ratio*100)}%</span>`:'<span class="rtag est">stock paid</span>'}</td></tr>`).join('')}
-    <tr class="sum"><td><b>Total</b></td><td class="r num"><b>${gel(A.sales)}</b></td><td class="r num"><b>${gel(A.gross)}</b></td><td class="r num"><b>${gel(A.opex+A.tax)}</b></td><td class="r num ${A.net<0?'neg':''}"><b>${gel(A.net)}</b></td><td></td></tr></tbody></table></div></div>`:'';
-  const lastEst=est.length?est[est.length-1]:null;
-  const sure=`<div class="panel mt"><h2>How exact is this</h2><div class="alerts">${est.length?`<div class="alert warn"><span class="ic">≈</span><div><b>Cost of goods is estimated for ${est.map(d=>mShort(d.m)).join(', ')}</b><div class="muted">No Optimo product report for ${est.length>1?'those months':'that month'}, so the cost ratio of the nearest report is used (${[...new Set(est.map(d=>Math.round(d.ratio*100)+'% from the '+d.estFrom))].map(esc).join('; ')}). Upload the report for exact profit.</div></div><div><button class="btn sm amber" data-act="optFor" data-m="${lastEst.m}">Upload ${mShort(lastEst.m)} report</button></div></div>`:A.sales?`<div class="alert good"><span class="ic">✓</span><div><b>Cost of goods is real for every month</b><div class="muted">Taken from the Optimo product reports.</div></div><div></div></div>`:''}
-    ${A.fixed?`<div class="alert info"><span class="ic">↻</span><div><b>${gel(A.fixed)} of fixed costs are planned amounts</b><div class="muted">Rent, accountant and the other fixed costs are counted automatically until the real payment is imported from the bank.</div></div><div></div></div>`:''}
-    ${loanTot?`<div class="alert info"><span class="ic">₾</span><div><b>${gel(loanTot)} paid from the TBC loan is kept outside profit</b><div class="muted">It is tracked on the Loan page. Loan repayments are shown as money out, not as a cost.</div></div><div><button class="btn sm" data-go="loan">Loan</button></div></div>`:''}</div></div>`;
-  return loadingOr(hero+wf+io+stock+costs+prods+months+sure);
+  return {mode,R,D,A,PA,hasCmp,ch,inParts,outParts,loanTot,loanBy,sups,op,cats,best,yd,itMs,est,neg,story};
 }
-
-/* ============================== monthly report ============================== */
+function recapSlides(X){
+  const {mode,R,D,A,PA,ch,inParts,outParts,loanTot,sups,op,cats,best,yd,itMs,est,neg,story}=X;
+  const a=(i,h)=>`<div class="ra" style="--d:${i*120}ms">${h}</div>`;const n=v=>`<span class="cu" data-v="${+v||0}">0</span>`;
+  const bars=(rows,color)=>{const mx=Math.max(1,...rows.map(r=>Math.abs(r.v)));return `<div class="bars">${rows.map(r=>`<div class="bar"><div class="name" title="${esc(r.k)}">${esc(r.k)}${r.ka?`<span>${esc(r.ka)}</span>`:''}</div><div class="track"><div class="fill" style="width:${Math.max(2,Math.abs(r.v)/mx*100)}%;background:${r.c||color}"></div></div><div class="amt num">${gel(r.v)}${r.sub?`<small>${r.sub}</small>`:''}</div></div>`).join('')}</div>`};
+  const out=[];const add=(t,h)=>out.push([t,h]);
+  add('Real profit',a(0,`<div class="rk">${esc(R.eyebrow)}</div>`)+a(1,`<h2 class="rh">${esc(R.label)}</h2>`)+a(2,`<div class="rl">Real profit</div><div class="rbig num ${neg?'rdown':''}">${n(A.net)}<small> ₾</small></div>`)+a(3,`<div class="rs">${ch(A.net,PA.net)?ch(A.net,PA.net)+' · ':''}${A.sales?pct(A.net,A.sales)+'% of every ₾ sold was kept':''}</div>`)+a(4,`<p class="rstory">${story}</p>`)+a(6,`<div class="rhint">${esc(R.sub)}. Press Next or → to go on.</div>`));
+  let chart='';
+  if(mode==='month'){const m=R.ms[0];const days=daysIn(m),dv=Array(days).fill(0);A.rows.forEach(r=>{if(r.d&&r.d.startsWith(m))dv[+r.d.slice(8)-1]+=+r.a||0});const dmx=Math.max(1,...dv);
+    chart=`<div class="rdays">${dv.map((v,i)=>`<i style="height:${Math.max(2,v/dmx*100)}%;--j:${i}" class="${v>=DAY_TARGET?'hi':''}" title="${i+1} ${mShort(m)}: ${gel(v)}"></i>`).join('')}</div><div class="rhint">Each bar is a day. Gold bars passed ${fmt(DAY_TARGET)} ₾.</div>`}
+  else{const smx=Math.max(1,...D.map(d=>d.sales));chart=`<div class="rmonths">${D.map((d,i)=>`<div><b class="num">${d.sales?fmt(d.sales/1000,1)+'k':''}</b><i class="s" style="height:${Math.max(2,d.sales/smx*100)}%;--j:${i}"></i><span>${mShort(d.m)}</span></div>`).join('')}</div><div class="rhint">Sales per month</div>`}
+  const live=mode==='month'&&R.ms[0]===thisMonth();const per=mode==='month'?(live?new Date().getDate():daysIn(R.ms[0])):R.ms.length;
+  add('Sales',a(0,`<div class="rk">Sales</div>`)+a(1,`<div class="rbig num">${n(A.sales)}<small> ₾</small></div>`)+a(2,`<div class="rs">${ch(A.sales,PA.sales)||'&nbsp;'}</div>`)+a(3,`<div class="rgrid3"><div><b class="num">${n(A.orders)}</b><span>orders</span></div><div><b class="num">${n(A.aov)}</b><span>₾ average order</span></div><div><b class="num">${n(A.sales/Math.max(1,per))}</b><span>₾ per ${mode==='month'?'day':'month'}</span></div></div>`)+a(4,chart));
+  add('How the profit was made',a(0,`<div class="rk">How the profit was made</div>`)+a(1,`<h3 class="rh3">From ${gel(A.sales+A.otherInc)} that came in, ${neg?'there was a loss of '+gel(-A.net):gel(A.net)+' was profit'}</h3>`)+a(2,`<div class="rcard">${waterfall(A)}</div>`)+a(3,`<div class="rhint">${A.allAccurate?'Cost of goods is the real cost of the items sold, from Optimo.':est.length?'Cost of goods is estimated for '+est.map(d=>mShort(d.m)).join(', ')+' from the nearest product report.':A.accurate?'':'Cost of goods is the stock paid for (Settings).'}</div>`));
+  add('Money in',a(0,`<div class="rk">Money in</div>`)+a(1,`<h3 class="rh3">${gel(A.sales+A.otherInc)} came in from customers</h3>`)+a(2,A.sales+A.otherInc?`<div class="rcard"><div class="donutwrap">${donut(inParts,'income')}${dlegend(inParts)}</div></div>`:'<div class="rs">No sales in this period.</div>')+(A.ownerIn?a(3,`<div class="rhint">Not counted as income: ${gel(A.ownerIn)} you put in yourself.</div>`):''));
+  const outTot=outParts.reduce((s,p)=>s+p.v,0);
+  add('Where the money went',a(0,`<div class="rk">Where the money went</div>`)+a(1,`<h3 class="rh3">${gel(outTot)} left Astroman's accounts</h3>`)+a(2,outParts.length?`<div class="rcard"><div class="donutwrap">${donut(outParts,'out')}${dlegend(outParts)}</div></div>`:'<div class="rs">Nothing spent.</div>')+a(3,`<div class="rhint">Only running costs and taxes reduce profit, plus what the sold items cost. Stock bought stays on the shelf as an asset.</div>`));
+  const grew=A.stock-A.cogs;
+  add('Stock',a(0,`<div class="rk">Stock: an asset, not a loss</div>`)+a(1,`<h3 class="rh3">${grew>=0?gel(grew)+' more stock on the shelf':gel(-grew)+' less stock on the shelf'}</h3>`)+a(2,`<div class="stockflow"><div><div class="k">Bought</div><div class="v num">${n(A.stock)}<small> ₾</small></div><em>imports, local buys, freight</em></div><div><div class="k">Sold, at cost</div><div class="v num">${n(A.cogs)}<small> ₾</small></div><em>${est.length?'estimated, ':''}what the sold items cost</em></div><div class="${grew>=0?'pos':'negb'}"><div class="k">${grew>=0?'Added to stock':'Taken from stock'}</div><div class="v num">${n(Math.abs(grew))}<small> ₾</small></div><em>${grew>=0?'more on the shelf than at the start':'sold more than you bought'}</em></div></div>`)+(sups.length?a(3,`<div class="rcard"><h3 class="rsub" style="margin-top:0">Biggest suppliers</h3>${bars(sups.map(([k,v])=>({k,v})),'var(--c3)')}</div>`):'')+(op&&op.value?a(4,`<div class="rhint">On the shelf now (Optimo stock list ${op.D.stock?.at?dLabel(op.D.stock.at.slice(0,10)):''}): <b class="num">${gel(op.value)}</b> at cost, ${gel(op.retail)} at shelf prices.</div>`):''));
+  const ct=cats.slice(0,8);const rest=cats.slice(8).reduce((s,r)=>s+r.v,0);
+  add('Running costs',a(0,`<div class="rk">Running costs &amp; taxes</div>`)+a(1,`<div class="rbig num">${n(A.opex+A.tax)}<small> ₾</small></div>`)+a(2,`<div class="rs">${ch(A.opex+A.tax,PA.opex+PA.tax,true)||'&nbsp;'}${A.fixed?' · '+gel(A.fixed)+' were fixed monthly costs':''}</div>`)+a(3,`<div class="rcard">${ct.length?bars(ct.map(r=>({k:r.c.en,ka:r.c.ka,v:r.v,c:r.c.g==='tax'?'var(--c4)':'var(--c1)',sub:A.sales?pct(r.v,A.sales)+'% of sales':''})),'var(--c1)'):'<div class="rs">No costs recorded.</div>'}${rest?`<div class="rhint">+ ${gel(rest)} in ${cats.length-8} smaller categories</div>`:''}</div>`));
+  if(best.length)add('Products',a(0,`<div class="rk">Products that made the most</div>`)+a(1,`<h3 class="rh3">${esc(best[0].n)} earned the most: ${gel(best[0].p)}</h3>`)+a(2,`<div class="rcard">${bars(best.map(r=>({k:r.n,v:r.p,sub:fmt(r.q)+' sold · '+pct(r.p,r.r)+'%'})),'var(--c2)')}</div>`)+a(3,`<div class="rhint">${yd?'From the Optimo sale history '+mShort(yd.from)+' – '+mShort(yd.to)+' '+yd.to.slice(0,4):'From the product report for '+itMs.map(mShort).join(', ')}.</div>`));
+  if(mode==='month'){const LB=liveBalances();const L=loanInfo();const bank=(LB.bog?.now||0)+(LB.tbc?.now||0);
+    add('Money now',a(0,`<div class="rk">Money now</div>`)+a(1,`<div class="rbig num">${n(bank)}<small> ₾ in the bank</small></div>`)+a(2,`<div class="rgrid2"><div><span>BOG</span><b class="num">${gel(LB.bog?.now||0)}</b></div><div><span>TBC</span><b class="num">${gel(LB.tbc?.now||0)}</b></div>${LB.personal?`<div><span>Your personal account</span><b class="num">${gel(LB.personal.now)}</b></div>`:''}${L?`<div><span>${esc(loanLabel())} · left of ${fmt(L.received)}</span><b class="num">${gel(L.left)}</b></div>`:''}</div>`)+(op&&op.value?a(3,`<div class="rs">Plus <b class="num">${gel(op.value)}</b> of stock at cost on the shelf.</div>`):''))}
+  else add('Month by month',a(0,`<div class="rk">Month by month</div>`)+a(1,`<h3 class="rh3">Best month: ${(()=>{const b=D.slice().sort((x,y)=>y.net-x.net)[0];return esc(mLabel(b.m))+', '+gel(b.net)+' profit'})()}</h3>`)+a(2,`<div class="rcard chart">${trendChart(R.ms,null)}</div>`)+a(3,`<div class="rhint">Blue = sales, gold = everything that counts against profit. Under each month: its net profit.</div>`));
+  const lastEst=est.length?est[est.length-1]:null;const todo=[];
+  if(est.length)todo.push(['warn','≈',`<b>Cost of goods is estimated for ${est.map(d=>mShort(d.m)).join(', ')}</b><div class="muted">${[...new Set(est.map(d=>Math.round(d.ratio*100)+'% from the '+d.estFrom))].map(esc).join('; ')}. Upload the Optimo report for exact profit.</div>`,`<button class="btn sm amber" data-act="optFor" data-m="${lastEst.m}">Upload ${mShort(lastEst.m)} report</button>`]);
+  else if(A.sales)todo.push(['good','✓','<b>Cost of goods is real</b><div class="muted">Taken from the Optimo reports.</div>','']);
+  if(A.fixed)todo.push(['info','↻',`<b>${gel(A.fixed)} of fixed costs are planned amounts</b><div class="muted">Counted automatically until the real payment is imported from the bank.</div>`,'']);
+  if(loanTot)todo.push(['info','₾',`<b>${gel(loanTot)} paid from the TBC loan is kept outside profit</b><div class="muted">Tracked on the Loan page.</div>`,'<button class="btn sm" data-go="loan">Loan</button>']);
+  const noSales=D.filter(d=>!d.hasSales&&d.list.length);if(noSales.length)todo.push(['bad','!',`<b>No sales loaded for ${noSales.map(d=>mShort(d.m)).join(', ')}</b><div class="muted">Those months show only costs.</div>`,'<button class="btn sm" data-go="sales">Sales</button>']);
+  add('How exact',a(0,`<div class="rk">How exact is this</div>`)+a(1,`<div class="alerts">${todo.map(([c,i,t,b])=>`<div class="alert ${c}"><span class="ic">${i}</span><div>${t}</div><div>${b}</div></div>`).join('')}</div>`)+a(2,`<div class="row" style="margin-top:22px;gap:10px;flex-wrap:wrap"><button class="btn amber" data-act="recapClose">Close</button>${mode==='month'?'<button class="btn" data-act="recapMode" data-v="year">See the whole year →</button>':''}</div>`));
+  return out;
+}
 let REP=null;
-function openReport(m){
-  const M=metrics(m),P=metrics(addMonth(m,-1)),Y=ytdOf(m),A=Y.A;const bal=S.cfg.balances||{};const L=loanInfo();const items=S.items.get(m);
-  const ch=(a,b,inv)=>{if(!b)return '';const c=Math.round((a-b)/Math.abs(b)*100);const good=inv?c<=0:c>=0;return `<span class="${good?'rup':'rdown'}">${c>=0?'▲':'▼'} ${Math.abs(c)}% vs ${EN_MONTHS[+addMonth(m,-1).slice(5)-1]}</span>`};
-  const n=v=>`<span class="cu" data-v="${+v||0}">0</span>`;
-  const a=(i,html,cls='')=>`<div class="ra ${cls}" style="--d:${i*140}ms">${html}</div>`;
-  const slides=[];
-  slides.push(a(0,`<div class="rk">Astroman · monthly report</div>`)+a(1,`<h2 class="rh">${mLabel(m)}</h2>`)+a(2,`<div class="rl">Net profit</div><div class="rbig num ${M.net<0?'rdown':''}">${n(M.net)}<small> ₾</small></div>`)+a(3,`<div class="rs">Sales ${gel(M.sales)} · ${M.orders} orders · ${M.sales?pct(M.net,M.sales):0}% kept as profit</div>`)+a(5,`<div class="rhint">Tap or press → to continue</div>`));
-  const days=daysIn(m),dv=Array(days).fill(0);M.rows.forEach(r=>{if(r.d&&r.d.startsWith(m))dv[+r.d.slice(8)-1]+=r.a});const dmx=Math.max(1,...dv);
-  slides.push(a(0,`<div class="rk">Sales</div>`)+a(1,`<div class="rbig num">${n(M.sales)}<small> ₾</small></div>`)+a(2,`<div class="rs">${ch(M.sales,P.sales)}</div>`)+a(3,`<div class="rgrid3"><div><b class="num">${n(M.orders)}</b><span>orders</span></div><div><b class="num">${n(M.aov)}</b><span>₾ average order</span></div><div><b class="num">${n(M.sales/days)}</b><span>₾ per day</span></div></div>`)+a(4,`<div class="rdays">${dv.map((v,i)=>`<i style="height:${Math.max(2,v/dmx*100)}%;--j:${i}" class="${v>=1000?'hi':''}"></i>`).join('')}</div><div class="rhint">Each bar is a day. Gold bars passed 1,000 ₾.</div>`));
-  const steps=[[M.otherInc?'Sales + other income':'Sales',M.sales+M.otherInc,'s'],['Cost of goods',-M.cogs,'c'],['Running costs',-M.opex,'c'],['Taxes',-M.tax,'c'],['Net profit',M.net,'t']];const base=Math.max(1,M.sales+M.otherInc);
-  slides.push(a(0,`<div class="rk">Where every lari went</div>`)+a(1,`<h3 class="rh3">From ${gel(M.sales+M.otherInc)} in, ${gel(M.net)} was profit</h3>`)+steps.map(([k,v,t],i)=>a(i+2,`<div class="rw ${t}"><span>${k}</span><div class="rwb"><i style="width:${Math.max(1,Math.abs(v)/base*100)}%"></i></div><b class="num">${v<0?'−':''}${fmt(Math.abs(v))}</b></div>`)).join('')+a(8,`<div class="rhint">${M.allAccurate?'Cost of goods is the real cost of the items sold, from Optimo.':M.est?'Cost of goods is estimated at '+Math.round(M.ratio*100)+'% of sales, from the '+esc(M.estFrom)+'. Stock bought is an asset, not a cost.':'Cost of goods is the stock paid for this month.'}</div>`));
-  const cats=CATS.filter(c=>['opex','tax'].includes(c.g)&&M.by[c.id]).map(c=>[c.en,M.by[c.id]]).sort((x,y)=>y[1]-x[1]).slice(0,6);const cmx=Math.max(1,...cats.map(c=>c[1]));
-  slides.push(a(0,`<div class="rk">Running costs &amp; taxes</div>`)+a(1,`<div class="rbig num">${n(M.opex+M.tax)}<small> ₾</small></div>`)+a(2,`<div class="rs">${ch(M.opex+M.tax,P.opex+P.tax,true)}${M.fixed?' · '+gel(M.fixed)+' were fixed costs':''}</div>`)+cats.map(([k,v],i)=>a(i+3,`<div class="rw c"><span>${esc(k)}</span><div class="rwb"><i style="width:${v/cmx*100}%"></i></div><b class="num">${fmt(v)}</b></div>`)).join(''));
-  if(items&&items.rows?.length){const best=items.rows.slice().sort((x,y)=>y.p-x.p).slice(0,5);const thin=items.rows.filter(r=>r.r>=100).sort((x,y)=>x.p/x.r-y.p/y.r).slice(0,3);const bmx=Math.max(1,...best.map(r=>r.p));
-    slides.push(a(0,`<div class="rk">Products</div>`)+a(1,`<h3 class="rh3">${fmt(items.qty)} items sold · ${pct(items.revenue-items.cost,items.revenue)}% margin</h3>`)+a(2,`<div class="rl">Made the most profit</div>`)+best.map((r,i)=>a(i+3,`<div class="rw s"><span>${esc(r.n)}</span><div class="rwb"><i style="width:${r.p/bmx*100}%"></i></div><b class="num">${fmt(r.p)}</b></div>`)).join('')+(thin.length?a(9,`<div class="rl" style="margin-top:18px">Thinnest margin</div><div class="rs">${thin.map(r=>esc(r.n)+' '+pct(r.p,r.r)+'%').join(' · ')}</div>`):''))}
-  const LB=liveBalances();const bank=(LB.bog?.now||0)+(LB.tbc?.now||0);const pers=LB.personal?LB.personal.now:M.rows.filter(r=>['cash','personal','cod'].includes(r.pay)).reduce((x,r)=>x+r.a,0);
-  slides.push(a(0,`<div class="rk">Money now</div>`)+a(1,`<div class="rbig num">${n(bank)}<small> ₾ in the bank</small></div>`)+a(2,`<div class="rgrid2"><div><span>BOG</span><b class="num">${gel(LB.bog?.now||0)}</b></div><div><span>TBC</span><b class="num">${gel(LB.tbc?.now||0)}</b></div><div><span>${LB.personal?'Your personal account now':'Your personal account ('+mShort(m)+' sales)'}</span><b class="num">${gel(pers)}</b></div>${L?`<div><span>${esc(loanLabel())} · left of ${fmt(L.received)}</span><b class="num">${gel(L.left)}</b></div>`:''}</div>`)+a(4,`<div class="rs">Cash left in the business this month: <b class="num">${gel(M.cash)}</b></div>`));
-  const yd=Y.D;const ymx=Math.max(1,...yd.map(d=>Math.abs(d.net)));
-  slides.push(a(0,`<div class="rk">${m.slice(0,4)} so far</div>`)+a(1,`<div class="rgrid3"><div><b class="num">${n(A.sales+A.otherInc)}</b><span>₾ revenue</span></div><div><b class="num">${n(A.cogs+A.opex+A.tax)}</b><span>₾ expenses</span></div><div><b class="num ${A.net<0?'rdown':''}">${n(A.net)}</b><span>₾ net profit</span></div></div>`)+a(3,`<div class="rmonths">${yd.map((d,i)=>`<div><i class="${d.net<0?'neg':''}" style="height:${Math.max(3,Math.abs(d.net)/ymx*100)}%;--j:${i}"></i><span>${mShort(d.m)}</span></div>`).join('')}</div><div class="rhint">Net profit per month</div>`));
-  const todo=[];if(!M.hasSales)todo.push('Sync sales from the order sheet');if(!items)todo.push('Upload the Optimo item report');if(items&&Math.abs(M.sales-items.revenue)>=50)todo.push(gel(Math.abs(M.sales-items.revenue))+' difference between Optimo and the order sheet');
-  const unk=M.rows.filter(r=>r.pay==='unknown').length;if(unk)todo.push(unk+' sales without a payment method');if(M.fixed)todo.push(gel(M.fixed)+' of fixed costs are estimates until the real payments are imported');
-  slides.push(a(0,`<div class="rk">To finish ${EN_MONTHS[+m.slice(5)-1]}</div>`)+(todo.length?todo.map((t,i)=>a(i+1,`<div class="rtodo"><i>${i+1}</i>${t}</div>`)).join(''):a(1,`<h3 class="rh3">Nothing missing. The month is complete.</h3>`))+a(todo.length+2,`<button class="btn amber" id="repDone" style="margin-top:18px">Close report</button>`));
-  $('#modalRoot').innerHTML=`<div class="rep" id="rep" role="dialog" aria-modal="true" aria-label="Monthly report ${mLabel(m)}"><canvas id="repStars" aria-hidden="true"></canvas>
-   <div class="rep-bar">${slides.map(()=>'<i><b></b></i>').join('')}</div>
-   <div class="rep-top"><span>${mLabel(m)}</span><span class="spacer"></span><button class="rep-btn" id="repPause" aria-label="Pause">❚❚</button><button class="rep-btn" id="repClose" aria-label="Close">✕</button></div>
-   <div class="rep-stage">${slides.map((s,i)=>`<section class="slide" data-i="${i}">${s}</section>`).join('')}</div>
-   <button class="rep-nav prev" id="repPrev" aria-label="Previous"></button><button class="rep-nav next" id="repNext" aria-label="Next"></button></div>`;
-  REP={i:-1,n:slides.length,paused:false,t:0};starfield($('#repStars'));
-  $('#repClose').onclick=closeReport;$('#repDone').onclick=closeReport;$('#repNext').onclick=()=>repGo(REP.i+1);$('#repPrev').onclick=()=>repGo(REP.i-1);
-  $('#repPause').onclick=()=>{REP.paused=!REP.paused;$('#repPause').textContent=REP.paused?'▶':'❚❚';$('#rep').classList.toggle('paused',REP.paused);if(!REP.paused)repTimer()};
-  document.addEventListener('keydown',repKey);repGo(0);
+function openRecap(mode,m){
+  mode=mode||'month';m=m||addMonth(thisMonth(),-1);const X=recapModel(mode,m);const slides=recapSlides(X);const last=addMonth(thisMonth(),-1);
+  $('#modalRoot').innerHTML=`<div class="rep" id="rep" role="dialog" aria-modal="true" aria-label="Recap ${esc(X.R.label)}"><canvas id="repStars" aria-hidden="true"></canvas>
+   <div class="rep-top"><div class="rtog" role="group" aria-label="Period"><button data-act="recapMode" data-v="month" aria-pressed="${mode==='month'}">${esc(mLabel(mode==='month'?m:last))}</button><button data-act="recapMode" data-v="year" aria-pressed="${mode==='year'}">This year</button></div><span class="spacer"></span><button class="rep-btn" data-act="recapClose" aria-label="Close">✕</button></div>
+   <div class="rep-bar">${slides.map(([t],i)=>`<button data-rep="${i}" aria-label="${i+1}: ${esc(t)}"><b></b></button>`).join('')}</div>
+   <div class="rep-stage" id="repStage">${slides.map(([,h],i)=>`<section class="slide" data-i="${i}"><div class="slide-in">${h}</div></section>`).join('')}</div>
+   <div class="rep-foot"><button class="btn rep-back" id="repPrev">← Back</button><span class="rep-count"><b id="repN">1</b> / ${slides.length} · <span id="repT"></span></span><button class="btn amber rep-next" id="repNext">Next →</button></div></div>`;
+  REP={mode,m,i:-1,n:slides.length,titles:slides.map(s=>s[0])};starfield($('#repStars'));
+  document.querySelectorAll('#rep [data-act]').forEach(b=>b.onclick=e=>act(b.dataset.act,b,e));
+  $('#repNext').onclick=()=>repGo(REP.i+1);$('#repPrev').onclick=()=>repGo(REP.i-1);
+  document.querySelectorAll('#rep [data-rep]').forEach(b=>b.onclick=()=>repGo(+b.dataset.rep));
+  let sx=null,sy=0;const st=$('#repStage');
+  st.addEventListener('pointerdown',e=>{sx=e.target.closest('.scrollx,.bar,button')?null:e.clientX;sy=e.clientY});
+  st.addEventListener('pointerup',e=>{if(sx==null)return;const dx=e.clientX-sx,dy=e.clientY-sy;sx=null;if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5)repGo(REP.i+(dx<0?1:-1))});
+  document.removeEventListener('keydown',repKey);document.addEventListener('keydown',repKey);repGo(0);
 }
-const REP_MS=7000;
-function repTimer(){clearTimeout(REP.t);if(REP.paused||REP.i>=REP.n-1)return;REP.t=setTimeout(()=>repGo(REP.i+1),REP_MS)}
-function repGo(i){if(!REP)return;if(i<0)i=0;if(i>=REP.n){closeReport();return}REP.i=i;
-  document.querySelectorAll('#rep .slide').forEach((s,k)=>{s.classList.toggle('on',k===i);s.classList.toggle('past',k<i)});
-  document.querySelectorAll('#rep .rep-bar i').forEach((b,k)=>{b.className=k<i?'done':k===i?'cur':'';if(k===i){const x=b.firstChild;x.style.animation='none';void x.offsetWidth;x.style.animation=''}});
-  $('#rep').classList.toggle('last',i===REP.n-1);const cur=document.querySelector(`#rep .slide[data-i="${i}"]`);if(cur)countUp(cur);repTimer()}
-function repKey(e){if(!REP)return;if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();repGo(REP.i+1)}else if(e.key==='ArrowLeft')repGo(REP.i-1);else if(e.key==='Escape')closeReport()}
-function closeReport(){if(REP)clearTimeout(REP.t);REP=null;document.removeEventListener('keydown',repKey);$('#modalRoot').innerHTML=''}
+function repGo(i){if(!REP)return;if(i>=REP.n){closeRecap();return}i=Math.max(0,i);if(i===REP.i)return;REP.i=i;
+  document.querySelectorAll('#rep .slide').forEach((s,k)=>{s.classList.toggle('on',k===i);if(k===i)s.scrollTop=0});
+  document.querySelectorAll('#rep .rep-bar button').forEach((b,k)=>b.className=k<i?'done':k===i?'cur':'');
+  $('#repN').textContent=i+1;$('#repT').textContent=REP.titles[i];$('#repPrev').disabled=i===0;$('#repNext').textContent=i===REP.n-1?'Done':'Next →';
+  const cur=document.querySelector(`#rep .slide[data-i="${i}"]`);if(cur&&!reduced())countUp(cur);else if(cur)cur.querySelectorAll('.cu').forEach(c=>c.textContent=fmt(+c.dataset.v))}
+function repKey(e){if(!REP)return;if(e.key==='ArrowRight'){e.preventDefault();repGo(REP.i+1)}else if(e.key==='ArrowLeft')repGo(REP.i-1);else if(e.key==='Escape')closeRecap()}
+function closeRecap(){REP=null;document.removeEventListener('keydown',repKey);$('#modalRoot').innerHTML=''}
 
 /* ============================== imports ============================== */
 function vImports(){
@@ -2493,7 +2465,9 @@ async function act(a,b){
   if(a==='prodFull'){S.prod.full=true;return render()}
   if(a==='prodAll'){S.prod.full=false;S.prod.all=b.dataset.v==='1';S.animate=true;return render()}
   if(a==='prodTab'){S.prod.tab=b.dataset.v;const D=prodData(S.prod.all?rangeMonths():[S.month]);document.querySelectorAll('[data-act="prodTab"]').forEach(x=>x.setAttribute('aria-selected',x===b));const el=$('#rankBars');el.innerHTML=rankBars(rankItems(D.rows,S.prod.tab),S.prod.tab);if(!reduced()){el.parentElement.classList.add('anim');el.querySelectorAll('.fill').forEach((f,j)=>f.style.setProperty('--j',j))}return}
-  if(a==='report')return openReport(S.month);
+  if(a==='report')return openRecap('month',S.month);
+  if(a==='recap')return openRecap('month');
+  if(a==='recapClose')return closeRecap();
   if(a==='plMode'){S.plMode=b.dataset.v;S.animate=true;return render()}
   if(a==='plYtd'||a==='plRange'){S.plMode='range';return go('pl')}
   if(a==='range'){const p=b.dataset.p;const R={p};if(p==='custom'){const ms=rangeMonths();R.from=ms[0];R.to=ms[ms.length-1]}if(p==='month'&&S.view==='pl'){S.plMode='month'}return setRange(R)}
@@ -2502,8 +2476,8 @@ async function act(a,b){
   if(a==='psFilter'){S.prod.sf=b.dataset.v;S.prod.sfull=false;return render()}
   if(a==='psFull'){S.prod.sfull=true;return render()}
   if(a==='shipFromTx'){const t=S.tx.get(b.dataset.id);if(!t)return;const u=usdOfTx(t);return shipModal(null,{date:t.date,item:(t.vendor||'Import')+' order',usd:u||Math.round(t.gel/fx()*100)/100,fx:u?Math.round(t.gel/u*10000)/10000:fx(),forwarder:'',status:'ordered',txId:t.id,note:'Paid '+t.date+' · '+gel(t.gel,2)})}
-  if(a==='recapMode'){S.recap=b.dataset.v;lsSet('af.recap',S.recap);S.animate=true;return render()}
-  if(a==='optFor'){S.opt={stage:'upload',month:b.dataset.m};return go('products')}
+  if(a==='recapMode')return openRecap(b.dataset.v,REP?.mode==='month'?REP.m:undefined);
+  if(a==='optFor'){closeRecap();S.opt={stage:'upload',month:b.dataset.m};return go('products')}
   if(a==='filterCat'){S.filters.q=catLabel(b.dataset.cat);S.filters.all=false;return go('expenses')}
   if(a==='filterFixed'){S.filters.q='';S.filters.all=false;return go('expenses')}
   if(a==='saveGeneral'){await saveCfg({fx:parseNum($('#cFx').value)||2.7,method:$('#cMethod').value,sheetId:$('#cSheet').value.trim()});return toast('Settings saved')}
