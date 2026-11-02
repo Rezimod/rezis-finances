@@ -1223,7 +1223,7 @@ function liveBalances(){
   for(const t of S.tx.values()){const o=out[t.account==='cash'&&cashToPers?'personal':t.account];if(!o||!t.date)continue;
     const after=t.date>o.asOf||(t.date===o.asOf&&t.source!=='bank'&&o.at&&(t.createdAt||'')>o.at);if(!after)continue;
     const g=CAT[t.cat]?.g;if(g==='ignore')continue;if(g==='income'||g==='inflow')o.inn+=+t.gel||0;else o.spent+=+t.gel||0}
-  const tb=out.tbc;if(tb)for(const e of S.loan.values()){if(e.count||!e.date||e.date<=tb.asOf)continue;tb.loan+=loanPotDelta(e,'tbc')}
+  const tb=out.tbc;if(tb)for(const e of S.loan.values()){if(!e.date||e.date<=tb.asOf)continue;tb.loan+=loanPotDelta(e,'tbc')}
   Object.values(out).forEach(o=>o.now=o.base+o.sales+o.inn-o.spent+o.loan);
   S.mc.set('#bal',out);return out;
 }
@@ -1236,7 +1236,7 @@ function moneyNow(m,M){
   const tot=Object.values(B).reduce((x,o)=>x+o.now,0);
   const fold=!B.cash&&payAcct('cash')==='personal';
   return `<div class="money">${BAL_ACC.filter(x=>!(fold&&x[0]==='cash')).map(x=>fold&&x[0]==='personal'?[x[0],'Rezi personal + cash',x[2]]:x).map(card).join('')}
-   <div class="mcard" data-go="loan" style="--c:#7C5CDB;cursor:pointer"><div class="lbl"><span>${esc(loanLabel())}</span><span class="hint">kept separate</span></div>${L?`<div class="val num">${cu(L.left)}<small>₾ left</small></div><div class="bar2"><i style="width:${Math.min(100,L.out/Math.max(1,L.received)*100)}%"></i></div><div class="parts">Out ${gel(L.out)} of ${gel(L.received)} · TBC ${fmt(L.pot.tbc)} · cash ${fmt(L.pot.cash)}</div>`:`<div class="val">—</div><div class="parts">Open the Loan page to add it.</div>`}</div>
+   <div class="mcard" data-go="loan" style="--c:#7C5CDB;cursor:pointer"><div class="lbl"><span>${esc(loanLabel())}</span><span class="hint">kept separate</span></div>${L?`<div class="val num">${cu(L.left)}<small>₾ left</small></div><div class="bar2"><i style="width:${Math.min(100,L.out/Math.max(1,L.received)*100)}%"></i></div><div class="parts">Out ${gel(L.out)} of ${gel(L.received)} · on TBC ${fmt(L.onTbc)}${L.offTbc>=1?' · off TBC '+fmt(L.offTbc):''}</div>`:`<div class="val">—</div><div class="parts">Open the Loan page to add it.</div>`}</div>
   </div>${Object.keys(B).length>1?`<p class="hint" style="margin:-8px 0 16px">All accounts together: <b class="num">${gel(tot)}</b>. Balances move with every sale and expense dated after the amount was set.</p>`:''}`;
 }
 function trendChart(ms,cur){
@@ -1781,8 +1781,8 @@ function bankBuild(){
   const B=S.bank,mp=B.map;const rules=[...[...S.rules.values()].map(r=>[r.match,r.cat,r.vendor||'',r.dir||'']),...DEFAULT_RULES];
   const loanE=[...S.loan.values()];
   const existing=new Set([...S.tx.values(),...loanE].map(t=>t.bankKey).filter(Boolean));
-  const loanNames=[...new Set(loanE.filter(e=>e.kind!=='move'&&(e.what||'').length>=4).map(e=>e.what.toLowerCase()))];
-  const onLoan=(amt,date)=>loanE.some(e=>e.pot===B.acct&&e.kind!=='move'&&!e.count&&Math.abs((+e.gel||0)-amt)<0.01&&Math.abs(new Date(e.date)-new Date(date))<=3*864e5);
+  const loanNames=[...new Set(loanE.filter(e=>(e.what||'').length>=4).map(e=>e.what.toLowerCase()))];
+  const onLoan=(amt,date)=>loanE.some(e=>e.pot===B.acct&&Math.abs((+e.gel||0)-amt)<0.01&&Math.abs(new Date(e.date)-new Date(date))<=3*864e5);
   const items=[];const posFee={};let lastDate='';
   for(const r of B.rows){
     const p=parseDateCell(r[mp.date]);if(!p||!p.m)continue;const y=p.y||new Date().getFullYear();
@@ -2120,53 +2120,60 @@ function vSettings(){
 
 /* ============================== loan ============================== */
 // The bank loan has its own ledger (collection `loan`), never mixed into the shop's books:
-// the money received, every payment made with it, repayments to the bank, and money moved between TBC and cash.
-// Entry {date, kind:'in'|'spend'|'repay'|'move', pot:'tbc'|'cash', to, gel, what, purpose, part, note, count, bankKey}
+// the money received, every payment made with it and repayments to the bank.
+// Entry {date, kind:'in'|'spend'|'repay', pot:'tbc'|'cash', gel, what, purpose, part, note, bankKey}
+// Cash in hand is a number Rezi types (cfg.loan.cash {gel,date}); it is shown on its own and never changes the loan numbers.
 const POTS={tbc:'TBC',cash:'Cash'};
 const LOAN_USE=[{id:'dev',en:'Developers',ka:'დეველოპერები'},{id:'software',en:'AI tools & software',ka:'პროგრამები'},{id:'goods',en:'Goods & stock',ka:'საქონელი'},{id:'bank',en:'Bank fees',ka:'საკომისიო'},{id:'other',en:'Other',ka:'სხვა'}];
 const LUSE=Object.fromEntries(LOAN_USE.map(u=>[u.id,u]));
-const LKIND={spend:'Payment',repay:'Repayment',move:'Cash move',in:'Loan received'};
+const LKIND={spend:'Payment',repay:'Repayment',in:'Loan received'};
 const loanLabel=()=>S.cfg.loan?.label||'Loan';
-function loanPotDelta(e,pot){const v=+e.gel||0;if(e.kind==='in')return e.pot===pot?v:0;if(e.kind==='move')return (e.to===pot?v:0)-(e.pot===pot?v:0);return e.pot===pot?-v:0}
+function loanPotDelta(e,pot){const v=+e.gel||0;if(e.pot!==pot)return 0;return e.kind==='in'?v:-v}
 function loanInfo(){
   if(S.mc.has('#loan'))return S.mc.get('#loan');
   let r=null;
-  if(S.loan.size){r={received:0,spent:0,interest:0,principal:0,pot:{tbc:0,cash:0},by:{},byMonth:{},start:'',count:null};
-    for(const e of S.loan.values()){const v=+e.gel||0;r.pot.tbc+=loanPotDelta(e,'tbc');r.pot.cash+=loanPotDelta(e,'cash');
+  if(S.loan.size){r={received:0,spent:0,interest:0,principal:0,fromPot:{tbc:0,cash:0},by:{},byMonth:{},start:''};
+    for(const e of S.loan.values()){const v=+e.gel||0;
       if(e.kind==='in'){r.received+=v;if(!r.start||e.date<r.start)r.start=e.date}
-      else if(e.kind==='move'){if(e.count&&(!r.count||e.date>=r.count.date))r.count=e}
-      else{const m=(e.date||'').slice(0,7);r.byMonth[m]=(r.byMonth[m]||0)+v;
+      else{r.fromPot[e.pot==='cash'?'cash':'tbc']+=v;const m=(e.date||'').slice(0,7);r.byMonth[m]=(r.byMonth[m]||0)+v;
         if(e.kind==='repay'){if(e.part==='interest')r.interest+=v;else r.principal+=v}
         else{r.spent+=v;const u=LUSE[e.purpose]?e.purpose:'other';r.by[u]=(r.by[u]||0)+v}}}
-    r.repaid=r.interest+r.principal;r.out=r.spent+r.repaid;r.left=r.received-r.out;r.owed=r.received-r.principal}
+    r.repaid=r.interest+r.principal;r.out=r.spent+r.repaid;r.left=r.received-r.out;r.owed=r.received-r.principal;
+    // where the rest is: the TBC balance is a bank fact; loan money not on TBC any more was taken off it
+    const tb=liveBalances().tbc;r.tbcNow=tb?tb.now:null;r.tbcAsOf=tb?tb.asOf:'';
+    r.onTbc=tb?Math.max(0,Math.min(r.left,tb.now)):r.left;r.offTbc=r.left-r.onTbc;r.shopOnTbc=tb?Math.max(0,tb.now-r.left):0}
   S.mc.set('#loan',r);return r;
 }
+const loanCash=()=>{const c=S.cfg.loan?.cash;return c&&c.gel!=null?c:null};
 function vLoan(){
   const L=loanInfo();const day=d=>d?new Date(d+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
   const w=S.canWrite?'':'disabled';
   const head=`<div class="pagehead"><div><div class="eyebrow">სესხი · kept apart from the shop's books</div><h1>${esc(loanLabel())}</h1><p>${L?`${gel(L.received)} received${L.start?' on '+day(L.start):''}. Every payment made with it, and where the rest is now.`:'What came in, what was paid with it, and where the rest is.'}</p></div><div class="actions"><button class="btn amber" data-act="loanNew" ${w}>+ Loan entry</button></div></div>`;
   if(!L)return loadingOr(head+`<div class="panel empty"><b>No loan recorded yet</b>Start with the money you received.<div class="mt"><button class="btn primary" data-act="loanNew" data-kind="in" ${w}>Add loan received</button></div></div>`);
+  const C=loanCash();
   const kpis=`<div class="kpis">
-   <div class="kpi"><div class="lbl">Left</div><div class="val num">${cu(L.left)}<small>₾</small></div><div class="delta">${gel(L.out)} out · ${pct(L.out,L.received)}% used</div></div>
-   <div class="kpi"><div class="lbl">On TBC</div><div class="val num ${L.pot.tbc<0?'neg':''}">${cu(L.pot.tbc)}<small>₾</small></div><div class="delta">loan money on the account</div></div>
-   <div class="kpi"><div class="lbl">In cash</div><div class="val num ${L.pot.cash<0?'neg':''}">${cu(L.pot.cash)}<small>₾</small></div><div class="delta">${L.count?'counted '+day(L.count.date):'<span class="down">not counted yet</span>'}</div></div>
-   <div class="kpi"><div class="lbl">Still owed</div><div class="val num">${cu(L.owed)}<small>₾</small></div><div class="delta">${gel(L.principal)} paid back · ${gel(L.interest)} interest</div></div></div>`;
+   <div class="kpi"><div class="lbl">Total loan</div><div class="val num">${cu(L.received)}<small>₾</small></div><div class="delta">${L.start?'received '+day(L.start)+' on TBC':'received'}</div></div>
+   <div class="kpi"><div class="lbl">Spent</div><div class="val num">${cu(L.out)}<small>₾</small></div><div class="delta">${pct(L.out,L.received)}% used · ${gel(L.repaid)} back to the bank</div></div>
+   <div class="kpi"><div class="lbl">Left</div><div class="val num ${L.left<0?'neg':''}">${cu(L.left)}<small>₾</small></div><div class="delta">${gel(L.onTbc)} on TBC${L.offTbc>=1?' · '+gel(L.offTbc)+' off TBC':''}</div></div></div>`;
   const uses=LOAN_USE.filter(u=>L.by[u.id]).map(u=>({n:u.en,ka:u.ka,v:L.by[u.id]})).sort((a,b)=>b.v-a.v);
   if(L.interest)uses.push({n:'Bank interest',ka:'პროცენტი',v:L.interest});if(L.principal)uses.push({n:'Paid back to the bank',ka:'ძირი',v:L.principal});
   const max=Math.max(1,...uses.map(x=>x.v));
   const months=Object.keys(L.byMonth).sort();
   const went=`<div class="panel"><h2>Where it went</h2><p class="sub">${gel(L.out)} of ${gel(L.received)}.</p>${uses.length?`<div class="bars">${uses.map(x=>`<div class="bar"><div class="name">${esc(x.n)}<span>${esc(x.ka)}</span></div><div class="track"><div class="fill" style="width:${x.v/max*100}%;background:#7C5CDB"></div></div><div class="amt num">${gel(x.v)}<small>${pct(x.v,L.out)}%</small></div></div>`).join('')}</div>`:'<div class="empty">Nothing paid from the loan yet.</div>'}
    ${months.length?`<div class="flow mt">${months.map(m=>`<div class="ln"><span class="k">${mLabel(m)}</span><span class="v num">${gel(L.byMonth[m])}</span></div>`).join('')}</div>`:''}</div>`;
-  const B=liveBalances().tbc;const diff=B?B.now-L.pot.tbc:0;
-  const rest=`<div class="panel stack"><h2>Where the rest is</h2>
-   <div class="flow"><div class="ln"><span class="k">On TBC</span><span class="v num">${gel(L.pot.tbc)}</span></div><div class="ln"><span class="k">In cash</span><span class="v num">${gel(L.pot.cash)}</span></div><div class="ln total"><span class="k">Left</span><span class="v num">${gel(L.left)}</span></div></div>
-   ${B?`<p class="hint" style="margin:0">The TBC account shows <b class="num">${gel(B.now)}</b> on the Overview. ${Math.abs(diff)<1?'That matches the loan money on it.':diff>0?`That is ${gel(diff)} more than the loan money on it: shop money on TBC, or a cash count that is out of date.`:`That is ${gel(-diff)} less: a payment or cash withdrawal is missing here, or the cash count is out of date.`}</p>`:''}
-   <label class="field"><span>Loan cash in hand now, ₾</span><input class="input num" id="lnCash" inputmode="decimal" placeholder="${fmt(Math.max(0,L.pot.cash))}"></label>
-   <div class="row"><button class="btn primary" data-act="loanCount" ${w}>Save cash count</button></div>
-   <p class="hint" style="margin:0">Count the loan cash and type it here. The difference is recorded as cash taken from (or put back on) TBC, so TBC plus cash always equals what is left.</p></div>`;
+  const rest=`<div class="stack"><div class="panel stack"><h2>Where the rest is</h2><p class="sub">${gel(L.left)} left of ${gel(L.received)}.</p>
+   <div class="flow"><div class="ln"><span class="k">On TBC<div class="small muted">${L.tbcNow==null?'no TBC balance in Settings yet, so all of it is counted here':'TBC balance now'+(L.tbcAsOf?', statement of '+day(L.tbcAsOf)+' plus payments since':'')}</div></span><span class="v num">${gel(L.onTbc)}</span></div>
+    <div class="ln"><span class="k">Taken off TBC<div class="small muted">loan money no longer on the account: cash withdrawals, or payments without a loan entry</div></span><span class="v num">${gel(L.offTbc)}</span></div>
+    <div class="ln total"><span class="k">Left</span><span class="v num">${gel(L.left)}</span></div></div>
+   ${L.shopOnTbc>=1?`<p class="hint" style="margin:0">TBC shows ${gel(L.tbcNow)}: that is ${gel(L.shopOnTbc)} more than the loan money left, so the extra is shop money.</p>`:''}
+   ${L.fromPot.cash?`<p class="hint" style="margin:0">Paid from TBC ${gel(L.fromPot.tbc)} · paid in cash ${gel(L.fromPot.cash)}.</p>`:''}</div>
+   <div class="panel stack"><h2>Cash in hand</h2><p class="sub">Kept on its own. It does not change the loan numbers.</p>
+    <div class="val num" style="font-size:2rem">${C?gel(C.gel):'—'}</div><div class="small muted">${C?'counted '+day(C.date):'not entered yet'}</div>
+    <label class="field"><span>Cash in hand now, ₾</span><input class="input num" id="lnCash" inputmode="decimal" placeholder="${C?fmt(C.gel):'0'}"></label>
+    <div class="row"><button class="btn primary" data-act="loanCount" ${w}>Save cash</button></div></div></div>`;
   const E=[...S.loan.values()].sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.createdAt||'').localeCompare(a.createdAt||''));
-  const sub=e=>e.kind==='spend'?(LUSE[e.purpose]||LUSE.other).en+' · '+POTS[e.pot]:e.kind==='repay'?(e.part==='interest'?'Bank interest':'Paid back to the bank')+' · '+POTS[e.pot]:e.kind==='move'?POTS[e.pot]+' → '+POTS[e.to]:'Received on '+POTS[e.pot];
-  const list=`<section class="eg mt"><div class="eg-h"><span>All loan entries</span><b>${E.length} · tap to edit</b></div><div class="recent">${E.map(e=>`<div class="rrow"><button class="erow" data-loan="${e.id}"><span><span class="et">${esc(e.what||LKIND[e.kind])}</span><small>${esc(e.date)} · ${esc(sub(e))}${e.note?' · '+esc(e.note.slice(0,60)):''}</small></span><b class="num ${e.kind==='in'?'up':''}">${e.kind==='in'?'+':e.kind==='move'?'':'−'}${gel(e.gel,e.gel%1?2:0)}</b></button></div>`).join('')}</div></section>`;
+  const sub=e=>e.kind==='spend'?(LUSE[e.purpose]||LUSE.other).en+' · '+POTS[e.pot]:e.kind==='repay'?(e.part==='interest'?'Bank interest':'Paid back to the bank')+' · '+POTS[e.pot]:'Received on '+POTS[e.pot];
+  const list=`<section class="eg mt"><div class="eg-h"><span>All loan entries</span><b>${E.length} · tap to edit</b></div><div class="recent">${E.map(e=>`<div class="rrow"><button class="erow" data-loan="${e.id}"><span><span class="et">${esc(e.what||LKIND[e.kind])}</span><small>${esc(e.date)} · ${esc(sub(e))}${e.note?' · '+esc(e.note.slice(0,60)):''}</small></span><b class="num ${e.kind==='in'?'up':''}">${e.kind==='in'?'+':'−'}${gel(e.gel,e.gel%1?2:0)}</b></button></div>`).join('')}</div></section>`;
   return loadingOr(head+kpis+`<div class="grid g2">${went}${rest}</div>`+list);
 }
 function loanModal(id,kind){
@@ -2187,24 +2194,22 @@ function loanModal(id,kind){
    <label class="field"><span>Note</span><input class="input" id="lgNote" value="${esc(e.note||'')}" placeholder="Optional"></label>
    <div class="row"><button class="btn amber" id="lgSave" ${S.canWrite?'':'disabled'}>Save</button>${id?'<button class="btn danger" id="lgDel">Delete</button>':''}<span class="spacer"></span><button class="btn ghost" data-close>Cancel</button></div>
   </div>`);
-  const sync=()=>{document.querySelectorAll('[data-lk]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lk===e.kind));document.querySelectorAll('#modalRoot [data-for]').forEach(el=>el.hidden=!el.dataset.for.split(' ').includes(e.kind));$('#lgPotL').textContent=e.kind==='in'?'Received on':e.kind==='move'?'Taken from (goes to the other)':'Paid from'};
+  const sync=()=>{document.querySelectorAll('[data-lk]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lk===e.kind));document.querySelectorAll('#modalRoot [data-for]').forEach(el=>el.hidden=!el.dataset.for.split(' ').includes(e.kind));$('#lgPotL').textContent=e.kind==='in'?'Received on':'Paid from'};
   document.querySelectorAll('[data-lk]').forEach(b=>b.onclick=()=>{e.kind=b.dataset.lk;sync()});sync();
   $('#lgSave').onclick=async()=>{const v=parseNum($('#lgGel').value);if(!(v>0)){toast('Enter an amount');return}
     const pot=$('#lgPot').value,now=new Date().toISOString();
     const d={date:$('#lgDate').value||today(),kind:e.kind,pot,gel:Math.round(v*100)/100,note:$('#lgNote').value.trim(),createdAt:e.createdAt||now,updatedAt:now};
-    if(e.kind==='move')d.to=pot==='tbc'?'cash':'tbc';else d.what=$('#lgWhat').value.trim();
+    d.what=$('#lgWhat').value.trim();
     if(e.kind==='spend')d.purpose=$('#lgUse').value;if(e.kind==='repay')d.part=$('#lgPart').value;
-    if(e.kind==='move'&&e.count!=null)d.count=e.count;if(e.bankKey)d.bankKey=e.bankKey;if(e.source)d.source=e.source;
+    if(e.bankKey)d.bankKey=e.bankKey;if(e.source)d.source=e.source;
     try{await S.db.doc('loan/'+(id||uid('l'))).set(d);closeModal();toast('Saved '+gel(d.gel,2)+' · '+LKIND[d.kind])}catch(x){toast(errMsg(x))}};
   if($('#lgDel'))$('#lgDel').onclick=async ev=>{const b=ev.currentTarget;if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Tap again to delete';return}try{await delDoc('loan/'+id);closeModal();toast('Deleted')}catch(x){toast(errMsg(x))}};
 }
 async function loanCount(){
-  const L=loanInfo();const el=$('#lnCash');if(!L||!el)return;
-  if(el.value.trim()===''){toast('Type the loan cash you have now');el.focus();return}
-  const v=parseNum(el.value);if(v<0){toast('Cash cannot be below zero');return}
-  const diff=Math.round((v-L.pot.cash)*100)/100;if(Math.abs(diff)<0.01){toast('Cash already matches: '+gel(v,2));return}
-  await S.db.doc('loan/'+uid('l')).set({date:today(),kind:'move',pot:diff>0?'tbc':'cash',to:diff>0?'cash':'tbc',gel:Math.abs(diff),count:v,what:diff>0?'Cash taken from TBC':'Cash put back on TBC',note:'Cash count: '+gel(v,2)+' in hand',createdAt:new Date().toISOString()});
-  toast('Loan cash set to '+gel(v,2));
+  const el=$('#lnCash');if(!el)return;
+  if(el.value.trim()===''){toast('Type the cash you have now');el.focus();return}
+  const v=parseNum(el.value);if(!(v>=0)){toast('Cash cannot be below zero');return}
+  try{await saveCfg({loan:{...(S.cfg.loan||{}),cash:{gel:Math.round(v*100)/100,date:today(),at:new Date().toISOString()}}});schedule();toast('Cash in hand: '+gel(v,2))}catch(x){toast(errMsg(x))}
 }
 
 /* ============================== Optimo control center ============================== */
