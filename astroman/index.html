@@ -276,6 +276,15 @@ select.input option{color:#111;background:#fff}
 .chart text{fill:var(--muted);font-family:var(--f-num);font-size:11px}
 .legend{display:flex;gap:16px;font-size:12.5px;color:var(--ink-2);margin-bottom:8px;flex-wrap:wrap}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.ldot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:1px}
+.lbig{font-size:30px;font-weight:600;letter-spacing:-.01em;line-height:1.1}
+.lsplit{padding:16px 20px;margin-bottom:16px}
+.loanbox{margin:16px 0}.lbh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.lbh .sub{margin-bottom:12px}
+.lbcols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.lbcols>div{display:flex;flex-direction:column;gap:3px;padding:12px 14px;border:1px solid var(--line);border-radius:12px}
+.lbcols span{font-size:12.5px;color:var(--ink-2)}.lbcols b{font-size:20px}.lbcols small{color:var(--muted);font-size:11.5px}
+.lbin{margin-top:12px}.lbin .input{flex:1;min-width:180px}
+@media (max-width:700px){.lbcols{grid-template-columns:1fr}}.lsplit .legend{margin:12px 0 0}
+.lbar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--line,rgba(127,127,127,.2));gap:2px}.lbar i{display:block;height:100%;min-width:0}
 .tip{position:fixed;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:12.5px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:70;min-width:180px;max-width:280px}
 .tip .t{font-weight:700;margin-bottom:4px}
 .tip .r{display:flex;justify-content:space-between;gap:14px}
@@ -1139,7 +1148,7 @@ function todayPanel(){
     <div class="cmps"><div class="cmp"><span>Yesterday</span><b class="num">${gel(Y.a)}</b>${pc(D.a,Y.a)}</div><div class="cmp"><span>Last ${new Date(d+'T12:00').toLocaleDateString('en-GB',{weekday:'short'})}</span><b class="num">${gel(W.a)}</b>${pc(D.a,W.a)}</div><div class="cmp"><span>30-day average</span><b class="num">${gel(avg)}</b>${pc(D.a,avg)}</div></div>
     ${Object.keys(pays).length?`<div class="tpays">${Object.entries(pays).sort((a,b)=>b[1].a-a[1].a).map(([k,o])=>`<span><i style="width:${o.a/Math.max(1,D.a)*100}%"></i>${esc(PAYS[k]||k)} <b class="num">${gel(o.a)}</b></span>`).join('')}</div>`:''}
    </div><div class="tlist"><div class="tlh"><span>Orders</span><b>${D.n?'newest first':''}</b></div>${list}</div></div>
-   <div class="strip" role="list">${strip.map(x=>{const o=dayOf(x);const dd=new Date(x+'T12:00');return `<button role="listitem" class="sd ${x===d?'on':''} ${o.a>=DAY_TARGET?'hit':''}" data-day="${x}" title="${dLong(x)} · ${gel(o.a)}"><span class="sb"><i style="height:${Math.max(o.a?6:0,o.a/smax*100)}%"></i></span><span class="sl">${dd.toLocaleDateString('en-GB',{weekday:'narrow'})}<b>${dd.getDate()}</b></span><span class="sa num">${o.a?fmt(o.a/1000,1)+'k':'—'}</span></button>`}).join('')}</div>
+   <div class="strip" role="list">${strip.map(x=>{const o=dayOf(x);const dd=new Date(x+'T12:00');return `<button role="listitem" class="sd ${x===d?'on':''} ${o.a>=DAY_TARGET?'hit':''}" data-day="${x}" title="${dLong(x)} · ${gel(o.a)}"><span class="sb"><i style="height:${Math.max(o.a?6:0,o.a/smax*100)}%"></i></span><span class="sl">${dd.toLocaleDateString('en-GB',{weekday:'narrow'})}<b>${dd.getDate()}</b></span><span class="sa num">${!o.a?'—':o.a>=1000?fmt(o.a/1000,1)+'k':fmt(o.a)}</span></button>`}).join('')}</div>
   </section>`;
 }
 function sparkline(vals,cls){
@@ -1236,7 +1245,7 @@ function moneyNow(m,M){
   const tot=Object.values(B).reduce((x,o)=>x+o.now,0);
   const fold=!B.cash&&payAcct('cash')==='personal';
   return `<div class="money">${BAL_ACC.filter(x=>!(fold&&x[0]==='cash')).map(x=>fold&&x[0]==='personal'?[x[0],'Rezi personal + cash',x[2]]:x).map(card).join('')}
-   <div class="mcard" data-go="loan" style="--c:#7C5CDB;cursor:pointer"><div class="lbl"><span>${esc(loanLabel())}</span><span class="hint">kept separate</span></div>${L?`<div class="val num">${cu(L.left)}<small>₾ left</small></div><div class="bar2"><i style="width:${Math.min(100,L.out/Math.max(1,L.received)*100)}%"></i></div><div class="parts">Out ${gel(L.out)} of ${gel(L.received)} · on TBC ${fmt(L.onTbc)}${L.offTbc>=1?' · off TBC '+fmt(L.offTbc):''}</div>`:`<div class="val">—</div><div class="parts">Open the Loan page to add it.</div>`}</div>
+   <div class="mcard" data-go="loan" style="--c:#7C5CDB;cursor:pointer"><div class="lbl"><span>${esc(loanLabel())}</span><span class="hint">kept separate</span></div>${L?`<div class="val num">${cu(L.left)}<small>₾ left</small></div><div class="bar2"><i style="width:${Math.min(100,L.out/Math.max(1,L.received)*100)}%"></i></div><div class="parts">Of ${gel(L.received)}: developers ${fmt(L.dev)} · other ${fmt(L.other)}</div>`:`<div class="val">—</div><div class="parts">Open the Loan page to add it.</div>`}</div>
   </div>${Object.keys(B).length>1?`<p class="hint" style="margin:-8px 0 16px">All accounts together: <b class="num">${gel(tot)}</b>. Balances move with every sale and expense dated after the amount was set.</p>`:''}`;
 }
 function trendChart(ms,cur){
@@ -1571,7 +1580,7 @@ function vExpenses(){
    <div class="toolbar"><div class="seg" role="group" aria-label="Period"><button data-act="expMode" data-v="0" aria-pressed="${!f.all}">${mShort(S.month)}</button><button data-act="expMode" data-v="1" aria-pressed="${f.all}">Period</button></div><input class="input grow" id="xQ" placeholder="Search…" value="${esc(f.q)}"></div>
    ${f.all?periodBar({noMonth:true}):''}
    <div class="esum"><div><span>Total spending</span><b class="num">${cu(total)}<small> ₾</small></b></div><div class="esplit">${spendG.map(g=>`<span><i style="background:${g==='goods'?'var(--s2)':g==='tax'?'var(--bad)':'var(--s1)'}"></i>${titles[g]} <b class="num">${fmt(gTot(g))}</b></span>`).join('')}</div></div>
-   ${latest}${groups||`<div class="panel empty"><b>No expenses ${f.q?'match':'yet'}</b>${f.q?'Try another search.':'Import a bank statement or add one by hand.'}</div>`}
+   ${loanBox(months,f.all?'this period':mShort(S.month),true)}${latest}${groups||`<div class="panel empty"><b>No expenses ${f.q?'match':'yet'}</b>${f.q?'Try another search.':'Import a bank statement or add one by hand.'}</div>`}
    <p class="hint" style="margin-top:12px">Tap a category to see its payments, then tap a payment to change it.</p>`);
 }
 /* ============================== sales ============================== */
@@ -1739,7 +1748,7 @@ function vBank(){
   const R=B.items;const inc=R.filter(r=>r.include);const tot=inc.reduce((a,r)=>a+r.gel,0);
   return head+steps+`<div class="panel" style="margin-bottom:16px"><div class="row"><div><h2>${R.length} rows from ${esc(ACC[B.acct].en)}</h2><p class="sub" style="margin:0">${R.filter(r=>r.dup).length} already imported · ${R.filter(r=>r.dir==='in').length} incoming · ${R.filter(r=>r.dir==='out'&&!r.cat).length} need a category</p></div><span class="spacer"></span><div class="stack" style="gap:6px"><label class="row small"><input type="checkbox" id="bRemember" ${B.remember?'checked':''}> Remember my category changes</label>${B.closing&&B.closing.total!=null?`<label class="row small"><input type="checkbox" id="bBal" ${B.saveBal?'checked':''}> Update ${esc(ACC[B.acct].en)} balance to <b class="num">${gel(B.closing.total,2)}</b> (closing balance on the statement)</label>`:''}</div></div></div>
   <div class="tablewrap"><table><thead><tr><th><input type="checkbox" id="bAll" aria-label="Select all"></th><th>Date</th><th>Description</th><th class="r">Amount</th><th>Category</th></tr></thead><tbody>
-  ${R.map((r,i)=>`<tr style="${r.dup?'opacity:.5':''}"><td><input type="checkbox" data-bi="${i}" ${r.include?'checked':''} aria-label="Include row"></td><td class="num small">${esc(r.date)}</td><td style="min-width:240px"><div class="small">${esc(r.party||'')}</div><div class="muted small">${esc(r.desc.slice(0,120))}</div>${r.loanDup?'<span class="chip">on the Loan page</span>':r.dup?'<span class="chip">already imported</span>':''}${r.dir==='in'?' <span class="chip good">money in</span>':''}${r.synthetic?' <span class="chip">calculated</span>':''}</td><td class="r num ${r.dir==='in'?'up':''}">${r.dir==='in'?'+':'−'}${fmt(r.gel,2)}</td><td><select class="input" data-bc="${i}" style="min-width:190px">${catOptions(r.cat,true)}<optgroup label="Kept apart from the books"><option value="toloan" ${r.cat==='toloan'?'selected':''}>Loan page · სესხი</option></optgroup></select>${r.rule?`<div class="hint">matched “${esc(r.rule)}”</div>`:''}</td></tr>`).join('')}
+  ${R.map((r,i)=>`<tr style="${r.dup?'opacity:.5':''}"><td><input type="checkbox" data-bi="${i}" ${r.include?'checked':''} aria-label="Include row"></td><td class="num small">${esc(r.date)}</td><td style="min-width:190px"><div class="small">${esc(r.party||'')}</div><div class="muted small">${esc(r.desc.slice(0,120))}</div>${r.loanDup?'<span class="chip">on the Loan page</span>':r.dup?'<span class="chip">already imported</span>':''}${r.dir==='in'?' <span class="chip good">money in</span>':''}${r.synthetic?' <span class="chip">calculated</span>':''}</td><td class="r num ${r.dir==='in'?'up':''}">${r.dir==='in'?'+':'−'}${fmt(r.gel,2)}</td><td><select class="input" data-bc="${i}" style="min-width:190px">${catOptions(r.cat,true)}<optgroup label="Kept apart from the books"><option value="toloan" ${r.cat==='toloan'?'selected':''}>Loan page · სესხი</option></optgroup></select>${r.rule?`<div class="hint">matched “${esc(r.rule)}”</div>`:''}</td></tr>`).join('')}
   </tbody></table></div>
   <div class="row" style="margin-top:14px"><button class="btn ghost" data-act="bankReset">Start over</button><span class="spacer"></span><span class="num" id="bTot">${inc.length} rows · ${gel(tot,2)}</span><button class="btn amber" id="bSaveBtn" data-act="bankSave" ${S.canWrite?'':'disabled'}>Save ${inc.length} rows</button></div>`;
 }
@@ -1880,9 +1889,9 @@ function vPL(){
    ${mode==='month'?'':periodBar({noMonth:true})}`;
   if(mode==='table')return loadingOr(head+plTable(ms));
   if(mode==='month'){const M=metrics(S.month);const yms=rangeMonths({p:'ytd'});
-    return loadingOr(head+`<div class="grid g3">${statement(M,mLabel(S.month),'Tap a line to see what is inside.'+(M.src?' Cost of goods from '+COGS_SRC[M.src]+'.':''))}<div class="panel chart" style="align-self:start"><h2>Net profit by month</h2><p class="sub">${S.month.slice(0,4)}. Red means a loss.</p>${netChart(yms)}</div></div>`)}
+    return loadingOr(head+`<div class="grid g3">${statement(M,mLabel(S.month),'Tap a line to see what is inside.'+(M.src?' Cost of goods from '+COGS_SRC[M.src]+'.':''))}<div class="panel chart" style="align-self:start"><h2>Net profit by month</h2><p class="sub">${S.month.slice(0,4)}. Red means a loss.</p>${netChart(yms)}</div></div>${loanBox([S.month],mShort(S.month),false)}`)}
   const {A}=rangeAgg(ms);
-  return loadingOr(head+`<div class="grid g3">${statement(A,esc(rangeLabel()),rangeSub(ms)+'. Tap a line to see what is inside.')}<div class="panel chart" style="align-self:start"><h2>Net profit by ${many?'year':'month'}</h2><p class="sub">${many?'Whole years; * marks a part year.':'Red means a loss.'}</p>${netChart(ms)}</div></div>${yearTable(ms)}`);
+  return loadingOr(head+`<div class="grid g3">${statement(A,esc(rangeLabel()),rangeSub(ms)+'. Tap a line to see what is inside.')}<div class="panel chart" style="align-self:start"><h2>Net profit by ${many?'year':'month'}</h2><p class="sub">${many?'Whole years; * marks a part year.':'Red means a loss.'}</p>${netChart(ms)}</div></div>${loanBox(ms,'this period',false)}${yearTable(ms)}`);
 }
 function plTable(range){
   const {cols,D,rows}=plModel(range);const ms=cols.map(c=>c.key);
@@ -1958,14 +1967,15 @@ function recapModel(mode,m){
   const inParts=pin.map(([k,v],i)=>({k:'Sales · '+(k==='unknown'?'payment not recorded':k==='other'?'other ways':PAYS[k]||k),v,c:COL[i]}));
   if(A.otherInc)inParts.push({k:'Other income',v:A.otherInc,c:'var(--c2)'});
   const top3=g=>CATS.filter(c=>c.g===g&&A.by[c.id]).sort((x,y)=>A.by[y.id]-A.by[x.id]).slice(0,3).map(c=>esc(c.en)+' '+fmt(A.by[c.id])).join(' · ');
-  const loanSp=[...S.loan.values()].filter(e=>e.kind==='spend'&&inR(e.date));const loanBy={};loanSp.forEach(e=>{const u=LUSE[e.purpose]?.en||'Other';loanBy[u]=(loanBy[u]||0)+(+e.gel||0)});const loanTot=loanSp.reduce((a,e)=>a+(+e.gel||0),0);
+  const loanSp=[...S.loan.values()].filter(e=>e.kind==='spend'&&inR(e.date));const loanDev=loanSp.filter(e=>e.purpose==='dev').reduce((a,e)=>a+(+e.gel||0),0);const loanTot=loanSp.reduce((a,e)=>a+(+e.gel||0),0);const loanBy={Developers:loanDev,'Other loan expenses':loanTot-loanDev};
   const outParts=[
     {k:'Stock bought',v:A.stock,c:'var(--c3)',tag:A.accurate?['good','asset']:null,sub:A.accurate?'Imports, local buys, freight. Goes on the shelf; becomes a cost only when sold.':'Counted as a cost (Settings)'},
     {k:'Running costs',v:A.opex,c:'var(--c1)',sub:top3('opex')},
     {k:'Taxes',v:A.tax,c:'var(--c4)',sub:top3('tax')},
     {k:'Loan repayments',v:A.by.loan||0,c:'var(--c5)',sub:'Principal and interest'},
     {k:'Owner & non-Astroman',v:(A.by.owner_draw||0)+(A.by.personal||0),c:'var(--c6)',sub:'Kept out of profit'},
-    {k:'Paid from the loan',v:loanTot,c:'var(--c8)',tag:['est','outside profit'],sub:Object.entries(loanBy).sort((a,b)=>b[1]-a[1]).map(([k,v])=>esc(k)+' '+fmt(v)).join(' · ')}
+    {k:'Developers (from the loan)',v:loanDev,c:'var(--c4)',tag:['est','outside profit'],sub:'Kept on their own'},
+    {k:'Other loan expenses',v:loanTot-loanDev,c:'var(--c8)',tag:['est','outside profit'],sub:'Everything else paid from the loan'}
   ].filter(p=>p.v>0);
   const goods=allTx().filter(t=>inR(t.date)&&CAT[t.cat]?.g==='goods');const sup={};goods.forEach(t=>{const k=(t.vendor||'').trim()||catLabel(t.cat);sup[k]=(sup[k]||0)+(+t.gel||0)});
   const sups=Object.entries(sup).sort((a,b)=>b[1]-a[1]).slice(0,6);
@@ -2042,7 +2052,7 @@ function closeRecap(){REP=null;document.removeEventListener('keydown',repKey);$(
 function vImports(){
   const y=S.month.slice(0,4);const list=[...S.ships.values()].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   const yr=list.filter(s=>(s.date||'').startsWith(y));const biz=yr.filter(s=>!s.personal);
-  const byFw={};biz.forEach(s=>{const k=s.forwarder||'—';byFw[k]=(byFw[k]||0)+(+s.usd||0)});
+  const byFw={};biz.forEach(s=>{const k=s.forwarder||'Forwarder not set';byFw[k]=(byFw[k]||0)+(+s.usd||0)});
   const transit=list.filter(s=>s.status!=='arrived');
   const landed=s=>(+s.usd||0)*(+s.fx||fx())+(+s.freight||0)+(+s.customs||0);
   const maxF=Math.max(1,...Object.values(byFw));
@@ -2052,7 +2062,7 @@ function vImports(){
   <div class="kpi"><div class="lbl">On the way</div><div class="val num">${cu(transit.length)}</div><div class="delta">$${fmt(transit.reduce((a,s)=>a+(+s.usd||0),0))} not arrived</div></div>
   <div class="kpi"><div class="lbl">Not Astroman</div><div class="val num">$${cu(yr.filter(s=>s.personal).reduce((a,s)=>a+(+s.usd||0),0))}</div><div class="delta">${yr.filter(s=>s.personal).length} items flagged personal</div></div></div>
   <div class="grid g3"><div class="tablewrap" style="align-self:start"><table><thead><tr><th>Ordered</th><th>Item</th><th>Forwarder</th><th>Status</th><th class="r">USD</th><th class="r">Landed ₾</th></tr></thead><tbody>
-  ${list.map(s=>`<tr class="click" data-ship="${s.id}"><td class="num small">${esc(s.date||'—')}</td><td style="min-width:160px">${esc(s.item)}${s.qty?` <span class="muted">×${s.qty}</span>`:''}${s.personal?' <span class="chip below">not Astroman</span>':''}</td><td class="small" style="white-space:nowrap">${esc(s.forwarder||'')}</td><td>${s.status==='arrived'?'<span class="chip good">Arrived</span>':s.status==='transit'?'<span class="chip warn">On the way</span>':'<span class="chip">Ordered</span>'}</td><td class="r num">$${fmt(s.usd,2)}</td><td class="r num">${s.freight||s.customs?gel(landed(s)):'<span class="muted">'+gel(landed(s))+'</span>'}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">No shipments yet.</td></tr>'}
+  ${list.map(s=>`<tr class="click" data-ship="${s.id}"><td class="num small">${esc(s.date||'—')}</td><td style="min-width:160px">${esc(s.item)}${s.qty?` <span class="muted">×${s.qty}</span>`:''}${s.personal?' <span class="chip below">not Astroman</span>':''}</td><td class="small" style="white-space:nowrap">${s.forwarder?esc(s.forwarder):'<span class="muted">—</span>'}</td><td>${s.status==='arrived'?'<span class="chip good">Arrived</span>':s.status==='transit'?'<span class="chip warn">On the way</span>':'<span class="chip">Ordered</span>'}</td><td class="r num">$${fmt(s.usd,2)}</td><td class="r num">${s.freight||s.customs?gel(landed(s)):'<span class="muted">'+gel(landed(s))+'</span>'}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">No shipments yet.</td></tr>'}
   </tbody></table></div>
   <div class="panel" style="align-self:start"><h2>By forwarder, ${y}</h2><p class="sub">Goods value shipped through each, Astroman only.</p><div class="bars">${Object.entries(byFw).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="bar"><div class="name">${esc(k)}</div><div class="track"><div class="fill" style="width:${v/maxF*100}%;background:var(--s2)"></div></div><div class="amt num">$${fmt(v)}</div></div>`).join('')||'<div class="empty">—</div>'}</div></div></div>`);
 }
@@ -2128,53 +2138,87 @@ const LOAN_USE=[{id:'dev',en:'Developers',ka:'დეველოპერებ�
 const LUSE=Object.fromEntries(LOAN_USE.map(u=>[u.id,u]));
 const LKIND={spend:'Payment',repay:'Repayment',in:'Loan received'};
 const loanLabel=()=>S.cfg.loan?.label||'Loan';
-function loanPotDelta(e,pot){const v=+e.gel||0;if(e.pot!==pot)return 0;return e.kind==='in'?v:-v}
+// old app versions saved cash counts as kind 'move'; they are not loan spending and are ignored everywhere
+const loanEntries=()=>[...S.loan.values()].filter(e=>e.kind!=='move');
+function loanPotDelta(e,pot){const v=+e.gel||0;if(e.pot!==pot||e.kind==='move')return 0;return e.kind==='in'?v:-v}
+// Developers are kept on their own. Everything else is "other expenses" together.
+// Rezi types what is left of the loan (cfg.loan.left); other expenses = received − developers − left,
+// so spending he never itemised still shows up. Without a typed amount, left comes from the entries.
 function loanInfo(){
   if(S.mc.has('#loan'))return S.mc.get('#loan');
   let r=null;
-  if(S.loan.size){r={received:0,spent:0,interest:0,principal:0,fromPot:{tbc:0,cash:0},by:{},byMonth:{},start:''};
-    for(const e of S.loan.values()){const v=+e.gel||0;
-      if(e.kind==='in'){r.received+=v;if(!r.start||e.date<r.start)r.start=e.date}
-      else{r.fromPot[e.pot==='cash'?'cash':'tbc']+=v;const m=(e.date||'').slice(0,7);r.byMonth[m]=(r.byMonth[m]||0)+v;
-        if(e.kind==='repay'){if(e.part==='interest')r.interest+=v;else r.principal+=v}
-        else{r.spent+=v;const u=LUSE[e.purpose]?e.purpose:'other';r.by[u]=(r.by[u]||0)+v}}}
-    r.repaid=r.interest+r.principal;r.out=r.spent+r.repaid;r.left=r.received-r.out;r.owed=r.received-r.principal;
-    // where the rest is: the TBC balance is a bank fact; loan money not on TBC any more was taken off it
+  if(loanEntries().length){r={received:0,dev:0,otherRec:0,interest:0,principal:0,fromPot:{tbc:0,cash:0},by:{},devBy:{},devMonth:{},otherMonth:{},start:''};
+    for(const e of loanEntries()){const v=+e.gel||0;
+      if(e.kind==='in'){r.received+=v;if(!r.start||e.date<r.start)r.start=e.date;continue}
+      r.fromPot[e.pot==='cash'?'cash':'tbc']+=v;const m=(e.date||'').slice(0,7);
+      if(e.kind==='spend'&&e.purpose==='dev'){r.dev+=v;const n=(e.what||'Developer').trim();r.devBy[n]=(r.devBy[n]||0)+v;r.devMonth[m]=(r.devMonth[m]||0)+v;continue}
+      r.otherRec+=v;r.otherMonth[m]=(r.otherMonth[m]||0)+v;
+      if(e.kind==='repay'){if(e.part==='interest')r.interest+=v;else r.principal+=v}
+      else{const u=LUSE[e.purpose]?e.purpose:'other';r.by[u]=(r.by[u]||0)+v}}
+    r.repaid=r.interest+r.principal;r.owed=r.received-r.principal;
+    r.leftCalc=r.received-r.dev-r.otherRec;const T=S.cfg.loan?.left;r.typed=T&&T.gel!=null?T:null;
+    r.left=r.typed?+r.typed.gel:r.leftCalc;r.other=r.received-r.dev-r.left;r.unitemised=r.other-r.otherRec;r.out=r.dev+r.other;
+    // where the left is: the TBC balance is a bank fact; loan money not on TBC any more was taken off it
     const tb=liveBalances().tbc;r.tbcNow=tb?tb.now:null;r.tbcAsOf=tb?tb.asOf:'';
-    r.onTbc=tb?Math.max(0,Math.min(r.left,tb.now)):r.left;r.offTbc=r.left-r.onTbc;r.shopOnTbc=tb?Math.max(0,tb.now-r.left):0}
+    r.onTbc=tb?Math.max(0,Math.min(r.left,tb.now)):r.left;r.offTbc=r.left-r.onTbc}
   S.mc.set('#loan',r);return r;
 }
+// loan money spent in some months, developers apart from the rest (for Expenses and Profit & loss)
+function loanSpentIn(ms){const inM=new Set(ms);let dev=0,other=0;for(const e of loanEntries()){if(e.kind==='in'||!inM.has((e.date||'').slice(0,7)))continue;const v=+e.gel||0;if(e.kind==='spend'&&e.purpose==='dev')dev+=v;else other+=v}return {dev,other}}
+function loanBox(ms,label,withInput){const L=loanInfo();if(!L)return '';const p=loanSpentIn(ms);const w=S.canWrite?'':'disabled';
+  return `<div class="panel loanbox"><div class="lbh"><div><h2>Loan · kept apart</h2><p class="sub">Not in these expenses or the profit. Developers on their own, everything else together.</p></div><button class="btn sm" data-go="loan">Loan page</button></div>
+   <div class="lbcols"><div><span><i class="ldot" style="background:var(--c4)"></i>Developers</span><b class="num">${gel(p.dev)}</b><small>${esc(label)} · ${gel(L.dev)} in all</small></div>
+    <div><span><i class="ldot" style="background:var(--c3)"></i>Other loan expenses</span><b class="num">${gel(p.other)}</b><small>${esc(label)} · ${gel(L.other)} in all</small></div>
+    <div><span><i class="ldot" style="background:var(--c2)"></i>Left from the loan</span><b class="num ${L.left<0?'neg':''}">${gel(L.left)}</b><small>${L.typed?'you entered it '+dLabel(L.typed.date):'from the entries'}</small></div></div>
+   ${withInput?`<div class="row lbin"><input class="input num" id="lnLeft" inputmode="decimal" placeholder="Left from the loan now, ₾ (${fmt(L.left)})" aria-label="Left from the loan now"><button class="btn primary" data-act="loanLeft" ${w}>Save what is left</button></div>`:''}</div>`}
 const loanCash=()=>{const c=S.cfg.loan?.cash;return c&&c.gel!=null?c:null};
 function vLoan(){
   const L=loanInfo();const day=d=>d?new Date(d+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
   const w=S.canWrite?'':'disabled';
-  const head=`<div class="pagehead"><div><div class="eyebrow">სესხი · kept apart from the shop's books</div><h1>${esc(loanLabel())}</h1><p>${L?`${gel(L.received)} received${L.start?' on '+day(L.start):''}. Every payment made with it, and where the rest is now.`:'What came in, what was paid with it, and where the rest is.'}</p></div><div class="actions"><button class="btn amber" data-act="loanNew" ${w}>+ Loan entry</button></div></div>`;
+  const head=`<div class="pagehead"><div><div class="eyebrow">სესხი · kept apart from the shop's books</div><h1>${esc(loanLabel())}</h1><p>${L?`${gel(L.received)} received${L.start?' on '+day(L.start):''}. Developers on their own, everything else together, and what is left.`:'What came in, what was paid with it, and what is left.'}</p></div><div class="actions"><button class="btn amber" data-act="loanNew" ${w}>+ Loan entry</button></div></div>`;
   if(!L)return loadingOr(head+`<div class="panel empty"><b>No loan recorded yet</b>Start with the money you received.<div class="mt"><button class="btn primary" data-act="loanNew" data-kind="in" ${w}>Add loan received</button></div></div>`);
-  const C=loanCash();
+  const C=loanCash();const P=v=>Math.max(0,v)/Math.max(1,L.received)*100;
   const kpis=`<div class="kpis">
    <div class="kpi"><div class="lbl">Total loan</div><div class="val num">${cu(L.received)}<small>₾</small></div><div class="delta">${L.start?'received '+day(L.start)+' on TBC':'received'}</div></div>
-   <div class="kpi"><div class="lbl">Spent</div><div class="val num">${cu(L.out)}<small>₾</small></div><div class="delta">${pct(L.out,L.received)}% used · ${gel(L.repaid)} back to the bank</div></div>
-   <div class="kpi"><div class="lbl">Left</div><div class="val num ${L.left<0?'neg':''}">${cu(L.left)}<small>₾</small></div><div class="delta">${gel(L.onTbc)} on TBC${L.offTbc>=1?' · '+gel(L.offTbc)+' off TBC':''}</div></div></div>`;
-  const uses=LOAN_USE.filter(u=>L.by[u.id]).map(u=>({n:u.en,ka:u.ka,v:L.by[u.id]})).sort((a,b)=>b.v-a.v);
-  if(L.interest)uses.push({n:'Bank interest',ka:'პროცენტი',v:L.interest});if(L.principal)uses.push({n:'Paid back to the bank',ka:'ძირი',v:L.principal});
-  const max=Math.max(1,...uses.map(x=>x.v));
-  const months=Object.keys(L.byMonth).sort();
-  const went=`<div class="panel"><h2>Where it went</h2><p class="sub">${gel(L.out)} of ${gel(L.received)}.</p>${uses.length?`<div class="bars">${uses.map(x=>`<div class="bar"><div class="name">${esc(x.n)}<span>${esc(x.ka)}</span></div><div class="track"><div class="fill" style="width:${x.v/max*100}%;background:#7C5CDB"></div></div><div class="amt num">${gel(x.v)}<small>${pct(x.v,L.out)}%</small></div></div>`).join('')}</div>`:'<div class="empty">Nothing paid from the loan yet.</div>'}
-   ${months.length?`<div class="flow mt">${months.map(m=>`<div class="ln"><span class="k">${mLabel(m)}</span><span class="v num">${gel(L.byMonth[m])}</span></div>`).join('')}</div>`:''}</div>`;
-  const rest=`<div class="stack"><div class="panel stack"><h2>Where the rest is</h2><p class="sub">${gel(L.left)} left of ${gel(L.received)}.</p>
-   <div class="flow"><div class="ln"><span class="k">On TBC<div class="small muted">${L.tbcNow==null?'no TBC balance in Settings yet, so all of it is counted here':'TBC balance now'+(L.tbcAsOf?', statement of '+day(L.tbcAsOf)+' plus payments since':'')}</div></span><span class="v num">${gel(L.onTbc)}</span></div>
-    <div class="ln"><span class="k">Taken off TBC<div class="small muted">loan money no longer on the account: cash withdrawals, or payments without a loan entry</div></span><span class="v num">${gel(L.offTbc)}</span></div>
-    <div class="ln total"><span class="k">Left</span><span class="v num">${gel(L.left)}</span></div></div>
-   ${L.shopOnTbc>=1?`<p class="hint" style="margin:0">TBC shows ${gel(L.tbcNow)}: that is ${gel(L.shopOnTbc)} more than the loan money left, so the extra is shop money.</p>`:''}
-   ${L.fromPot.cash?`<p class="hint" style="margin:0">Paid from TBC ${gel(L.fromPot.tbc)} · paid in cash ${gel(L.fromPot.cash)}.</p>`:''}</div>
-   <div class="panel stack"><h2>Cash in hand</h2><p class="sub">Kept on its own. It does not change the loan numbers.</p>
-    <div class="val num" style="font-size:2rem">${C?gel(C.gel):'—'}</div><div class="small muted">${C?'counted '+day(C.date):'not entered yet'}</div>
-    <label class="field"><span>Cash in hand now, ₾</span><input class="input num" id="lnCash" inputmode="decimal" placeholder="${C?fmt(C.gel):'0'}"></label>
-    <div class="row"><button class="btn primary" data-act="loanCount" ${w}>Save cash</button></div></div></div>`;
-  const E=[...S.loan.values()].sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.createdAt||'').localeCompare(a.createdAt||''));
+   <div class="kpi"><div class="lbl"><i class="ldot" style="background:var(--c4)"></i>Developers</div><div class="val num">${cu(L.dev)}<small>₾</small></div><div class="delta">${pct(L.dev,L.received)}% of the loan</div></div>
+   <div class="kpi"><div class="lbl"><i class="ldot" style="background:var(--c3)"></i>Other expenses</div><div class="val num ${L.other<0?'neg':''}">${cu(L.other)}<small>₾</small></div><div class="delta">${pct(Math.max(0,L.other),L.received)}% of the loan</div></div>
+   <div class="kpi"><div class="lbl"><i class="ldot" style="background:var(--c2)"></i>Left</div><div class="val num ${L.left<0?'neg':''}">${cu(L.left)}<small>₾</small></div><div class="delta">${L.typed?'you entered it '+day(L.typed.date):'from the entries · type the real amount below'}</div></div></div>
+  <div class="panel lsplit"><div class="lbar" role="img" aria-label="Loan split"><i style="width:${P(L.dev)}%;background:var(--c4)"></i><i style="width:${P(L.other)}%;background:var(--c3)"></i><i style="width:${P(L.left)}%;background:var(--c2)"></i></div>
+   <div class="legend"><span><i style="background:var(--c4)"></i>Developers ${gel(L.dev)}</span><span><i style="background:var(--c3)"></i>Other expenses ${gel(L.other)}</span><span><i style="background:var(--c2)"></i>Left ${gel(L.left)}</span></div></div>`;
+  const months=ob=>{const ks=Object.keys(ob).sort();return ks.length?`<div class="flow mt">${ks.map(m=>`<div class="ln"><span class="k">${mLabel(m)}</span><span class="v num">${gel(ob[m])}</span></div>`).join('')}</div>`:''};
+  const sorted=(a,b)=>(b.date||'').localeCompare(a.date||'')||(b.createdAt||'').localeCompare(a.createdAt||'');
+  const E=loanEntries().sort(sorted);const isDev=e=>e.kind==='spend'&&e.purpose==='dev';
   const sub=e=>e.kind==='spend'?(LUSE[e.purpose]||LUSE.other).en+' · '+POTS[e.pot]:e.kind==='repay'?(e.part==='interest'?'Bank interest':'Paid back to the bank')+' · '+POTS[e.pot]:'Received on '+POTS[e.pot];
-  const list=`<section class="eg mt"><div class="eg-h"><span>All loan entries</span><b>${E.length} · tap to edit</b></div><div class="recent">${E.map(e=>`<div class="rrow"><button class="erow" data-loan="${e.id}"><span><span class="et">${esc(e.what||LKIND[e.kind])}</span><small>${esc(e.date)} · ${esc(sub(e))}${e.note?' · '+esc(e.note.slice(0,60)):''}</small></span><b class="num ${e.kind==='in'?'up':''}">${e.kind==='in'?'+':'−'}${gel(e.gel,e.gel%1?2:0)}</b></button></div>`).join('')}</div></section>`;
-  return loadingOr(head+kpis+`<div class="grid g2">${went}${rest}</div>`+list);
+  const rows=list=>`<div class="recent">${list.map(e=>`<div class="rrow"><button class="erow" data-loan="${e.id}"><span><span class="et">${esc(e.what||LKIND[e.kind])}</span><small>${esc(e.date)} · ${esc(sub(e))}${e.note?' · '+esc(e.note.slice(0,60)):''}</small></span><b class="num ${e.kind==='in'?'up':''}">${e.kind==='in'?'+':'−'}${gel(e.gel,e.gel%1?2:0)}</b></button></div>`).join('')||'<div class="empty">Nothing yet.</div>'}</div>`;
+  const people=Object.entries(L.devBy).sort((a,b)=>b[1]-a[1]);
+  const dev=`<div class="panel stack"><div><h2>Developers · დეველოპერები</h2><p class="sub">Kept on their own, apart from every other expense.</p></div>
+   <div class="val num lbig">${gel(L.dev)}</div>
+   <div class="flow">${people.map(([n,v])=>`<div class="ln"><span class="k">${esc(n)}<div class="small muted">${E.filter(e=>isDev(e)&&(e.what||'Developer').trim()===n).length} payments</div></span><span class="v num">${gel(v)}</span></div>`).join('')}</div>
+   ${months(L.devMonth)}</div>`;
+  const items=LOAN_USE.filter(u=>u.id!=='dev'&&L.by[u.id]).map(u=>[u.en,u.ka,L.by[u.id]]);
+  if(L.interest)items.push(['Bank interest','პროცენტი',L.interest]);if(L.principal)items.push(['Paid back to the bank','ძირი',L.principal]);
+  items.sort((a,b)=>b[2]-a[2]);
+  const other=`<div class="panel stack"><div><h2>All other expenses · სხვა ხარჯები</h2><p class="sub">Everything that is not developers, together.</p></div>
+   <div class="val num lbig ${L.other<0?'neg':''}">${gel(L.other)}</div>
+   <div class="flow">${items.map(([n,ka,v])=>`<div class="ln"><span class="k">${esc(n)} <span class="muted small">${esc(ka)}</span></span><span class="v num">${gel(v)}</span></div>`).join('')}
+    ${L.typed&&Math.abs(L.unitemised)>=1?`<div class="ln"><span class="k">${L.unitemised>0?'Not itemised':'More left than the entries show'}<div class="small muted">${L.unitemised>0?'spent, worked out from what you say is left':'what you typed is more than the entries leave: an entry may be wrong'}</div></span><span class="v num ${L.unitemised<0?'neg':''}">${gel(L.unitemised)}</span></div>`:''}
+    <div class="ln total"><span class="k">Other expenses</span><span class="v num">${gel(L.other)}</span></div></div>
+   <label class="field"><span>Left from the loan now, ₾</span><input class="input num" id="lnLeft" inputmode="decimal" placeholder="${fmt(L.left)}"></label>
+   <div class="row"><button class="btn primary" data-act="loanLeft" ${w}>Save what is left</button>${L.typed?`<button class="btn ghost" data-act="loanLeftClear" ${w}>Use the entries instead</button>`:''}</div>
+   <p class="hint" style="margin:0">${L.typed?`By the entries alone ${gel(L.leftCalc)} would be left.`:'Type what is left of the loan. Whatever is not developers and not left counts as other expenses.'}</p></div>`;
+  const where=`<div class="panel stack"><div><h2>Where the left is</h2><p class="sub">${gel(L.left)} left of ${gel(L.received)}.</p></div>
+   <div class="flow"><div class="ln"><span class="k">On TBC<div class="small muted">${L.tbcNow==null?'no TBC balance in Settings yet, so all of it is counted here':'TBC balance now'+(L.tbcAsOf?', statement of '+day(L.tbcAsOf)+' plus payments since':'')}</div></span><span class="v num">${gel(L.onTbc)}</span></div>
+    <div class="ln"><span class="k">Off TBC<div class="small muted">taken out in cash, or spent without an entry</div></span><span class="v num">${gel(L.offTbc)}</span></div>
+    <div class="ln total"><span class="k">Left</span><span class="v num">${gel(L.left)}</span></div></div>
+   <p class="hint" style="margin:0">Still owed to TBC: ${gel(L.owed)} · paid back ${gel(L.principal)} · interest ${gel(L.interest)}.</p></div>`;
+  const cash=`<div class="panel stack"><div><h2>Cash in hand</h2><p class="sub">Kept on its own. It does not change the loan numbers.</p></div>
+    <div class="val num lbig">${C?gel(C.gel):'—'}</div><div class="small muted">${C?'counted '+day(C.date):'not entered yet'}</div>
+    <label class="field"><span>Cash in hand now, ₾</span><input class="input num" id="lnCash" inputmode="decimal" placeholder="${C?fmt(C.gel):'0'}"></label>
+    <div class="row"><button class="btn primary" data-act="loanCount" ${w}>Save cash</button></div></div>`;
+  const devE=E.filter(isDev),othE=E.filter(e=>!isDev(e));
+  const lists=`<div class="grid g2 mt"><section class="eg"><div class="eg-h"><span>Developer payments</span><b>${devE.length} · tap to edit</b></div>${rows(devE)}</section>
+   <section class="eg"><div class="eg-h"><span>Other loan entries</span><b>${othE.length} · tap to edit</b></div>${rows(othE)}</section></div>`;
+  return loadingOr(head+kpis+`<div class="grid g2">${dev}${other}</div><div class="grid g2 mt">${where}${cash}</div>`+lists);
 }
 function loanModal(id,kind){
   const e=id?{...S.loan.get(id)}:{date:today(),kind:kind||'spend',pot:'tbc',purpose:'dev',part:'interest',gel:'',what:'',note:''};
@@ -2205,12 +2249,10 @@ function loanModal(id,kind){
     try{await S.db.doc('loan/'+(id||uid('l'))).set(d);closeModal();toast('Saved '+gel(d.gel,2)+' · '+LKIND[d.kind])}catch(x){toast(errMsg(x))}};
   if($('#lgDel'))$('#lgDel').onclick=async ev=>{const b=ev.currentTarget;if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Tap again to delete';return}try{await delDoc('loan/'+id);closeModal();toast('Deleted')}catch(x){toast(errMsg(x))}};
 }
-async function loanCount(){
-  const el=$('#lnCash');if(!el)return;
-  if(el.value.trim()===''){toast('Type the cash you have now');el.focus();return}
-  const v=parseNum(el.value);if(!(v>=0)){toast('Cash cannot be below zero');return}
-  try{await saveCfg({loan:{...(S.cfg.loan||{}),cash:{gel:Math.round(v*100)/100,date:today(),at:new Date().toISOString()}}});schedule();toast('Cash in hand: '+gel(v,2))}catch(x){toast(errMsg(x))}
-}
+const saveLoanCfg=(k,v,msg)=>saveCfg({loan:{...(S.cfg.loan||{}),[k]:v}}).then(()=>{schedule();toast(msg)},x=>toast(errMsg(x)));
+function loanNum(id,what){const el=$(id);if(!el)return null;if(el.value.trim()===''){toast('Type '+what);el.focus();return null}const v=parseNum(el.value);if(!(v>=0)){toast('It cannot be below zero');return null}return Math.round(v*100)/100}
+function loanCount(){const v=loanNum('#lnCash','the cash you have now');if(v!=null)saveLoanCfg('cash',{gel:v,date:today(),at:new Date().toISOString()},'Cash in hand: '+gel(v,2))}
+function loanLeft(){const v=loanNum('#lnLeft','what is left of the loan');if(v!=null)saveLoanCfg('left',{gel:v,date:today(),at:new Date().toISOString()},'Left from the loan: '+gel(v,2))}
 
 /* ============================== Optimo control center ============================== */
 // Kept apart from the books: Optimo exports live in their own collection and never change the P&L.
@@ -2267,7 +2309,7 @@ function vOptimo(){
    <div class="grid g2"><div class="drop" data-act="opPick" role="button" tabindex="0">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',28)}<b>Drop your Optimo exports here</b><span>Sale history (გაყიდვების ისტორია) and stock list (StockItems), .xlsx</span></div>
    <div class="panel"><h2>What to export from Optimo</h2><div class="flow"><div class="ln"><span class="k"><b>1.</b> Sale history for any period, for example since you started</span></div><div class="ln"><span class="k"><b>2.</b> Stock items list: what is on the shelf now</span></div><div class="ln"><span class="k"><b>3.</b> Optional: sale history for the last 90 days, for sharper reorder advice</span></div></div></div></div>`);
   const per=M.sel?`${dLabel(M.sel.from)} – ${dLabel(M.sel.to)}`:'no sale history yet';
-  const periodSel=M.D.sales.length>1?`<select class="input" id="opPeriod" aria-label="Sales period">${M.D.sales.map(x=>`<option value="${esc(x.id)}" ${x.id===M.sel.id?'selected':''}>${dLabel(x.from)} – ${dLabel(x.to)}</option>`).join('')}</select>`:'';
+  const periodSel=M.D.sales.length>1?`<select class="input" id="opPeriod" aria-label="Sales period" style="width:auto">${M.D.sales.map(x=>`<option value="${esc(x.id)}" ${x.id===M.sel.id?'selected':''}>${dLabel(x.from)} – ${dLabel(x.to)}</option>`).join('')}</select>`:'';
   const head=`<div class="pagehead"><div><div class="eyebrow">Optimo · ${esc(per)}</div><h1>Optimo control center</h1><p>${M.D.stock?'Stock counted '+dLabel(M.D.stock.at.slice(0,10))+'. ':''}Separate from the books.</p></div><div class="actions">${periodSel}${upBtn}</div></div>
    <div class="tabs" role="tablist">${tabs.map(([k,t])=>`<button role="tab" aria-selected="${T===k}" data-act="opTab" data-v="${k}">${t}${k==='stock'&&M.reorder.length?` <span class="chip bad" style="padding:0 6px">${M.reorder.length}</span>`:''}</button>`).join('')}</div>`;
   const body=T==='items'?opItems(M):T==='stock'?opStock(M):T==='cats'?opCats(M):opOverview(M);
@@ -2492,6 +2534,8 @@ async function act(a,b){
     await saveCfg({balances:bal});return toast('Balances saved')}
   if(a==='loanNew')return loanModal(null,b.dataset.kind);
   if(a==='loanCount')return loanCount();
+  if(a==='loanLeft')return loanLeft();
+  if(a==='loanLeftClear'){const {left,...rest}=S.cfg.loan||{};return saveCfg({loan:rest}).then(()=>{schedule();toast('Left now comes from the entries')},x=>toast(errMsg(x)))}
   if(a==='exportBackup')return exportBackup();
   if(a==='pickBackup')return $('#backupFile').click();
   if(a==='copyPhone'){const v=$('#phLink').value;try{await navigator.clipboard.writeText(v);toast('Phone link copied')}catch(e){$('#phLink').select();toast('Select and copy the link')}return}
