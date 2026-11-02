@@ -1316,11 +1316,71 @@ function prodData(ms){
   return {rows,hasCost:costed.length>0,revenue:rows.reduce((a,r)=>a+r.r,0),cost:costed.reduce((a,r)=>a+r.k,0),costRev:costed.reduce((a,r)=>a+r.r,0),qty:rows.reduce((a,r)=>a+r.q,0),
     months:ms.filter(m=>covered.has(m)||sheetMonths.includes(m)),srcs:[...new Set(parts.map(p=>p.src))],source:parts.length===1?parts[0].source:'',uploadedAt:parts.length===1?parts[0].uploadedAt:null,onlyOptimo:parts.every(p=>p.src==='optimo')};
 }
-function vProducts(){
-  if(S.opt)return vOptImport();
+function vProducts(){if(S.opt)return vOptImport();return (S.prod.view||'stock')==='sales'?vProdSales():vStock()}
+/* ---------- stock, prices & costs ---------- */
+// What is on the shelf (last Optimo stock list) plus what is on the way: import shipments not yet arrived,
+// or arrived after the stock list was taken. Each shipment can be linked to a product by its barcode.
+const landedOf=s=>(+s.usd||0)*(+s.fx||fx())+(+s.freight||0)+(+s.customs||0);
+const usdOfTx=t=>t.cur==='USD'&&t.orig?+t.orig:(()=>{const m=String(t.note||'').match(/USD\s?([\d,]+(?:\.\d+)?)/);return m?parseNum(m[1]):0})();
+function incoming(){const sd=opDocs().stock?.at?.slice(0,10)||'';
+  return [...S.ships.values()].filter(s=>!s.personal&&(s.status!=='arrived'||(s.arrivedAt&&sd&&s.arrivedAt>sd))).map(s=>({...s,land:landedOf(s)})).sort((a,b)=>(b.date||'').localeCompare(a.date||''))}
+// import payments in the last 45 days of the stock list that no shipment describes
+function unlistedImports(){const sd=opDocs().stock?.at?.slice(0,10)||today();const from=new Date(Date.parse(sd)-45*864e5).toISOString().slice(0,10);
+  const ships=[...S.ships.values()];const day=d=>Date.parse(d||'1970-01-01');
+  return [...S.tx.values()].filter(t=>t.cat==='goods_import'&&t.date>=from).filter(t=>{const u=usdOfTx(t);
+    return !ships.some(s=>s.txId===t.id||t.shipId===s.id||(u&&Math.abs((+s.usd||0)-u)<0.02&&Math.abs(day(s.date)-day(t.date))<=12*864e5))}).sort((a,b)=>b.date.localeCompare(a.date))}
+function stockRows(M){
+  const inc=incoming();const by=new Map();const known=new Set(M.items.map(x=>x.b));const fresh=[];
+  for(const s of inc){if(s.sku&&known.has(s.sku)){const o=by.get(s.sku)||{q:0,land:0,n:0};o.q+=+s.qty||0;o.land+=s.land;o.n++;by.set(s.sku,o)}
+    else fresh.push({b:'',n:s.item,cat:'',q:0,inStock:false,isNew:true,inc:+s.qty||0,incLand:s.land,cost:s.qty?s.land/s.qty:0,price:0,unit:null,sq:0,rev:0,profit:0,margin:null,status:'new',shipId:s.id})}
+  const rows=M.items.filter(x=>x.inStock||by.has(x.b)).map(x=>{const o=by.get(x.b);return {...x,inc:o?o.q:0,incLand:o?o.land:0}});
+  return {rows:rows.concat(fresh),inc};
+}
+function vStock(){
+  const M=opModel();const up=S.canWrite?`<button class="btn amber" data-act="opPick">${svg('M12 16V4M7 9l5-5 5 5M4 20h16')} Upload Optimo files</button><input type="file" id="opFile" accept=".xlsx,.xls,.csv" multiple hidden>`:'';
+  const head=(sub)=>`<div class="pagehead"><div><div class="eyebrow">Products · პროდუქცია</div><h1>Products</h1><p>${sub}</p></div><div class="actions"><button class="btn" data-act="newShip">+ Import</button>${up}</div></div>${prodTabs()}`;
+  if(!M||!M.D.stock)return loadingOr(head('Every product with its stock, cost, price and profit.')+`<div class="drop" data-act="opPick" role="button" tabindex="0">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',28)}<b>Upload the Optimo stock list and sale history</b><span>StockItems.xlsx and SaleHistory….xlsx</span></div>`);
+  const {rows,inc}=stockRows(M);const P=S.prod;const sf=P.sf||'all';const st=M.D.stock;
+  const incLand=inc.reduce((a,s)=>a+s.land,0),incQty=inc.reduce((a,s)=>a+(+s.qty||0),0);
+  const per=M.sel?dLabel(M.sel.from)+' – '+dLabel(M.sel.to):'';
+  const kpis=`<div class="kpis">
+   <div class="kpi"><div class="lbl">On the shelf</div><div class="val num">${cu(M.units)}<small> pcs</small></div><div class="delta">${M.stocked.filter(x=>x.q>0).length} products · counted ${dLabel(st.at.slice(0,10))}</div></div>
+   <div class="kpi"><div class="lbl">Stock value at cost</div><div class="val num">${cu(M.value)}<small>₾</small></div><div class="delta">${incLand?'+ '+gel(incLand)+' on the way = '+gel(M.value+incLand):'what you paid for it'}</div></div>
+   <div class="kpi"><div class="lbl">At shelf prices</div><div class="val num">${cu(M.retail)}<small>₾</small></div><div class="delta">${gel(M.retail-M.value)} profit waiting on the shelf</div></div>
+   <div class="kpi"><div class="lbl">Sold ${M.sel?esc(per):''}</div><div class="val num">${cu(M.rev)}<small>₾</small></div><div class="delta">${gel(M.profit)} profit · ${pct(M.profit,M.rev)}% margin</div></div></div>`;
+  const items=new Map(M.items.map(x=>[x.b,x]));
+  const incP=`<div class="panel"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">On the way</h2><p class="sub" style="margin:2px 0 0">${inc.length?fmt(incQty)+' pieces · '+gel(incLand)+' landed cost. Imports not yet in the Optimo stock list.':'Nothing on the way.'}</p></div><span class="spacer"></span><button class="btn sm" data-go="imports">All imports</button></div>
+   ${inc.length?`<div class="flow mt">${inc.map(s=>{const it=s.sku&&items.get(s.sku);return `<div class="ln click" data-ship="${s.id}"><span class="k"><b>${esc(s.item)}</b><div class="small muted">${esc(s.date||'')} · ${s.status==='arrived'?'arrived '+esc(s.arrivedAt):s.status==='transit'?'on the way':'ordered'} · ${it?'→ '+esc(it.n):'<span style="color:var(--warn)">new product, not in Optimo yet</span>'}</div></span><span class="v num">${s.qty?'+'+fmt(s.qty):'<span class="muted">qty?</span>'}<div class="small muted">${gel(s.land)}${s.qty?' · '+gel(s.land/s.qty,2)+' each':''}</div></span></div>`}).join('')}</div>`:''}</div>`;
+  const un=unlistedImports();
+  const unP=un.length?`<div class="panel"><h2>Imports paid, items not listed</h2><p class="sub">${gel(un.reduce((a,t)=>a+t.gel,0))} paid in the last 45 days with no item list, so their products can't be added to stock yet. Tap Add items and write what was in the order.</p><div class="flow">${un.map(t=>`<div class="ln"><span class="k"><b>${esc(t.vendor||'Import')}</b><div class="small muted">${esc(t.date)}${usdOfTx(t)?' · $'+fmt(usdOfTx(t),2):''}</div></span><span class="v"><span class="num">${gel(t.gel)}</span> <button class="btn sm" data-act="shipFromTx" data-id="${esc(t.id)}">Add items</button></span></div>`).join('')}</div></div>`:'';
+  const q=(P.sq||'').toLowerCase();
+  const fl=rows.filter(x=>(!q||x.n.toLowerCase().includes(q)||String(x.b).includes(q))&&(!P.scat||(x.isNew?'New':x.cat||'Other')===P.scat)&&(sf==='all'||(sf==='in'&&x.q>0)||(sf==='way'&&x.inc>0)||(sf==='out'&&x.q===0&&!x.inc)||(sf==='neg'&&x.q<0)));
+  const mgOf=x=>x.unit==null||!x.price?null:x.unit/(x.vat==='ჩვეულებრივი'?x.price/1.18:x.price);
+  const val=(x,k)=>k==='n'?x.n:k==='mg'?(mgOf(x)??-9):k==='sv'?(Math.max(x.q,0)+x.inc)*x.cost:x[k]??-Infinity;
+  const sort=P.ssort||'sv',dir=P.sdir||-1;fl.sort((a,b)=>{const x=val(a,sort),y=val(b,sort);return (typeof x==='string'?x.localeCompare(y):x-y)*dir});
+  const cols=[['n','Product'],['q','On hand'],['inc','On the way'],['cost','Cost'],['price','Price'],['mg','Margin'],['sv','Stock value'],['sq','Sold'],['profit','Profit']];
+  const cats=[...new Set(rows.map(x=>x.isNew?'New':x.cat||'Other'))].sort();
+  const cnt=k=>rows.filter(x=>k==='in'?x.q>0:k==='way'?x.inc>0:k==='out'?x.q===0&&!x.inc:x.q<0).length;
+  const shown=P.sfull||q?fl:fl.slice(0,100);
+  const table=`<div class="panel mt" style="padding-bottom:6px"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">All products</h2><p class="sub" style="margin:2px 0 0">Cost and price from Optimo; sold and profit for ${esc(per)}. Margin is what you keep from the price after VAT.</p></div></div>
+   <div class="toolbar mt"><input class="input grow" id="psQ" placeholder="Search product or barcode…" value="${esc(P.sq||'')}">
+    <select class="input" id="psCat" aria-label="Category"><option value="">All categories</option>${cats.map(c=>`<option ${P.scat===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+    <div class="seg" role="group" aria-label="Show">${[['all','All',rows.length],['in','In stock',cnt('in')],['way','On the way',cnt('way')],['out','Out',cnt('out')],['neg','Below zero',cnt('neg')]].map(([k,t,n])=>`<button data-act="psFilter" data-v="${k}" aria-pressed="${sf===k}">${t} <span class="muted">${n}</span></button>`).join('')}</div></div>
+   <div class="tablewrap"><table><thead><tr>${cols.map(([k,t])=>`<th class="sort ${k==='n'?'':'r'} ${sort===k?'sorted':''}" data-psort="${k}">${t}${sort===k?(dir>0?' ↑':' ↓'):''}</th>`).join('')}</tr></thead><tbody>
+   ${shown.map(x=>{const mg=mgOf(x);const m=mg==null?null:Math.round(mg*100);return `<tr ${x.shipId?`class="click" data-ship="${x.shipId}"`:''}><td style="min-width:220px">${esc(x.n)}<div class="muted small">${x.isNew?'<span class="chip warn">new · add to Optimo</span>':esc(x.cat||'')+' · '+esc(x.b)}</div></td>
+    <td class="r num ${x.q<0?'neg':x.q===0?'muted':''}">${x.isNew?'—':fmt(x.q)}</td><td class="r num">${x.inc?'<b style="color:var(--good)">+'+fmt(x.inc)+'</b>':'<span class="muted">·</span>'}</td>
+    <td class="r num">${x.cost?gel(x.cost,x.cost<20?2:0):'—'}</td><td class="r num">${x.price?gel(x.price):'—'}</td>
+    <td class="r">${m==null?'<span class="muted">—</span>':`<span class="chip ${m<15?'bad':m<35?'warn':'good'}">${m}%</span>`}</td>
+    <td class="r num">${gel((Math.max(x.q,0)+x.inc)*x.cost)}</td><td class="r num">${x.sq?fmt(x.sq):'<span class="muted">·</span>'}</td><td class="r num ${x.profit<0?'neg':''}">${x.sq?gel(x.profit):'<span class="muted">·</span>'}</td></tr>`}).join('')}
+   </tbody></table></div>${shown.length<fl.length?`<div class="row mt"><button class="btn sm" data-act="psFull">Show all ${fl.length} products</button></div>`:''}
+   <p class="hint mt">Stock value counts what is on hand plus what is on the way, at cost. Products below zero sold more than Optimo had on record; recount them in Optimo.</p></div>`;
+  return loadingOr(head('Stock, cost, price and profit for every product. Imports on the way are added until they show up in a new Optimo stock list.')+kpis+`<div class="grid g2">${incP}${unP||`<div class="panel"><h2>Imports paid, items not listed</h2><div class="empty">Every recent import payment has its items listed.</div></div>`}</div>`+table);
+}
+function prodTabs(){const v=S.prod.view||'stock';return `<div class="tabs" role="tablist" style="margin-bottom:16px"><button role="tab" aria-selected="${v==='stock'}" data-act="prodView" data-v="stock">Stock, prices &amp; costs</button><button role="tab" aria-selected="${v==='sales'}" data-act="prodView" data-v="sales">Sales by month</button></div>`}
+function vProdSales(){
   const m=S.month,P=S.prod,ms=P.all?rangeMonths():[m],D=prodData(ms);const M=metrics(m);const OD=P.all?null:(S.items.get(m)?D:null);
   const head=`<div class="pagehead"><div><div class="eyebrow">${P.all?esc(rangeLabel()):kaM(m)+' · '+m.slice(0,4)}</div><h1>Products</h1><p>Which items sell, which make money and which don't. Uses your Optimo report by item; months without one use the product names in the order sheet${D&&D.srcs.includes('sheet')&&D.hasCost?' and the cost written next to each order':''}.</p></div>
-   <div class="actions"><div class="seg" role="group" aria-label="Period"><button data-act="prodAll" data-v="0" aria-pressed="${!P.all}">${mShort(m)} ${m.slice(0,4)}</button><button data-act="prodAll" data-v="1" aria-pressed="${P.all}">Period</button></div><button class="btn amber" data-act="optStart">Upload Optimo report</button></div></div>${P.all?periodBar({noMonth:true}):''}`;
+   <div class="actions"><div class="seg" role="group" aria-label="Period"><button data-act="prodAll" data-v="0" aria-pressed="${!P.all}">${mShort(m)} ${m.slice(0,4)}</button><button data-act="prodAll" data-v="1" aria-pressed="${P.all}">Period</button></div><button class="btn amber" data-act="optStart">Upload Optimo report</button></div></div>${prodTabs()}${P.all?periodBar({noMonth:true}):''}`;
   if(!D)return loadingOr(head+`<div class="grid g2"><div class="panel stack"><div><h2>No Optimo report for ${mLabel(m)} yet</h2><p class="sub">In Optimo, open the sales report by item (პროდუქციის მიხედვით), pick ${mLabel(m)}, and export it to Excel. Include the cost price column (თვითღირებულება) so profit can be calculated.</p></div><div class="drop" data-act="optStart" role="button" tabindex="0">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',28)}<b>Upload the Optimo report</b><span>.xlsx, .xls or .csv</span></div></div>${reconPanel(m,M,null)}</div>`);
   const rows=D.rows.filter(r=>!P.q||r.n.toLowerCase().includes(P.q.toLowerCase())||(r.c||'').toLowerCase().includes(P.q.toLowerCase()));
   const gp=D.costRev-D.cost;const part=D.hasCost&&D.costRev<D.revenue*.98;
@@ -1922,8 +1982,11 @@ function vRecap(){
   // costs by category
   const cats=CATS.filter(c=>['opex','tax'].includes(c.g)&&A.by[c.id]>0).map(c=>({c,v:A.by[c.id],p:PA.by[c.id]||0})).sort((a,b)=>b.v-a.v);const cmx=Math.max(1,...cats.map(r=>r.v));
   // products from the item reports in this period
-  const it=new Map();R.ms.forEach(m=>{const d=S.items.get(m);if(d&&d.hasCost)(d.rows||[]).forEach(r=>{const k=(r.c||'')+'|'+r.n.toLowerCase();const o=it.get(k)||{n:r.n,q:0,r:0,p:0};o.q+=+r.q||0;o.r+=+r.r||0;o.p+=+r.p||0;it.set(k,o)})});
-  const best=[...it.values()].sort((a,b)=>b.p-a.p).slice(0,6);const bmx=Math.max(1,...best.map(r=>r.p));const itMs=R.ms.filter(m=>S.items.get(m)?.hasCost);
+  // a sale history covering the period beats single monthly reports
+  const yd=mode==='year'?[...S.itemsYear.values()].find(d=>d.hasCost&&d.from>=R.ms[0]&&d.to<=R.ms[R.ms.length-1]):null;
+  const it=new Map();const addRows=rows=>(rows||[]).forEach(r=>{const k=(r.c||'')+'|'+r.n.toLowerCase();const o=it.get(k)||{n:r.n,q:0,r:0,p:0};o.q+=+r.q||0;o.r+=+r.r||0;o.p+=+r.p||0;it.set(k,o)});
+  if(yd)addRows(yd.rows);else R.ms.forEach(m=>{const d=S.items.get(m);if(d&&d.hasCost)addRows(d.rows)});
+  const best=[...it.values()].sort((a,b)=>b.p-a.p).slice(0,6);const bmx=Math.max(1,...best.map(r=>r.p));const itMs=yd?[]:R.ms.filter(m=>S.items.get(m)?.hasCost);
   const est=D.filter(d=>d.est&&d.sales>0);
   const neg=A.net<0;
   const story=`You sold <b>${gel(A.sales)}</b> of goods in ${fmt(A.orders)} orders. Those items cost about <b>${gel(A.cogs)}</b> to buy${est.length?' (estimated)':''}, leaving <b>${gel(A.gross)}</b> gross profit. Running the shop cost <b>${gel(A.opex)}</b> and taxes <b>${gel(A.tax)}</b>${A.otherInc?`, other income added <b>${gel(A.otherInc)}</b>`:''}, so Astroman ${neg?'lost':'made'} <b>${gel(Math.abs(A.net))}</b>.${A.accurate&&A.stock?` You also put <b>${gel(A.stock)}</b> into new stock. That is on the shelf, not lost.`:''}`;
@@ -1949,7 +2012,7 @@ function vRecap(){
     ${op&&op.value?`<div class="rshelf"><span>On the shelf now (Optimo stock list${op.D.stock?.at?', '+dLabel(op.D.stock.at.slice(0,10)):''})</span><b class="num">${gel(op.value)}</b><em>at cost · ${fmt(op.units)} pieces · ${gel(op.retail)} at shelf prices</em></div>`:''}
     ${A.accurate?'':'<p class="hint mt">Settings are set to count stock as a cost when it is paid for. Change “How to calculate profit” in Settings to treat it as an asset.</p>'}</div>`;
   const costs=`<div class="panel mt"><h2>Running costs and taxes</h2><p class="sub">${gel(A.opex+A.tax)} in total${A.fixed?', including '+gel(A.fixed)+' of fixed monthly costs added automatically':''}.${hasCmp?' Change vs '+esc(R.cmpLbl)+'.':''}</p>${cats.length?`<div class="bars">${cats.map(r=>{const d=r.v-r.p;return `<div class="bar"><div class="name">${esc(r.c.en)}<span>${esc(r.c.ka)}</span></div><div class="track"><div class="fill" style="width:${r.v/cmx*100}%;background:${r.c.g==='tax'?'var(--c4)':'var(--c1)'}"></div></div><div class="amt num">${gel(r.v)}<small>${A.sales?pct(r.v,A.sales)+'% of sales':''}${hasCmp?(r.p?' · '+(d>0?'▲ ':d<0?'▼ ':'')+fmt(Math.abs(d)):' · new'):''}</small></div></div>`}).join('')}</div>`:'<div class="empty">No costs recorded.</div>'}</div>`;
-  const prods=best.length?`<div class="panel mt"><h2>Products that made the most</h2><p class="sub">Profit per item, from the product report${itMs.length>1?'s':''} for ${itMs.map(mShort).join(', ')}.</p><div class="bars">${best.map(r=>`<div class="bar"><div class="name">${esc(r.n)}</div><div class="track"><div class="fill" style="width:${r.p/bmx*100}%;background:var(--c2)"></div></div><div class="amt num">${gel(r.p)}<small>${fmt(r.q)} sold · ${pct(r.p,r.r)}%</small></div></div>`).join('')}</div></div>`:'';
+  const prods=best.length?`<div class="panel mt"><h2>Products that made the most</h2><p class="sub">Profit per item, ${yd?'from the Optimo sale history '+mShort(yd.from)+' – '+mShort(yd.to)+' '+yd.to.slice(0,4):'from the product report'+(itMs.length>1?'s':'')+' for '+itMs.map(mShort).join(', ')}.</p><div class="bars">${best.map(r=>`<div class="bar"><div class="name">${esc(r.n)}</div><div class="track"><div class="fill" style="width:${r.p/bmx*100}%;background:var(--c2)"></div></div><div class="amt num">${gel(r.p)}<small>${fmt(r.q)} sold · ${pct(r.p,r.r)}%</small></div></div>`).join('')}</div></div>`:'';
   const months=mode==='year'?`<div class="panel mt"><h2>Month by month</h2><p class="sub">Sales against all spending that counts in profit. Below each month: its net profit.</p><div class="chart">${trendChart(R.ms,null)}</div>
     <div class="tablewrap mt"><table><thead><tr><th>Month</th><th class="r">Sales</th><th class="r">Gross profit</th><th class="r">Running + tax</th><th class="r">Net profit</th><th>Cost of goods</th></tr></thead><tbody>${D.map(d=>`<tr><td>${esc(mLabel(d.m))}</td><td class="r num">${gel(d.sales)}</td><td class="r num">${gel(d.gross)}</td><td class="r num">${gel(d.opex+d.tax)}</td><td class="r num ${d.net<0?'neg':''}">${gel(d.net)}</td><td>${!d.sales?'<span class="muted">—</span>':d.allAccurate?'<span class="rtag">real</span>':d.est?`<span class="rtag est">est. ${Math.round(d.ratio*100)}%</span>`:'<span class="rtag est">stock paid</span>'}</td></tr>`).join('')}
     <tr class="sum"><td><b>Total</b></td><td class="r num"><b>${gel(A.sales)}</b></td><td class="r num"><b>${gel(A.gross)}</b></td><td class="r num"><b>${gel(A.opex+A.tax)}</b></td><td class="r num ${A.net<0?'neg':''}"><b>${gel(A.net)}</b></td><td></td></tr></tbody></table></div></div>`:'';
@@ -2021,8 +2084,9 @@ function vImports(){
   </tbody></table></div>
   <div class="panel" style="align-self:start"><h2>By forwarder, ${y}</h2><p class="sub">Goods value shipped through each, Astroman only.</p><div class="bars">${Object.entries(byFw).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="bar"><div class="name">${esc(k)}</div><div class="track"><div class="fill" style="width:${v/maxF*100}%;background:var(--s2)"></div></div><div class="amt num">$${fmt(v)}</div></div>`).join('')||'<div class="empty">—</div>'}</div></div></div>`);
 }
-function shipModal(id){
-  const s=id?{...S.ships.get(id)}:{date:today(),item:'',qty:'',usd:'',forwarder:'',status:'ordered',fx:fx(),freight:'',customs:'',personal:false,note:''};
+function shipModal(id,pre){
+  const s=id?{...S.ships.get(id)}:{date:today(),item:'',qty:'',usd:'',forwarder:'',status:'ordered',fx:fx(),freight:'',customs:'',personal:false,note:'',...(pre||{})};
+  const prods=opDocs().stock?.items||[];const cur=prods.find(x=>x[0]===s.sku);
   const fws=[...new Set(['World Logistics','MSCS Georgia','Silkpost','Wejet','VIPexpress','ULC',...[...S.ships.values()].map(x=>x.forwarder).filter(Boolean)])];
   modal(`<h3>${id?'Edit shipment':'New shipment'}</h3><p class="muted small">Landed cost = USD × rate + freight + customs.</p>
   <div class="formgrid" style="margin-top:14px">
@@ -2035,15 +2099,18 @@ function shipModal(id){
    <label class="field"><span>Customs &amp; VAT, ₾</span><input class="input num" id="sCustoms" inputmode="decimal" value="${esc(s.customs||'')}"></label>
    <label class="field"><span>Forwarder</span><input class="input" id="sFw" list="fwList" value="${esc(s.forwarder)}"><datalist id="fwList">${fws.map(f=>`<option value="${esc(f)}">`).join('')}</datalist></label>
    <label class="field"><span>Status</span><select class="input" id="sStatus">${[['ordered','Ordered'],['transit','On the way'],['arrived','Arrived']].map(([v,l])=>`<option value="${v}" ${s.status===v?'selected':''}>${l}</option>`).join('')}</select></label>
+   <label class="field"><span>Arrived on</span><input class="input" type="date" id="sArr" value="${esc(s.arrivedAt||'')}"></label>
+   <label class="field" style="grid-column:1/-1"><span>Product in Optimo (leave empty if it is new)</span><input class="input" id="sSku" list="skuList" value="${cur?esc(cur[1]+' · '+cur[0]):''}" placeholder="Search by name or barcode"><datalist id="skuList">${prods.map(x=>`<option value="${esc(x[1]+' · '+x[0])}">`).join('')}</datalist></label>
   </div>
   <label class="row small" style="margin-top:12px"><input type="checkbox" id="sPers" ${s.personal?'checked':''}> Not for Astroman (personal or other business)</label>
-  ${id?'':`<label class="row small" style="margin-top:6px"><input type="checkbox" id="sTx" checked> Also record the payment as an expense (Imported goods)</label>`}
+  ${id||s.txId?'':`<label class="row small" style="margin-top:6px"><input type="checkbox" id="sTx" checked> Also record the payment as an expense (Imported goods)</label>`}
   <div class="flow" style="margin-top:12px"><div class="ln total"><span class="k">Landed cost</span><span class="v num" id="sLanded">—</span></div></div>
   <div class="foot">${id?'<button class="btn danger" id="sDel">Delete</button>':'<span></span>'}<div class="row"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" id="sSave" ${S.canWrite?'':'disabled'}>Save</button></div></div>`);
   const calc=()=>{$('#sLanded').textContent=gel(parseNum($('#sUsd').value)*parseNum($('#sFx').value)+parseNum($('#sFreight').value)+parseNum($('#sCustoms').value),2)};
   ['sUsd','sFx','sFreight','sCustoms'].forEach(i=>$('#'+i).addEventListener('input',calc));calc();
   $('#sSave').onclick=async()=>{
-    const b={date:$('#sDate').value,item:$('#sItem').value.trim(),qty:parseNum($('#sQty').value)||null,usd:parseNum($('#sUsd').value),fx:parseNum($('#sFx').value)||fx(),freight:parseNum($('#sFreight').value),customs:parseNum($('#sCustoms').value),forwarder:$('#sFw').value.trim(),status:$('#sStatus').value,personal:$('#sPers').checked,note:s.note||'',source:s.source||'manual',updatedAt:new Date().toISOString()};
+    const skuTxt=$('#sSku').value.trim();const sku=skuTxt?(prods.find(x=>skuTxt===x[1]+' · '+x[0]||skuTxt===x[0])||[''])[0]:'';if(skuTxt&&!sku){toast('Pick the product from the list, or leave it empty');return}
+    const status=$('#sStatus').value;const b={...(id?{}:{txId:s.txId||''}),sku,arrivedAt:$('#sArr').value||(status==='arrived'?today():''),date:$('#sDate').value,item:$('#sItem').value.trim(),qty:parseNum($('#sQty').value)||null,usd:parseNum($('#sUsd').value),fx:parseNum($('#sFx').value)||fx(),freight:parseNum($('#sFreight').value),customs:parseNum($('#sCustoms').value),forwarder:$('#sFw').value.trim(),status,personal:$('#sPers').checked,note:s.note||'',source:s.source||'manual',updatedAt:new Date().toISOString()};
     if(!b.item){toast('Name the shipment');return}
     try{const sid=id||uid('s');await S.db.doc('ships/'+sid).set(b);
       if(!id&&$('#sTx')?.checked&&b.usd){await saveTx({date:b.date,cat:b.personal?'personal':'goods_import',account:'unknown',vendor:b.item,note:'Shipment via '+(b.forwarder||'—'),cur:'USD',orig:b.usd,fx:b.fx,gel:Math.round(b.usd*b.fx*100)/100,source:'manual',shipId:sid})}
@@ -2173,7 +2240,7 @@ async function loanCount(){
 // Stock doc  optimo/stock          {kind:'stock',at,file,items:[[barcode,name,category,qty,min,cost,price,vat]]}
 // Sales doc  optimo/sales-<from>_<to> {kind:'sales',from,to,file,at,rows:[[barcode,name,qty,cost,revenue,vat]]}
 const OP_STATUS={reorder:['bad','Reorder'],soon:['warn','Order soon'],optional:['','Out · slow seller'],negative:['bad','Count is wrong'],dead:['warn','Never sold'],slow:['warn','Too much stock'],ok:['good','OK'],gone:['','Not in stock list']};
-function opDocs(){const out={stock:null,sales:[]};S.optimo.forEach((d,id)=>{if(d.kind==='stock')out.stock=d;else if(d.kind==='sales')out.sales.push({...d,id})});out.sales.sort((a,b)=>spanDays(b)-spanDays(a));return out}
+function opDocs(){const out={stock:null,sales:[]};S.optimo.forEach((d,id)=>{if(d.kind==='stock')out.stock=d;else if(d.kind==='sales')out.sales.push({...d,id})});out.sales.sort((a,b)=>String(b.to).localeCompare(String(a.to))||spanDays(b)-spanDays(a));return out}
 const spanDays=d=>Math.max(1,Math.round((Date.parse(d.to)-Date.parse(d.from))/864e5)+1);
 const dLabel=s=>{const [y,m,d]=s.split('-');return +d+' '+EN_MONTHS[+m-1].slice(0,3)+' '+y};
 function opSettings(){const c=S.cfg.optimo||{};return {cover:+c.cover||3,lead:+c.lead||1}}
@@ -2312,6 +2379,9 @@ function opParse(wb,file){
   const from=m?`${m[3]}-${m[2]}-${m[1]}`:'',to=m?`${m[6]}-${m[5]}-${m[4]}`:today();
   return {kind:'sales',file:file.name,at:new Date().toISOString(),from,to,rows};
 }
+// a sale history inside one year, in the shape the profit calculation reads (cost of items sold vs sales)
+function yearDoc(d){const rows=d.rows.map(([b,n,q,k,r])=>({n,c:b,q,r,k,p:Math.round((r-k)*100)/100}));
+  return {from:d.from.slice(0,7),to:d.to.slice(0,7),rows,hasCost:true,revenue:Math.round(rows.reduce((a,x)=>a+x.r,0)*100)/100,cost:Math.round(rows.reduce((a,x)=>a+x.k,0)*100)/100,qty:rows.reduce((a,x)=>a+x.q,0),source:'Optimo sale history · '+d.file,uploadedAt:new Date().toISOString()}}
 function opUpload(files){
   const out=[];let left=files.length;const errs=[];
   [...files].forEach(f=>{const r=new FileReader();r.onload=async()=>{try{await xlsxReady();out.push(opParse(wbFromBytes(new Uint8Array(r.result)),f))}catch(e){errs.push(e.message||'Could not read '+f.name)}if(--left===0)opPreview(out,errs)};r.readAsArrayBuffer(f)});
@@ -2321,11 +2391,11 @@ function opPreview(docs,errs){
   modal(`<h3>Add to Optimo</h3>${errs.map(e=>`<p class="small" style="color:var(--bad)">${esc(e)}</p>`).join('')}
    <div class="flow mt">${docs.map((d,i)=>d.kind==='stock'?`<div class="ln"><span class="k"><b>Stock list</b> · ${d.items.length} items<div class="muted small">${esc(d.file)} · replaces the current stock list</div></span><span class="v num">${gel(d.items.reduce((a,x)=>a+Math.max(0,x[3])*x[5],0))}</span></div>`
      :`<div class="ln"><span class="k"><b>Sale history</b> · ${d.rows.length} lines<div class="muted small">${esc(d.file)}</div><div class="row small" style="gap:6px;margin-top:6px">from <input type="date" class="input" style="width:auto" data-opf="${i}" value="${d.from}"> to <input type="date" class="input" style="width:auto" data-opt="${i}" value="${d.to}"></div></span><span class="v num">${gel(d.rows.reduce((a,x)=>a+x[4],0))}</span></div>`).join('')}</div>
-   <p class="hint mt">A sale history for the same dates replaces the earlier one. Your books are not changed.</p>
+   <p class="hint mt">A sale history for the same dates replaces the earlier one. One that stays inside one year also sets that year's real cost of goods in the profit figures.</p>
    <div class="foot"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" id="opSave">Save</button></div>`,true);
   $('#opSave').onclick=async()=>{
     for(const [i,d] of docs.entries()){if(d.kind!=='sales')continue;d.from=document.querySelector(`[data-opf="${i}"]`).value;d.to=document.querySelector(`[data-opt="${i}"]`).value;if(!d.from||!d.to||d.from>d.to){toast('Set the dates of the sale history');return}}
-    for(const d of docs){const id=d.kind==='stock'?'stock':'sales-'+d.from+'_'+d.to;await S.db.doc('optimo/'+id).set(d);if(d.kind==='sales')S.op.period=id}
+    for(const d of docs){const id=d.kind==='stock'?'stock':'sales-'+d.from+'_'+d.to;await S.db.doc('optimo/'+id).set(d);if(d.kind==='sales'){S.op.period=id;if(d.from.slice(0,4)===d.to.slice(0,4))await S.db.doc('itemsYear/'+d.from.slice(0,4)).set(yearDoc(d))}}
     closeModal();toast('Optimo data saved');S.op.tab='overview';S.animate=true;render()};
 }
 async function opExport(){
@@ -2354,7 +2424,8 @@ function bindView(){
   hide();
   const on=(sel,ev,fn)=>{const el=$(sel);if(el)el.addEventListener(ev,fn)};
   const searchBox=(id,setter)=>{let t;on(id,'input',e=>{clearTimeout(t);t=setTimeout(()=>{setter(e.target.value);render();const x=$(id);x.focus();x.setSelectionRange(x.value.length,x.value.length)},250)})};
-  searchBox('#xQ',v=>S.filters.q=v);searchBox('#sQ',v=>S.salesQ=v);searchBox('#pQ',v=>S.prod.q=v);
+  searchBox('#xQ',v=>S.filters.q=v);searchBox('#sQ',v=>S.salesQ=v);searchBox('#pQ',v=>S.prod.q=v);searchBox('#psQ',v=>{S.prod.sq=v;S.prod.sfull=false});on('#psCat','change',e=>{S.prod.scat=e.target.value;render()});
+  document.querySelectorAll('th[data-psort]').forEach(th=>th.onclick=()=>{const k=th.dataset.psort;if(S.prod.ssort===k)S.prod.sdir*=-1;else{S.prod.ssort=k;S.prod.sdir=k==='n'?1:-1}render()});
   on('#xCat','change',e=>{S.filters.cat=e.target.value;render()});on('#xAcct','change',e=>{S.filters.acct=e.target.value;render()});on('#xAll','change',e=>{S.filters.all=e.target.checked;render()});
   document.querySelectorAll('[data-theme-set]').forEach(b=>b.onclick=()=>{lsSet('af.theme',b.dataset.themeSet);applyTheme(b.dataset.themeSet);render()});
   document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Tap again';setTimeout(()=>{delete b.dataset.sure;b.textContent='Delete'},4000);return}try{await delDoc('tx/'+b.dataset.del);toast('Deleted')}catch(e){toast(errMsg(e))}});
@@ -2427,6 +2498,10 @@ async function act(a,b){
   if(a==='plYtd'||a==='plRange'){S.plMode='range';return go('pl')}
   if(a==='range'){const p=b.dataset.p;const R={p};if(p==='custom'){const ms=rangeMonths();R.from=ms[0];R.to=ms[ms.length-1]}if(p==='month'&&S.view==='pl'){S.plMode='month'}return setRange(R)}
   if(a==='expMode'){S.filters.all=b.dataset.v==='1';S.animate=true;return render()}
+  if(a==='prodView'){S.prod.view=b.dataset.v;S.animate=true;return render()}
+  if(a==='psFilter'){S.prod.sf=b.dataset.v;S.prod.sfull=false;return render()}
+  if(a==='psFull'){S.prod.sfull=true;return render()}
+  if(a==='shipFromTx'){const t=S.tx.get(b.dataset.id);if(!t)return;const u=usdOfTx(t);return shipModal(null,{date:t.date,item:(t.vendor||'Import')+' order',usd:u||Math.round(t.gel/fx()*100)/100,fx:u?Math.round(t.gel/u*10000)/10000:fx(),forwarder:'',status:'ordered',txId:t.id,note:'Paid '+t.date+' · '+gel(t.gel,2)})}
   if(a==='recapMode'){S.recap=b.dataset.v;lsSet('af.recap',S.recap);S.animate=true;return render()}
   if(a==='optFor'){S.opt={stage:'upload',month:b.dataset.m};return go('products')}
   if(a==='filterCat'){S.filters.q=catLabel(b.dataset.cat);S.filters.all=false;return go('expenses')}
