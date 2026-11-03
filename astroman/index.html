@@ -1367,7 +1367,7 @@ const usdOfTx=t=>t.cur==='USD'&&t.orig?+t.orig:(()=>{const m=String(t.note||'').
 // (those carry goods and fees only, freight comes when they are shipped)
 function incoming(){const sd=opDocs().stock?.at?.slice(0,10)||'';const out=[];
   for(const s of shipList()){if(s.personal)continue;const st=shipSt(s);if(st==='arrived'&&!(s.arrivedAt&&sd&&s.arrivedAt>sd))continue;
-    shipCalc(s).lines.forEach((l,i)=>out.push({id:s.id+':'+i,shipId:s.id,item:l.n,sku:l.sku,qty:l.q,land:l.landed,date:s.shippedAt||s.date||'',status:st,arrivedAt:s.arrivedAt||''}))}
+    shipCalc(s).lines.forEach((l,i)=>!l.personal&&out.push({id:s.id+':'+i,shipId:s.id,item:l.n,sku:l.sku,qty:l.q,land:l.landed,date:s.shippedAt||s.date||'',status:st,arrivedAt:s.arrivedAt||''}))}
   for(const o of orderList()){if(o.personal||shipOf(o))continue;const c=orderCalc(o);
     c.lines.forEach((l,i)=>{const g=l.q*l.p;out.push({id:o.id+':'+i,orderId:o.id,item:l.n,sku:l.sku,qty:l.q,land:(g+(c.goods?(c.fee+c.dlv)*g/c.goods:0))*c.rate,date:o.date||'',status:'order',arrivedAt:''})})}
   return out.sort((a,b)=>(b.date||'').localeCompare(a.date||''))}
@@ -2144,15 +2144,16 @@ function orderCalc(o){
   const oc=inCur.reduce((a,t)=>a+ +t.orig,0);if(oc>0){rate=inCur.reduce((a,t)=>a+(+t.gel||0),0)/oc;rateSrc='paid'}
   const paidGel=pays.reduce((a,t)=>a+(+t.gel||0),0);
   const paid=pays.reduce((a,t)=>a+(cur==='GEL'?(+t.gel||0):t.cur===cur&&+t.orig>0?+t.orig:rate?(+t.gel||0)/rate:0),0);
-  const status=!pays.length?'unpaid':paid>=total*0.985-0.01?'paid':'part';
+  const status=!pays.length?(o.paid?'paid':'unpaid'):paid>=total*0.985-0.01||o.paid?'paid':'part';
   const r={cur,lines,goods,fee,dlv,total,rate,rateSrc,gelTotal:total*rate,pays,paidGel,paid,status,units:lines.reduce((a,l)=>a+l.q,0)};
   if(o.id)S.mc.set(k,r);return r}
 function shipCalc(s){
   const k='#s'+s.id;if(S.mc.has(k))return S.mc.get(k);
   const orders=orderList().filter(o=>o.shipId===s.id).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   const L=[];
-  for(const o of orders){const c=orderCalc(o);c.lines.forEach(l=>{const g=l.q*l.p;const sh=c.goods?g/c.goods:1/c.lines.length;
-    L.push({n:l.n,sku:l.sku,q:l.q,kg:l.w*l.q,goods:g*c.rate,fee:(c.fee+c.dlv)*c.rate*sh,orderId:o.id,sup:o.supplier||'',cur:c.cur,price:l.p})})}
+  for(const o of orders){const c=orderCalc(o);const fv=+o.vatFixed||0,fd=+o.dutyFixed||0,fx2=fv>0||fd>0;
+    c.lines.forEach(l=>{const g=l.q*l.p;const sh=c.goods?g/c.goods:1/c.lines.length;
+    L.push({n:l.n,sku:l.sku,q:l.q,kg:l.w*l.q,goods:g*c.rate,fee:(c.fee+c.dlv)*c.rate*sh,orderId:o.id,sup:o.supplier||'',cur:c.cur,price:l.p,personal:!!o.personal,fixed:fx2,fv:fv*sh,fd:fd*sh})})}
   if(+s.usd>0)L.push({n:s.item||'Goods',sku:s.sku||'',q:+s.qty||0,kg:0,goods:+s.usd*(+s.fx||fx()),fee:0,legacy:true,cur:'USD',price:+s.qty?+s.usd/+s.qty:+s.usd});
   const fc=s.freightCur||'GEL';const fRate=fc==='GEL'?1:(+s.freightFx||lastRate(fc));
   const freight=(+s.freight||0)*fRate;
@@ -2164,8 +2165,9 @@ function shipCalc(s){
   const weightGap=basis==='weight'&&!allKg;if(weightGap)basis='value';
   const shareOf=l=>basis==='weight'?(kgL?l.kg/kgL:0):basis==='qty'?(units?l.q/units:0):(goods+fee?(l.goods+l.fee)/(goods+fee):1/L.length);
   L.forEach(l=>{const sh=shareOf(l);l.freight=freight*sh;l.local=(local+other)*sh;l.cif=l.goods+l.fee+l.freight});
-  const cif=sum(l=>l.cif);
-  L.forEach(l=>{const sh=cif?l.cif/cif:1/L.length;l.duty=duty*sh;l.vat=vat*sh;l.landed=l.cif+l.local+l.duty+(vIn?l.vat:0);l.unit=l.q?l.landed/l.q:0;l.goodsUnit=l.q?(l.goods+l.fee)/l.q:0});
+  const free=L.filter(l=>!l.fixed),cif=free.reduce((a,l)=>a+l.cif,0);
+  const restV=Math.max(0,vat-sum(l=>l.fixed?l.fv:0)),restD=Math.max(0,duty-sum(l=>l.fixed?l.fd:0));
+  L.forEach(l=>{if(l.fixed){l.duty=l.fd;l.vat=l.fv}else{const sh=cif?l.cif/cif:1/(free.length||1);l.duty=restD*sh;l.vat=restV*sh}l.landed=l.cif+l.local+l.duty+(vIn?l.vat:0);l.unit=l.q?l.landed/l.q:0;l.goodsUnit=l.q?(l.goods+l.fee)/l.q:0});
   const landed=goods+fee+freight+local+other+duty+(vIn?vat:0);
   const st=shipSt(s);const miss=[];
   if(!L.length)miss.push('No orders in it yet');
@@ -2203,7 +2205,7 @@ function vImports(){
   const tabs=`<div class="tabs" role="tablist">${[['ships','Shipments',nAct?nAct+' active':''],['orders','Orders',orders.length||''],['products','Product costs','']].map(([k,t,n])=>`<button role="tab" aria-selected="${I.tab===k}" data-act="impTab" data-v="${k}">${t}${n?` <span class="muted">${n}</span>`:''}</button>`).join('')}</div>`;
   const fws=[...new Set(ships.map(s=>s.forwarder).filter(Boolean))].sort();
   const fwSel=`<select class="input" id="impFw" aria-label="Forwarder"><option value="">All forwarders</option>${fws.map(f=>`<option ${I.fw===f?'selected':''}>${esc(f)}</option>`).join('')}</select>`;
-  const vatNote=`<p class="hint mt">Product cost ${vatInCost()?'includes':'leaves out'} import VAT. <button class="linkbtn" data-act="impVat">${vatInCost()?'VAT is reclaimed? Leave it out':'Count VAT in the cost'}</button></p>`;
+  const vatNote=`<p class="hint mt">Product cost ${vatInCost()?'includes':'leaves out'} import VAT. <button class="linkbtn" data-act="impVat">${vatInCost()?'VAT is reclaimed? Leave it out':'Count VAT in the cost'}</button> · <button class="linkbtn" data-act="impPack">Load an imports file</button></p>`;
   const head=`<div class="pagehead"><div><div class="eyebrow">Supplier → forwarder → Tbilisi</div><h1>Imports</h1><p>Every supplier order and the shipment that brings it. Put several orders in one shipment, add its freight, customs, VAT and transport, and see what each product really cost on the shelf.</p></div><div class="actions"><button class="btn" data-act="newShip">+ Shipment</button><button class="btn" data-act="newOrder">+ Order</button><button class="btn amber" data-act="invOrder">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',14)} Upload invoice</button></div></div>`;
   let body='';
   if(I.tab==='orders')body=impOrders(orders,fwSel);
@@ -2346,6 +2348,71 @@ async function doMerge(P,f){
   return oid;
 }
 
+/* ---------- imports file: a ready set of shipments and orders, merged with what is already here ---------- */
+// The file holds shipments and orders with fixed ids, so loading it twice changes nothing. Records already in the
+// app that describe the same goods (an older one-product record, an order, or a shipment of the same forwarder and
+// month) are offered for merging: their payments move to the matching new order or shipment, then they are removed.
+const tokens=s=>new Set(String(s||'').toLowerCase().replace(/[^a-z0-9Ⴀ-ჿ]+/g,' ').split(' ').filter(w=>w.length>=4&&!/^(telescope|astronomical|order|lamp|light|with|from|goods|the|and|ltd|co|limited|technology|electronic)$/.test(w)));
+const overlap=(a,b)=>{let n=0;a.forEach(w=>{if(b.has(w))n++});return n};
+const dayDiff=(a,b)=>Math.abs(Date.parse(a||'1970-01-01')-Date.parse(b||'1970-01-01'))/864e5;
+function packMatches(P){
+  const ids=new Set([...P.ships.map(s=>s.id),...P.orders.map(o=>o.id)]);
+  const pOrd=P.orders.map(o=>({o,tk:tokens([o.supplier,o.ref,o.platform,...(o.lines||[]).map(l=>l.n)].join(' ')),tot:(o.lines||[]).reduce((a,l)=>a+(+l.q||0)*(+l.p||0),0)+(+o.fee||0)+(+o.shipFee||0)}));
+  const pShip=P.ships.map(s=>({s,fw:String(s.forwarder||'').toLowerCase().replace(/[^a-z]/g,''),d:s.arrivedAt||s.date}));
+  const out=[];
+  for(const r of S.ships.values()){if(ids.has(r.id))continue;
+    if(isOrder(r)||isLegacy(r)){
+      const tk=tokens(isOrder(r)?[r.supplier,r.ref,...(r.lines||[]).map(l=>l.n)].join(' '):[r.item,r.note].join(' '));
+      const amt=isOrder(r)?orderCalc(r).total:+r.usd;
+      let best=null;
+      for(const c of pOrd){const dd=dayDiff(r.date,c.o.date);if(dd>75)continue;
+        const ov=overlap(tk,c.tk);const sameRef=isOrder(r)&&r.ref&&c.o.ref&&String(r.ref).trim()===String(c.o.ref).trim();
+        const amtHit=amt>0&&(Math.abs(amt-c.tot)<=c.tot*0.02||(c.o.lines||[]).some(l=>{const a=(+l.q||0)*(+l.p||0);return a>0&&Math.abs(amt-a)<=a*0.01}));
+        const score=(sameRef?10:0)+ov*2+(amtHit?3:0)-dd/30;
+        const ok=sameRef||(ov>0&&amtHit)||(ov>=2&&dd<=45)||(ov>0&&dd<=21)||(amtHit&&dd<=30);
+        if(ok&&(!best||score>best.score))best={score,to:c.o,why:sameRef?'same order no.':ov&&amtHit?'same goods and amount':ov?'same goods':'same amount'}}
+      if(best)out.push({r,kind:isOrder(r)?'order':'older record',to:best.to,toShip:best.to.shipId,why:best.why});
+    }else{
+      const fw=String(r.forwarder||'').toLowerCase().replace(/[^a-z]/g,'');let best=null;
+      for(const c of pShip){if(!fw||!c.fw||(fw!==c.fw&&!fw.includes(c.fw)&&!c.fw.includes(fw)))continue;const dd=Math.min(dayDiff(r.arrivedAt||r.date,c.d),dayDiff(r.date,c.s.date));if(dd>45)continue;if(!best||dd<best.dd)best={dd,to:c.s}}
+      if(best)out.push({r,kind:'shipment',toShip:best.to.id,to:null,why:'same forwarder, '+Math.round(best.dd)+' days apart'});
+    }}
+  return out}
+function packModal(P){
+  const M=packMatches(P);const nm=id=>{const s=P.ships.find(x=>x.id===id);return s?(s.forwarder||'Shipment')+' · '+shortD(s.arrivedAt||s.date):''};
+  const lineCount=P.orders.reduce((a,o)=>a+(o.lines||[]).length,0);
+  modal(`<h3>Load imports</h3><p class="muted small">${P.ships.length} shipments and ${P.orders.length} orders with ${lineCount} products, from ${esc(P.title||'the file')}.</p>
+   <div class="flow mt">${P.ships.map(s=>{const os=P.orders.filter(o=>o.shipId===s.id);return `<div class="ln"><span class="k"><b>${esc(s.forwarder||'Forwarder not set')}</b> <span class="small muted">${esc(s.origin||'')} · ${stLabel(shipSt(s))} ${s.arrivedAt?shortD(s.arrivedAt):''} · ${os.map(o=>esc(o.supplier.split(/[ ,]/)[0])).join(', ')}</span></span><span class="v small muted">${os.length} order${os.length===1?'':'s'}</span></div>`}).join('')}
+    ${P.orders.filter(o=>!o.shipId).map(o=>`<div class="ln"><span class="k"><b>${esc(o.supplier)}</b> <span class="small muted">${esc(o.date)} · not in a shipment</span></span><span class="v small muted">1 order</span></div>`).join('')}</div>
+   <h4 class="mt" style="margin-bottom:6px">Already in the app — merge</h4>
+   ${M.length?`<p class="small muted" style="margin-top:0">These look like the same goods. Ticked ones are replaced: their payments move to the new order or shipment, then they are removed.</p>
+    <div class="flow">${M.map((m,i)=>`<label class="ln" style="cursor:pointer"><span class="k"><input type="checkbox" data-pm="${i}" checked> <b>${esc(m.kind==='shipment'?(m.r.forwarder||'Shipment'):isOrder(m.r)?m.r.supplier||'Order':m.r.item||'Goods')}</b> <span class="small muted">${esc(m.kind)} · ${esc(m.r.date||'')} · ${esc(m.why)}</span></span><span class="v small">→ ${esc(m.to?m.to.supplier.split(/[ ,]/).slice(0,2).join(' '):nm(m.toShip))}</span></label>`).join('')}</div>`
+   :'<p class="small muted" style="margin-top:0">Nothing here describes the same goods, so nothing is replaced.</p>'}
+   <div class="foot"><span class="hint" style="align-self:center">Loading the same file again changes nothing.</span><div class="row"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" id="pkGo" ${S.canWrite?'':'disabled'}>Load${M.length?' and merge':''}</button></div></div>`,true);
+  $('#pkGo').onclick=async()=>{const bt=$('#pkGo');bt.disabled=true;bt.textContent='Loading…';
+    const use=M.filter((m,i)=>document.querySelector(`[data-pm="${i}"]`)?.checked);
+    try{const n=await packApply(P,use);closeModal();toast(`Loaded ${P.ships.length} shipments and ${P.orders.length} orders${n?' · merged '+n+' older record'+(n>1?'s':''):''}`);const I=impState();I.ship=null;I.tab='ships';I.st='all';S.animate=true;render()}
+    catch(e){bt.disabled=false;bt.textContent='Load';toast(errMsg(e))}};
+}
+async function packApply(P,use){
+  const now=new Date().toISOString();
+  for(const s of P.ships){const {id,...d}=s;await putShip(id,{...d,source:'imports file',updatedAt:now})}
+  for(const o of P.orders){const {id,...d}=o;await putShip(id,{kind:'order',...d,source:'imports file',updatedAt:now})}
+  const goods=t=>/^goods/.test(t.cat||'')&&!t.role;
+  for(const m of use){const r=m.r;
+    for(const t of [...S.tx.values()]){
+      const mine=t.orderId===r.id||t.shipId===r.id||(r.txId&&t.id===r.txId);if(!mine)continue;const nt={...t};
+      if(m.to&&(t.orderId===r.id||r.txId===t.id||goods(t))){nt.orderId=m.to.id;delete nt.shipId;delete nt.role}
+      else if(m.toShip){nt.shipId=m.toShip;delete nt.orderId;if(!nt.role)nt.role=/vat/.test(nt.cat)?'vat':'freight'}
+      else continue;
+      await saveTx(nt)}
+    if(m.kind==='shipment')for(const o of orderList())if(o.shipId===r.id&&!use.some(x=>x.r.id===o.id))await putShip(o.id,{...o,shipId:m.toShip});
+    await delDoc('ships/'+r.id)}
+  return use.length}
+function packPick(){const inp=document.createElement('input');inp.type='file';inp.accept='.json,application/json';
+  inp.onchange=async()=>{const f=inp.files[0];if(!f)return;let P;try{P=JSON.parse(await f.text())}catch(e){toast('That is not an imports file');return}
+    if(P.app!=='astroman-imports'||!Array.isArray(P.ships)||!Array.isArray(P.orders)){toast('That is not an imports file');return}packModal(P)};inp.click()}
+
 /* ---------- supplier invoice → one order ---------- */
 // A PDF's text is rebuilt into rows from where each word sits on the page; an Excel sheet is read as it is. Then the
 // header row (product · qty · price · amount) is found and every position under it becomes one line of the order.
@@ -2432,7 +2499,7 @@ async function readInvoiceFile(f){
 function optimoCost(sku){if(!sku)return null;let m=S.mc.get('#optc');if(!m){m=new Map((opDocs().stock?.items||[]).map(x=>[String(x[0]),{n:x[1],cost:+x[5]||0}]));S.mc.set('#optc',m)}return m.get(String(sku))||null}
 function impProducts(ships,fwSel){
   const I=impState();const q=(I.q||'').toLowerCase();
-  const rows=[];for(const s of ships){if(s.personal)continue;if(I.fw&&s.forwarder!==I.fw)continue;const C=shipCalc(s);C.lines.forEach(l=>rows.push({...l,s,C}))}
+  const rows=[];for(const s of ships){if(s.personal)continue;if(I.fw&&s.forwarder!==I.fw)continue;const C=shipCalc(s);C.lines.forEach(l=>{if(!l.personal)rows.push({...l,s,C})})}
   const fl=rows.filter(r=>!q||(r.n+' '+r.sku+' '+r.sup).toLowerCase().includes(q)).sort((a,b)=>(b.s.arrivedAt||b.s.shippedAt||b.s.date||'').localeCompare(a.s.arrivedAt||a.s.shippedAt||a.s.date||''));
   const bar=`<div class="toolbar"><input class="input grow" id="impQ" placeholder="Search product, barcode or supplier…" value="${esc(I.q||'')}">${fwSel}</div>`;
   if(!fl.length)return bar+`<div class="panel empty"><b>No products yet</b>Products appear here once their orders are in a shipment.</div>`;
@@ -2466,7 +2533,7 @@ function vShipView(s){
   const basisSeg=`<div class="seg" role="group" aria-label="Split freight by">${BASES.map(([k,t])=>`<button data-act="shipBasis" data-v="${k}" aria-pressed="${(s.basis||'auto')===k}">${t}</button>`).join('')}</div>`;
   const prods=`<div class="panel" style="padding-bottom:6px"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">Cost per product</h2><p class="sub" style="margin:2px 0 0">Freight and transport split by <b>${C.basis==='weight'?'weight':C.basis==='qty'?'pieces':'value'}</b>${C.weightGap?' (some products have no weight, so by value)':''}; customs${C.vIn?' and VAT':''} by customs value.</p></div><span class="spacer"></span>${basisSeg}</div>
    ${C.lines.length?`<div class="tablewrap mt"><table><thead><tr><th>Product</th><th class="r">Pcs</th><th class="r">Goods</th><th class="r">Fee</th><th class="r">Freight &amp; transport</th><th class="r">Customs${C.vIn?' + VAT':''}</th><th class="r">Landed</th><th class="r">Each</th></tr></thead><tbody>
-    ${C.lines.map(l=>{const oc=optimoCost(l.sku);return `<tr ${l.orderId?`class="click" data-order="${l.orderId}"`:''}><td style="min-width:180px">${esc(l.n||'—')}<div class="small muted">${esc(l.sup||(l.legacy?'entered on the shipment':''))}${l.kg?' · '+fmt(l.kg,1)+' kg':''}${oc&&oc.cost?' · Optimo '+gel(oc.cost,2):''}</div></td>
+    ${C.lines.map(l=>{const oc=optimoCost(l.sku);return `<tr ${l.orderId?`class="click" data-order="${l.orderId}"`:''}><td style="min-width:180px">${esc(l.n||'—')}${l.personal?' <span class="chip below">not Astroman</span>':''}<div class="small muted">${esc(l.sup||(l.legacy?'entered on the shipment':''))}${l.fixed?' · own customs':''}${l.kg?' · '+fmt(l.kg,1)+' kg':''}${oc&&oc.cost?' · Optimo '+gel(oc.cost,2):''}</div></td>
      <td class="r num">${fmt(l.q)}</td><td class="r num">${gel(l.goods)}</td><td class="r num">${l.fee?gel(l.fee):'·'}</td><td class="r num">${l.freight+l.local?gel(l.freight+l.local):'·'}</td><td class="r num">${l.duty+(C.vIn?l.vat:0)?gel(l.duty+(C.vIn?l.vat:0)):'·'}</td>
      <td class="r num">${gel(l.landed)}</td><td class="r num"><b>${l.q?gel(l.unit,2):'—'}</b>${l.q&&l.goodsUnit?`<div class="small muted">+${Math.round((l.unit/l.goodsUnit-1)*100)}%</div>`:''}</td></tr>`}).join('')}</tbody>
     <tfoot><tr><td>Total</td><td class="r num">${fmt(C.units)}</td><td class="r num">${gel(C.goods)}</td><td class="r num">${gel(C.fee)}</td><td class="r num">${gel(C.freight+C.local+C.other)}</td><td class="r num">${gel(C.duty+(C.vIn?C.vat:0))}</td><td class="r num">${gel(C.landed)}</td><td></td></tr></tfoot></table></div>`
@@ -2517,10 +2584,15 @@ function orderModal(id,pre){
     <label class="field"><span>Delivery to the agent <span class="curl"></span></span><input class="input num" id="oDlv" inputmode="decimal" value="${esc(o.shipFee||'')}" placeholder="optional"></label>
     <label class="field"><span>Shipment</span><select class="input" id="oShip"><option value="">Not in a shipment yet</option>${opens.map(s=>`<option value="${s.id}" ${o.shipId===s.id?'selected':''}>${esc(s.forwarder||'Shipment')} · ${stLabel(shipSt(s))} · ${shortD(s.date)}</option>`).join('')}<option value="__new">+ New shipment…</option></select></label>
    </div>
+   <details class="mt"><summary class="small muted" style="cursor:pointer">Customs charged on this order alone (optional)</summary>
+    <div class="formgrid" style="margin-top:10px"><label class="field"><span>Its own import VAT, ₾</span><input class="input num" id="oVatF" inputmode="decimal" value="${esc(o.vatFixed||'')}"></label>
+    <label class="field"><span>Its own customs duty, ₾</span><input class="input num" id="oDutyF" inputmode="decimal" value="${esc(o.dutyFixed||'')}"></label></div>
+    <p class="hint">Use it when the declaration shows exactly what this order's goods were charged. The rest of the shipment's customs is then split among the other orders.</p></details>
    <div class="flow mt" id="oTot"></div>
    <div class="panel mt" style="padding:14px"><div class="row"><b>Payments</b><span class="spacer"></span><button class="btn sm amber" id="oPay">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',14)} Add receipt</button><button class="btn sm" id="oLink">Link a bank payment</button></div>
     <div class="flow" style="margin-top:6px">${pays.map(t=>`<div class="ln"><span class="k">${esc(t.date)} <span class="small muted">· ${esc((ACC[t.account]||ACC.unknown).en)}${t.receipt?' · '+esc(t.receipt):''}</span></span><span class="v num">${t.cur&&t.cur!=='GEL'&&t.orig?money(t.orig,t.cur)+' · ':''}${gel(t.gel,2)} <button class="btn sm ghost" data-unlink="${t.id}">Unlink</button></span></div>`).join('')||'<div class="muted small" style="padding:6px 0">No payment yet. Add the receipt and it is also saved as an expense.</div>'}</div></div>
-   <label class="row small" style="margin-top:12px"><input type="checkbox" id="oPers" ${o.personal?'checked':''}> Not for Astroman (personal or other business)</label>
+   <label class="row small" style="margin-top:12px"><input type="checkbox" id="oPaid" ${o.paid?'checked':''}> Paid in full (even without a payment linked here)</label>
+   <label class="row small" style="margin-top:6px"><input type="checkbox" id="oPers" ${o.personal?'checked':''}> Not for Astroman (personal or other business)</label>
    <label class="field mt"><span>Note</span><input class="input" id="oNote" value="${esc(o.note||'')}"></label>
    <div class="foot">${id?'<button class="btn danger" id="oDel">Delete</button>':'<span></span>'}<div class="row"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" id="oSave" ${S.canWrite?'':'disabled'}>Save</button></div></div>`,true);
   const L=o.lines.map(l=>({t:lineTxt(l),q:l.q??'',p:l.p??'',w:l.w??''}));
@@ -2568,7 +2640,7 @@ function orderModal(id,pre){
    if(pre&&pre.pickInvoice){pre.pickInvoice=false;$('#invFile').click()}}
   const build=()=>{const c=cur();
     const lines=L.map(l=>{const t=l.t.trim();const hit=prods.find(x=>t===x[1]+' · '+x[0]);return {n:hit?hit[1]:t,sku:hit?String(hit[0]):'',q:parseNum(l.q),p:parseNum(l.p),w:parseNum(l.w)||0}}).filter(l=>l.n||l.q||l.p);
-    const b={...(o0||{}),kind:'order',date:$('#oDate').value||today(),supplier:$('#oSup').value.trim(),platform:$('#oPlat').value.trim(),ref:$('#oRef').value.trim(),cur:c,fx:c==='GEL'?1:parseNum($('#oFx').value),lines,fee:parseNum($('#oFee').value),shipFee:parseNum($('#oDlv').value),shipId:$('#oShip').value==='__new'?(o.shipId||''):$('#oShip').value,personal:$('#oPers').checked,note:$('#oNote').value.trim(),invoice:invName};delete b.id;delete b.pickInvoice;
+    const b={...(o0||{}),kind:'order',date:$('#oDate').value||today(),supplier:$('#oSup').value.trim(),platform:$('#oPlat').value.trim(),ref:$('#oRef').value.trim(),cur:c,fx:c==='GEL'?1:parseNum($('#oFx').value),lines,fee:parseNum($('#oFee').value),shipFee:parseNum($('#oDlv').value),shipId:$('#oShip').value==='__new'?(o.shipId||''):$('#oShip').value,personal:$('#oPers').checked,note:$('#oNote').value.trim(),invoice:invName,vatFixed:parseNum($('#oVatF').value)||0,dutyFixed:parseNum($('#oDutyF').value)||0,paid:$('#oPaid').checked};delete b.id;delete b.pickInvoice;
     if(!b.supplier){toast('Write the supplier');$('#oSup').focus();return null}
     if(!lines.length){toast('Add at least one product');return null}
     if(lines.some(l=>!l.n)){toast('Every line needs a product name');return null}
@@ -2807,6 +2879,7 @@ async function impAct(a,b){const I=impState();
   if(a==='newOrder')return orderModal(null,b&&b.dataset.ship?{shipId:b.dataset.ship}:null);
   if(a==='newShip')return shipModal();
   if(a==='invOrder')return orderModal(null,{pickInvoice:true});
+  if(a==='impPack')return packPick();
   if(a==='impMerge'){const ids=[...I.sel].filter(id=>S.ships.get(id));return mergeModal(ids)}
   if(a==='impTab'){I.tab=b.dataset.v;I.q='';S.animate=true;return render()}
   if(a==='impSt'){I.st=b.dataset.v;return render()}
