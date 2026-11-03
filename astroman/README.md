@@ -21,7 +21,9 @@ A separate page (Store → Optimo) for Optimo exports: sale history for any peri
 
 Follows the real flow: supplier orders → a forwarder's warehouse → one shipment → Tbilisi.
 
-- **Orders**: one per supplier payment (Alibaba, 1688, Bresser…), with every product, quantity, price and optional weight, the platform fee and any delivery to the agent, in USD, EUR, CNY or GEL. Products can be linked to Optimo by barcode.
+- **Invoice upload**: drop a supplier invoice (text PDF or Excel) and it becomes one order: every position is a product line with its quantity and price, and the supplier, invoice no., date, currency, platform fee and shipping fill in. The lines are checked against the invoice total. Scanned PDFs have no text, so their products are typed.
+- **Merge**: older records that hold one product each (and orders) from the same invoice can be ticked on the Orders tab and merged into one order; their payments move with them and freight/customs stay on the shipment.
+- **Orders**: one per supplier invoice (Alibaba, 1688, Bresser…), with every product, quantity, price and optional weight, the platform fee and any delivery to the agent, in USD, EUR, CNY or GEL. Products can be linked to Optimo by barcode.
 - **Shipments**: tick the orders that travel together and put them in one shipment with its forwarder (land, air or sea). Track it from *At the agent* → *On the way* → *In customs* → *Arrived*; each step records its date.
 - **Costs**: freight (any currency), customs duty, import VAT, transport to the store and other costs. Freight and transport are split by weight (or value or pieces), customs and VAT by customs value, giving the **landed cost of each product**, compared with the Optimo cost.
 - **Payments**: drop a receipt (a bank or Alibaba PDF is read automatically) or link a payment already imported from the bank. Each payment is an expense; the rate actually paid becomes the order's rate. A receipt payment is not imported again from the bank statement.

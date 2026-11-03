@@ -248,6 +248,7 @@ tfoot td{font-weight:700;border-top:2px solid var(--ink);border-bottom:0}
 td.ck,th.ck{width:34px;padding-right:0}
 .selbar{position:sticky;bottom:14px;z-index:6;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--accent);border-radius:var(--r);padding:10px 14px;box-shadow:0 18px 40px -16px rgba(0,0,0,.6);margin-top:12px}
 @media (max-width:860px){.selbar{bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
+.drop.slim{display:flex;align-items:center;gap:12px;text-align:left;padding:12px 16px}.drop.slim svg{margin:0;flex:none}.drop.slim b{font-size:14px;margin:0}.drop.slim span{font-size:12.5px}
 .lines td{padding:5px 6px}.lines .input{padding:7px 8px}.lines input.r{text-align:right}
 /* ---------- forms ---------- */
 .field{display:flex;flex-direction:column;gap:5px;min-width:0}
@@ -2203,7 +2204,7 @@ function vImports(){
   const fws=[...new Set(ships.map(s=>s.forwarder).filter(Boolean))].sort();
   const fwSel=`<select class="input" id="impFw" aria-label="Forwarder"><option value="">All forwarders</option>${fws.map(f=>`<option ${I.fw===f?'selected':''}>${esc(f)}</option>`).join('')}</select>`;
   const vatNote=`<p class="hint mt">Product cost ${vatInCost()?'includes':'leaves out'} import VAT. <button class="linkbtn" data-act="impVat">${vatInCost()?'VAT is reclaimed? Leave it out':'Count VAT in the cost'}</button></p>`;
-  const head=`<div class="pagehead"><div><div class="eyebrow">Supplier → forwarder → Tbilisi</div><h1>Imports</h1><p>Every supplier order and the shipment that brings it. Put several orders in one shipment, add its freight, customs, VAT and transport, and see what each product really cost on the shelf.</p></div><div class="actions"><button class="btn" data-act="newShip">+ Shipment</button><button class="btn amber" data-act="newOrder">+ Order</button></div></div>`;
+  const head=`<div class="pagehead"><div><div class="eyebrow">Supplier → forwarder → Tbilisi</div><h1>Imports</h1><p>Every supplier order and the shipment that brings it. Put several orders in one shipment, add its freight, customs, VAT and transport, and see what each product really cost on the shelf.</p></div><div class="actions"><button class="btn" data-act="newShip">+ Shipment</button><button class="btn" data-act="newOrder">+ Order</button><button class="btn amber" data-act="invOrder">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',14)} Upload invoice</button></div></div>`;
   let body='';
   if(I.tab==='orders')body=impOrders(orders,fwSel);
   else if(I.tab==='products')body=impProducts(ships,fwSel);
@@ -2235,31 +2236,199 @@ function shipCard(s){
    <div class="nums3"><div><span>Goods</span><b>${gel(C.goods)}</b></div><div><span>Landed</span><b>${gel(C.landed)}</b></div><div><span>On top</span><b>${C.addPct==null?'—':'+'+Math.round(C.addPct*100)+'%'}</b></div></div>
    <div class="row small muted" style="gap:6px">${esc(when)}${C.miss.map(m=>`<span class="chip warn">${esc(m)}</span>`).join('')}</div></div>`;
 }
+// Older records (made before orders existed) hold one product each, with its goods typed on the shipment itself.
+// They are listed with the orders so the ones from one invoice can be ticked and merged into one order.
+const isLegacy=s=>!!s&&!isOrder(s)&&+s.usd>0;
 function impOrders(orders,fwSel){
   const I=impState();const q=(I.q||'').toLowerCase();
-  const tag=o=>{const c=orderCalc(o),s=shipOf(o);return {c,s,pay:c.status!=='paid',agent:c.status==='paid'&&(!s||shipSt(s)==='collecting'),loose:!s,shipped:!!s}};
-  const fl=orders.filter(o=>{const t=tag(o);if(I.of&&!t[I.of])return false;if(I.fw&&(!t.s||t.s.forwarder!==I.fw))return false;
-    if(q){const hay=[o.supplier,o.ref,o.platform,o.note,...(o.lines||[]).map(l=>l.n)].join(' ').toLowerCase();if(!hay.includes(q))return false}return true})
+  const legs=shipList().filter(isLegacy);
+  const tag=o=>{if(!isOrder(o))return {leg:true,s:o,shipped:true};const c=orderCalc(o),s=shipOf(o);return {c,s,pay:c.status!=='paid',agent:c.status==='paid'&&(!s||shipSt(s)==='collecting'),loose:!s,shipped:!!s}};
+  const all=orders.concat(legs);
+  const fl=all.filter(o=>{const t=tag(o);if(I.of&&!t[I.of])return false;if(I.fw&&(!t.s||t.s.forwarder!==I.fw))return false;
+    if(q){const hay=[o.supplier,o.ref,o.platform,o.note,o.item,o.forwarder,...(o.lines||[]).map(l=>l.n)].join(' ').toLowerCase();if(!hay.includes(q))return false}return true})
    .sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  const cnt=k=>orders.filter(o=>!k||tag(o)[k]).length;
+  const cnt=k=>all.filter(o=>!k||tag(o)[k]).length;
   const bar=`<div class="toolbar"><input class="input grow" id="impQ" placeholder="Search supplier, order no., product…" value="${esc(I.q||'')}">${fwSel}
    <div class="seg" role="group" aria-label="Show">${[['','All'],['pay','To pay'],['agent','At the agent'],['loose','Not in a shipment'],['shipped','In a shipment']].map(([k,t])=>`<button data-act="impOf" data-v="${k}" aria-pressed="${(I.of||'')===k}">${t} <span class="muted">${cnt(k)}</span></button>`).join('')}</div></div>`;
-  if(!fl.length)return bar+`<div class="panel empty"><b>${orders.length?'No orders match':'No orders yet'}</b>${orders.length?'Try another filter.':'Add each supplier order with its products and prices, then attach the payment receipt.'}<div class="row" style="justify-content:center;margin-top:14px"><button class="btn amber" data-act="newOrder">+ Order</button></div></div>`;
+  if(!fl.length)return bar+`<div class="panel empty"><b>${all.length?'No orders match':'No orders yet'}</b>${all.length?'Try another filter.':'Upload a supplier invoice and every position on it becomes a line of one order.'}<div class="row" style="justify-content:center;margin-top:14px"><button class="btn" data-act="newOrder">+ Order</button><button class="btn amber" data-act="invOrder">Upload invoice</button></div></div>`;
   [...I.sel].forEach(id=>{if(!S.ships.get(id))I.sel.delete(id)});
   const allSel=fl.length&&fl.every(o=>I.sel.has(o.id));
-  const rows=fl.map(o=>{const {c,s}=tag(o);const n=c.lines.length;
+  const rows=fl.map(o=>{const t=tag(o);
+    if(t.leg){const paid=payTxs('s',o.id).some(x=>/^goods/.test(x.cat))||(o.txId&&S.tx.has(o.txId));
+      return `<tr class="click" data-shipview="${o.id}"><td class="ck"><input type="checkbox" data-osel="${o.id}" ${I.sel.has(o.id)?'checked':''} aria-label="Select record"></td>
+     <td class="num small">${esc(o.date||'—')}</td>
+     <td style="min-width:200px"><b>${esc(o.item||'Goods')}</b> <span class="chip">older record · 1 product</span>${o.personal?' <span class="chip below">not Astroman</span>':''}<div class="small muted">goods typed on the shipment</div></td>
+     <td class="r num">${o.qty?fmt(o.qty):'—'}</td><td class="r num">${money(+o.usd,'USD')}<div class="small muted">≈ ${gel(+o.usd*(+o.fx||fx()))}</div></td>
+     <td>${paid?'<span class="chip good">Paid</span>':'<span class="muted">—</span>'}</td>
+     <td>${esc(o.forwarder||'—')} ${stChip(shipSt(o))}</td></tr>`}
+    const {c,s}=t;const n=c.lines.length;
     const what=c.lines.slice(0,2).map(l=>l.n).filter(Boolean).join(', ')+(n>2?' +'+(n-2)+' more':'');
     return `<tr class="click" data-order="${o.id}"><td class="ck"><input type="checkbox" data-osel="${o.id}" ${I.sel.has(o.id)?'checked':''} aria-label="Select order"></td>
      <td class="num small">${esc(o.date||'—')}</td>
-     <td style="min-width:200px"><b>${esc(o.supplier||'Supplier?')}</b>${o.personal?' <span class="chip below">not Astroman</span>':''}<div class="small muted">${esc([o.platform,o.ref?'#'+o.ref:''].filter(Boolean).join(' · '))}${what?' · '+esc(what):''}</div></td>
+     <td style="min-width:200px"><b>${esc(o.supplier||'Supplier?')}</b>${o.personal?' <span class="chip below">not Astroman</span>':''}<div class="small muted">${esc([o.platform,o.ref?'#'+o.ref:'',n+' product'+(n===1?'':'s')].filter(Boolean).join(' · '))}${what?' · '+esc(what):''}</div></td>
      <td class="r num">${fmt(c.units)}</td><td class="r num">${money(c.total,c.cur)}<div class="small muted">≈ ${gel(c.gelTotal)}</div></td>
      <td>${c.status==='paid'?'<span class="chip good">Paid</span>':c.status==='part'?`<span class="chip warn">${money(c.total-c.paid,c.cur,0)} left</span>`:'<span class="chip bad">Not paid</span>'}</td>
      <td>${s?`<button class="linkbtn" data-shipview="${s.id}">${esc(s.forwarder||'Shipment')}</button> ${stChip(shipSt(s))}`:'<span class="chip warn">Not in a shipment</span>'}</td></tr>`}).join('');
-  const sel=[...I.sel].map(id=>S.ships.get(id)).filter(Boolean);
-  const selBar=sel.length?`<div class="selbar"><b>${sel.length} order${sel.length>1?'s':''} selected</b><span class="muted small">≈ ${gel(sel.reduce((a,o)=>a+orderCalc(o).gelTotal,0))}</span><span class="spacer"></span><button class="btn ghost sm" data-act="impClear">Clear</button><button class="btn amber sm" data-act="impPut">Put in a shipment</button></div>`:'';
-  return bar+`<div class="tablewrap"><table><thead><tr><th class="ck"><input type="checkbox" id="oselAll" ${allSel?'checked':''} aria-label="Select all"></th><th>Ordered</th><th>Supplier</th><th class="r">Pcs</th><th class="r">Total</th><th>Paid</th><th>Shipment</th></tr></thead><tbody>${rows}</tbody></table></div>
-   <p class="hint mt">Tick the orders that travel together and press <b>Put in a shipment</b>.</p>${selBar}`;
+  const sel=[...I.sel].map(id=>S.ships.get(id)).filter(Boolean);const selO=sel.filter(isOrder);
+  const val=sel.reduce((a,o)=>a+(isOrder(o)?orderCalc(o).gelTotal:+o.usd*(+o.fx||fx())),0);
+  const selBar=sel.length?`<div class="selbar"><b>${sel.length} selected</b><span class="muted small">≈ ${gel(val)}</span><span class="spacer"></span><button class="btn ghost sm" data-act="impClear">Clear</button>${sel.length>1?'<button class="btn sm" data-act="impMerge">Merge into one order</button>':''}${selO.length===sel.length?'<button class="btn amber sm" data-act="impPut">Put in a shipment</button>':''}</div>`:'';
+  return bar+(legs.length?`<div class="panel" style="padding:12px 16px;margin-bottom:12px"><span class="small"><b>${legs.length} older record${legs.length>1?'s':''}</b> hold${legs.length>1?'':'s'} one product each. Tick the ones that came on the same invoice and press <b>Merge into one order</b>.</span></div>`:'')
+   +`<div class="tablewrap"><table><thead><tr><th class="ck"><input type="checkbox" id="oselAll" ${allSel?'checked':''} aria-label="Select all"></th><th>Ordered</th><th>Supplier · products</th><th class="r">Pcs</th><th class="r">Total</th><th>Paid</th><th>Shipment</th></tr></thead><tbody>${rows}</tbody></table></div>
+   <p class="hint mt">Tick orders that travel together and press <b>Put in a shipment</b>. Tick parts of one invoice and press <b>Merge into one order</b>.</p>${selBar}`;
 }
+
+/* ---------- merge: several records from one invoice become one order ---------- */
+function mergePlan(ids){
+  const recs=ids.map(id=>S.ships.get(id)).filter(Boolean);
+  const ords=recs.filter(isOrder),legs=recs.filter(isLegacy);
+  const curs=[...new Set([...ords.map(o=>o.cur||'USD'),...(legs.length?['USD']:[])])];
+  const cur=curs[0]||'USD';
+  const lines=[];let fee=0,dlv=0,wv=0,wfx=0;
+  for(const o of ords){const c=orderCalc(o);c.lines.forEach(l=>lines.push({n:l.n,sku:l.sku,q:l.q,p:l.p,w:l.w,from:o.id}));fee+=c.fee;dlv+=c.dlv;if(+o.fx>0&&cur!=='GEL'){wv+=c.total;wfx+=c.total*+o.fx}}
+  for(const s of legs){const q=+s.qty||1;lines.push({n:s.item||'Goods',sku:s.sku||'',q,p:+s.usd/q,w:0,from:s.id});wv+=+s.usd;wfx+=+s.usd*(+s.fx||fx())}
+  const dates=recs.map(r=>r.date).filter(Boolean).sort();
+  const goodsTx=t=>(legs.some(s=>s.txId===t.id)||(legs.some(s=>s.id===t.shipId)&&/^goods/.test(t.cat)&&!t.role));
+  const payO=[...S.tx.values()].filter(t=>ords.some(o=>o.id===t.orderId)||goodsTx(t));
+  const vendor=(ords.find(o=>o.supplier)||{}).supplier||(payO.find(t=>t.vendor)||{}).vendor||'';
+  const realShips=[...new Map(ords.map(shipOf).filter(Boolean).map(s=>[s.id,s])).values()];
+  const box=realShips[0]||legs.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''))[0]||null;
+  const fwds=[...new Set([...realShips,...legs].map(s=>s.forwarder).filter(Boolean))];
+  const legCost=legs.reduce((a,s)=>a+(+s.freight||0)*(s.freightCur&&s.freightCur!=='GEL'?(+s.freightFx||lastRate(s.freightCur)||0):1)+(+s.customs||0)+(+s.vat||0)+(+s.local||0)+(+s.other||0),0);
+  return {recs,ords,legs,curs,cur,lines,fee,dlv,fx:cur==='GEL'?1:(wv?wfx/wv:lastRate(cur)),date:dates[0]||today(),vendor,ref:(ords.find(o=>o.ref)||{}).ref||'',platform:(ords.find(o=>o.platform)||{}).platform||'',
+    payO,box,fwds,legCost,personal:recs.every(r=>r.personal),note:recs.map(r=>r.note).filter(Boolean).join(' · ')}
+}
+function mergeModal(ids){
+  const P=mergePlan(ids);
+  if(P.recs.length<2){toast('Tick at least two');return}
+  if(P.curs.length>1){toast('These are in different currencies ('+P.curs.join(', ')+'), so they can’t be one invoice');return}
+  const goods=P.lines.reduce((a,l)=>a+l.q*l.p,0);
+  modal(`<h3>Merge into one order</h3><p class="muted small">${P.recs.length} records become one order with ${P.lines.length} product${P.lines.length===1?'':'s'}. Check the details as on the invoice.</p>
+   <div class="formgrid" style="margin-top:14px">
+    <label class="field" style="grid-column:span 2"><span>Supplier</span><input class="input" id="mSup" value="${esc(P.vendor)}" placeholder="Supplier on the invoice"></label>
+    <label class="field"><span>Invoice / order no.</span><input class="input" id="mRef" value="${esc(P.ref)}"></label>
+    <label class="field"><span>Date</span><input class="input" type="date" id="mDate" value="${esc(P.date)}"></label></div>
+   <div class="tablewrap mt"><table><thead><tr><th>Product</th><th class="r">Qty</th><th class="r">Price each</th><th class="r">Total</th></tr></thead><tbody>
+    ${P.lines.map(l=>`<tr><td>${esc(l.n)}</td><td class="r num">${fmt(l.q)}</td><td class="r num">${money(l.p,P.cur)}</td><td class="r num">${money(l.q*l.p,P.cur)}</td></tr>`).join('')}</tbody>
+    <tfoot><tr><td>Goods</td><td></td><td></td><td class="r num">${money(goods,P.cur)}</td></tr></tfoot></table></div>
+   <div class="flow mt">
+    <div class="ln"><span class="k">Payments moved to the new order</span><span class="v num">${P.payO.length?P.payO.length+' · '+gel(P.payO.reduce((a,t)=>a+(+t.gel||0),0),2):'none'}</span></div>
+    <div class="ln"><span class="k">Shipment it travels in</span><span class="v">${P.box?esc(P.box.forwarder||'Shipment')+' '+stChip(shipSt(P.box)):'none yet'}</span></div>
+    ${P.legCost?`<div class="ln"><span class="k">Freight, customs and other costs from the older records</span><span class="v num">${gel(P.legCost)} → kept on that shipment</span></div>`:''}
+   </div>
+   ${P.fwds.length>1?`<p class="small" style="color:var(--warn);margin-top:10px">These came with different forwarders (${esc(P.fwds.join(', '))}). Merge only if they really are one invoice; the order will sit in the ${esc(P.box.forwarder||'first')} shipment.</p>`:''}
+   <div class="foot"><span class="hint" style="align-self:center">The separate records are removed after the merge.</span><div class="row"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" id="mGo" ${S.canWrite?'':'disabled'}>Merge</button></div></div>`,true);
+  $('#mGo').onclick=async()=>{const bt=$('#mGo');bt.disabled=true;bt.textContent='Merging…';
+    try{const oid=await doMerge(P,{supplier:$('#mSup').value.trim(),ref:$('#mRef').value.trim(),date:$('#mDate').value||P.date});impState().sel.clear();toast('Merged into one order');orderModal(oid)}
+    catch(e){bt.disabled=false;bt.textContent='Merge';toast(errMsg(e))}};
+}
+// Order of writes keeps nothing at risk: the new order first, then its payments, then the shipment, and only then
+// the old records are removed.
+async function doMerge(P,f){
+  const oid=uid('o');const legIds=new Set(P.legs.map(s=>s.id));const box=P.box;
+  const boxId=box?box.id:'';
+  await putShip(oid,{kind:'order',date:f.date,supplier:f.supplier,platform:P.platform||'',ref:f.ref,cur:P.cur,fx:P.cur==='GEL'?1:Math.round(P.fx*10000)/10000,
+    lines:P.lines.map(({from,...l})=>l),fee:r2(P.fee),shipFee:r2(P.dlv),shipId:boxId,personal:P.personal,note:P.note,mergedFrom:P.recs.map(r=>r.id)});
+  for(const t of P.payO){const nt={...t,orderId:oid};delete nt.shipId;delete nt.role;
+    if(P.cur==='USD'&&nt.cur!=='USD'&&legIds.size){const s=P.legs.find(x=>x.txId===t.id||x.id===t.shipId);const exp=s?+s.usd*(+s.fx||fx()):0;
+      if(s&&+s.usd>0&&Math.abs(+t.gel-exp)<=exp*0.01){nt.cur='USD';nt.orig=r2(+s.usd);nt.fx=Math.round(t.gel/+s.usd*10000)/10000}}
+    await saveTx(nt)}
+  for(const t of [...S.tx.values()])if(t.shipId&&legIds.has(t.shipId)&&t.shipId!==boxId&&!P.payO.includes(t))await saveTx({...t,shipId:boxId});
+  if(box){const nb={...S.ships.get(box.id)};
+    if(isLegacy(nb)){delete nb.item;delete nb.qty;delete nb.usd;delete nb.fx;delete nb.sku;delete nb.txId}
+    const others=P.legs.filter(s=>s.id!==box.id);
+    if(others.length){const toGel=s=>(+s.freight||0)*(s.freightCur&&s.freightCur!=='GEL'?(+s.freightFx||lastRate(s.freightCur)||0):1);
+      const add=others.reduce((a,s)=>a+toGel(s),0);if(add){nb.freight=r2(toGel(nb)+add);nb.freightCur='GEL';nb.freightFx=1}
+      ['customs','vat','local','other'].forEach(k=>{const v=others.reduce((a,s)=>a+(+s[k]||0),0);if(v)nb[k]=r2((+nb[k]||0)+v)});
+      if(!nb.kg){const kg=others.reduce((a,s)=>a+(+s.kg||0),0);if(kg)nb.kg=kg}}
+    await putShip(box.id,nb)}
+  for(const o of P.ords)await delDoc('ships/'+o.id);
+  for(const s of P.legs)if(s.id!==boxId)await delDoc('ships/'+s.id);
+  return oid;
+}
+
+/* ---------- supplier invoice → one order ---------- */
+// A PDF's text is rebuilt into rows from where each word sits on the page; an Excel sheet is read as it is. Then the
+// header row (product · qty · price · amount) is found and every position under it becomes one line of the order.
+async function pdfRows(file){await loadPdfJs();const pdf=await window.pdfjsLib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;const rows=[];
+  for(let i=1;i<=Math.min(pdf.numPages,8);i++){const pg=await pdf.getPage(i);const c=await pg.getTextContent();
+    const its=c.items.filter(x=>x.str&&x.str.trim()).map(x=>({s:x.str,x:x.transform[4],y:x.transform[5],w:x.width||0,h:Math.abs(x.transform[3])||8})).sort((a,b)=>b.y-a.y||a.x-b.x);
+    const lines=[];for(const it of its){const ln=lines.find(l=>Math.abs(l.y-it.y)<=Math.max(2,it.h*0.4));if(ln)ln.items.push(it);else lines.push({y:it.y,items:[it]})}
+    lines.sort((a,b)=>b.y-a.y);
+    for(const ln of lines){ln.items.sort((a,b)=>a.x-b.x);const cells=[];
+      for(const it of ln.items){const last=cells[cells.length-1];if(last&&it.x-last.x1<Math.max(3,it.h*0.5)){last.s+=(it.x-last.x1>0.5&&!/\s$/.test(last.s)?' ':'')+it.s;last.x1=Math.max(last.x1,it.x+it.w)}else cells.push({s:it.s,x0:it.x,x1:it.x+it.w})}
+      rows.push(cells.map(c=>({s:c.s.trim(),x0:c.x0,x1:c.x1})).filter(c=>c.s))}}
+  return rows}
+const numOf=v=>{if(typeof v==='number')return v;const m=String(v??'').replace(/[^\d.,\s'-]/g,' ').trim().match(/-?\d[\d\s,.']*/);if(!m)return NaN;const n=normAmt(m[0].trim().replace(/[\s,.']+$/,''));return isNaN(n)?NaN:n};
+const isNumCell=v=>typeof v==='number'||/^[^A-Za-zႠ-ჿ]*\d[\d\s,.']*\s*(pcs|pc|sets?|units?|ea|ც|ცალი)?[^A-Za-zႠ-ჿ]*$/i.test(String(v??'').trim());
+function hdrKind(t){t=String(t||'').toLowerCase().trim();if(!t||t.length>40)return '';
+  if(/amount|total|sum|subtotal|line\s*value|ჯამ|თანხ/.test(t))return 'a';
+  if(/price|rate|cost|ფასი/.test(t))return 'p';
+  if(/^(qty|q'?ty|quantity|pcs|units?|count|order\s*qty|რაოდ|კოლ)|quantit/.test(t))return 'q';
+  if(/^(no\.?|#|n°|№|s\/n|sr\.?|s\.\s*no\.?)$/.test(t))return 'i';
+  if(/model|sku|code|art\.?\s*no|part\s*no|item\s*no/.test(t))return 'm';
+  if(/descr|product|item|goods|commodity|name|article|specification|დასახ|პროდუქ/.test(t))return 'n';
+  if(/^(unit|uom|u\/m)$/.test(t))return 'u';return ''}
+// rows: arrays of {s,x0,x1} (PDF) or plain arrays of cells (Excel)
+function readInvoice(rows,text){
+  const asCells=r=>Array.isArray(r)&&r.length&&typeof r[0]==='object'&&r[0]&&'x0' in r[0]?r:null;
+  let hi=-1,cols=null;
+  for(let i=0;i<rows.length&&hi<0;i++){const r=rows[i];const cells=asCells(r)?r.map(c=>c.s):r.map(c=>c==null?'':String(c));
+    const kinds=cells.map(hdrKind);if(kinds.includes('q')&&(kinds.includes('p')||kinds.includes('a'))&&cells.filter(Boolean).length>=3){hi=i;cols=kinds.map((k,j)=>({k,s:cells[j],x0:asCells(r)?r[j].x0:j,x1:asCells(r)?r[j].x1:j})).filter(c=>c.s)}}
+  if(hi<0)return null;
+  const pdf=!!asCells(rows[hi]);
+  // a header word split over two lines ("Unit" / "Price") — take the kind from the line below when it fills a blank
+  if(pdf&&rows[hi+1]&&rows[hi+1].every(c=>hdrKind(c.s)||!isNumCell(c.s))&&rows[hi+1].some(c=>hdrKind(c.s))){rows[hi+1].forEach(c=>{const k=hdrKind(c.s);const col=cols.find(h=>c.x0<h.x1+6&&c.x1>h.x0-6);if(col&&(!col.k||(k&&col.k==='u')))col.k=k||col.k});hi++}
+  const idx=k=>cols.findIndex(c=>c.k===k);
+  const at=(r,ci)=>{if(ci<0)return '';if(!pdf)return r[cols[ci].x0]??'';
+    const h=cols[ci];let best='';r.forEach(c=>{const ov=Math.min(c.x1,h.x1+8)-Math.max(c.x0,h.x0-8);if(ov>0){const own=cols.reduce((b,hh,j)=>{const o2=Math.min(c.x1,hh.x1+8)-Math.max(c.x0,hh.x0-8);return o2>b.o?{o:o2,j}:b},{o:0,j:-1});if(own.j===ci)best+=(best?' ':'')+c.s}});
+    if(!best){r.forEach(c=>{const cx=(c.x0+c.x1)/2;const near=cols.reduce((b,hh,j)=>{const d=Math.abs(cx-(hh.x0+hh.x1)/2);return d<b.d?{d,j}:b},{d:1e9,j:-1});if(near.j===ci&&!cols.some(hh=>Math.min(c.x1,hh.x1+8)-Math.max(c.x0,hh.x0-8)>0))best+=(best?' ':'')+c.s})}
+    return best};
+  const flat=r=>pdf?r.map(c=>c.s):r.map(c=>c==null?'':String(c));
+  const qi=idx('q'),pi=idx('p'),ai=idx('a'),mi=idx('m');
+  const sample=rows.slice(hi+1,hi+25);const texty=ci=>sample.reduce((a,r)=>{const v=String(at(r,ci)||'').trim();return a+(v&&!isNumCell(v)?v.length:0)},0);
+  const nc=cols.map((c,j)=>j).filter(j=>cols[j].k==='n');let ni=nc.length?nc.reduce((b,j)=>texty(j)>texty(b)?j:b,nc[0]):-1;
+  if(ni>=0&&!texty(ni)){const alt=cols.map((c,j)=>j).filter(j=>!['q','p','a'].includes(cols[j].k)).sort((x,y)=>texty(y)-texty(x))[0];if(alt!=null&&texty(alt))ni=alt}
+  const stopRe=/^(sub\s*-?\s*total|total|grand\s*total|ჯამი|სულ|amount\s*in\s*words|say\s*total)/i;
+  const lines=[];let stop=rows.length,lastLine=hi,total=null,grand=null;
+  for(let i=hi+1;i<rows.length;i++){const r=rows[i];const cells=flat(r).map(s=>s.trim());if(!cells.some(Boolean))continue;
+    if(cells.filter(hdrKind).length>=3)continue;
+    const label=cells.find(s=>s&&!isNumCell(s))||'';
+    if(stopRe.test(label)){stop=i;break}
+    const q=numOf(at(r,qi)),p=numOf(at(r,pi)),a=numOf(at(r,ai));
+    let name=String(at(r,ni)||'').trim();const model=String(at(r,mi)||'').trim();
+    if(q>0&&(p>0||a>0)){if(!name)name=cells.filter(s=>s&&!isNumCell(s)).sort((x,y)=>y.length-x.length)[0]||'';
+      const price=p>0?p:a/q;lines.push({n:name.replace(/\s+/g,' '),model:model&&!name.toLowerCase().includes(model.toLowerCase())?model:'',q,p:Math.round(price*10000)/10000,a:a>0?a:q*price});lastLine=i}
+    else if(lines.length&&name&&!(q>0)&&!(a>0)&&!(p>0))lines[lines.length-1].n=(lines[lines.length-1].n+' '+name).replace(/\s+/g,' ').slice(0,140)}
+  // fees, shipping and the grand total under the table
+  const T=String(text||'');let fee=0,dlv=0,disc=0;
+  const tl=rows.slice(Math.min(stop,lastLine+1)).map(r=>flat(r).join('  '));
+  // a fee or shipping charge written as a row of the table is not a product
+  const FEE=/(transaction|processing|service|platform|handling|payment|bank)\s*(fee|charge)|commission/i,SHIP=/^(shipping|freight|delivery|express|courier|logistics)(\s*(fee|cost|charge))?\b/i;
+  for(let k=lines.length-1;k>=0;k--){const l=lines[k];if(FEE.test(l.n)){fee+=l.a;lines.splice(k,1)}else if(SHIP.test(l.n.trim())){dlv+=l.a;lines.splice(k,1)}}
+  const lastNum=s=>{const m=s.match(/-?\d[\d\s,.']*\d|\d/g);return m?numOf(m[m.length-1]):NaN};
+  for(const s of tl){const v=lastNum(s);if(!(Math.abs(v)>0))continue;const t=s.toLowerCase();
+    if(/(transaction|processing|service|platform|handling|payment|bank)\s*(fee|charge)|commission/.test(t)&&!/%\s*$/.test(t.trim()))fee+=Math.abs(v);
+    else if(/(shipping|freight|delivery|express|courier|logistics)\s*(fee|cost|charge|amount)?/.test(t)&&!/address|method|mark|term|time|date|port|by\s|via/.test(t))dlv+=Math.abs(v);
+    else if(/discount|coupon|promotion/.test(t))disc+=Math.abs(v);
+    else if(/grand\s*total|total\s*amount|total\s*due|amount\s*due|order\s*total|total\s*payable/.test(t))grand=Math.abs(v);
+    else if(/^\s*total\b/.test(t)&&!/qty|quantit|pcs|weight|kg|cbm|carton/.test(t))total=Math.abs(v)}
+  total=grand??total;
+  const cnt=k=>(T.match(k)||[]).length;const cs={USD:cnt(/USD|US\$|\$/g),EUR:cnt(/EUR|€/g),CNY:cnt(/CNY|RMB|¥/g)};
+  const cur=Object.entries(cs).sort((a,b)=>b[1]-a[1])[0];
+  const refM=T.match(/(?:invoice|order|proforma(?:\s*invoice)?|\bPI|contract)\s*(?:no\.?|number|#|id)\s*[:.：]?\s*([A-Z0-9][A-Z0-9\-\/_.]{2,30})/i);
+  const supM=T.match(/(?:seller|supplier|exporter|vendor|beneficiary|sold\s*by|company\s*name)\s*(?:name)?\s*[:：]\s*([^\n]{3,80})/i);
+  let supplier=supM?supM[1].replace(/\s{2,}.*/,'').trim():'';
+  if(!supplier){const co=T.split('\n').find(s=>/(co\.?,?\s*ltd|limited|gmbh|llc|inc\.|corp|company|trading)/i.test(s)&&!/buyer|bill\s*to|ship\s*to|consignee|astroman/i.test(s));if(co)supplier=co.trim().slice(0,80)}
+  lines.forEach(l=>{l.n=((l.n||'')+(l.model?(l.n?' · ':'')+l.model:'')).replace(/\s+/g,' ').trim().slice(0,140);delete l.model});
+  return {lines,fee:fee-disc>0?r2(fee-disc):r2(fee),disc:r2(disc),dlv:r2(dlv),total,cur:cur&&cur[1]?cur[0]:'',ref:refM?refM[1]:'',date:parseReceipt(T).date||'',supplier}
+}
+async function readInvoiceFile(f){
+  if(/\.pdf$/i.test(f.name)||f.type==='application/pdf'){const rows=await pdfRows(f);const text=rows.map(r=>r.map(c=>c.s).join('  ')).join('\n');return readInvoice(rows,text)}
+  if(/\.(xlsx|xls|csv)$/i.test(f.name)){await xlsxReady();const wb=wbFromBytes(new Uint8Array(await f.arrayBuffer()));let best=null;
+    for(const n of wb.SheetNames){const aoa=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:''});const text=aoa.map(r=>r.join('  ')).join('\n');const r=readInvoice(aoa,text);if(r&&(!best||r.lines.length>best.lines.length))best=r}
+    return best}
+  throw {message:'Use the invoice as a PDF or an Excel file'}}
+
 function optimoCost(sku){if(!sku)return null;let m=S.mc.get('#optc');if(!m){m=new Map((opDocs().stock?.items||[]).map(x=>[String(x[0]),{n:x[1],cost:+x[5]||0}]));S.mc.set('#optc',m)}return m.get(String(sku))||null}
 function impProducts(ships,fwSel){
   const I=impState();const q=(I.q||'').toLowerCase();
@@ -2328,7 +2497,9 @@ function orderModal(id,pre){
   const opens=shipList().filter(s=>shipSt(s)!=='arrived'||s.id===o.shipId).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   const lineTxt=l=>l.sku&&pName.has(String(l.sku))?pName.get(String(l.sku))+' · '+l.sku:(l.n||'');
   const pays=id?payTxs('o',id):[];
-  modal(`<h3>${id?'Order':'New order'}</h3><p class="muted small">One payment to one supplier. Put the products and prices exactly as on the invoice.</p>
+  modal(`<h3>${id?'Order':'New order'}</h3><p class="muted small">One supplier invoice = one order. Every position on the invoice is one product line.</p>
+   <div class="drop slim mt" id="invDrop" role="button" tabindex="0">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',20)}<div><b>${o.invoice?'Invoice: '+esc(o.invoice)+' · drop another to replace the products':'Drop the supplier invoice'}</b><span>PDF or Excel. Products, quantities, prices, fees and shipping fill in by themselves.</span></div></div><input type="file" id="invFile" accept=".pdf,application/pdf,.xlsx,.xls,.csv" hidden>
+   <div id="invInfo" class="small" style="margin-top:8px"></div>
    <div class="formgrid" style="margin-top:14px">
     <label class="field" style="grid-column:span 2"><span>Supplier</span><input class="input" id="oSup" list="supList" value="${esc(o.supplier)}" placeholder="Shop name on Alibaba"><datalist id="supList">${sups.map(x=>`<option value="${esc(x)}">`).join('')}</datalist></label>
     <label class="field"><span>Where</span><input class="input" id="oPlat" list="platList" value="${esc(o.platform||'')}"><datalist id="platList">${PLATFORMS.map(x=>`<option value="${x}">`).join('')}</datalist></label>
@@ -2376,9 +2547,28 @@ function orderModal(id,pre){
   ['oFee','oDlv','oFx'].forEach(i=>$('#'+i).addEventListener('input',calc));
   $('#oFeeP').addEventListener('input',()=>{const goods=L.reduce((a,l)=>a+parseNum(l.q)*parseNum(l.p),0);const p=parseNum($('#oFeeP').value);$('#oFee').value=p&&goods?r2(goods*p/100):'';calc()});
   draw();
+  let invName=o.invoice||'';
+  const takeInv=async f=>{if(!f)return;const info=$('#invInfo');info.innerHTML='<span class="muted">Reading '+esc(f.name)+'…</span>';
+    try{const r=await readInvoiceFile(f);
+      if(!r||!r.lines.length){info.innerHTML=`<span class="chip warn">${esc(f.name)}</span> No product table found in it${/pdf$/i.test(f.name)?' (a scanned PDF has no text to read)':''} — type the products.`;return}
+      invName=f.name;
+      if(r.supplier&&!$('#oSup').value.trim())$('#oSup').value=r.supplier;
+      if(r.ref&&!$('#oRef').value.trim())$('#oRef').value=r.ref;
+      if(r.date)$('#oDate').value=r.date;
+      if(r.cur&&r.cur!==cur()){$('#oCur').value=r.cur;$('#oFx').value=lastRate(r.cur)||''}
+      L.length=0;r.lines.forEach(l=>L.push({t:l.n,q:String(l.q),p:String(l.p),w:''}));
+      if(r.fee)$('#oFee').value=r.fee;if(r.dlv)$('#oDlv').value=r.dlv;draw();
+      const tot=r.lines.reduce((a,l)=>a+l.q*l.p,0)+(r.fee||0)+(r.dlv||0);const c=cur();
+      const chk=r.total?(Math.abs(r.total-tot)<=Math.max(0.05,r.total*0.002)?`<span class="chip good">matches the invoice total ${money(r.total,c)}</span>`:`<span class="chip warn">invoice total says ${money(r.total,c)}, lines add up to ${money(tot,c)} — check</span>`):'';
+      info.innerHTML=`<span class="chip good">Read ${r.lines.length} position${r.lines.length>1?'s':''} from ${esc(f.name)}</span> ${chk}${r.disc?' <span class="chip">discount '+money(r.disc,c)+' taken off the fee</span>':''}<div class="muted" style="margin-top:4px">Check names and numbers against the invoice. Pick the Optimo product on a line to link it.</div>`}
+    catch(e){info.innerHTML=`<span class="chip warn">${esc(f.name)}</span> ${esc(e.message||'Could not read it')} — type the products.`}};
+  {const d=$('#invDrop');d.onclick=()=>$('#invFile').click();d.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('#invFile').click()}});
+   d.addEventListener('dragover',e=>{e.preventDefault();d.classList.add('over')});d.addEventListener('dragleave',()=>d.classList.remove('over'));
+   d.addEventListener('drop',e=>{e.preventDefault();d.classList.remove('over');takeInv(e.dataTransfer.files[0])});$('#invFile').onchange=e=>takeInv(e.target.files[0]);
+   if(pre&&pre.pickInvoice){pre.pickInvoice=false;$('#invFile').click()}}
   const build=()=>{const c=cur();
     const lines=L.map(l=>{const t=l.t.trim();const hit=prods.find(x=>t===x[1]+' · '+x[0]);return {n:hit?hit[1]:t,sku:hit?String(hit[0]):'',q:parseNum(l.q),p:parseNum(l.p),w:parseNum(l.w)||0}}).filter(l=>l.n||l.q||l.p);
-    const b={...(o0||{}),kind:'order',date:$('#oDate').value||today(),supplier:$('#oSup').value.trim(),platform:$('#oPlat').value.trim(),ref:$('#oRef').value.trim(),cur:c,fx:c==='GEL'?1:parseNum($('#oFx').value),lines,fee:parseNum($('#oFee').value),shipFee:parseNum($('#oDlv').value),shipId:$('#oShip').value==='__new'?(o.shipId||''):$('#oShip').value,personal:$('#oPers').checked,note:$('#oNote').value.trim()};delete b.id;
+    const b={...(o0||{}),kind:'order',date:$('#oDate').value||today(),supplier:$('#oSup').value.trim(),platform:$('#oPlat').value.trim(),ref:$('#oRef').value.trim(),cur:c,fx:c==='GEL'?1:parseNum($('#oFx').value),lines,fee:parseNum($('#oFee').value),shipFee:parseNum($('#oDlv').value),shipId:$('#oShip').value==='__new'?(o.shipId||''):$('#oShip').value,personal:$('#oPers').checked,note:$('#oNote').value.trim(),invoice:invName};delete b.id;delete b.pickInvoice;
     if(!b.supplier){toast('Write the supplier');$('#oSup').focus();return null}
     if(!lines.length){toast('Add at least one product');return null}
     if(lines.some(l=>!l.n)){toast('Every line needs a product name');return null}
@@ -2616,6 +2806,8 @@ async function setShipStatus(id,st){const s=S.ships.get(id);if(!s)return;const b
 async function impAct(a,b){const I=impState();
   if(a==='newOrder')return orderModal(null,b&&b.dataset.ship?{shipId:b.dataset.ship}:null);
   if(a==='newShip')return shipModal();
+  if(a==='invOrder')return orderModal(null,{pickInvoice:true});
+  if(a==='impMerge'){const ids=[...I.sel].filter(id=>S.ships.get(id));return mergeModal(ids)}
   if(a==='impTab'){I.tab=b.dataset.v;I.q='';S.animate=true;return render()}
   if(a==='impSt'){I.st=b.dataset.v;return render()}
   if(a==='impOf'){I.of=b.dataset.v;return render()}
@@ -3038,7 +3230,7 @@ async function act(a,b){
   if(a==='bankReview')return bankBuild();
   if(a==='bankSave')return bankSave(b);
   if(a==='exportXlsx')return exportXlsx();
-  if(a==='newShip'||a==='newOrder'||a.startsWith('imp')||a.startsWith('ship')||a==='payShip'||a==='linkShip'){const r=await impAct(a,b);if(r!==false)return}
+  if(a==='newShip'||a==='newOrder'||a==='invOrder'||a.startsWith('imp')||a.startsWith('ship')||a==='payShip'||a==='linkShip'){const r=await impAct(a,b);if(r!==false)return}
   if(a==='optStart')return optStart();
   if(a==='optCancel'||a==='optReset'){S.opt=a==='optReset'?{stage:'upload',month:S.opt.month}:null;S.animate=true;return render()}
   if(a==='optSave')return optSave(b);
