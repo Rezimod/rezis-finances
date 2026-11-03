@@ -9,7 +9,9 @@
 <meta name="apple-mobile-web-app-title" content="Astroman Finance">
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 34'%3E%3Ccircle cx='17' cy='17' r='8.5' fill='%23F5A623'/%3E%3Cellipse cx='17' cy='17' rx='15' ry='5' fill='none' stroke='%231C3480' stroke-width='2' transform='rotate(-22 17 17)'/%3E%3C/svg%3E">
-<style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px)}</style>
+<style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
 </head>
 <body>
 <title>Astroman Finance</title>
@@ -562,6 +564,51 @@ tr.dayrow td{background:var(--surface-2);font-size:12px;color:var(--ink-2);paddi
   @keyframes slideup{from{transform:translateY(100%)}}
 }
 @media (min-width:861px){.railtop{display:flex;flex-direction:column;gap:18px}}
+/* ---------- phone polish ---------- */
+.qrbox{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.qr{width:148px;height:148px;background:#fff;border-radius:10px;padding:6px;flex:none}.qr svg{width:100%;height:100%;display:block}
+@media (max-width:860px){
+  /* a solid bar: nothing shows through it while scrolling, and it clears the iPhone status bar */
+  .rail{background:color-mix(in srgb,var(--night) 92%,#000);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-right:0;border-bottom:1px solid var(--line)}
+  :root[data-theme="light"] .rail{background:var(--night)}
+  /* 16px text stops iPhone zooming into a field when it is tapped */
+  .input,select.input,textarea.input{font-size:16px}
+  .toolbar .seg{flex:1 1 100%;max-width:100%;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .toolbar .seg::-webkit-scrollbar{display:none}.toolbar .seg button{flex:none;white-space:nowrap}
+  .toolbar select.input{flex:1 1 40%}
+  /* windows become sheets from the bottom, the buttons always in reach */
+  .scrim{place-items:end stretch;padding:0}
+  .modal,.modal.wide{width:100%;max-height:calc(100dvh - 10px - env(safe-area-inset-top,0px));border-radius:18px 18px 0 0;padding:18px 16px 0;animation:slideup .25s var(--ease) both}
+  .modal .foot{position:sticky;bottom:0;background:var(--surface);margin:16px -16px 0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+  .modal h3{font-size:20px}
+  .pipe .stage{padding:11px 12px}.pipe .stage .hint{display:none}.pipe .stage .n{font-size:21px;margin-top:3px}
+  .stepper span{display:none}
+  .selbar{left:0;right:0}
+}
+@media (max-width:640px){
+  .mhide{display:none}
+  /* wide tables become one card per row */
+  .tablewrap:has(table.mstack){overflow:visible;background:transparent;border:0;box-shadow:none}
+  table.mstack,table.mstack tbody,table.mstack tfoot{display:block}
+  table.mstack thead{display:none}
+  table.mstack tr{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px 18px;padding:12px 14px;margin-bottom:8px;border:1px solid var(--line);border-radius:12px;background:var(--glass)}
+  table.mstack td{border:0;padding:0;text-align:left;min-width:0;white-space:normal}
+  table.mstack td.ck{order:-2;flex:none;padding-top:2px}
+  table.mstack td.mn{order:-1;flex:1 1 70%;min-width:0!important}
+  table.mstack td.mn+td,table.mstack td[data-l]{font-size:13px}
+  table.mstack td[data-l]::before{content:attr(data-l);display:block;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;font-family:var(--f-ui);font-weight:600}
+  table.mstack td.mh{display:none}
+  table.mstack tfoot tr{background:var(--surface-2)}
+  table.mstack tfoot td{border-top:0;font-weight:700}
+  /* order lines: product on its own row, numbers underneath */
+  .lines{border:0;background:transparent;box-shadow:none;overflow:visible}
+  .lines table,.lines tbody{display:block}.lines thead{display:none}
+  .lines tr{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;padding:10px;margin-bottom:8px;border:1px solid var(--line);border-radius:12px;background:var(--glass)}
+  .lines td{padding:0!important;border:0}
+  .lines td:first-child{grid-column:1/-1}
+  .lines td input{width:100%!important}
+  .lines td[data-lt]{display:none}
+}
 /* ---------- recap ---------- */
 :root{--c1:#7B9CF5;--c2:#5BD398;--c3:#F5A623;--c4:#B18CFF;--c5:#4FC9D9;--c6:#FF8FB1;--c7:#E8D27A;--c8:#8EA0C8}
 :root[data-theme="light"]{--c1:#2F5BD3;--c2:#1D8051;--c3:#D98A06;--c4:#7A4FD6;--c5:#0E8FA3;--c6:#C2416E;--c7:#9C8410;--c8:#6F7A96}
@@ -997,9 +1044,10 @@ const salesDoc=(m,source,locked)=>({month:m.m,rows:m.rows,source,syncedAt:new Da
 function localDownloads(){return {save:async({filename,data})=>{const blob=data instanceof Blob?data:new Blob([data]);const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},1500)}}}
 function vConnect(){
   const c=readCreds()||{};
-  return `<div class="pagehead"><div><div class="eyebrow">First-time setup on this device</div><h1>Connect your data</h1><p>Your numbers live in your own Google account, not on this website. Paste the web-app address and the secret key from your Apps Script once on each device. Or open the phone link from Settings on a device that's already connected.</p></div></div>
+  return `<div class="pagehead"><div><div class="eyebrow">First-time setup on this device</div><h1>Connect your data</h1><p>Your numbers live in your own Google account, not on this website, so each device connects once.</p></div></div>
+  <div class="panel" style="margin-bottom:16px;border-color:color-mix(in srgb,var(--accent) 45%,var(--line))"><h2>Easiest: scan from your computer</h2><p class="sub" style="margin:0">On the computer where Astroman Finance already opens, go to <b>Settings → Backup &amp; devices</b> and point this phone's camera at the QR code. It opens here already connected. Or paste the phone link into the first box below.</p></div>
   <div class="grid g2"><div class="panel stack">
-   <label class="field"><span>Web-app URL (from Apps Script → Deploy)</span><input class="input" id="cnU" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(c.u||'')}"></label>
+   <label class="field"><span>Web-app URL (Apps Script → Deploy → Manage deployments), or the phone link</span><input class="input" id="cnU" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(c.u||'')}"></label>
    <label class="field"><span>Secret key</span><input class="input" id="cnK" type="password" autocomplete="current-password" value="${esc(c.k||'')}"></label>
    <div class="row"><button class="btn amber" id="cnGo">Connect</button><span class="muted small" id="cnMsg"></span></div></div>
    <div class="panel"><h2>Why this step</h2><p class="sub">This page is public, so it holds no data. Without the key nobody can read Astroman's numbers, even with the link.</p></div></div>`;
@@ -2124,7 +2172,7 @@ const COST_CAT={goods:'goods_import',freight:'freight',customs:'freight',vat:'va
 const r2=n=>Math.round((+n||0)*100)/100;
 const vatInCost=()=>S.cfg.impVat!=='reclaim';
 const shortD=d=>d?new Date(d+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'—';
-function impState(){return S.imp||(S.imp={tab:'ships',st:'active',fw:'',q:'',y:'',of:'',sel:new Set(),ship:null})}
+function impState(){return S.imp||(S.imp={tab:'ships',st:'',fw:'',q:'',y:'',of:'',sel:new Set(),ship:null})}
 function lastRate(cur){if(cur==='GEL')return 1;if(cur==='USD')return fx();
   const o=orderList().filter(x=>x.cur===cur&&+x.fx>0).sort((a,b)=>(b.date||'').localeCompare(a.date||''))[0];
   const s=shipList().filter(x=>x.freightCur===cur&&+x.freightFx>0).sort((a,b)=>(b.date||'').localeCompare(a.date||''))[0];
@@ -2206,7 +2254,7 @@ function vImports(){
   const fws=[...new Set(ships.map(s=>s.forwarder).filter(Boolean))].sort();
   const fwSel=`<select class="input" id="impFw" aria-label="Forwarder"><option value="">All forwarders</option>${fws.map(f=>`<option ${I.fw===f?'selected':''}>${esc(f)}</option>`).join('')}</select>`;
   const vatNote=`<p class="hint mt">Product cost ${vatInCost()?'includes':'leaves out'} import VAT. <button class="linkbtn" data-act="impVat">${vatInCost()?'VAT is reclaimed? Leave it out':'Count VAT in the cost'}</button> · <button class="linkbtn" data-act="impPack">Load an imports file</button></p>`;
-  const head=`<div class="pagehead"><div><div class="eyebrow">Supplier → forwarder → Tbilisi</div><h1>Imports</h1><p>Every supplier order and the shipment that brings it. Put several orders in one shipment, add its freight, customs, VAT and transport, and see what each product really cost on the shelf.</p></div><div class="actions"><button class="btn" data-act="newShip">+ Shipment</button><button class="btn" data-act="newOrder">+ Order</button><button class="btn amber" data-act="invOrder">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',14)} Upload invoice</button></div></div>`;
+  const head=`<div class="pagehead"><div><div class="eyebrow">Supplier → forwarder → Tbilisi</div><h1>Imports</h1><p class="mhide">Every supplier order and the shipment that brings it. Put several orders in one shipment, add its freight, customs, VAT and transport, and see what each product really cost on the shelf.</p></div><div class="actions"><button class="btn" data-act="newShip">+ Shipment</button><button class="btn" data-act="newOrder">+ Order</button><button class="btn amber" data-act="invOrder">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',14)} Upload invoice</button></div></div>`;
   let body='';
   if(I.tab==='orders')body=impOrders(orders,fwSel);
   else if(I.tab==='products')body=impProducts(ships,fwSel);
@@ -2214,16 +2262,16 @@ function vImports(){
   return loadingOr(head+pipe+tabs+body+vatNote);
 }
 function impShips(ships,fwSel){
-  const I=impState();const q=(I.q||'').toLowerCase();
+  const I=impState();const q=(I.q||'').toLowerCase();const st0=I.st||(ships.some(s=>shipSt(s)!=='arrived')?'active':'all');
   const years=[...new Set(ships.map(shipYear).filter(Boolean))].sort().reverse();
-  const fl=ships.filter(s=>{const st=shipSt(s);if(I.st==='active'&&st==='arrived')return false;if(I.st==='done'&&st!=='arrived')return false;
-    if(I.fw&&s.forwarder!==I.fw)return false;if(I.y&&I.st!=='active'&&shipYear(s)!==I.y)return false;
+  const fl=ships.filter(s=>{const st=shipSt(s);if(st0==='active'&&st==='arrived')return false;if(st0==='done'&&st!=='arrived')return false;
+    if(I.fw&&s.forwarder!==I.fw)return false;if(I.y&&st0!=='active'&&shipYear(s)!==I.y)return false;
     if(q){const C=shipCalc(s);const hay=[s.forwarder,s.track,s.note,s.origin,s.item,...C.orders.map(o=>o.supplier+' '+(o.ref||'')),...C.lines.map(l=>l.n)].join(' ').toLowerCase();if(!hay.includes(q))return false}return true});
-  fl.sort((a,b)=>I.st==='active'?(stIdx(shipSt(b))-stIdx(shipSt(a)))||(b.date||'').localeCompare(a.date||''):(b.arrivedAt||b.date||'').localeCompare(a.arrivedAt||a.date||''));
+  fl.sort((a,b)=>st0==='active'?(stIdx(shipSt(b))-stIdx(shipSt(a)))||(b.date||'').localeCompare(a.date||''):(b.arrivedAt||b.date||'').localeCompare(a.arrivedAt||a.date||''));
   const cnt=k=>ships.filter(s=>k==='all'||(k==='done')===(shipSt(s)==='arrived')).length;
   const bar=`<div class="toolbar"><input class="input grow" id="impQ" placeholder="Search forwarder, supplier, product, tracking…" value="${esc(I.q||'')}">${fwSel}
-   ${I.st!=='active'&&years.length?`<select class="input" id="impY" aria-label="Year"><option value="">All years</option>${years.map(y=>`<option ${I.y===y?'selected':''}>${y}</option>`).join('')}</select>`:''}
-   <div class="seg" role="group" aria-label="Show">${[['active','Active'],['done','Done'],['all','All']].map(([k,t])=>`<button data-act="impSt" data-v="${k}" aria-pressed="${I.st===k}">${t} <span class="muted">${cnt(k)}</span></button>`).join('')}</div></div>`;
+   ${st0!=='active'&&years.length?`<select class="input" id="impY" aria-label="Year"><option value="">All years</option>${years.map(y=>`<option ${I.y===y?'selected':''}>${y}</option>`).join('')}</select>`:''}
+   <div class="seg" role="group" aria-label="Show">${[['active','Active'],['done','Done'],['all','All']].map(([k,t])=>`<button data-act="impSt" data-v="${k}" aria-pressed="${st0===k}">${t} <span class="muted">${cnt(k)}</span></button>`).join('')}</div></div>`;
   if(!fl.length)return bar+`<div class="panel empty"><b>${ships.length?'No shipments match':'No shipments yet'}</b>${ships.length?'Try another filter.':'Add your supplier orders first, then put them in a shipment with its forwarder.'}<div class="row" style="justify-content:center;margin-top:14px"><button class="btn" data-act="newShip">+ Shipment</button></div></div>`;
   return bar+`<div class="shipgrid">${fl.map(shipCard).join('')}</div>`;
 }
@@ -2258,24 +2306,24 @@ function impOrders(orders,fwSel){
   const rows=fl.map(o=>{const t=tag(o);
     if(t.leg){const paid=payTxs('s',o.id).some(x=>/^goods/.test(x.cat))||(o.txId&&S.tx.has(o.txId));
       return `<tr class="click" data-shipview="${o.id}"><td class="ck"><input type="checkbox" data-osel="${o.id}" ${I.sel.has(o.id)?'checked':''} aria-label="Select record"></td>
-     <td class="num small">${esc(o.date||'—')}</td>
-     <td style="min-width:200px"><b>${esc(o.item||'Goods')}</b> <span class="chip">older record · 1 product</span>${o.personal?' <span class="chip below">not Astroman</span>':''}<div class="small muted">goods typed on the shipment</div></td>
-     <td class="r num">${o.qty?fmt(o.qty):'—'}</td><td class="r num">${money(+o.usd,'USD')}<div class="small muted">≈ ${gel(+o.usd*(+o.fx||fx()))}</div></td>
-     <td>${paid?'<span class="chip good">Paid</span>':'<span class="muted">—</span>'}</td>
-     <td>${esc(o.forwarder||'—')} ${stChip(shipSt(o))}</td></tr>`}
+     <td class="num small" data-l="Ordered">${esc(o.date||'—')}</td>
+     <td class="mn" style="min-width:200px"><b>${esc(o.item||'Goods')}</b> <span class="chip">older record · 1 product</span>${o.personal?' <span class="chip below">not Astroman</span>':''}<div class="small muted">goods typed on the shipment</div></td>
+     <td class="r num" data-l="Pcs">${o.qty?fmt(o.qty):'—'}</td><td class="r num" data-l="Total">${money(+o.usd,'USD')}<div class="small muted">≈ ${gel(+o.usd*(+o.fx||fx()))}</div></td>
+     <td data-l="Paid">${paid?'<span class="chip good">Paid</span>':'<span class="muted">—</span>'}</td>
+     <td data-l="Shipment">${esc(o.forwarder||'—')} ${stChip(shipSt(o))}</td></tr>`}
     const {c,s}=t;const n=c.lines.length;
     const what=c.lines.slice(0,2).map(l=>l.n).filter(Boolean).join(', ')+(n>2?' +'+(n-2)+' more':'');
     return `<tr class="click" data-order="${o.id}"><td class="ck"><input type="checkbox" data-osel="${o.id}" ${I.sel.has(o.id)?'checked':''} aria-label="Select order"></td>
-     <td class="num small">${esc(o.date||'—')}</td>
-     <td style="min-width:200px"><b>${esc(o.supplier||'Supplier?')}</b>${o.personal?' <span class="chip below">not Astroman</span>':''}<div class="small muted">${esc([o.platform,o.ref?'#'+o.ref:'',n+' product'+(n===1?'':'s')].filter(Boolean).join(' · '))}${what?' · '+esc(what):''}</div></td>
-     <td class="r num">${fmt(c.units)}</td><td class="r num">${money(c.total,c.cur)}<div class="small muted">≈ ${gel(c.gelTotal)}</div></td>
-     <td>${c.status==='paid'?'<span class="chip good">Paid</span>':c.status==='part'?`<span class="chip warn">${money(c.total-c.paid,c.cur,0)} left</span>`:'<span class="chip bad">Not paid</span>'}</td>
-     <td>${s?`<button class="linkbtn" data-shipview="${s.id}">${esc(s.forwarder||'Shipment')}</button> ${stChip(shipSt(s))}`:'<span class="chip warn">Not in a shipment</span>'}</td></tr>`}).join('');
+     <td class="num small" data-l="Ordered">${esc(o.date||'—')}</td>
+     <td class="mn" style="min-width:200px"><b>${esc(o.supplier||'Supplier?')}</b>${o.personal?' <span class="chip below">not Astroman</span>':''}<div class="small muted">${esc([o.platform,o.ref?'#'+o.ref:'',n+' product'+(n===1?'':'s')].filter(Boolean).join(' · '))}${what?' · '+esc(what):''}</div></td>
+     <td class="r num" data-l="Pcs">${fmt(c.units)}</td><td class="r num" data-l="Total">${money(c.total,c.cur)}<div class="small muted">≈ ${gel(c.gelTotal)}</div></td>
+     <td data-l="Paid">${c.status==='paid'?'<span class="chip good">Paid</span>':c.status==='part'?`<span class="chip warn">${money(c.total-c.paid,c.cur,0)} left</span>`:'<span class="chip bad">Not paid</span>'}</td>
+     <td data-l="Shipment">${s?`<button class="linkbtn" data-shipview="${s.id}">${esc(s.forwarder||'Shipment')}</button> ${stChip(shipSt(s))}`:'<span class="chip warn">Not in a shipment</span>'}</td></tr>`}).join('');
   const sel=[...I.sel].map(id=>S.ships.get(id)).filter(Boolean);const selO=sel.filter(isOrder);
   const val=sel.reduce((a,o)=>a+(isOrder(o)?orderCalc(o).gelTotal:+o.usd*(+o.fx||fx())),0);
   const selBar=sel.length?`<div class="selbar"><b>${sel.length} selected</b><span class="muted small">≈ ${gel(val)}</span><span class="spacer"></span><button class="btn ghost sm" data-act="impClear">Clear</button>${sel.length>1?'<button class="btn sm" data-act="impMerge">Merge into one order</button>':''}${selO.length===sel.length?'<button class="btn amber sm" data-act="impPut">Put in a shipment</button>':''}</div>`:'';
   return bar+(legs.length?`<div class="panel" style="padding:12px 16px;margin-bottom:12px"><span class="small"><b>${legs.length} older record${legs.length>1?'s':''}</b> hold${legs.length>1?'':'s'} one product each. Tick the ones that came on the same invoice and press <b>Merge into one order</b>.</span></div>`:'')
-   +`<div class="tablewrap"><table><thead><tr><th class="ck"><input type="checkbox" id="oselAll" ${allSel?'checked':''} aria-label="Select all"></th><th>Ordered</th><th>Supplier · products</th><th class="r">Pcs</th><th class="r">Total</th><th>Paid</th><th>Shipment</th></tr></thead><tbody>${rows}</tbody></table></div>
+   +`<div class="tablewrap"><table class="mstack"><thead><tr><th class="ck"><input type="checkbox" id="oselAll" ${allSel?'checked':''} aria-label="Select all"></th><th>Ordered</th><th>Supplier · products</th><th class="r">Pcs</th><th class="r">Total</th><th>Paid</th><th>Shipment</th></tr></thead><tbody>${rows}</tbody></table></div>
    <p class="hint mt">Tick orders that travel together and press <b>Put in a shipment</b>. Tick parts of one invoice and press <b>Merge into one order</b>.</p>${selBar}`;
 }
 
@@ -2503,14 +2551,14 @@ function impProducts(ships,fwSel){
   const fl=rows.filter(r=>!q||(r.n+' '+r.sku+' '+r.sup).toLowerCase().includes(q)).sort((a,b)=>(b.s.arrivedAt||b.s.shippedAt||b.s.date||'').localeCompare(a.s.arrivedAt||a.s.shippedAt||a.s.date||''));
   const bar=`<div class="toolbar"><input class="input grow" id="impQ" placeholder="Search product, barcode or supplier…" value="${esc(I.q||'')}">${fwSel}</div>`;
   if(!fl.length)return bar+`<div class="panel empty"><b>No products yet</b>Products appear here once their orders are in a shipment.</div>`;
-  return bar+`<div class="tablewrap"><table><thead><tr><th>Product</th><th>Shipment</th><th class="r">Pcs</th><th class="r">Paid each</th><th class="r">Landed each</th><th class="r">On top</th><th class="r">Optimo cost</th></tr></thead><tbody>
+  return bar+`<div class="tablewrap"><table class="mstack"><thead><tr><th>Product</th><th>Shipment</th><th class="r">Pcs</th><th class="r">Paid each</th><th class="r">Landed each</th><th class="r">On top</th><th class="r">Optimo cost</th></tr></thead><tbody>
    ${fl.map(r=>{const oc=optimoCost(r.sku);const d=oc&&oc.cost?r.unit-oc.cost:null;const est=r.C.st!=='arrived';
-    return `<tr class="click" data-shipview="${r.s.id}"><td style="min-width:200px">${esc(r.n||'—')}<div class="small muted">${esc(r.sup||'')}${r.sku?' · '+esc(r.sku):''}</div></td>
-     <td class="small">${esc(r.s.forwarder||'—')}<div class="muted">${stLabel(r.C.st)} · ${shortD(r.s.arrivedAt||r.s.shippedAt||r.s.date)}</div></td>
-     <td class="r num">${fmt(r.q)}</td><td class="r num">${r.q?gel(r.goodsUnit,2):'—'}</td>
-     <td class="r num"><b>${r.q?gel(r.unit,2):'—'}</b>${est?'<div class="small muted">so far</div>':''}</td>
-     <td class="r num">${r.goodsUnit?'+'+Math.round((r.unit/r.goodsUnit-1)*100)+'%':'—'}</td>
-     <td class="r num">${oc&&oc.cost?gel(oc.cost,2)+`<div class="small ${Math.abs(d)<0.5?'muted':d>0?'neg':'up'}">${Math.abs(d)<0.5?'matches':(d>0?'real cost +':'real cost −')+gel(Math.abs(d),2)}</div>`:'<span class="muted">—</span>'}</td></tr>`}).join('')}
+    return `<tr class="click" data-shipview="${r.s.id}"><td class="mn" style="min-width:200px">${esc(r.n||'—')}<div class="small muted">${esc(r.sup||'')}${r.sku?' · '+esc(r.sku):''}</div></td>
+     <td class="small" data-l="Shipment">${esc(r.s.forwarder||'—')}<div class="muted">${stLabel(r.C.st)} · ${shortD(r.s.arrivedAt||r.s.shippedAt||r.s.date)}</div></td>
+     <td class="r num" data-l="Pcs">${fmt(r.q)}</td><td class="r num" data-l="Paid each">${r.q?gel(r.goodsUnit,2):'—'}</td>
+     <td class="r num" data-l="Landed each"><b>${r.q?gel(r.unit,2):'—'}</b>${est?'<div class="small muted">so far</div>':''}</td>
+     <td class="r num" data-l="On top">${r.goodsUnit?'+'+Math.round((r.unit/r.goodsUnit-1)*100)+'%':'—'}</td>
+     <td class="r num" data-l="Optimo cost">${oc&&oc.cost?gel(oc.cost,2)+`<div class="small ${Math.abs(d)<0.5?'muted':d>0?'neg':'up'}">${Math.abs(d)<0.5?'matches':(d>0?'real cost +':'real cost −')+gel(Math.abs(d),2)}</div>`:'<span class="muted">—</span>'}</td></tr>`}).join('')}
    </tbody></table></div><p class="hint mt">Landed each = goods + platform fee + freight + transport + customs${vatInCost()?' + VAT':''}, divided by the pieces. “So far” means the shipment has not arrived, so some costs may still be missing.</p>`;
 }
 
@@ -2532,11 +2580,11 @@ function vShipView(s){
    <div class="row mt"><button class="btn sm amber" data-act="payShip">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',14)} Add receipt</button><button class="btn sm" data-act="linkShip">Link a bank payment</button></div></div>`;
   const basisSeg=`<div class="seg" role="group" aria-label="Split freight by">${BASES.map(([k,t])=>`<button data-act="shipBasis" data-v="${k}" aria-pressed="${(s.basis||'auto')===k}">${t}</button>`).join('')}</div>`;
   const prods=`<div class="panel" style="padding-bottom:6px"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">Cost per product</h2><p class="sub" style="margin:2px 0 0">Freight and transport split by <b>${C.basis==='weight'?'weight':C.basis==='qty'?'pieces':'value'}</b>${C.weightGap?' (some products have no weight, so by value)':''}; customs${C.vIn?' and VAT':''} by customs value.</p></div><span class="spacer"></span>${basisSeg}</div>
-   ${C.lines.length?`<div class="tablewrap mt"><table><thead><tr><th>Product</th><th class="r">Pcs</th><th class="r">Goods</th><th class="r">Fee</th><th class="r">Freight &amp; transport</th><th class="r">Customs${C.vIn?' + VAT':''}</th><th class="r">Landed</th><th class="r">Each</th></tr></thead><tbody>
-    ${C.lines.map(l=>{const oc=optimoCost(l.sku);return `<tr ${l.orderId?`class="click" data-order="${l.orderId}"`:''}><td style="min-width:180px">${esc(l.n||'—')}${l.personal?' <span class="chip below">not Astroman</span>':''}<div class="small muted">${esc(l.sup||(l.legacy?'entered on the shipment':''))}${l.fixed?' · own customs':''}${l.kg?' · '+fmt(l.kg,1)+' kg':''}${oc&&oc.cost?' · Optimo '+gel(oc.cost,2):''}</div></td>
-     <td class="r num">${fmt(l.q)}</td><td class="r num">${gel(l.goods)}</td><td class="r num">${l.fee?gel(l.fee):'·'}</td><td class="r num">${l.freight+l.local?gel(l.freight+l.local):'·'}</td><td class="r num">${l.duty+(C.vIn?l.vat:0)?gel(l.duty+(C.vIn?l.vat:0)):'·'}</td>
-     <td class="r num">${gel(l.landed)}</td><td class="r num"><b>${l.q?gel(l.unit,2):'—'}</b>${l.q&&l.goodsUnit?`<div class="small muted">+${Math.round((l.unit/l.goodsUnit-1)*100)}%</div>`:''}</td></tr>`}).join('')}</tbody>
-    <tfoot><tr><td>Total</td><td class="r num">${fmt(C.units)}</td><td class="r num">${gel(C.goods)}</td><td class="r num">${gel(C.fee)}</td><td class="r num">${gel(C.freight+C.local+C.other)}</td><td class="r num">${gel(C.duty+(C.vIn?C.vat:0))}</td><td class="r num">${gel(C.landed)}</td><td></td></tr></tfoot></table></div>`
+   ${C.lines.length?`<div class="tablewrap mt"><table class="mstack"><thead><tr><th>Product</th><th class="r">Pcs</th><th class="r">Goods</th><th class="r">Fee</th><th class="r">Freight &amp; transport</th><th class="r">Customs${C.vIn?' + VAT':''}</th><th class="r">Landed</th><th class="r">Each</th></tr></thead><tbody>
+    ${C.lines.map(l=>{const oc=optimoCost(l.sku);return `<tr ${l.orderId?`class="click" data-order="${l.orderId}"`:''}><td class="mn" style="min-width:180px">${esc(l.n||'—')}${l.personal?' <span class="chip below">not Astroman</span>':''}<div class="small muted">${esc(l.sup||(l.legacy?'entered on the shipment':''))}${l.fixed?' · own customs':''}${l.kg?' · '+fmt(l.kg,1)+' kg':''}${oc&&oc.cost?' · Optimo '+gel(oc.cost,2):''}</div></td>
+     <td class="r num" data-l="Pcs">${fmt(l.q)}</td><td class="r num" data-l="Goods">${gel(l.goods)}</td><td class="r num" data-l="Fee">${l.fee?gel(l.fee):'·'}</td><td class="r num" data-l="Freight">${l.freight+l.local?gel(l.freight+l.local):'·'}</td><td class="r num" data-l="Customs">${l.duty+(C.vIn?l.vat:0)?gel(l.duty+(C.vIn?l.vat:0)):'·'}</td>
+     <td class="r num" data-l="Landed">${gel(l.landed)}</td><td class="r num" data-l="Each"><b>${l.q?gel(l.unit,2):'—'}</b>${l.q&&l.goodsUnit?`<div class="small muted">+${Math.round((l.unit/l.goodsUnit-1)*100)}%</div>`:''}</td></tr>`}).join('')}</tbody>
+    <tfoot><tr><td class="mn">Total</td><td class="r num" data-l="Pcs">${fmt(C.units)}</td><td class="r num" data-l="Goods">${gel(C.goods)}</td><td class="r num" data-l="Fee">${gel(C.fee)}</td><td class="r num" data-l="Freight">${gel(C.freight+C.local+C.other)}</td><td class="r num" data-l="Customs">${gel(C.duty+(C.vIn?C.vat:0))}</td><td class="r num" data-l="Landed">${gel(C.landed)}</td><td class="mh"></td></tr></tfoot></table></div>`
    :`<div class="empty">No products yet. Add the orders that travel in this shipment.</div>`}</div>`;
   const ords=`<div class="panel"><div class="row"><div><h2 style="margin:0">Orders inside</h2><p class="sub" style="margin:2px 0 0">${C.orders.length} order${C.orders.length===1?'':'s'} from ${new Set(C.orders.map(o=>o.supplier)).size} supplier${new Set(C.orders.map(o=>o.supplier)).size===1?'':'s'}</p></div><span class="spacer"></span><button class="btn sm" data-act="shipAddOrders">+ Add orders</button></div>
    <div class="flow mt">${C.orders.map(o=>{const c=orderCalc(o);return `<div class="ln click" data-order="${o.id}"><span class="k"><b>${esc(o.supplier||'Supplier?')}</b> <span class="small muted">${esc(o.date||'')}${o.ref?' · #'+esc(o.ref):''} · ${c.lines.length} product${c.lines.length===1?'':'s'} · ${fmt(c.units)} pcs</span> ${c.status==='paid'?'<span class="chip good">Paid</span>':c.status==='part'?'<span class="chip warn">Part paid</span>':'<span class="chip bad">Not paid</span>'}</span><span class="v num">${money(c.total,c.cur)} <span class="small muted">≈ ${gel(c.gelTotal)}</span> <button class="btn sm ghost" data-rmorder="${o.id}" aria-label="Take out of this shipment">✕</button></span></div>`}).join('')||(+s.usd>0?`<div class="muted small">This older shipment has its goods entered directly (${esc(s.item||'')} · $${fmt(s.usd,2)}). Edit it to change them, or add orders.</div>`:'<div class="muted small">No orders yet.</div>')}</div></div>`;
@@ -2595,12 +2643,12 @@ function orderModal(id,pre){
    <label class="row small" style="margin-top:6px"><input type="checkbox" id="oPers" ${o.personal?'checked':''}> Not for Astroman (personal or other business)</label>
    <label class="field mt"><span>Note</span><input class="input" id="oNote" value="${esc(o.note||'')}"></label>
    <div class="foot">${id?'<button class="btn danger" id="oDel">Delete</button>':'<span></span>'}<div class="row"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" id="oSave" ${S.canWrite?'':'disabled'}>Save</button></div></div>`,true);
-  const L=o.lines.map(l=>({t:lineTxt(l),q:l.q??'',p:l.p??'',w:l.w??''}));
+  const L=o.lines.map(l=>({t:lineTxt(l),q:l.q??'',p:l.p??'',w:+l.w?l.w:''}));
   const cur=()=>$('#oCur').value;
   const draw=()=>{$('#oLines').innerHTML=L.map((l,i)=>`<tr><td style="min-width:220px"><input class="input" data-li="${i}" data-lk="t" list="skuList" value="${esc(l.t)}" placeholder="Product"></td>
-    <td><input class="input num r" data-li="${i}" data-lk="q" inputmode="decimal" value="${esc(l.q)}" style="width:70px"></td>
-    <td><input class="input num r" data-li="${i}" data-lk="p" inputmode="decimal" value="${esc(l.p)}" style="width:96px"></td>
-    <td><input class="input num r" data-li="${i}" data-lk="w" inputmode="decimal" value="${esc(l.w)}" style="width:70px" placeholder="—"></td>
+    <td><input class="input num r" data-li="${i}" data-lk="q" inputmode="decimal" value="${esc(l.q)}" style="width:70px" placeholder="Qty" aria-label="Quantity"></td>
+    <td><input class="input num r" data-li="${i}" data-lk="p" inputmode="decimal" value="${esc(l.p)}" style="width:96px" placeholder="Price" aria-label="Price each"></td>
+    <td><input class="input num r" data-li="${i}" data-lk="w" inputmode="decimal" value="${esc(l.w)}" style="width:70px" placeholder="kg" aria-label="kg each"></td>
     <td class="r num" data-lt="${i}"></td><td class="r"><button class="btn sm ghost" data-lrm="${i}" aria-label="Remove line">✕</button></td></tr>`).join('');calc()};
   const calc=()=>{const c=cur();const goods=L.reduce((a,l)=>a+parseNum(l.q)*parseNum(l.p),0);
     L.forEach((l,i)=>{const el=document.querySelector(`[data-lt="${i}"]`);if(el)el.textContent=money(parseNum(l.q)*parseNum(l.p),c)});
@@ -2920,7 +2968,7 @@ function vSettings(){
    <div><button class="btn primary" data-act="saveGeneral" ${S.canWrite?'':'disabled'}>Save</button></div></div>
   <div class="panel stack"><h2>Backup &amp; devices</h2><p class="sub" style="margin:0">${S.hosted?'Your data is stored in your Google account (Apps Script). Every change waits on this device until Google confirms it, every change is also written to a permanent log, and a full copy of the data goes to the “Astroman Finance backups” folder in your Drive every night (kept 90 days).':'Your data is stored in your Claude account.'} A backup file moves everything between the Claude version and the hosted version.</p>
    <div class="row"><button class="btn" data-act="exportBackup">Download backup</button>${S.canWrite?'<button class="btn" data-act="pickBackup">Import backup</button><input type="file" id="backupFile" accept=".json,application/json" hidden>':''}<span class="muted small" id="impMsg" aria-live="polite"></span></div>
-   ${S.hosted&&readCreds()?`<label class="field"><span>Phone link: open it once on your phone to connect it (it contains your key, keep it private)</span><input class="input small" id="phLink" readonly value="${esc(phoneLink())}"></label><div class="row"><button class="btn" data-act="copyPhone">Copy phone link</button><button class="btn ghost" data-act="disconnect">Disconnect this device</button></div>`:''}</div>
+   ${S.hosted&&readCreds()?`<label class="field"><span>Phone link: open it once on your phone to connect it (it contains your key, keep it private)</span><input class="input small" id="phLink" readonly value="${esc(phoneLink())}"></label><div class="qrbox"><div id="phQr" class="qr" aria-label="QR code of the phone link"></div><div class="small"><b>Connect a phone</b><div class="muted">Point the phone's camera at the code and open the link. It holds your key, so don't share a photo of it.</div></div></div><div class="row"><button class="btn" data-act="copyPhone">Copy phone link</button><button class="btn ghost" data-act="disconnect">Disconnect this device</button></div>`:''}</div>
   <div class="panel"><h2>Your bank sorting rules</h2><p class="sub">Created when you correct a category during bank import.</p>
    ${rules.length?`<div class="flow">${rules.map(r=>`<div class="ln"><span class="k">“${esc(r.match)}” → ${catChip(r.cat)}</span><span class="v"><button class="btn sm ghost" data-rmrule="${r.id}">Remove</button></span></div>`).join('')}</div>`:'<div class="muted">No custom rules yet. Built-in rules cover Wolt, Glovo, Facebook, Optimo, forwarders, Bresser, utilities, the accountant and bank fees.</div>'}</div></div>`;
 }
@@ -3261,10 +3309,13 @@ function bindView(){
   document.querySelectorAll('th[data-osort]').forEach(th=>th.onclick=()=>{const k=th.dataset.osort;if(S.op.sort===k)S.op.dir*=-1;else{S.op.sort=k;S.op.dir=k==='n'||k==='status'?1:-1}render()});
   document.querySelectorAll('[data-opcat]').forEach(r=>r.onclick=()=>{S.op.cat=r.dataset.opcat;S.op.tab='items';S.op.status='';S.animate=true;render()});
   on('#backupFile','change',e=>{const f=e.target.files[0];if(f)importBackup(f)});
+  drawPhoneQr();
   on('#rYear','change',e=>{if(e.target.value)setRange({p:'year',y:e.target.value})});
   on('#rFrom','change',e=>setRange({p:'custom',from:e.target.value,to:$('#rTo').value}));
   on('#rTo','change',e=>setRange({p:'custom',from:$('#rFrom').value,to:e.target.value}));
-  on('#cnGo','click',async()=>{const u=$('#cnU').value.trim(),k=$('#cnK').value.trim();const msg=$('#cnMsg');if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(u)){msg.textContent='That doesn’t look like an Apps Script web-app URL';return}msg.textContent='Checking…';
+  const fromLink=v=>{const m=String(v||'').match(/connect=([A-Za-z0-9+/=_-]+)/);if(!m)return null;try{const o=JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g,'+').replace(/_/g,'/')))));return o.u&&o.k?o:null}catch(e){return null}};
+  on('#cnU','input',e=>{const o=fromLink(e.target.value);if(o){e.target.value=o.u;$('#cnK').value=o.k;$('#cnMsg').textContent='Phone link recognised — press Connect'}});
+  on('#cnGo','click',async()=>{const o0=fromLink($('#cnU').value);if(o0){$('#cnU').value=o0.u;$('#cnK').value=o0.k}const u=$('#cnU').value.trim(),k=$('#cnK').value.trim();const msg=$('#cnMsg');if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(u)){msg.textContent='That doesn’t look like an Apps Script web-app URL';return}msg.textContent='Checking…';
     try{await gasCall(u,k,{action:'ping'});lsSet('af.backend',JSON.stringify({u,k}));msg.textContent='Connected';S.view='overview';connectBackend({u,k});render()}catch(e){msg.textContent=e.message||'Could not connect'}});
   on('#ordersFile','change',e=>{const f=e.target.files[0];if(f)readFile(f,wb=>{S.salesPreview=parseOrdersWorkbook(wb,f.name,true);openSalesPreview()})});
   document.querySelectorAll('th[data-sort]').forEach(th=>th.onclick=()=>{const k=th.dataset.sort;if(S.prod.sort===k)S.prod.dir*=-1;else{S.prod.sort=k;S.prod.dir=k==='n'?1:-1}render()});
@@ -3288,6 +3339,10 @@ function bindView(){
   document.querySelectorAll('[data-rmrule]').forEach(b=>b.onclick=async()=>{try{await delDoc('rules/'+b.dataset.rmrule)}catch(e){toast(errMsg(e))}});
   document.querySelectorAll('[data-act]').forEach(b=>{if(b.tagName==='DIV'&&b.classList.contains('drop'))b.addEventListener('keydown',e=>{if(e.key==='Enter')act(b.dataset.act,b)});b.onclick=e=>act(b.dataset.act,b,e)});
 }
+// the QR code is drawn here from the link; nothing is sent to any service
+function loadQr(){if(window.qrcode)return Promise.resolve();return loadQr.p||(loadQr.p=new Promise((res,rej)=>{const sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';sc.onload=res;sc.onerror=()=>{loadQr.p=null;rej()};document.head.appendChild(sc)}))}
+function drawPhoneQr(){const el=$('#phQr');if(!el)return;const v=phoneLink();if(!v){el.remove();return}
+  loadQr().then(()=>{const q=window.qrcode(0,'M');q.addData(v);q.make();const box=$('#phQr');if(box)box.innerHTML=q.createSvgTag({cellSize:4,margin:2,scalable:true})}).catch(()=>{const box=$('#phQr');if(box)box.closest('.qrbox').hidden=true})}
 function readFixedForm(){const list=fixedList().map(f=>({...f}));document.querySelectorAll('[data-fx]').forEach(el=>{const f=list[+el.dataset.fx];if(!f)return;const k=el.dataset.k;f[k]=k==='gel'?parseNum(el.value):el.value.trim()});return list}
 async function act(a,b){
   try{
