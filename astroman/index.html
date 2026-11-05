@@ -691,6 +691,18 @@ tr.dayrow td{background:var(--surface-2);font-size:12px;color:var(--ink-2);paddi
 .rsub{font-size:14px;margin:18px 0 10px;color:var(--ink-2);font-weight:600}
 .rshelf{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-2)}.rshelf b{font-size:18px;color:var(--ink)}.rshelf em{font-style:normal;color:var(--muted);font-size:12px}
 tr.sum td{border-top:1px solid var(--ink-2)}
+
+/* ---------- store register ---------- */
+.thumb{border-radius:8px;object-fit:contain;background:#fff;flex:none;vertical-align:middle;padding:2px}
+.thumb.ph{display:inline-grid;place-items:center;font-size:11px;font-weight:700;color:var(--brand);background:var(--surface-2);padding:0}
+.pickgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));grid-auto-rows:max-content;gap:8px}
+.pick{border:1px solid var(--line);border-radius:10px;padding:6px;background:var(--surface);cursor:pointer;text-align:left;display:grid;gap:4px;color:var(--ink)}
+.pick img{width:100%;height:106px;object-fit:contain;background:#fff;border-radius:6px}
+.pick b{font-size:11.5px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:600}
+.pick:hover{border-color:var(--brand)}.pick[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.orow.void .op{text-decoration:line-through;opacity:.6}
+tr.dim td{opacity:.55}
+.cmp a{color:var(--brand);text-decoration:none}
 </style>
 
 <canvas id="sky" aria-hidden="true"></canvas>
@@ -781,8 +793,8 @@ const DEFAULT_RULES=[
  ['საკომისიო','bank_fees',''],['commission','bank_fees',''],['მომსახურების საფასური','bank_fees',''],
  ['ხაზინ','gezi','Treasury'],['treasury','gezi','Treasury'],
 ];
-const IC={overview:'M3 13h4v8H3zM10 3h4v18h-4zM17 9h4v12h-4z',recap:'M12 3l2.6 5.5 6 .8-4.4 4.1 1.1 5.9L12 16.4l-5.3 2.9 1.1-5.9L3.4 9.3l6-.8z',sales:'M3 17l6-6 4 4 8-8M15 7h6v6',products:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',expenses:'M4 6h16M4 12h16M4 18h10',bank:'M3 10l9-6 9 6M5 10v9h14v-9M9 19v-5h6v5',pl:'M5 4h14v16H5zM9 9h6M9 13h6M9 17h3',imports:'M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7',settings:'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM4 12h2M18 12h2M12 4v2M12 18v2',more:'M5 12h.01M12 12h.01M19 12h.01',optimo:'M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10M7.5 5l9 4',loan:'M3 6h18v12H3zM12 9.5a2.5 2.5 0 1 1 0 5a2.5 2.5 0 1 1 0-5M6.5 9v6M17.5 9v6'};
-const PAGES=[{id:'overview',t:'Overview'},{id:'recap',t:'Recap'},{id:'sales',t:'Sales'},{id:'products',t:'Products'},{id:'expenses',t:'Expenses'},{id:'bank',t:'Bank import'},{id:'pl',t:'Profit & loss'},{id:'imports',t:'Imports'},{id:'loan',t:'Loan'},{id:'optimo',t:'Optimo'},{id:'settings',t:'Settings'}];
+const IC={store:'M3 9l1.2-5h15.6L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6',overview:'M3 13h4v8H3zM10 3h4v18h-4zM17 9h4v12h-4z',recap:'M12 3l2.6 5.5 6 .8-4.4 4.1 1.1 5.9L12 16.4l-5.3 2.9 1.1-5.9L3.4 9.3l6-.8z',sales:'M3 17l6-6 4 4 8-8M15 7h6v6',products:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',expenses:'M4 6h16M4 12h16M4 18h10',bank:'M3 10l9-6 9 6M5 10v9h14v-9M9 19v-5h6v5',pl:'M5 4h14v16H5zM9 9h6M9 13h6M9 17h3',imports:'M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7',settings:'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM4 12h2M18 12h2M12 4v2M12 18v2',more:'M5 12h.01M12 12h.01M19 12h.01',optimo:'M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10M7.5 5l9 4',loan:'M3 6h18v12H3zM12 9.5a2.5 2.5 0 1 1 0 5a2.5 2.5 0 1 1 0-5M6.5 9v6M17.5 9v6'};
+const PAGES=[{id:'overview',t:'Overview'},{id:'recap',t:'Recap'},{id:'sales',t:'Sales'},{id:'products',t:'Products'},{id:'expenses',t:'Expenses'},{id:'bank',t:'Bank import'},{id:'pl',t:'Profit & loss'},{id:'imports',t:'Imports'},{id:'loan',t:'Loan'},{id:'optimo',t:'Optimo'},{id:'store',t:'Store sales'},{id:'settings',t:'Settings'}];
 const DEFAULT_FIXED=[
  {id:'rent',label:'Rent',cat:'rent',gel:1500,account:'bog',match:'',from:'2026-09'},
  {id:'accountant',label:'Accountant',cat:'accounting',gel:200,account:'bog',match:'',from:'2026-09'},
@@ -794,9 +806,9 @@ const DEFAULT_FIXED=[
 
 /* ============================== state ============================== */
 const S={db:null,user:null,canWrite:true,mcp:null,downloads:null,loaded:{},
-  tx:new Map(),loan:new Map(),sales:new Map(),ships:new Map(),rules:new Map(),items:new Map(),itemsYear:new Map(),optimo:new Map(),cfg:{},range:null,mc:new Map(),
+  tx:new Map(),loan:new Map(),catalog:new Map(),pos:new Map(),shift:new Map(),sales:new Map(),ships:new Map(),rules:new Map(),items:new Map(),itemsYear:new Map(),optimo:new Map(),cfg:{},range:null,mc:new Map(),
   view:'overview',month:null,draft:null,bank:null,opt:null,salesPreview:null,filters:{cat:'',acct:'',q:'',all:false},salesQ:'',
-  prod:{tab:'popular',sort:'p',dir:-1,q:'',all:false},op:{tab:'overview',rank:'profit',period:'',q:'',cat:'',status:'',sort:'profit',dir:-1,full:false},animate:true};
+  prod:{tab:'popular',sort:'p',dir:-1,q:'',all:false},op:{tab:'overview',rank:'profit',period:'',q:'',cat:'',status:'',sort:'profit',dir:-1,full:false},store:{tab:'live',day:null,q:'',cat:'',f:'all',full:false},animate:true};
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -1092,14 +1104,14 @@ function vConnect(){
 async function connectBackend(c){
   S.backend=backendDB(c.u,c.k);S.db=S.backend;S.canWrite=true;S.mcp=null;
   const sub=(path,key)=>S.db.collection(path).onSnapshot(snap=>{const m=new Map();snap.docs.forEach(d=>m.set(d.id,{id:d.id,...d.data()}));S[key]=m;S.loaded[key]=true;schedule()});
-  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');
+  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');sub('catalog','catalog');sub('pos','pos');sub('shift','shift');
   S.db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()});
   S.backend.fromCache();
   try{await S.backend.load(true);S.backend.flush();autoSyncSales()}catch(e){if(e.code==='bad_key'){toast('Wrong secret key. Connect again.');S.view='connect';render();return}toast(errMsg(e));setConn(false,'Offline — showing saved copy')}
 }
 function backupDocs(){
   const out=[];const add=(c,m)=>m.forEach((v,id)=>{const d={...v};delete d.id;out.push({c,id,d})});
-  add('tx',S.tx);add('sales',S.sales);add('ships',S.ships);add('rules',S.rules);add('items',S.items);add('itemsYear',S.itemsYear);add('optimo',S.optimo);add('loan',S.loan);out.push({c:'cfg',id:'main',d:S.cfg});return out;
+  add('tx',S.tx);add('sales',S.sales);add('ships',S.ships);add('rules',S.rules);add('items',S.items);add('itemsYear',S.itemsYear);add('optimo',S.optimo);add('loan',S.loan);add('catalog',S.catalog);add('pos',S.pos);add('shift',S.shift);out.push({c:'cfg',id:'main',d:S.cfg});return out;
 }
 async function exportBackup(){
   const data=JSON.stringify({app:'astroman-finance',v:1,at:new Date().toISOString(),docs:backupDocs()});
@@ -1126,7 +1138,7 @@ async function boot(){
   if(user){try{const w=await user.can('data.write');if(w===false)S.canWrite=false}catch(e){}}
   if(!db){setConn(false,'Sign in to load data');S.loaded.none=true;render();return}
   const sub=(path,key)=>db.collection(path).onSnapshot(snap=>{const m=new Map();snap.docs.forEach(d=>m.set(d.id,{id:d.id,...d.data()}));S[key]=m;S.loaded[key]=true;setConn(true);schedule()},err=>{setConn(false,'Sync paused ('+err.code+')')});
-  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');
+  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');sub('catalog','catalog');sub('pos','pos');sub('shift','shift');
   db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()},()=>{});
 }
 function setConn(ok,txt){$('#syncDot').className='dot'+(ok?'':' off');$('#syncTxt').textContent=txt||(ok?'Saved to cloud':'Offline')}
@@ -1166,7 +1178,7 @@ function go(v){if(REP)closeRecap();if(v==='recap'){$('#moreSheet').classList.rem
 function render(){
   S.renderedOnce=true;S.mc=new Map();
   document.querySelectorAll('#menu button,#tabbar button').forEach(b=>b.setAttribute('aria-current',b.dataset.go===S.view?'page':'false'));
-  const v={connect:vConnect,overview:vOverview,sales:vSales,products:vProducts,expenses:vExpenses,bank:vBank,pl:vPL,imports:vImports,loan:vLoan,optimo:vOptimo,settings:vSettings,add:vAdd}[S.view]||vOverview;
+  const v={connect:vConnect,overview:vOverview,sales:vSales,products:vProducts,expenses:vExpenses,bank:vBank,pl:vPL,imports:vImports,loan:vLoan,optimo:vOptimo,store:vStore,settings:vSettings,add:vAdd}[S.view]||vOverview;
   const main=$('#main');const y=window.scrollY;
   main.innerHTML=banner()+v();
   const anim=S.animate&&!reduced();main.classList.toggle('anim',anim);
@@ -1269,7 +1281,7 @@ function todayPanel(){
    <div class="tgrid"><div class="tmain">
     <div class="tbig"><div><div class="lbl">Sales${isT?' so far':''}</div><div class="val num">${cu(D.a)}<small>₾</small></div><div class="tsub"><b class="num">${D.n}</b> order${D.n===1?'':'s'}${D.n?` · avg <b class="num">${gel(D.a/D.n)}</b>`:''}</div></div>
      <div class="tring">${ring(D.a,DAY_TARGET)}<span class="num">${pct(D.a,DAY_TARGET)}%</span><small>of ${fmt(DAY_TARGET)} ₾</small></div></div>
-    <div class="cmps"><div class="cmp"><span>Yesterday</span><b class="num">${gel(Y.a)}</b>${pc(D.a,Y.a)}</div><div class="cmp"><span>Last ${new Date(d+'T12:00').toLocaleDateString('en-GB',{weekday:'short'})}</span><b class="num">${gel(W.a)}</b>${pc(D.a,W.a)}</div><div class="cmp"><span>30-day average</span><b class="num">${gel(avg)}</b>${pc(D.a,avg)}</div></div>
+    <div class="cmps"><div class="cmp"><span>Yesterday</span><b class="num">${gel(Y.a)}</b>${pc(D.a,Y.a)}</div><div class="cmp"><span>Last ${new Date(d+'T12:00').toLocaleDateString('en-GB',{weekday:'short'})}</span><b class="num">${gel(W.a)}</b>${pc(D.a,W.a)}</div><div class="cmp"><span>30-day average</span><b class="num">${gel(avg)}</b>${pc(D.a,avg)}</div><div class="cmp"><span>Store register</span><b class="num">${gel(regDay(d).a)}</b><a href="#store" data-go="store" class="small">${regDay(d).n} sale${regDay(d).n===1?'':'s'} →</a></div></div>
     ${Object.keys(pays).length?`<div class="tpays">${Object.entries(pays).sort((a,b)=>b[1].a-a[1].a).map(([k,o])=>`<span><i style="width:${o.a/Math.max(1,D.a)*100}%"></i>${esc(PAYS[k]||k)} <b class="num">${gel(o.a)}</b></span>`).join('')}</div>`:''}
    </div><div class="tlist"><div class="tlh"><span>Orders</span><b>${D.n?'newest first':''}</b></div>${list}</div></div>
    <div class="strip" role="list">${strip.map(x=>{const o=dayOf(x);const dd=new Date(x+'T12:00');return `<button role="listitem" class="sd ${x===d?'on':''} ${o.a>=DAY_TARGET?'hit':''}" data-day="${x}" title="${dLong(x)} · ${gel(o.a)}"><span class="sb"><i style="height:${Math.max(o.a?6:0,o.a/smax*100)}%"></i></span><span class="sl">${dd.toLocaleDateString('en-GB',{weekday:'narrow'})}<b>${dd.getDate()}</b></span><span class="sa num">${!o.a?'—':o.a>=1000?fmt(o.a/1000,1)+'k':fmt(o.a)}</span></button>`}).join('')}</div>
@@ -3364,8 +3376,184 @@ async function opExport(){
 function modal(html,wide){$('#modalRoot').innerHTML=`<div class="scrim" id="scrim"><div class="modal ${wide?'wide':''}" role="dialog" aria-modal="true">${html}</div></div>`;$('#scrim').addEventListener('click',e=>{if(e.target.id==='scrim'||e.target.closest('[data-close]'))closeModal()});document.addEventListener('keydown',escClose)}
 function escClose(e){if(e.key==='Escape')closeModal()}
 function closeModal(){$('#modalRoot').innerHTML='';document.removeEventListener('keydown',escClose)}
+
+/* ============================== store register (POS) ============================== */
+// The register (astroman/store/) writes `pos` (one record per sale) and `shift` records with its own limited
+// key; the catalog it sells from is the `catalog` collection, managed here. Nothing here touches the books.
+const POSPAY={cash:'Cash',card_bog:'BOG terminal',card_tbc:'TBC terminal',installment:'Installments',transfer:'Transfer',other:'Other'};
+const posInitials=n=>String(n||'').replace(/[^\p{L}\p{N}]/gu,'').slice(0,2).toUpperCase()||'·';
+function thumb(x,s){s=s||36;return x&&x.img?`<img class="thumb" src="${esc(x.img)}" alt="" loading="lazy" style="width:${s}px;height:${s}px" onerror="this.outerHTML='<span class=\\'thumb ph\\' style=\\'width:${s}px;height:${s}px\\'>${esc(posInitials(x.n))}</span>'">`:`<span class="thumb ph" style="width:${s}px;height:${s}px">${esc(posInitials(x&&x.n))}</span>`}
+function posOrders(day){return [...S.pos.values()].filter(o=>o&&o.lines&&(!day||o.day===day)).sort((a,b)=>String(b.at).localeCompare(String(a.at)))}
+function regDay(d){const L=posOrders(d).filter(o=>o.status!=='void');return {n:L.length,a:L.reduce((s,o)=>s+(+o.total||0),0),L}}
+function storeDir(){return location.origin+location.pathname.replace(/[^/]*$/,'')+'store/'}
+function storeLink(){const c=readCreds();const k=S.cfg.pos&&S.cfg.pos.key;if(!c||!k)return '';const b=btoa(unescape(encodeURIComponent(JSON.stringify({u:c.u,k})))).replace(/\+/g,'-').replace(/\//g,'_');return storeDir()+'#connect='+b}
+function catLive(x){let q=+x.q||0;const c=x.countedAt||'';S.pos.forEach(o=>{if(o.status==='void'||!o.lines)return;if(c&&(o.day||'')<c)return;o.lines.forEach(l=>{if(l.b===x.b)q-=+l.q||0})});return q}
+function vStore(){
+  const T=S.store.tab;const noImg=[...S.catalog.values()].filter(x=>!x.hidden&&!x.img).length;
+  const tabs=[['live','Live'],['history','History'],['catalog','Catalog'],['setup','Register setup']];
+  const head=`<div class="pagehead"><div><div class="eyebrow">Store · სალარო</div><h1>Store sales</h1><p>What the consultants ring up on the register, as it happens. Kept apart from the books, like the Optimo pages.</p></div><div class="actions"><a class="btn" href="${esc(storeDir())}" target="_blank" rel="noopener">Open the register ↗</a></div></div>
+  <div class="tabs" role="tablist">${tabs.map(([k,t])=>`<button role="tab" aria-selected="${T===k}" data-act="st_tab" data-v="${k}">${t}${k==='catalog'&&noImg?` <span class="chip warn" style="padding:0 6px">${noImg} without picture</span>`:''}</button>`).join('')}</div>`;
+  const body=T==='history'?storeHistory():T==='catalog'?storeCatalog():T==='setup'?storeSetup():storeLive();
+  return loadingOr(head+body);
+}
+function storeLive(){
+  const t=today();const d=S.store.day&&S.store.day<=t?S.store.day:t;const isT=d===t;const R=regDay(d);const all=posOrders(d);
+  const by={};R.L.forEach(o=>{by[o.pay]=(by[o.pay]||0)+o.total});
+  const byU={};R.L.forEach(o=>{const k=o.user?o.user.name:'?';const u=byU[k]||(byU[k]={n:0,a:0});u.n++;u.a+=o.total});
+  const shifts=[...S.shift.values()].filter(s=>s&&(s.day===d||(!s.closedAt&&isT))).sort((a,b)=>String(b.openedAt).localeCompare(String(a.openedAt)));
+  const drawer=shifts.filter(s=>!s.closedAt).reduce((a,s)=>a+shiftExpected(s),0);
+  const voids=all.filter(o=>o.status==='void');
+  const items=new Map();R.L.forEach(o=>o.lines.forEach(l=>{const it=items.get(l.b)||{b:l.b,n:l.n,q:0,a:0,img:l.img};it.q+=l.q;it.a+=Math.max(0,l.q*l.p-(+l.d||0));items.set(l.b,it)}));
+  const top=[...items.values()].sort((a,b)=>b.a-a.a).slice(0,8);
+  const setup=!(S.cfg.pos&&S.cfg.pos.key);
+  return `${setup?`<div class="banner">The register is not set up yet: paste the register key and add the consultants under <a href="#store" data-act="st_tab" data-v="setup">Register setup</a>, then open the device link on the shop computer.</div>`:''}
+  <div class="row" style="flex-wrap:wrap;gap:8px;margin-bottom:14px"><div><div class="eyebrow"><span class="dot"></span>${isT?'Today':'Day view'} · ${KA_DAYS[new Date(d+'T12:00').getDay()]}</div><h2 style="margin:0;font-family:var(--f-display);font-size:22px">${dLong(d)}</h2></div><span class="spacer"></span>
+   <div class="actions"><span class="ago small muted">Checks the register every 30 s while this page is open</span><button class="btn sm" data-act="st_day" data-d="${addDay(d,-1)}">‹</button>${isT?'':`<button class="btn sm" data-act="st_day" data-d="${t}">Today</button>`}<button class="btn sm" data-act="st_day" data-d="${addDay(d,1)}" ${isT?'disabled':''}>›</button><button class="btn sm amber" data-act="st_refresh">↻ Refresh</button></div></div>
+  <div class="kpis"><div class="kpi"><div class="lbl">Register sales${isT?' so far':''}</div><div class="val num">${cu(R.a)}<small>₾</small></div><div class="delta">${R.n} sale${R.n===1?'':'s'}${R.n?' · avg '+gel(R.a/R.n):''}</div></div>
+   <div class="kpi"><div class="lbl">Cash taken</div><div class="val num">${cu(by.cash||0)}<small>₾</small></div><div class="delta">${Object.entries(by).filter(([k])=>k!=='cash').map(([k,v])=>(POSPAY[k]||k)+' '+gel(v)).join(' · ')||'no card payments'}</div></div>
+   <div class="kpi"><div class="lbl">In the drawer now</div><div class="val num">${cu(drawer)}<small>₾</small></div><div class="delta">${shifts.filter(s=>!s.closedAt).length?'expected cash in open shifts':'no open shift'}</div></div>
+   <div class="kpi"><div class="lbl">Voided</div><div class="val num">${cu(voids.length)}</div><div class="delta">${voids.length?gel(voids.reduce((a,o)=>a+o.total,0))+' cancelled':'nothing cancelled'}</div></div></div>
+  <div class="grid g3b"><div class="panel"><div class="row"><h2 style="margin:0">Sales</h2><span class="spacer"></span><span class="muted small">${all.length?'newest first':''}</span></div>
+   ${all.length?`<div class="olist mt">${all.map(o=>storeOrderRow(o)).join('')}</div>`:`<div class="empty"><b>${isT?'No register sales yet today':'No register sales on this day'}</b>${isT?'<span>Sales show up here within a minute of the consultant pressing Confirm.</span>':''}</div>`}</div>
+  <div class="stack"><div class="panel"><h2>By consultant</h2><p class="sub">Who sold what today.</p>${Object.keys(byU).length?`<div class="flow">${Object.entries(byU).sort((a,b)=>b[1].a-a[1].a).map(([k,u])=>`<div class="ln"><span class="k"><b>${esc(k)}</b><div class="small muted">${u.n} sale${u.n===1?'':'s'}</div></span><span class="v num">${gel(u.a)}</span></div>`).join('')}</div>`:'<div class="muted">—</div>'}</div>
+   <div class="panel mt"><h2>Shifts</h2><p class="sub">Opened with the cash in the drawer; closed with the counted cash.</p>${shifts.length?`<div class="flow">${shifts.map(s=>{const E=shiftExpected(s);const diff=s.closedAt?r2(s.closeCash-E):null;return `<div class="ln"><span class="k"><b>${esc(s.user?s.user.name:'?')}</b> ${s.closedAt?'<span class="chip">closed</span>':'<span class="chip good">open</span>'}<div class="small muted">${dtShort(s.openedAt)} → ${s.closedAt?dtShort(s.closedAt):'…'} · opened with ${gel(s.openCash)}${(s.moves||[]).length?' · '+s.moves.length+' cash move'+(s.moves.length>1?'s':''):''}</div></span><span class="v num">${s.closedAt?`${gel(s.closeCash)}<div class="small ${Math.abs(diff)<0.01?'muted':diff<0?'neg':''}">${Math.abs(diff)<0.01?'matches':(diff>0?'+':'−')+gel(Math.abs(diff))+' vs expected'}</div>`:`${gel(E)}<div class="small muted">expected</div>`}</span></div>`}).join('')}</div>`:'<div class="muted">No shift on this day.</div>'}</div>
+   ${top.length?`<div class="panel mt"><h2>Sold today</h2><div class="flow">${top.map(it=>`<div class="ln"><span class="k row" style="gap:8px">${thumb(it,30)}<span><b>${esc(it.n)}</b><div class="small muted">×${fmt(it.q)}</div></span></span><span class="v num">${gel(it.a)}</span></div>`).join('')}</div></div>`:''}</div></div>`;
+}
+function dtShort(iso){if(!iso)return '—';const d=new Date(iso);return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function tOf(iso){const d=new Date(iso);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function shiftExpected(s){let cash=0;S.pos.forEach(o=>{if(o.shift===s.id&&o.status!=='void'&&o.pay==='cash')cash+=+o.total||0});const mv=(s.moves||[]).reduce((a,m)=>a+(m.kind==='in'?1:-1)*(+m.gel||0),0);return r2((+s.openCash||0)+cash+mv)}
+function storeOrderRow(o){return `<div class="orow click ${o.status==='void'?'void':''}" data-act="st_order" data-id="${esc(o.id)}" style="cursor:pointer"><span class="ob"><span class="op">${esc(o.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '))}</span><small>${tOf(o.at)} · №${o.no||''} · ${esc(o.user?o.user.name:'?')}${o.status==='void'?' · <b style="color:var(--bad)">voided</b>':''}${o.note?' · '+esc(o.note):''}</small></span><span class="chip">${esc(POSPAY[o.pay]||o.pay)}</span><b class="num">${gel(o.total,o.total%1?2:0)}</b></div>`}
+function storeOrderModal(id){
+  const o=S.pos.get(id);if(!o)return;
+  modal(`<h3>Receipt №${o.no||''} · ${gel(o.total,2)}</h3><p class="sub">${dtShort(o.at)} · ${esc(o.user?o.user.name:'?')} · ${esc(POSPAY[o.pay]||o.pay)}${o.pay==='cash'?' · given '+gel(o.cash,2)+', change '+gel(o.change,2):''}${o.note?' · '+esc(o.note):''}</p>
+   <div class="flow">${o.lines.map(l=>`<div class="ln"><span class="k row" style="gap:8px">${thumb(l,34)}<span><b>${esc(l.n)}</b><div class="small muted">${l.q} × ${gel(l.p,2)}${l.d?' − '+gel(l.d,2):''} · ${esc(l.b)}</div></span></span><span class="v num">${gel(Math.max(0,l.q*l.p-(+l.d||0)),2)}</span></div>`).join('')}${o.disc?`<div class="ln"><span class="k">Discount</span><span class="v num">−${gel(o.disc,2)}</span></div>`:''}</div>
+   ${o.status==='void'?`<p class="hint">Voided ${dtShort(o.voidAt)} by ${esc(o.voidBy?o.voidBy.name:'?')}: ${esc(o.voidWhy||'')}</p>`:''}
+   <div class="row mt">${o.status!=='void'?`<button class="btn danger" data-act="st_void" data-id="${esc(o.id)}">Void this sale</button>`:''}<span class="spacer"></span><button class="btn" data-close>Close</button></div>`);
+}
+function storeHistory(){
+  const m=S.month;const L=posOrders().filter(o=>(o.day||'').startsWith(m));
+  const days=new Map();L.forEach(o=>{const D=days.get(o.day)||(days.set(o.day,{d:o.day,n:0,a:0,cash:0,card:0,other:0,v:0}),days.get(o.day));if(o.status==='void'){D.v++;return}D.n++;D.a+=o.total;if(o.pay==='cash')D.cash+=o.total;else if(o.pay==='card_bog'||o.pay==='card_tbc')D.card+=o.total;else D.other+=o.total});
+  const rows=[...days.values()].sort((a,b)=>b.d.localeCompare(a.d));const tot=rows.reduce((t,D)=>({n:t.n+D.n,a:t.a+D.a,cash:t.cash+D.cash,card:t.card+D.card,other:t.other+D.other,v:t.v+D.v}),{n:0,a:0,cash:0,card:0,other:0,v:0});
+  const items=new Map();L.forEach(o=>{if(o.status==='void')return;o.lines.forEach(l=>{const it=items.get(l.b)||{b:l.b,n:l.n,q:0,a:0,img:l.img};it.q+=l.q;it.a+=Math.max(0,l.q*l.p-(+l.d||0));items.set(l.b,it)})});
+  const top=[...items.values()].sort((a,b)=>b.a-a.a).slice(0,15);const max=Math.max(1,...top.map(x=>x.a));
+  const byU={};L.forEach(o=>{if(o.status==='void')return;const k=o.user?o.user.name:'?';const u=byU[k]||(byU[k]={n:0,a:0});u.n++;u.a+=o.total});
+  return `<div class="kpis"><div class="kpi"><div class="lbl">${esc(mLabel(m))} on the register</div><div class="val num">${cu(tot.a)}<small>₾</small></div><div class="delta">${tot.n} sales · ${rows.length} selling day${rows.length===1?'':'s'}</div></div><div class="kpi"><div class="lbl">Cash</div><div class="val num">${cu(tot.cash)}<small>₾</small></div><div class="delta">${pct(tot.cash,tot.a)}% of sales</div></div><div class="kpi"><div class="lbl">Card terminals</div><div class="val num">${cu(tot.card)}<small>₾</small></div><div class="delta">${pct(tot.card,tot.a)}%${tot.other?' · other '+gel(tot.other):''}</div></div><div class="kpi"><div class="lbl">Average sale</div><div class="val num">${cu(tot.n?tot.a/tot.n:0)}<small>₾</small></div><div class="delta">${tot.v?tot.v+' voided':'no voids'}</div></div></div>
+  <div class="grid g3b"><div class="panel"><h2>By day</h2><p class="sub">Pick the month in the sidebar. Tap a day to see its sales.</p>${rows.length?`<div class="tablewrap"><table><thead><tr><th>Day</th><th class="r">Sales</th><th class="r">Total</th><th class="r hm">Cash</th><th class="r hm">Cards</th><th class="r hm">Other</th></tr></thead><tbody>${rows.map(D=>`<tr class="click" data-act="st_day" data-d="${D.d}" style="cursor:pointer"><td>${esc(dShort(D.d))}${D.v?` <span class="chip bad" style="padding:0 6px">${D.v} void</span>`:''}</td><td class="r num">${D.n}</td><td class="r num"><b>${gel(D.a)}</b></td><td class="r num hm">${gel(D.cash)}</td><td class="r num hm">${gel(D.card)}</td><td class="r num hm">${gel(D.other)}</td></tr>`).join('')}</tbody><tfoot><tr><td><b>Total</b></td><td class="r num">${tot.n}</td><td class="r num"><b>${gel(tot.a)}</b></td><td class="r num hm">${gel(tot.cash)}</td><td class="r num hm">${gel(tot.card)}</td><td class="r num hm">${gel(tot.other)}</td></tr></tfoot></table></div>`:`<div class="empty"><b>No register sales in ${esc(mLabel(m))}</b></div>`}</div>
+  <div class="stack"><div class="panel"><h2>Best sellers on the register</h2>${top.length?`<div class="bars">${top.map(x=>`<div class="bar"><div class="name" title="${esc(x.n)}">${esc(x.n)}<span>×${fmt(x.q)}</span></div><div class="track"><div class="fill" style="width:${x.a/max*100}%;background:var(--s1)"></div></div><div class="amt num">${gel(x.a)}</div></div>`).join('')}</div>`:'<div class="muted">—</div>'}</div>
+   <div class="panel mt"><h2>By consultant</h2>${Object.keys(byU).length?`<div class="flow">${Object.entries(byU).sort((a,b)=>b[1].a-a[1].a).map(([k,u])=>`<div class="ln"><span class="k"><b>${esc(k)}</b><div class="small muted">${u.n} sales · avg ${gel(u.a/u.n)}</div></span><span class="v num">${gel(u.a)}</span></div>`).join('')}</div>`:'<div class="muted">—</div>'}</div></div></div>`;
+}
+function storeCatalog(){
+  const P=S.store;const q=(P.q||'').toLowerCase();const f=P.f||'all';
+  let L=[...S.catalog.values()].filter(x=>x&&x.b);
+  const cats=[...new Set(L.map(x=>x.cat||'სხვადასხვა'))].sort();
+  const cnt={all:L.length,noimg:L.filter(x=>!x.img&&!x.hidden).length,hidden:L.filter(x=>x.hidden).length,instock:L.filter(x=>catLive(x)>0&&!x.hidden).length};
+  L=L.filter(x=>(!q||x.n.toLowerCase().includes(q)||String(x.b).includes(q))&&(!P.cat||(x.cat||'სხვადასხვა')===P.cat)&&(f==='all'||(f==='noimg'&&!x.img&&!x.hidden)||(f==='hidden'&&x.hidden)||(f==='instock'&&catLive(x)>0&&!x.hidden)));
+  L.sort((a,b)=>(b.sold||0)-(a.sold||0)||a.n.localeCompare(b.n));
+  const shown=P.full||q?L:L.slice(0,80);
+  const st=S.optimo.get('stock');
+  return `<div class="panel"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">Products on the register</h2><p class="sub" style="margin:2px 0 0">Prices, stock and pictures the consultants see. Built from the Optimo stock list${st?' counted '+dLabel(st.at.slice(0,10)):''}; pictures come from astroman.ge.</p></div><span class="spacer"></span><div class="actions">${cnt.noimg?`<button class="btn amber" data-act="st_pickNext">Pick pictures (${cnt.noimg} left)</button>`:''}<button class="btn" data-act="st_add">+ Add product</button><button class="btn" data-act="st_sync" ${st?'':'disabled'} title="Update stock, prices and new items from the Optimo stock list on the Products page">↻ Update from Optimo list</button></div></div>
+   <div class="toolbar mt"><input class="input grow" id="stQ" placeholder="Search product or barcode…" value="${esc(P.q||'')}"><select class="input" id="stCat" aria-label="Category"><option value="">All categories</option>${cats.map(c=>`<option ${P.cat===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+    <div class="seg" role="group" aria-label="Show">${[['all','All',cnt.all],['instock','In stock',cnt.instock],['noimg','No picture',cnt.noimg],['hidden','Hidden',cnt.hidden]].map(([k,t,n])=>`<button data-act="st_filter" data-v="${k}" aria-pressed="${f===k}">${t} <span class="muted">${n}</span></button>`).join('')}</div></div>
+   ${shown.length?`<div class="tablewrap"><table><thead><tr><th></th><th>Product</th><th class="hm">Category</th><th class="r">Price</th><th class="r">On shelf</th><th class="r hm">Sold</th><th></th></tr></thead><tbody>${shown.map(x=>{const lq=catLive(x);return `<tr class="${x.hidden?'dim':''}"><td style="width:44px">${thumb(x,40)}</td><td><b>${esc(x.n)}</b><div class="small muted num">${esc(x.b)}${x.hidden?' · <span class="chip">hidden</span>':''}${!x.img?' · <span class="chip warn">no picture</span>':''}</div></td><td class="hm">${esc(x.cat||'')}</td><td class="r num">${gel(x.price)}</td><td class="r num ${lq<0?'neg':''}">${lq}${lq!==(+x.q||0)?`<div class="small muted">${x.q} counted</div>`:''}</td><td class="r num hm">${fmt(x.sold||0)}</td><td class="r" style="white-space:nowrap"><button class="btn sm" data-act="st_img" data-b="${esc(x.b)}">Picture</button> <button class="btn sm" data-act="st_edit" data-b="${esc(x.b)}">Edit</button></td></tr>`}).join('')}</tbody></table></div>${L.length>shown.length?`<div class="row mt"><button class="btn" data-act="st_full">Show all ${L.length}</button></div>`:''}`
+   :`<div class="empty"><b>${S.catalog.size?'Nothing matches':'No catalog yet'}</b>${S.catalog.size?'':'<span>Upload the Optimo stock list on the Products page, then press “Update from Optimo list”.</span>'}</div>`}</div>`;
+}
+function storeSetup(){
+  const pos=S.cfg.pos||{};const users=pos.users||[];const R=pos.receipt||{};const link=storeLink();
+  return `<div class="grid g2"><div class="panel stack"><h2>Consultants</h2><p class="sub" style="margin:0">Each consultant picks their name on the register and types a 4-digit PIN. Every sale records who made it.</p>
+   <div class="tablewrap"><table><thead><tr><th>Name</th><th>PIN</th><th></th></tr></thead><tbody id="stUsers">${users.map((u,i)=>`<tr><td><input class="input" data-su="${i}" data-k="name" value="${esc(u.name)}"></td><td><input class="input num" data-su="${i}" data-k="pin" inputmode="numeric" maxlength="4" value="${esc(u.pin||'')}" style="max-width:110px"></td><td class="r"><button class="btn sm ghost" data-act="st_rmUser" data-i="${i}">Remove</button></td></tr>`).join('')||'<tr><td colspan="3" class="muted">No consultants yet — the register will show one “კონსულტანტი” without a PIN.</td></tr>'}</tbody></table></div>
+   <div class="row"><button class="btn" data-act="st_addUser">+ Add consultant</button><span class="spacer"></span><button class="btn primary" data-act="st_saveUsers">Save consultants</button></div></div>
+  <div class="panel stack"><h2>Register key &amp; device link</h2><p class="sub" style="margin:0">The register uses its own key (POS_KEY in the backend script). It can only read the catalog and save sales; it never sees costs, expenses or the books.</p>
+   <label class="field"><span>Register key (POS_KEY from Code.gs)</span><input class="input" id="stKey" type="password" autocomplete="off" value="${esc(pos.key||'')}" placeholder="astro-pos-…"></label>
+   <div class="row"><button class="btn primary" data-act="st_saveKey">Save key</button><button class="btn" data-act="st_check">Check the backend</button><span class="muted small" id="stCheckMsg" aria-live="polite"></span></div>
+   ${link?`<label class="field"><span>Device link — open it once on the shop computer (it holds the register key, keep it private)</span><input class="input small" id="stLink" readonly value="${esc(link)}"></label><div class="qrbox"><div id="stQr" class="qr" aria-label="QR code of the device link"></div><div class="small"><b>Connect a tablet or phone</b><div class="muted">Point its camera at the code. For the Windows computer, copy the link and open it in Chrome or Edge, then install it as an app.</div></div></div><div class="row"><button class="btn" data-act="st_copyLink">Copy device link</button></div>`:'<p class="hint" style="margin:0">Save the key to get the device link.</p>'}</div>
+  <div class="panel stack"><h2>Receipt</h2><p class="sub" style="margin:0">Printed from the register when “ქვითრის ამობეჭდვა” is on. Non-fiscal.</p>
+   <label class="field"><span>Shop name</span><input class="input" id="stRTitle" value="${esc(R.title||'ასტრომანი')}"></label>
+   <label class="field"><span>Address</span><input class="input" id="stRAddr" value="${esc(R.addr||'ალ. ყაზბეგის 17, თბილისი')}"></label>
+   <div class="grid g2"><label class="field"><span>Phone</span><input class="input" id="stRPhone" value="${esc(R.phone||'')}"></label><label class="field"><span>Tax ID (ს/კ)</span><input class="input" id="stRTax" value="${esc(R.tax||'')}"></label></div>
+   <label class="field"><span>Footer line</span><input class="input" id="stRFoot" value="${esc(R.foot||'გმადლობთ! astroman.ge')}"></label>
+   <div><button class="btn primary" data-act="st_saveReceipt">Save receipt</button></div></div>
+  <div class="panel"><h2>Install on the shop computer (Windows)</h2><div class="flow">
+   <div class="ln"><span class="k"><b>1.</b> Paste the new <code>Code.gs</code> into the Apps Script project and deploy a new version (Deploy → Manage deployments → ✎ → Version: New → Deploy). The URL stays the same.</span></div>
+   <div class="ln"><span class="k"><b>2.</b> Save the register key above and add the consultants.</span></div>
+   <div class="ln"><span class="k"><b>3.</b> On the Windows PC open the device link in Chrome or Edge. Install it as an app: Chrome → ⋮ → “Cast, save and share” → “Install page as app…”; Edge → ⋯ → Apps → “Install this site as an app”.</span></div>
+   <div class="ln"><span class="k"><b>4.</b> Pin the app to the taskbar. For a barcode scanner, plug it in (USB, keyboard mode) — scanning adds the product. For a receipt printer, set it as the default printer and choose 80 mm paper once in the print dialog.</span></div>
+   <div class="ln"><span class="k"><b>5.</b> Full step-by-step guide: <a href="https://github.com/Rezimod/rezis-finances/blob/main/astroman/store/README.md" target="_blank" rel="noopener">store/README.md</a>.</span></div></div></div></div>`;
+}
+function catEditModal(b){
+  const x=b?S.catalog.get(b):null;const cats=[...new Set([...S.catalog.values()].map(y=>y.cat||'სხვადასხვა'))].sort();
+  modal(`<h3>${x?'Edit product':'New product'}</h3><p class="sub">${x?'Barcode '+esc(x.b)+'. Price and stock normally come from Optimo; what you type here is what the register shows until the next Optimo update.':'Products not in Optimo yet. Give it the barcode you will print, or any code.'}</p>
+   <div class="stack"><label class="field"><span>Name</span><input class="input" id="ceN" value="${esc(x?x.n:'')}"></label>
+   <div class="grid g2">${x?'':`<label class="field"><span>Barcode / code</span><input class="input num" id="ceB" placeholder="e.g. 10123"></label>`}<label class="field"><span>Price ₾</span><input class="input num" id="ceP" inputmode="decimal" value="${x?x.price:''}"></label><label class="field"><span>Category</span><input class="input" id="ceC" list="ceCats" value="${esc(x?x.cat||'':'')}"><datalist id="ceCats">${cats.map(c=>`<option value="${esc(c)}">`).join('')}</datalist></label>${x?`<label class="field"><span>On shelf (counted)</span><input class="input num" id="ceQ" inputmode="numeric" value="${x.q||0}"></label>`:''}</div>
+   <label class="field"><span>Picture URL (or use Picture → pick from astroman.ge)</span><input class="input small" id="ceImg" value="${esc(x?x.img||'':'')}" placeholder="https://astroman.ge/wp-content/uploads/…"></label>
+   ${x?`<label class="row"><input type="checkbox" id="ceH" ${x.hidden?'checked':''}> Hidden from the register</label>`:''}
+   <div class="row"><button class="btn primary" data-act="st_saveEdit" data-b="${esc(x?x.b:'')}">Save</button>${x?`<button class="btn" data-act="st_img" data-b="${esc(x.b)}">Picture…</button>`:''}<span class="spacer"></span><button class="btn" data-close>Cancel</button></div></div>`);
+}
+let SITE=null;
+function loadSite(){if(SITE)return Promise.resolve(SITE);return fetch(storeDir()+'site-products.json',{cache:'force-cache'}).then(r=>r.json()).then(j=>{SITE=j;return j})}
+function siteScore(name,p){const t=s=>String(s).toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim().split(' ').filter(Boolean);const A=new Set(t(name)),B=new Set(t(p.n));let sh=0;A.forEach(w=>{if(B.has(w))sh+=w.length});const nm=name.toLowerCase(),pn=p.n.toLowerCase();return sh/Math.max(1,[...A].join('').length)+(pn.includes(nm)||nm.includes(pn)?1:0)}
+async function catPickModal(b){
+  const x=S.catalog.get(b);if(!x)return;
+  modal(`<h3>Picture for “${esc(x.n)}”</h3><p class="sub">Pick the matching product from astroman.ge. Closest names first.</p><input class="input" id="pkQ" placeholder="Search the website products…" value=""><div class="pickgrid mt" id="pkGrid"><div class="muted">Loading website products…</div></div><div class="row mt"><button class="btn ghost" data-act="st_noImg" data-b="${esc(b)}">Leave without picture</button><span class="spacer"></span><button class="btn" data-act="st_pickNext" data-after="${esc(b)}">Skip →</button><button class="btn" data-close>Close</button></div>`,true);
+  const site=await loadSite();if(!$('#pkGrid'))return;
+  const draw=()=>{const q=($('#pkQ').value||'').toLowerCase().trim();let L=site.slice();if(q)L=L.filter(p=>p.n.toLowerCase().includes(q));else{L.sort((a,c)=>siteScore(x.n,c)-siteScore(x.n,a));L=L.slice(0,24)}
+    $('#pkGrid').innerHTML=L.length?L.map(p=>`<button class="pick" data-act="st_pick" data-b="${esc(b)}" data-id="${p.id}" aria-pressed="${x.wooId===p.id}"><img src="${esc(p.img)}" alt="" loading="lazy"><b>${esc(p.n)}</b><span class="small muted">${esc(p.p)} ₾</span></button>`).join(''):'<div class="muted">Nothing matches</div>';
+    $('#pkGrid').querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>storeAct(el.dataset.act,el))};
+  draw();let t;$('#pkQ').oninput=()=>{clearTimeout(t);t=setTimeout(draw,200)};
+}
+function nextNoImg(after){const L=[...S.catalog.values()].filter(x=>!x.img&&!x.hidden).sort((a,b)=>(b.sold||0)-(a.sold||0)||a.n.localeCompare(b.n));if(!after)return L[0];const i=L.findIndex(x=>x.b===after);return L[i+1]||L[0]}
+async function saveCat(b,patch){const cur=S.catalog.get(b)||{};const {id,...rest}=cur;await S.db.doc('catalog/'+b).set({...rest,...patch,b,updatedAt:new Date().toISOString()})}
+async function storeSyncOptimo(){
+  const st=S.optimo.get('stock');if(!st||!st.items)return toast('Upload the Optimo stock list on the Products page first');
+  const y=String(new Date().getFullYear());const sales=[...S.optimo.values()].filter(x=>x.kind==='sales'&&String(x.from||'').startsWith(y));const sold={};sales.forEach(s=>(s.rows||[]).forEach(r=>{sold[String(r[0])]=(sold[String(r[0])]||0)+(+r[2]||0)}));
+  let n=0,fresh=0;const seen=new Set();
+  for(const it of st.items){const [b0,name,cat,q,mn,cost,price,vat]=it;const b=String(b0||'').trim();if(!b)continue;seen.add(b);const cur=S.catalog.get(b);
+    const d={n:cur&&cur.nameEdited?cur.n:String(name||'').trim(),cat:cat==='დელივერი'?'მიწოდება':cat==='ფაზები'?'რუკები':cat==='ჭაღები'?'სანათები':(cat||'სხვადასხვა'),price:cur&&cur.priceEdited?cur.price:(+price||0),cost:+cost||0,vat:vat||'',q:+q||0,min:+mn||0,sold:sold[b]||(cur?cur.sold||0:0),countedAt:String(st.at||'').slice(0,10)};
+    if(!cur){fresh++;await saveCat(b,{...d,img:null,big:null,wooId:null,hidden:cat==='დელივერი'})}
+    else{const same=['n','cat','price','cost','vat','q','min','sold','countedAt'].every(k=>JSON.stringify(cur[k])===JSON.stringify(d[k]));if(!same){n++;await saveCat(b,d)}}}
+  toast(`Catalog updated from Optimo: ${n} changed, ${fresh} new${fresh?' (give them pictures)':''}`);
+}
+function readUsers(){const rows=[...document.querySelectorAll('#stUsers tr')];const users=[];rows.forEach((r,i)=>{const n=r.querySelector('[data-k="name"]'),p=r.querySelector('[data-k="pin"]');if(!n)return;const cur=((S.cfg.pos||{}).users||[])[i]||{};users.push({id:cur.id||uid('u'),name:n.value.trim(),pin:p.value.replace(/\D/g,'').slice(0,4)})});return users}
+async function savePos(patch){await saveCfg({pos:{...(S.cfg.pos||{}),...patch}})}
+async function storeAct(a,b){
+  if(a==='st_tab'){S.store.tab=b.dataset.v;S.animate=true;render();window.scrollTo({top:0});return}
+  if(a==='st_day'){S.store.day=b.dataset.d;S.store.tab='live';render();return}
+  if(a==='st_refresh'){if(!S.backend)return;b.disabled=true;try{await S.backend.load()}catch(e){toast(errMsg(e))}b.disabled=false;render();return}
+  if(a==='st_order')return storeOrderModal(b.dataset.id);
+  if(a==='st_void'){if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Tap again to void';return}const o=S.pos.get(b.dataset.id);if(!o)return;const {id,...rest}=o;await S.db.doc('pos/'+o.id).set({...rest,status:'void',voidAt:new Date().toISOString(),voidBy:{id:'owner',name:'Owner'},voidWhy:'Voided from the finance desk'});closeModal();toast('Sale voided');return}
+  if(a==='st_filter'){S.store.f=b.dataset.v;S.store.full=false;return render()}
+  if(a==='st_full'){S.store.full=true;return render()}
+  if(a==='st_edit')return catEditModal(b.dataset.b);
+  if(a==='st_add')return catEditModal(null);
+  if(a==='st_saveEdit'){const bc=b.dataset.b||($('#ceB')?$('#ceB').value.trim():'');if(!bc){toast('Type a barcode or code');return}const n=$('#ceN').value.trim();if(!n){toast('Type a name');return}
+    const cur=S.catalog.get(bc);const price=parseNum($('#ceP').value);const patch={n,cat:$('#ceC').value.trim()||'სხვადასხვა',price,img:$('#ceImg').value.trim()||null};
+    if(cur){patch.nameEdited=n!==cur.n||!!cur.nameEdited;patch.priceEdited=price!==+cur.price||!!cur.priceEdited;patch.q=parseNum($('#ceQ').value);patch.hidden=$('#ceH').checked;if(!patch.img){patch.big=null;patch.wooId=null}else if(patch.img!==cur.img){patch.big=patch.img;patch.wooId=null}}
+    else{if(!b.dataset.b&&S.catalog.has(bc)){toast('That code is already used');return}Object.assign(patch,{b:bc,cost:0,vat:'',q:0,min:0,sold:0,hidden:false,big:patch.img,wooId:null,countedAt:today(),nameEdited:true,priceEdited:true})}
+    await saveCat(bc,patch);closeModal();toast('Saved');return}
+  if(a==='st_img')return catPickModal(b.dataset.b);
+  if(a==='st_pick'){const site=await loadSite();const p=site.find(x=>String(x.id)===b.dataset.id);if(!p)return;await saveCat(b.dataset.b,{img:p.img,big:p.big,wooId:p.id});toast('Picture set');const nx=nextNoImg(b.dataset.b);if(nx&&nx.b!==b.dataset.b&&S.store.f==='noimg')return catPickModal(nx.b);closeModal();return}
+  if(a==='st_noImg'){await saveCat(b.dataset.b,{img:null,big:null,wooId:null,noImg:true});closeModal();return}
+  if(a==='st_pickNext'){const nx=nextNoImg(b.dataset.after);if(!nx){closeModal();toast('Every product has a picture');return}return catPickModal(nx.b)}
+  if(a==='st_sync'){b.disabled=true;try{await storeSyncOptimo()}catch(e){toast(errMsg(e))}b.disabled=false;return}
+  if(a==='st_addUser'){const users=readUsers();users.push({id:uid('u'),name:'',pin:''});S.cfg={...S.cfg,pos:{...(S.cfg.pos||{}),users}};render();const last=document.querySelector('#stUsers tr:last-child [data-k="name"]');if(last)last.focus();return}
+  if(a==='st_rmUser'){const users=readUsers();users.splice(+b.dataset.i,1);S.cfg={...S.cfg,pos:{...(S.cfg.pos||{}),users}};return render()}
+  if(a==='st_saveUsers'){const users=readUsers().filter(u=>u.name);if(users.some(u=>u.pin&&u.pin.length!==4)){toast('A PIN is 4 digits (or empty)');return}await savePos({users});toast('Consultants saved — the register picks them up within a minute');return}
+  if(a==='st_saveKey'){const k=$('#stKey').value.trim();await savePos({key:k});toast(k?'Register key saved':'Register key removed');return}
+  if(a==='st_copyLink'){const v=$('#stLink').value;try{await navigator.clipboard.writeText(v);toast('Device link copied')}catch(e){$('#stLink').select();toast('Select and copy the link')}return}
+  if(a==='st_check'){const m=$('#stCheckMsg');const c=readCreds();if(!c){m.textContent='Not connected';return}m.textContent='Checking…';try{const k=(S.cfg.pos||{}).key;const r=await gasCall(c.u,k||c.k,{action:'pos_since',t:Date.now()});m.textContent=k?'Backend is updated and the register key works ('+(r.docs?r.docs.length:0)+' new records)':'Backend is updated. Save the register key to test it.'}catch(e){m.textContent=e.code==='old_backend'||/unknown action/.test(e.message||'')?'The backend still runs the old script — paste the new Code.gs and deploy a new version':e.code==='bad_key'?'That register key is not the POS_KEY in Code.gs':(e.message||'Could not reach the backend')}return}
+  if(a==='st_saveReceipt'){await savePos({receipt:{title:$('#stRTitle').value.trim(),addr:$('#stRAddr').value.trim(),phone:$('#stRPhone').value.trim(),tax:$('#stRTax').value.trim(),foot:$('#stRFoot').value.trim()}});toast('Receipt saved');return}
+  return false;
+}
+function bindStore(){
+  if(S.view!=='store')return;
+  let t;const q=$('#stQ');if(q)q.addEventListener('input',e=>{clearTimeout(t);t=setTimeout(()=>{S.store.q=e.target.value;S.store.full=false;render();const x=$('#stQ');if(x){x.focus();x.setSelectionRange(x.value.length,x.value.length)}},250)});
+  const c=$('#stCat');if(c)c.addEventListener('change',e=>{S.store.cat=e.target.value;render()});
+  const qr=$('#stQr');if(qr){const v=storeLink();loadQr().then(()=>{const q=window.qrcode(0,'M');q.addData(v);q.make();const box=$('#stQr');if(box)box.innerHTML=q.createSvgTag({cellSize:4,margin:2,scalable:true})}).catch(()=>{if(qr.closest('.qrbox'))qr.closest('.qrbox').hidden=true})}
+}
+setInterval(()=>{if(S.backend&&S.view==='store'&&S.store.tab==='live'&&!document.hidden&&!S.backend.pending())S.backend.load().catch(()=>{})},30000);
+
 function bindView(){
   if(S.view==='add')bindAdd();
+  bindStore();
   if($('#stars'))starfield($('#stars'));
   const tip=$('#tip');const showTip=(e,html)=>{tip.innerHTML=html;tip.hidden=false;const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8),y=Math.min(e.clientY+14,innerHeight-tip.offsetHeight-8);tip.style.left=Math.max(8,x)+'px';tip.style.top=Math.max(8,y)+'px'};
   const hide=()=>tip.hidden=true;
@@ -3438,6 +3626,7 @@ function readFixedForm(){const list=fixedList().map(f=>({...f}));document.queryS
 async function act(a,b){
   try{
   if(a==='syncSheet'){if(!S.mcp&&!S.backend){toast('Live sync needs Google Drive connected (in Claude) or the hosted version');return}return syncSheet(b)}
+  if(a.startsWith('st_')){const r=await storeAct(a,b);if(r!==false)return}
   if(a==='pickOrders')return $('#ordersFile').click();
   if(a==='opPick')return $('#opFile')?$('#opFile').click():null;
   if(a==='opTab'){S.op.tab=b.dataset.v;S.animate=true;render();window.scrollTo({top:0});return}

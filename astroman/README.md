@@ -29,3 +29,13 @@ Follows the real flow: supplier orders → a forwarder's warehouse → one shipm
 - **Payments**: drop a receipt (a bank or Alibaba PDF is read automatically) or link a payment already imported from the bank. Each payment is an expense; the rate actually paid becomes the order's rate. A receipt payment is not imported again from the bank statement.
 - Orders are stored in the `ships` collection with `kind: "order"`; older shipments with goods entered directly keep working.
 
+
+## Store register (astroman/store/)
+
+A point-of-sale page for the shop, in Georgian, modelled on Optimo: the consultant picks their name and PIN, taps products (with the pictures from astroman.ge), takes cash or a card terminal, prints a non-fiscal receipt, opens and closes shifts, and voids mistakes. Every sale is saved to the same Google backend within seconds and shows up on the owner's **Store sales** page here (live, history, best sellers, shifts, cash in the drawer).
+
+- The register connects with its **own key** (`POS_KEY` in the backend script). With that key the backend only answers `pos_since` (catalog without costs, recent sales and shifts, consultants) and `pos_write` (new sales and shifts, never deletes). Costs, expenses and the books never reach the shop computer.
+- The catalog (`catalog` collection) is built from the Optimo stock list plus website pictures; manage it under Store sales → Catalog ("Update from Optimo list", "Pick pictures", "Add product").
+- Consultants, PINs, the receipt header and the device link live under Store sales → Register setup.
+- Works offline: the app shell and pictures are cached on the device, sales wait in an outbox until Google confirms them.
+- Installing on the shop's Windows PC: see [store/README.md](store/README.md).

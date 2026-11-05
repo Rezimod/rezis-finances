@@ -1,0 +1,17 @@
+{
+  "name": "ასტრომანი — სალარო",
+  "short_name": "სალარო",
+  "description": "Astroman store register: consultants ring up sales, the owner sees them live.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#F2F4F8",
+  "theme_color": "#1C3480",
+  "lang": "ka",
+  "icons": [
+    {"src": "./icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "./icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "./icon-180.png", "sizes": "180x180", "type": "image/png"}
+  ]
+}

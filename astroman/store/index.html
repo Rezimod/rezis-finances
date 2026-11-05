@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1C3480">
+<meta name="robots" content="noindex,nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="სალარო">
+<title>ასტრომანი · სალარო</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#EEF1F7; --surface:#FFFFFF; --surface-2:#F4F6FB; --ink:#0F1B3D; --ink-2:#3E4A6B; --muted:#7A849E; --line:#DFE4EF;
+  --brand:#1C3480; --brand-2:#2B4BB5; --brand-ink:#FFFFFF; --accent:#F5A623; --accent-ink:#1A1300;
+  --good:#1D8051; --good-bg:#E2F3E9; --warn:#A86A12; --warn-bg:#FBF0DC; --bad:#C0392F; --bad-bg:#FBE5E2;
+  --f-ui:"Noto Sans Georgian",system-ui,-apple-system,"Segoe UI",sans-serif; --f-num:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --r:14px; --shadow:0 1px 2px rgba(15,27,61,.05),0 10px 30px -18px rgba(15,27,61,.25); --ease:cubic-bezier(.2,.7,.2,1);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:14px;line-height:1.45;-webkit-tap-highlight-color:transparent;overflow:hidden;user-select:none}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+input,textarea{user-select:text}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+[hidden]{display:none!important}
+.muted{color:var(--muted)}.small{font-size:12.5px}.b{font-weight:700}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;padding:2px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap;font-weight:600}
+.chip.good{background:var(--good-bg);color:var(--good)}.chip.bad{background:var(--bad-bg);color:var(--bad)}.chip.warn{background:var(--warn-bg);color:var(--warn)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:10px 16px;font-weight:600;white-space:nowrap;transition:transform .12s,box-shadow .15s,background .15s;min-height:44px}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand);box-shadow:0 8px 20px -10px rgba(28,52,128,.8)}
+.btn.amber{background:linear-gradient(180deg,#FFBE4D,var(--accent));color:var(--accent-ink);border-color:transparent;font-weight:700}
+.btn.ghost{background:transparent}.btn.danger{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,var(--line))}
+.btn.big{font-size:17px;padding:14px 22px;min-height:56px;border-radius:14px}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.input{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 13px;min-height:44px;outline:none;transition:border-color .15s,box-shadow .15s}
+.input:focus{border-color:var(--brand-2);box-shadow:0 0 0 3px rgba(43,75,181,.15)}
+.field{display:flex;flex-direction:column;gap:5px}.field>span{font-size:12.5px;color:var(--ink-2);font-weight:600}
+.row{display:flex;align-items:center;gap:10px}.spacer{flex:1}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---------- header ---------- */
+.app{display:flex;flex-direction:column;height:100dvh}
+header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:8px 14px;background:var(--surface);border-bottom:1px solid var(--line);min-height:60px}
+.logo{display:flex;align-items:center;gap:10px;justify-self:center}
+.logo b{font-size:17px;letter-spacing:.02em;font-weight:800}
+.logo small{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.hleft{display:flex;align-items:center;gap:8px}
+.hright{display:flex;align-items:center;gap:8px;justify-self:end}
+.ibtn{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;color:var(--ink-2);position:relative}
+.ibtn.on{color:var(--brand);border-color:var(--brand)}
+.ibtn .n{position:absolute;top:-6px;right:-6px;background:var(--accent);color:var(--accent-ink);font-size:10.5px;font-weight:800;border-radius:999px;min-width:18px;height:18px;display:grid;place-items:center;padding:0 4px}
+.user{display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px}
+.conn{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding:0 6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 0 rgba(29,128,81,.5);animation:pulse 2.4s infinite}
+.dot.off{background:var(--accent);animation:none}.dot.bad{background:var(--bad);animation:none}
+@keyframes pulse{70%{box-shadow:0 0 0 6px rgba(29,128,81,0)}100%{box-shadow:0 0 0 0 rgba(29,128,81,0)}}
+.menubtn{background:var(--brand);color:#fff;border-color:var(--brand)}
+
+/* ---------- sale screen ---------- */
+.sale{display:grid;grid-template-columns:minmax(360px,38%) minmax(0,1fr);flex:1;min-height:0}
+.cart{display:flex;flex-direction:column;background:var(--surface);border-right:1px solid var(--line);min-height:0}
+.lines{flex:1;overflow:auto;min-height:0}
+.lines .empty{height:100%;display:grid;place-items:center;color:var(--muted);text-align:center}
+.lines .empty svg{display:block;margin:0 auto 8px;opacity:.5}
+.line{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .12s}
+.line.sel{background:#EEF3FF;box-shadow:inset 3px 0 0 var(--brand)}
+.line img,.line .ph{width:48px;height:48px;border-radius:10px;object-fit:contain;background:var(--surface-2)}
+.line .nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.line .sub{font-size:12px;color:var(--muted)}
+.line .sub b{color:var(--ink-2);font-weight:600}
+.line .amt{text-align:right}
+.line .amt .tot{font-weight:700;font-size:15px}
+.line .qty{display:inline-flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-top:3px}
+.line .qty button{width:30px;height:28px;border:0;background:var(--surface-2);font-weight:700}
+.line .qty span{min-width:30px;text-align:center;font-weight:700}
+.line .rm{border:0;background:transparent;color:var(--muted);width:28px;height:28px;border-radius:8px}
+.line .rm:hover{background:var(--bad-bg);color:var(--bad)}
+.ph{display:grid;place-items:center;color:var(--brand);font-weight:800;font-size:13px;background:linear-gradient(135deg,#E8EDFB,#F6F8FD)}
+.ctot{border-top:1px solid var(--line);padding:10px 14px;display:grid;gap:3px;background:var(--surface-2)}
+.ctot .r{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-2)}
+.ctot .r.big{font-size:20px;color:var(--ink);font-weight:800;margin-top:2px}
+.ctot .r.big .num{font-size:26px}
+.pad{display:grid;grid-template-columns:96px repeat(3,1fr) 1.25fr;gap:6px;padding:10px;background:var(--brand);border-top:1px solid var(--line)}
+.pad .mode{grid-column:1;display:flex;flex-direction:column;gap:6px;grid-row:1/5}
+.pad .mode button{flex:1;border:0;border-radius:10px;background:rgba(255,255,255,.12);color:#fff;font-size:12px;font-weight:600;padding:0 6px;line-height:1.2}
+.pad .mode button[aria-pressed="true"]{background:#fff;color:var(--brand)}
+.pad .k{border:0;border-radius:10px;background:#fff;color:var(--ink);font-size:20px;font-weight:600;min-height:50px;font-family:var(--f-num)}
+.pad .k:active{background:var(--surface-2)}
+.pad .k.dim{background:rgba(255,255,255,.85);font-family:var(--f-ui);font-size:18px}
+.pad .go{grid-column:5;grid-row:1/5;border:0;border-radius:12px;background:linear-gradient(180deg,#FFBE4D,var(--accent));color:var(--accent-ink);font-weight:800;font-size:17px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;line-height:1.1}
+.pad .go small{font-weight:600;font-size:11.5px;opacity:.8}
+.pad .go:disabled{background:rgba(255,255,255,.2);color:rgba(255,255,255,.6)}
+.pad .buf{grid-column:2/5;grid-row:1;background:rgba(255,255,255,.14);color:#fff;border-radius:10px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;min-height:40px;font-size:13px}
+.pad .buf b{font-family:var(--f-num);font-size:20px}
+.pad .keys{grid-column:2/5;grid-row:2/5;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);gap:6px}
+.catalog{display:flex;flex-direction:column;min-height:0;padding:12px 14px 0}
+.search{position:relative}
+.search input{padding-left:40px;font-size:15px;min-height:48px;border-radius:14px}
+.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.search .x{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:var(--surface-2);width:30px;height:30px;border-radius:50%}
+.ctabs{display:flex;align-items:center;gap:6px;margin:10px 0 8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.ctabs::-webkit-scrollbar{display:none}
+.ctabs button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-weight:600;white-space:nowrap;color:var(--ink-2)}
+.ctabs button[aria-pressed="true"]{background:var(--brand);color:#fff;border-color:var(--brand)}
+.ctabs .vw{margin-left:auto;display:flex;gap:4px;flex:none}
+.ctabs .vw button{padding:7px 9px;border-radius:9px}
+/* rows are max-content: a scrolling grid with overflow:hidden items would otherwise size its rows to zero */
+.grid{flex:1;overflow:auto;min-height:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));grid-auto-rows:max-content;gap:10px;align-content:start;padding:2px 2px 16px}
+.grid.list{grid-template-columns:1fr;gap:6px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;cursor:pointer;position:relative;text-align:left;padding:0;user-select:none;display:grid;grid-template-rows:auto auto;transition:transform .12s,box-shadow .15s;box-shadow:var(--shadow)}
+.card:hover{transform:translateY(-2px);box-shadow:0 14px 30px -16px rgba(15,27,61,.4)}
+.card:active{transform:scale(.98)}
+.card .img{position:relative;width:100%;height:0;padding-top:100%;background:#fff;border-bottom:1px solid var(--line);border-radius:13px 13px 0 0;overflow:hidden}
+.card .img>img,.card .img>.ph{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:6px}
+.card .img>.ph{font-size:28px;border-radius:0}
+.card .q{position:absolute;top:8px;right:8px;min-width:26px;height:26px;border-radius:999px;display:grid;place-items:center;font-size:12px;font-weight:800;padding:0 7px;background:var(--good-bg);color:var(--good);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.card .q.zero{background:var(--bad-bg);color:var(--bad)}.card .q.neg{background:#2F2F2F;color:#fff}
+.card .price{position:absolute;left:8px;bottom:8px;background:rgba(255,255,255,.92);backdrop-filter:blur(4px);border-radius:9px;padding:3px 8px;font-weight:800;font-size:15px;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.card .t{padding:8px 10px 10px;display:grid;gap:1px}
+.card .t .n{font-weight:600;font-size:13px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:34px}
+.card .t .bc{font-size:11px;color:var(--muted);font-family:var(--f-num)}
+.grid.list .card{grid-template-columns:56px minmax(0,1fr) auto auto;grid-template-rows:auto;align-items:center;gap:12px;padding:6px 12px 6px 6px}
+.grid.list .card .img{display:contents}
+.grid.list .card .img>img,.grid.list .card .img>.ph{position:static;width:56px;height:56px;border-radius:10px;background:var(--surface-2);object-fit:contain;padding:3px;order:1;font-size:16px}
+.grid.list .card .t{order:2;padding:0}.grid.list .card .t .n{min-height:0;-webkit-line-clamp:1}
+.grid.list .card .q{position:static;order:3}
+.grid.list .card .price{position:static;order:4;background:transparent;box-shadow:none;padding:0;font-size:16px;min-width:70px;text-align:right}
+.nores{grid-column:1/-1;padding:40px;text-align:center;color:var(--muted)}
+
+/* ---------- pay screen ---------- */
+.pay{flex:1;min-height:0;overflow:auto;padding:18px clamp(14px,4vw,48px)}
+.pay .hdr{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:760px;margin:0 auto 18px}
+.pay .hdr .box{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 18px;text-align:center}
+.pay .hdr .lbl{font-size:13px;color:var(--ink-2);font-weight:600}
+.pay .hdr .val{font-size:36px;font-weight:800;margin-top:2px}
+.pay .hdr .val.neg{color:var(--bad)}.pay .hdr .val.pos{color:var(--good)}
+.pay .body{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;max-width:980px;margin:0 auto}
+.pay h3{margin:0 0 8px;font-size:14px;color:var(--ink-2)}
+.cashrow{display:flex;border:1.5px solid var(--brand);border-radius:12px;overflow:hidden;background:var(--surface)}
+.cashrow input{flex:1;border:0;padding:12px 14px;font-size:22px;outline:none;font-family:var(--f-num)}
+.cashrow button{border:0;background:var(--surface-2);padding:0 16px;font-weight:600;border-left:1px solid var(--line)}
+.toggle{display:flex;align-items:center;justify-content:space-between;background:#E6ECFA;border-radius:12px;padding:12px 14px;margin-top:10px;font-weight:600}
+.sw{width:46px;height:26px;border-radius:999px;background:#C7CEE0;position:relative;border:0;transition:background .15s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .15s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.sw[aria-checked="true"]{background:var(--brand-2)}.sw[aria-checked="true"]::after{transform:translateX(20px)}
+.methods{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:6px}
+.methods button{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 8px;display:grid;gap:4px;justify-items:center;font-weight:600;font-size:12.5px;min-height:74px}
+.methods button[aria-pressed="true"]{border-color:var(--brand);background:#EEF3FF;color:var(--brand)}
+.methods .lg{font-size:16px;font-weight:800;letter-spacing:.02em}
+.methods .bog .lg{color:#F05A28}.methods .tbc .lg{color:#00A3E0}
+.pay .keys{display:grid;grid-template-columns:repeat(3,1fr) 1.15fr;gap:8px}
+.pay .keys button{border:0;border-radius:12px;background:var(--surface);border:1px solid var(--line);font-size:22px;font-weight:600;min-height:58px;font-family:var(--f-num)}
+.pay .keys button:active{background:var(--surface-2)}
+.pay .keys .plus{background:var(--brand);color:#fff;border-color:var(--brand);font-family:var(--f-ui);font-size:17px;font-weight:700}
+.pay .confirm{margin-top:14px;width:100%}
+.pay .note{margin-top:12px}
+.backbar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--line)}
+.backbar h2{margin:0;font-size:16px}
+.done{flex:1;display:grid;place-items:center;text-align:center;padding:24px}
+.done .ok{width:92px;height:92px;border-radius:50%;background:var(--good-bg);color:var(--good);display:grid;place-items:center;margin:0 auto 14px;animation:pop .4s var(--ease) both}
+.done h1{margin:0;font-size:28px}
+.done .chg{font-size:44px;font-weight:800;color:var(--brand);margin:6px 0 2px}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+
+/* ---------- login ---------- */
+.login{flex:1;display:grid;place-items:center;padding:20px;background:radial-gradient(120% 100% at 50% 0%,#E6ECFA 0%,var(--bg) 60%)}
+.login .box{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:26px;width:min(560px,100%);box-shadow:var(--shadow)}
+.login h1{margin:0 0 4px;font-size:22px}
+.users{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin:16px 0}
+.users button{border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:14px 10px;display:grid;justify-items:center;gap:8px;font-weight:600}
+.users button[aria-pressed="true"]{border-color:var(--brand);background:#EEF3FF}
+.users .avatar{width:44px;height:44px;font-size:17px}
+.pin{display:flex;justify-content:center;gap:12px;margin:10px 0 14px}
+.pin i{width:16px;height:16px;border-radius:50%;border:2px solid var(--brand);display:block}
+.pin i.on{background:var(--brand)}
+.pinpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:300px;margin:0 auto}
+.pinpad button{border:1px solid var(--line);background:var(--surface);border-radius:12px;font-size:22px;min-height:56px;font-family:var(--f-num);font-weight:600}
+.pinpad button:active{background:var(--surface-2)}
+.err{color:var(--bad);font-weight:600;text-align:center;min-height:20px;margin-top:8px}
+
+/* ---------- modal / menu ---------- */
+.scrim{position:fixed;inset:0;background:rgba(10,18,45,.55);backdrop-filter:blur(5px);display:grid;place-items:center;padding:16px;z-index:50;animation:fade .18s ease both}
+@keyframes fade{from{opacity:0}}
+.modal{background:var(--surface);border-radius:18px;width:min(640px,100%);max-height:calc(100dvh - 32px);overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.4);animation:pop .22s var(--ease) both}
+.modal.wide{width:min(900px,100%)}
+.mh{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:1}
+.mh h3{margin:0;font-size:17px;flex:1;text-align:center}
+.mh .x{border:0;background:var(--surface-2);width:36px;height:36px;border-radius:10px;font-size:18px}
+.mb{padding:16px 18px;display:grid;gap:12px}
+.fn{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.fn button{border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface);padding:18px 8px 14px;display:grid;justify-items:center;gap:8px;font-weight:600;font-size:12.5px;min-height:92px;color:var(--ink-2)}
+.fn button svg{color:var(--brand)}
+.fn button:hover{background:var(--surface-2)}
+.fn button.top{background:var(--brand);color:#fff;grid-column:span 2}.fn button.top svg{color:#fff}
+.fn button.top.dark{background:#141E44}
+.fn button:disabled{opacity:.4}
+.kv{display:grid;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.kv div{display:flex;justify-content:space-between;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line);background:var(--surface)}
+.kv div:last-child{border-bottom:0}.kv div.sum{background:var(--surface-2);font-weight:700}
+.olist{display:grid;gap:6px}
+.orow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);cursor:pointer}
+.orow .t{font-family:var(--f-num);font-weight:600}
+.orow .d{font-size:12px;color:var(--muted)}
+.orow.void{opacity:.55;text-decoration:line-through}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:12px;font-size:13.5px;z-index:60;box-shadow:0 12px 32px rgba(0,0,0,.35);max-width:calc(100vw - 32px);animation:toastin .25s var(--ease) both}
+@keyframes toastin{from{transform:translate(-50%,12px);opacity:0}}
+.setup{flex:1;display:grid;place-items:center;padding:20px}
+.setup .box{width:min(560px,100%);background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;display:grid;gap:12px}
+
+/* ---------- print ---------- */
+#printRoot{display:none}
+@media print{
+  body{overflow:visible;background:#fff}
+  body>*:not(#printRoot){display:none!important}
+  #printRoot{display:block;width:72mm;font-family:"Noto Sans Georgian",sans-serif;font-size:11px;color:#000}
+  @page{margin:4mm;size:80mm auto}
+}
+.rc{width:72mm;font-size:11px;line-height:1.35}
+.rc h2{text-align:center;margin:0;font-size:15px;letter-spacing:.06em}
+.rc .c{text-align:center}
+.rc hr{border:0;border-top:1px dashed #000;margin:5px 0}
+.rc table{width:100%;border-collapse:collapse}
+.rc td{padding:1px 0;vertical-align:top}
+.rc td.r{text-align:right;white-space:nowrap}
+.rc .tot td{font-weight:800;font-size:13px;padding-top:4px}
+
+@media (max-width:900px){
+  .sale{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto}
+  .cart{border-right:0;border-top:1px solid var(--line);grid-row:2;max-height:52dvh}
+  .lines{max-height:22dvh}
+  header.top{grid-template-columns:auto 1fr auto}.logo{justify-self:start}
+  .logo small{display:none}
+  .pay .body{grid-template-columns:1fr}
+  .fn{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+<div id="printRoot"></div>
+<script>
+/* ============================== basics ============================== */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+const uid=p=>(p||'o')+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const r2=n=>Math.round((+n||0)*100)/100;
+const fmt=(n,d)=>{n=+n||0;if(d==null)d=Math.abs(n%1)>0.004?2:0;return n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d})};
+const gel=(n,d)=>fmt(n,d)+' ₾';
+const pad2=n=>String(n).padStart(2,'0');
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())};
+const KA_M=['იანვარი','თებერვალი','მარტი','აპრილი','მაისი','ივნისი','ივლისი','აგვისტო','სექტემბერი','ოქტომბერი','ნოემბერი','დეკემბერი'];
+const KA_D=['კვირა','ორშაბათი','სამშაბათი','ოთხშაბათი','ხუთშაბათი','პარასკევი','შაბათი'];
+const dLong=s=>{const d=new Date(s+'T12:00');return d.getDate()+' '+KA_M[d.getMonth()]+' '+d.getFullYear()+', '+KA_D[d.getDay()]};
+const tShort=iso=>{const d=new Date(iso);return pad2(d.getHours())+':'+pad2(d.getMinutes())};
+const dtShort=iso=>{const d=new Date(iso);return pad2(d.getDate())+'.'+pad2(d.getMonth()+1)+' '+pad2(d.getHours())+':'+pad2(d.getMinutes())};
+function toast(msg,ms){const r=$('#toastRoot');r.innerHTML=`<div class="toast" role="status">${esc(msg)}</div>`;clearTimeout(toast.t);toast.t=setTimeout(()=>r.innerHTML='',ms||3200)}
+const svg=(d,s=22)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+const I={cart:'M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H7M9 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm8 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z',search:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-3.5-3.5',menu:'M4 7h16M4 12h16M4 17h16',grid:'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',list:'M4 6h16M4 12h16M4 18h16',cloud:'M7 18a4 4 0 0 1-.6-7.95A6 6 0 0 1 18 9a4.5 4.5 0 0 1 0 9H7z',back:'M15 5l-7 7 7 7',check:'M5 13l4 4L19 7',print:'M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z',clock:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 7v5l3 2',key:'M21 2l-2 2m-7.6 7.6a5 5 0 1 1-7.1 7.1 5 5 0 0 1 7.1-7.1zm0 0L19 3m-3 3l2 2',sales:'M3 17l6-6 4 4 8-8M15 7h6v6',cashIn:'M12 5v14m-6-6l6 6 6-6',cashOut:'M12 19V5m-6 6l6-6 6 6',history:'M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l3 2',sync:'M21 12a9 9 0 0 1-15.5 6.2M3 12a9 9 0 0 1 15.5-6.2M21 4v5h-5M3 20v-5h5',wifi:'M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h.01',refresh:'M4 4v6h6M20 20v-6h-6M20 9A8 8 0 0 0 5.6 6.6L4 10m0 4l1.6 3.4A8 8 0 0 0 20 15',msg:'M4 5h16v11H8l-4 4z',logout:'M10 17l5-5-5-5M15 12H3M21 3v18',power:'M12 3v9M6.3 7a8 8 0 1 0 11.4 0',install:'M12 3v12m-5-5l5 5 5-5M4 21h16',user:'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-8 9a8 8 0 0 1 16 0',day:'M4 5h16v15H4zM4 10h16M8 3v4m8-4v4',pct:'M19 5L5 19M7.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm9 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z',box:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',trash:'M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3',gear:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm7.4-3a7.4 7.4 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a7.5 7.5 0 0 0-1.7-1L14.8 3h-3.6l-.4 2.6a7.5 7.5 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.4 7.4 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.5 7.5 0 0 0 1.7 1l.4 2.6h3.6l.4-2.6a7.5 7.5 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6c.1-.3.1-.7.1-1z'};
+const PAY=[['cash','ნაღდი','₾','cash'],['card_bog','BOG ტერმინალი','BOG','bog'],['card_tbc','TBC ტერმინალი','TBC','tbc'],['installment','განვადება','0%',''],['transfer','გადარიცხვა','↗',''],['other','სხვა','…','']];
+const PAYN=Object.fromEntries(PAY.map(p=>[p[0],p[1]]));
+
+/* ============================== state ============================== */
+const P={u:null,k:null,cat:new Map(),pos:new Map(),shift:new Map(),cfg:{users:[],receipt:{}},loaded:false,
+  user:null,view:'sale',tab:'all',q:'',grid:lsGet('pos.grid')!=='list',cart:{lines:[],disc:0,note:''},sel:-1,mode:'qty',buf:'',
+  pay:{method:'cash',cash:'',receipt:lsGet('pos.receipt')!=='0',note:''},last:null,conn:{ok:false,txt:'კავშირი…'},install:null};
+try{const c=JSON.parse(lsGet('pos.cart')||'null');if(c&&Array.isArray(c.lines))P.cart=c}catch(e){}
+try{P.user=JSON.parse(lsGet('pos.user')||'null')}catch(e){}
+const DEVICE=lsGet('pos.device')||(()=>{const d=uid('d');lsSet('pos.device',d);return d})();
+function saveCart(){lsSet('pos.cart',JSON.stringify(P.cart))}
+
+/* ============================== backend ============================== */
+function readCreds(){
+  const m=(location.hash||'').match(/connect=([A-Za-z0-9+/=_-]+)/);
+  if(m){try{const o=JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g,'+').replace(/_/g,'/')))));if(o.u&&o.k){lsSet('pos.backend',JSON.stringify({u:o.u,k:o.k}));try{history.replaceState(null,'',location.pathname)}catch(e){}}}catch(e){}}
+  try{const c=JSON.parse(lsGet('pos.backend')||'null');return c&&c.u&&c.k?c:null}catch(e){return null}
+}
+async function gasCall(body){
+  let last;
+  for(let a=0;a<4;a++){
+    if(a)await new Promise(z=>setTimeout(z,1500*a));
+    let r;try{r=await fetch(P.u,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...body,key:P.k})})}catch(e){last={message:'ინტერნეტი არ არის'};continue}
+    const t=await r.text();let j;try{j=JSON.parse(t)}catch(e){last={message:'სერვერმა არასწორად უპასუხა'};continue}
+    if(j.info||j.error==='bad_body'){last={message:'Google-მა არ უპასუხა — ვცდილობ თავიდან'};continue}
+    if(j.error==='bad_key')throw {code:'bad_key',message:'არასწორი გასაღები'};
+    if(j.error==='not_allowed')throw {code:'not_allowed',message:'ეს მოქმედება სალაროს არ შეუძლია'};
+    if(j.error==='unknown action')throw {code:'old_backend',message:'ბექენდი ძველია — მფლობელმა უნდა განაახლოს Apps Script'};
+    if(j.error)throw {message:j.error};return j;
+  }
+  throw last;
+}
+let outbox=[],busy=false,flushT=0,fails=0,since=0,lastFull=0,loading=false;
+try{outbox=JSON.parse(lsGet('pos.outbox')||'[]')}catch(e){}
+function setConn(ok,txt,bad){P.conn={ok,txt,bad};const el=$('#conn');if(el)el.innerHTML=connHtml()}
+function connHtml(){return `<span class="dot ${P.conn.bad?'bad':P.conn.ok?'':'off'}"></span><span>${esc(P.conn.txt)}</span>`}
+function status(){if(outbox.length)setConn(fails<2,(fails?'ინახება ხელახლა · ':'ინახება… ')+outbox.length,fails>3);else setConn(true,'შენახულია')}
+function saveOutbox(){lsSet('pos.outbox',JSON.stringify(outbox))}
+function saveCache(){clearTimeout(saveCache.t);saveCache.t=setTimeout(()=>{const docs=[];[['catalog',P.cat],['pos',P.pos],['shift',P.shift]].forEach(([c,m])=>m.forEach((d,id)=>docs.push([c,id,d])));lsSet('pos.cache',JSON.stringify({u:P.u,at:since,cfg:P.cfg,docs}))},600)}
+function fromCache(){let c;try{c=JSON.parse(lsGet('pos.cache')||'null')}catch(e){}if(!c||c.u!==P.u||!Array.isArray(c.docs))return false;
+  c.docs.forEach(([cc,id,d])=>col(cc).set(id,d));if(c.cfg)P.cfg=c.cfg;since=c.at||0;outbox.forEach(apply);P.loaded=true;return true}
+const col=c=>c==='catalog'?P.cat:c==='pos'?P.pos:P.shift;
+const apply=op=>{col(op.c).set(op.id,op.d)};
+function push(c,id,d){const op={op:'set',c,id,d:JSON.parse(JSON.stringify(d))};outbox=outbox.filter(o=>!(o.c===c&&o.id===id)||busy);outbox.push(op);saveOutbox();apply(op);saveCache();status();clearTimeout(flushT);flushT=setTimeout(flush,300)}
+async function flush(){
+  if(busy||!outbox.length||!P.u)return;busy=true;status();
+  const batch=outbox.slice(0,25);
+  try{await gasCall({action:'pos_write',ops:batch});const ids=new Set(batch.map(o=>o.c+'/'+o.id+JSON.stringify(o.d)));outbox=outbox.filter(o=>!ids.has(o.c+'/'+o.id+JSON.stringify(o.d)));saveOutbox();fails=0;busy=false;status();if(outbox.length)flush()}
+  catch(e){busy=false;fails++;status();if(e.code==='bad_key'||e.code==='old_backend'||e.code==='not_allowed'){toast(e.message,6000);return}clearTimeout(flushT);flushT=setTimeout(flush,Math.min(60000,4000*fails))}
+}
+// A delta read only adds and updates; records that vanished are dropped on the full read (on open and every 30 min).
+async function load(full){
+  if(loading||!P.u)return;loading=true;
+  if(!full&&Date.now()-lastFull>30*60000)full=true;
+  try{
+    const r=await gasCall({action:'pos_since',t:full?0:Math.max(0,since-300000)});
+    if(!r||!Array.isArray(r.docs))throw {message:'არასრული პასუხი'};
+    if(full){const keep=new Set(r.keys||[]);if(keep.size||!r.docs.length){[['catalog',P.cat],['pos',P.pos],['shift',P.shift]].forEach(([c,m])=>{if(keep.size)[...m.keys()].forEach(id=>{if(!keep.has(c+'/'+id))m.delete(id)})})}lastFull=Date.now()}
+    r.docs.forEach(x=>col(x.c).set(x.id,x.d));
+    if(r.pos)P.cfg={users:[],receipt:{},...r.pos};
+    outbox.forEach(apply);since=r.at||Date.now();P.loaded=true;saveCache();status();render();
+  }catch(e){if(e.code)toast(e.message,6000);setConn(false,P.loaded?'ოფლაინი — ვაჩვენებ შენახულს':'ვერ დავუკავშირდი',true)}
+  finally{loading=false}
+}
+function connect(){const c=readCreds();if(!c)return false;P.u=c.u;P.k=c.k;fromCache();status();load(true);flush();return true}
+setInterval(()=>{if(!document.hidden){flush();load(false)}},60000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){flush();load(false)}});
+addEventListener('online',()=>{fails=0;flush();load(false)});
+addEventListener('beforeunload',e=>{if(outbox.length){e.preventDefault();e.returnValue=''}});
+
+/* ============================== catalog helpers ============================== */
+function items(){return [...P.cat.values()].filter(x=>x&&!x.hidden)}
+// what is on the shelf now: the Optimo count minus what this register sold since that count
+function liveQ(x){let q=+x.q||0;const c=x.countedAt||'';P.pos.forEach(o=>{if(o.status==='void'||!o.lines)return;if(c&&(o.day||'')<c)return;o.lines.forEach(l=>{if(l.b===x.b)q-=+l.q||0})});return q}
+function cats(){const s=new Set();items().forEach(x=>s.add(x.cat||'სხვადასხვა'));return [...s].sort((a,b)=>a.localeCompare(b,'ka'))}
+function norm(s){return String(s||'').toLowerCase().replace(/\s+/g,' ').trim()}
+function filtered(){
+  const q=norm(P.q);let L=items();
+  if(q)L=L.filter(x=>norm(x.n).includes(q)||String(x.b).includes(q));
+  else if(P.tab!=='all')L=L.filter(x=>(x.cat||'სხვადასხვა')===P.tab);
+  L.sort((a,b)=>(b.sold||0)-(a.sold||0)||a.n.localeCompare(b.n,'ka'));
+  return L;
+}
+function ph(n,cls){return `<div class="ph ${cls||''}">${esc(initials2(n))}</div>`}
+function pic(x,cls){return x.img?`<img src="${esc(x.img)}" alt="" loading="lazy" data-ph="${esc(initials2(x.n))}" data-cls="${esc(cls||'')}" onerror="phFail(this)">`:ph(x.n,cls)}
+const initials2=n=>String(n||'').replace(/[^\p{L}\p{N}]/gu,'').slice(0,2).toUpperCase()||'·';
+function phFail(img){const d=document.createElement('div');d.className='ph '+(img.dataset.cls||'');d.textContent=img.dataset.ph||'·';img.replaceWith(d)}
+
+/* ============================== cart ============================== */
+const lineTot=l=>Math.max(0,r2(l.q*l.p-(+l.d||0)));
+function totals(){const sub=P.cart.lines.reduce((a,l)=>a+r2(l.q*l.p),0);const ld=P.cart.lines.reduce((a,l)=>a+Math.min(+l.d||0,r2(l.q*l.p)),0);const od=Math.min(+P.cart.disc||0,sub-ld);return {sub:r2(sub),disc:r2(ld+od),total:r2(Math.max(0,sub-ld-od)),n:P.cart.lines.reduce((a,l)=>a+l.q,0)}}
+function addItem(x){
+  const i=P.cart.lines.findIndex(l=>l.b===x.b&&l.p===+x.price);
+  if(i>=0){P.cart.lines[i].q+=1;P.sel=i}else{P.cart.lines.push({b:x.b,n:x.n,p:+x.price||0,q:1,d:0,img:x.img||null});P.sel=P.cart.lines.length-1}
+  P.buf='';saveCart();render();const el=document.querySelectorAll('.line')[P.sel];if(el)el.scrollIntoView({block:'nearest'});
+}
+function setQty(i,q){if(!P.cart.lines[i])return;if(q<=0){P.cart.lines.splice(i,1);P.sel=Math.min(P.sel,P.cart.lines.length-1)}else P.cart.lines[i].q=q;saveCart();render()}
+function clearCart(){P.cart={lines:[],disc:0,note:''};P.sel=-1;P.buf='';saveCart();render()}
+function padKey(k){
+  if(k==='C'){P.buf='';if(P.mode==='disc'&&P.sel<0)P.cart.disc=0;applyBuf();return}
+  if(k==='⌫'){P.buf=P.buf.slice(0,-1);applyBuf();return}
+  if(k==='.'){if(P.mode==='qty'||P.buf.includes('.'))return;P.buf+=P.buf?'.':'0.';render();return}
+  if(P.buf.length>=7)return;P.buf+=k;applyBuf();
+}
+function applyBuf(){
+  const v=parseFloat(P.buf);
+  if(P.mode==='disc'&&P.sel<0){P.cart.disc=isFinite(v)?v:0;saveCart();render();return}
+  const l=P.cart.lines[P.sel];if(!l){render();return}
+  if(P.mode==='qty'){if(P.buf==='')l.q=1;else if(isFinite(v)&&v>0)l.q=Math.min(999,Math.floor(v));else if(P.buf==='0'){}}
+  if(P.mode==='disc')l.d=isFinite(v)?Math.min(v,r2(l.q*l.p)):0;
+  if(P.mode==='price')l.p=isFinite(v)?v:l.p;
+  saveCart();render();
+}
+function selectLine(i){P.sel=i;P.buf='';render()}
+
+/* ============================== render ============================== */
+function render(){
+  const app=$('#app');
+  if(!P.u){app.innerHTML=vSetup();bindSetup();return}
+  if(!P.user)app.innerHTML=vLogin();
+  else if(P.view==='pay')app.innerHTML=vPay();
+  else if(P.view==='done')app.innerHTML=vDone();
+  else app.innerHTML=vSale();
+  bind();
+}
+function header(){
+  const u=P.user;const open=openShift();
+  return `<header class="top">
+   <div class="hleft">${u?`<div class="user"><span class="avatar">${esc(initials(u.name))}</span><span><b>${esc(u.name)}</b><div class="small muted">${open?'ცვლა '+tShort(open.openedAt)+'-დან':'ცვლა დახურულია'}</div></span></div>`:''}</div>
+   <div class="logo">${logoSvg(34)}<div><b>ასტრომანი</b><small>სალარო · ${esc(dLong(today()).split(',')[0])}</small></div></div>
+   <div class="hright"><span class="conn" id="conn">${connHtml()}</span>
+    <button class="ibtn" data-act="sync" title="სინქრონიზაცია">${svg(I.sync,20)}${outbox.length?`<span class="n">${outbox.length}</span>`:''}</button>
+    <button class="ibtn menubtn" data-act="menu" aria-label="ფუნქციები">${svg(I.menu,22)}</button></div></header>`;
+}
+const initials=n=>String(n||'').trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase()||'?';
+const logoSvg=s=>`<svg width="${s}" height="${s}" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="8.5" fill="#F5A623"/><ellipse cx="17" cy="17" rx="15" ry="5" fill="none" stroke="#1C3480" stroke-width="1.8" transform="rotate(-22 17 17)"/><path d="M8.6 14.2a8.5 8.5 0 0 1 16.8 0" fill="#F5A623"/></svg>`;
+
+function vSetup(){
+  return `<div class="setup"><div class="box"><div class="row">${logoSvg(40)}<div><b style="font-size:18px">ასტრომანი · სალარო</b><div class="muted small">ამ მოწყობილობის პირველი დაკავშირება</div></div></div>
+   <p style="margin:0">მფლობელის კომპიუტერზე, Astroman Finance → <b>Store sales → Register</b> გვერდზე არის <b>მოწყობილობის ბმული</b>. გახსენით ის აქ, ან ჩასვით ქვემოთ.</p>
+   <label class="field"><span>მოწყობილობის ბმული</span><input class="input" id="suLink" placeholder="https://rezimod.github.io/…/store/#connect=…"></label>
+   <div class="row"><button class="btn primary big" id="suGo">დაკავშირება</button><span class="muted small" id="suMsg"></span></div></div></div>`;
+}
+function bindSetup(){$('#suGo').onclick=()=>{const v=$('#suLink').value.trim();const m=v.match(/connect=([A-Za-z0-9+/=_-]+)/);if(!m){$('#suMsg').textContent='ბმული არ არის სწორი';return}location.hash='connect='+m[1];if(!connect()){$('#suMsg').textContent='ბმული არ არის სწორი';return}render()}}
+
+function vLogin(){
+  const users=P.cfg.users&&P.cfg.users.length?P.cfg.users:[{id:'default',name:'კონსულტანტი',pin:''}];
+  const sel=P.loginSel||users[0].id;const u=users.find(x=>x.id===sel)||users[0];
+  const needPin=!!u.pin;
+  return header()+`<div class="login"><div class="box"><h1>ვინ მუშაობს სალაროზე?</h1><div class="muted">აირჩიეთ სახელი${needPin?' და აკრიფეთ PIN':''}.</div>
+   <div class="users">${users.map(x=>`<button data-login="${esc(x.id)}" aria-pressed="${x.id===u.id}"><span class="avatar">${esc(initials(x.name))}</span>${esc(x.name)}</button>`).join('')}</div>
+   ${needPin?`<div class="pin">${[0,1,2,3].map(i=>`<i class="${(P.pin||'').length>i?'on':''}"></i>`).join('')}</div>
+   <div class="pinpad">${['1','2','3','4','5','6','7','8','9','⌫','0','OK'].map(k=>`<button data-pin="${k}" ${k==='OK'?'class="num" style="background:var(--brand);color:#fff;border-color:var(--brand)"':''}>${k}</button>`).join('')}</div>
+   <div class="err" id="pinErr">${esc(P.pinErr||'')}</div>`
+   :`<button class="btn primary big" style="width:100%" data-login-go="1">შესვლა</button>`}
+   ${!P.loaded?`<p class="muted small" style="text-align:center;margin:12px 0 0">კატალოგი იტვირთება…</p>`:''}</div></div>`;
+}
+function doLogin(u){P.user={id:u.id,name:u.name};lsSet('pos.user',JSON.stringify(P.user));P.pin='';P.pinErr='';P.view='sale';render();if(!openShift())shiftOpenModal()}
+
+function vSale(){
+  const T=totals();const L=filtered();const sel=P.cart.lines[P.sel];
+  const modeL={qty:'რაოდენობა',disc:'ფასდაკლება',price:'ფასი'};
+  const hint=P.mode==='disc'&&P.sel<0?'მთელ შეკვეთაზე ₾':sel?esc(sel.n):'აირჩიეთ პროდუქტი';
+  return header()+`<div class="sale">
+  <section class="cart" aria-label="შეკვეთა">
+   <div class="lines">${P.cart.lines.length?P.cart.lines.map((l,i)=>`<div class="line ${i===P.sel?'sel':''}" data-line="${i}">${pic(l)}
+     <div><div class="nm">${esc(l.n)}</div><div class="sub"><b class="num">${gel(l.p)}</b> × ${l.q}${l.d?` · −${gel(l.d)}`:''}</div>
+      <span class="qty"><button data-qty="${i}" data-v="-1">−</button><span class="num">${l.q}</span><button data-qty="${i}" data-v="1">+</button></span></div>
+     <div class="amt"><div class="tot num">${gel(lineTot(l))}</div><button class="rm" data-rm="${i}" aria-label="წაშლა">✕</button></div></div>`).join('')
+    :`<div class="empty"><div>${svg(I.cart,40)}შეკვეთა ცარიელია<div class="small">დააჭირეთ პროდუქტს ან დაასკანერეთ შტრიხკოდი</div></div></div>`}</div>
+   <div class="ctot"><div class="r"><span>ნივთები</span><span class="num">${T.n}</span></div>${T.disc?`<div class="r"><span>ფასდაკლება</span><span class="num">−${gel(T.disc)}</span></div>`:''}<div class="r big"><span>სულ გადასახდელი</span><span class="num">${gel(T.total)}</span></div></div>
+   <div class="pad">
+    <div class="mode">${Object.entries(modeL).map(([k,t])=>`<button data-mode="${k}" aria-pressed="${P.mode===k}">${t}</button>`).join('')}<button data-act="clearCart" ${P.cart.lines.length?'':'disabled'} style="background:rgba(255,120,100,.25)">გასუფთავება</button></div>
+    <div class="buf"><span>${modeL[P.mode]} · ${hint}</span><b>${esc(P.buf||'')}</b></div>
+    <div class="keys">${['1','2','3','4','5','6','7','8','9','⌫','0','.'].map(k=>`<button class="k ${/\d|\./.test(k)?'':'dim'}" data-key="${k}">${k}</button>`).join('')}</div>
+    <button class="go" data-act="pay" ${T.total>0?'':'disabled'}>გადახდა<small>${T.total>0?gel(T.total):'საცალო გაყიდვა'}</small></button>
+   </div>
+  </section>
+  <section class="catalog" aria-label="პროდუქტები">
+   <div class="search">${svg(I.search,20)}<input class="input" id="q" placeholder="პროდუქტის ძიება ან შტრიხკოდი" value="${esc(P.q)}" autocomplete="off">${P.q?`<button class="x" data-act="clearQ">✕</button>`:''}</div>
+   <div class="ctabs"><button data-tab="all" aria-pressed="${P.tab==='all'&&!P.q}">მთავარი</button>${cats().map(c=>`<button data-tab="${esc(c)}" aria-pressed="${P.tab===c&&!P.q}">${esc(c)}</button>`).join('')}
+    <span class="vw"><button data-act="grid" aria-pressed="${P.grid}" title="ბადე">${svg(I.grid,18)}</button><button data-act="listv" aria-pressed="${!P.grid}" title="სია">${svg(I.list,18)}</button></span></div>
+   <div class="grid ${P.grid?'':'list'}" id="grid">${L.length?L.slice(0,P.q?200:400).map(x=>{const q=liveQ(x);return `<div class="card" role="button" tabindex="0" data-add="${esc(x.b)}"><div class="img">${pic(x)}<span class="q ${q<0?'neg':q===0?'zero':''}">${q}</span><span class="price num">${gel(x.price)}</span></div><div class="t"><div class="n">${esc(x.n)}</div><div class="bc">${esc(x.b)}</div></div></div>`}).join('')
+    :`<div class="nores">${P.loaded?'ვერაფერი მოიძებნა':'კატალოგი იტვირთება…'}</div>`}</div>
+  </section></div>`;
+}
+
+function vPay(){
+  const T=totals();const m=P.pay.method;const cash=m==='cash'?parseFloat(P.pay.cash)||0:T.total;const chg=r2(cash-T.total);
+  return `<div class="backbar"><button class="ibtn" data-act="back">${svg(I.back,20)}</button><h2>გადახდა</h2><span class="spacer"></span><span class="muted">${P.cart.lines.length} ნივთი · ${esc(P.user.name)}</span></div>
+  <div class="pay"><div class="hdr"><div class="box"><div class="lbl">სულ გადასახდელი (₾)</div><div class="val num">${fmt(T.total,2)}</div></div><div class="box"><div class="lbl">ხურდა (₾)</div><div class="val num ${chg<0?'neg':chg>0?'pos':''}">${chg<0?'−':''}${fmt(Math.abs(chg),2)}</div></div></div>
+  <div class="body"><div>
+   <h3>ნაღდი ანგარიშსწორება</h3>
+   <div class="cashrow"><input id="cash" inputmode="decimal" placeholder="0.00" value="${esc(P.pay.cash)}" ${m==='cash'?'':'disabled'}><button data-act="exact">ზუსტი თანხა</button></div>
+   <div class="toggle"><span>ქვითრის ამობეჭდვა</span><button class="sw" role="switch" aria-checked="${P.pay.receipt}" data-act="toggleReceipt"></button></div>
+   <h3 style="margin-top:16px">გადახდის წესი</h3>
+   <div class="methods">${PAY.map(([k,t,lg,cls])=>`<button data-method="${k}" aria-pressed="${m===k}" class="${cls}"><span class="lg">${esc(lg)}</span>${esc(t)}</button>`).join('')}</div>
+   <label class="field note"><span>შენიშვნა (არასავალდებულო)</span><input class="input" id="payNote" value="${esc(P.pay.note)}" placeholder="მაგ. მყიდველის სახელი, მიწოდება…"></label>
+  </div><div>
+   <div class="keys">${['1','2','3','+10','4','5','6','+20','7','8','9','+50','⌫','0','.','+100'].map(k=>`<button data-pk="${k}" class="${k.startsWith('+')?'plus':''}" ${m==='cash'?'':'disabled'}>${k}</button>`).join('')}<button data-pk="C" style="grid-column:1/-1;font-family:var(--f-ui);font-size:15px" ${m==='cash'?'':'disabled'}>გასუფთავება</button></div>
+   <button class="btn amber big confirm" data-act="confirm" ${m==='cash'&&chg<0?'disabled':''}>${svg(I.check,22)} დადასტურება · ${gel(T.total)}</button>
+   ${m==='cash'&&chg<0?`<div class="err">აკლია ${gel(-chg)}</div>`:''}
+  </div></div></div>`;
+}
+function vDone(){
+  const o=P.last;if(!o)return vSale();
+  return `<div class="backbar"><h2>გაყიდვა შენახულია</h2><span class="spacer"></span><span class="muted">${dtShort(o.at)}</span></div>
+  <div class="done"><div><div class="ok">${svg(I.check,46)}</div><h1>${gel(o.total)} · ${esc(PAYN[o.pay]||o.pay)}</h1>
+   ${o.pay==='cash'?`<div class="muted" style="margin-top:8px">ხურდა</div><div class="chg num">${gel(o.change)}</div><div class="muted">მიღებულია ${gel(o.cash)}</div>`:''}
+   <div class="row" style="justify-content:center;margin-top:22px;gap:10px;flex-wrap:wrap"><button class="btn big" data-act="printLast">${svg(I.print,20)} ქვითარი</button><button class="btn primary big" data-act="newSale">ახალი გაყიდვა</button></div></div></div>`;
+}
+
+/* ============================== actions ============================== */
+function bind(){
+  document.querySelectorAll('[data-add]').forEach(b=>{b.onclick=()=>{const x=P.cat.get(b.dataset.add);if(x)addItem(x)};b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();b.click()}}});
+  document.querySelectorAll('[data-line]').forEach(b=>b.onclick=e=>{if(e.target.closest('button'))return;selectLine(+b.dataset.line)});
+  document.querySelectorAll('[data-qty]').forEach(b=>b.onclick=()=>{const i=+b.dataset.qty;P.sel=i;setQty(i,P.cart.lines[i].q+ +b.dataset.v)});
+  document.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>setQty(+b.dataset.rm,0));
+  document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{P.mode=b.dataset.mode;P.buf='';render()});
+  document.querySelectorAll('[data-key]').forEach(b=>b.onclick=()=>padKey(b.dataset.key));
+  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{P.tab=b.dataset.tab;P.q='';render()});
+  document.querySelectorAll('[data-login]').forEach(b=>b.onclick=()=>{P.loginSel=b.dataset.login;P.pin='';P.pinErr='';render()});
+  document.querySelectorAll('[data-login-go]').forEach(b=>b.onclick=()=>{const users=P.cfg.users&&P.cfg.users.length?P.cfg.users:[{id:'default',name:'კონსულტანტი',pin:''}];doLogin(users.find(x=>x.id===(P.loginSel||users[0].id))||users[0])});
+  document.querySelectorAll('[data-pin]').forEach(b=>b.onclick=()=>{const k=b.dataset.pin;const users=P.cfg.users||[];const u=users.find(x=>x.id===(P.loginSel||(users[0]||{}).id))||users[0];if(!u)return;
+    if(k==='⌫')P.pin=(P.pin||'').slice(0,-1);else if(k==='OK'){}else if((P.pin||'').length<4)P.pin=(P.pin||'')+k;
+    if(k==='OK'||(P.pin||'').length===4){if(P.pin===String(u.pin)){doLogin(u);return}P.pinErr='არასწორი PIN';P.pin='';}else P.pinErr='';render()});
+  document.querySelectorAll('[data-method]').forEach(b=>b.onclick=()=>{P.pay.method=b.dataset.method;if(P.pay.method!=='cash')P.pay.cash='';render();const c=$('#cash');if(c&&!c.disabled)c.focus()});
+  document.querySelectorAll('[data-pk]').forEach(b=>b.onclick=()=>{const k=b.dataset.pk;let v=P.pay.cash||'';if(k==='C')v='';else if(k==='⌫')v=v.slice(0,-1);else if(k.startsWith('+'))v=String(r2((parseFloat(v)||0)+ +k.slice(1)));else if(k==='.'){if(!v.includes('.'))v=(v||'0')+'.'}else if(v.replace('.','').length<7)v+=k;P.pay.cash=v;render()});
+  const q=$('#q');if(q){q.oninput=()=>{P.q=q.value;renderGridOnly()};q.onkeydown=e=>{if(e.key==='Enter'){const v=q.value.trim();const x=[...P.cat.values()].find(y=>String(y.b)===v&&!y.hidden);if(x){addItem(x);P.q='';render();$('#q').focus()}else{const L=filtered();if(L.length===1){addItem(L[0]);P.q='';render();$('#q').focus()}}}};}
+  const cash=$('#cash');if(cash){cash.oninput=()=>{P.pay.cash=cash.value.replace(/[^\d.]/g,'');updatePayHdr()};cash.onkeydown=e=>{if(e.key==='Enter')act('confirm')}}
+  const pn=$('#payNote');if(pn)pn.oninput=()=>P.pay.note=pn.value;
+  document.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>act(b.dataset.act,b));
+}
+function renderGridOnly(){const g=$('#grid');if(!g)return;const L=filtered();g.innerHTML=L.length?L.slice(0,200).map(x=>{const q=liveQ(x);return `<div class="card" role="button" tabindex="0" data-add="${esc(x.b)}"><div class="img">${pic(x)}<span class="q ${q<0?'neg':q===0?'zero':''}">${q}</span><span class="price num">${gel(x.price)}</span></div><div class="t"><div class="n">${esc(x.n)}</div><div class="bc">${esc(x.b)}</div></div></div>`}).join(''):`<div class="nores">ვერაფერი მოიძებნა</div>`;
+  g.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const x=P.cat.get(b.dataset.add);if(x){addItem(x)}});
+  document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tab===P.tab&&!P.q)))}
+function updatePayHdr(){const T=totals();const cash=parseFloat(P.pay.cash)||0;const chg=r2(cash-T.total);const v=document.querySelectorAll('.pay .hdr .val')[1];if(v){v.className='val num '+(chg<0?'neg':chg>0?'pos':'');v.textContent=(chg<0?'−':'')+fmt(Math.abs(chg),2)}const c=$('[data-act="confirm"]');if(c)c.disabled=chg<0;const e=$('.pay .err');if(e)e.hidden=chg>=0}
+async function act(a,b){
+  if(a==='pay'){if(!totals().total)return;P.pay.cash='';P.pay.note='';P.view='pay';render();const c=$('#cash');if(c)c.focus();return}
+  if(a==='back'){P.view='sale';render();return}
+  if(a==='exact'){P.pay.cash=String(totals().total);render();return}
+  if(a==='toggleReceipt'){P.pay.receipt=!P.pay.receipt;lsSet('pos.receipt',P.pay.receipt?'1':'0');render();return}
+  if(a==='confirm')return confirmSale();
+  if(a==='newSale'){P.view='sale';P.last=null;render();return}
+  if(a==='printLast'){if(P.last)printHtml(receiptHtml(P.last));return}
+  if(a==='clearCart'){if(!b.dataset.sure){b.dataset.sure=1;b.textContent='ნამდვილად?';setTimeout(()=>{delete b.dataset.sure;b.textContent='გასუფთავება'},3000);return}clearCart();return}
+  if(a==='clearQ'){P.q='';render();$('#q').focus();return}
+  if(a==='grid'){P.grid=true;lsSet('pos.grid','grid');render();return}
+  if(a==='listv'){P.grid=false;lsSet('pos.grid','list');render();return}
+  if(a==='sync'){toast('სინქრონიზაცია…');flush();await load(true);toast(outbox.length?'ზოგი ჩანაწერი ჯერ ინახება':'განახლებულია');return}
+  if(a==='menu')return funcMenu();
+}
+function openShift(){let best=null;P.shift.forEach(s=>{if(!s.closedAt&&s.device===DEVICE&&(!best||s.openedAt>best.openedAt))best=s});return best}
+function confirmSale(){
+  const T=totals();if(!T.total)return;const m=P.pay.method;const cash=m==='cash'?parseFloat(P.pay.cash)||0:T.total;
+  if(m==='cash'&&cash<T.total){toast('ნაღდი თანხა ნაკლებია');return}
+  const now=new Date();const sh=openShift();
+  const o={id:uid('o'),at:now.toISOString(),day:today(),user:P.user,shift:sh?sh.id:null,device:DEVICE,
+    lines:P.cart.lines.map(l=>({b:l.b,n:l.n,q:l.q,p:l.p,d:+l.d||0,img:l.img||null})),sub:T.sub,disc:T.disc,total:T.total,pay:m,
+    cash:m==='cash'?r2(cash):T.total,change:m==='cash'?r2(cash-T.total):0,receipt:!!P.pay.receipt,note:(P.pay.note||'').trim(),status:'ok',no:nextNo()};
+  push('pos',o.id,o);P.last=o;clearCart();P.view='done';render();
+  if(o.receipt)setTimeout(()=>printHtml(receiptHtml(o)),150);
+}
+function nextNo(){let n=0;P.pos.forEach(o=>{if(o.no>n)n=o.no});return n+1}
+
+/* ============================== receipts ============================== */
+function printHtml(html){$('#printRoot').innerHTML=html;setTimeout(()=>window.print(),60)}
+function receiptHtml(o){
+  const R=P.cfg.receipt||{};
+  return `<div class="rc"><h2>${esc(R.title||'ასტრომანი')}</h2><div class="c">${esc(R.addr||'ალ. ყაზბეგის 17, თბილისი')}</div>${R.phone?`<div class="c">${esc(R.phone)}</div>`:''}${R.tax?`<div class="c">ს/კ ${esc(R.tax)}</div>`:''}<hr>
+  <table><tr><td>ქვითარი №${o.no||''}</td><td class="r">${dtShort(o.at)}</td></tr><tr><td>კონსულტანტი</td><td class="r">${esc(o.user.name)}</td></tr></table><hr>
+  <table>${o.lines.map(l=>`<tr><td colspan="2">${esc(l.n)}</td></tr><tr><td>${l.q} × ${fmt(l.p,2)}${l.d?' −'+fmt(l.d,2):''}</td><td class="r">${fmt(lineTot(l),2)}</td></tr>`).join('')}</table><hr>
+  <table>${o.disc?`<tr><td>ფასდაკლება</td><td class="r">−${fmt(o.disc,2)}</td></tr>`:''}<tr class="tot"><td>სულ</td><td class="r">${fmt(o.total,2)} ₾</td></tr><tr><td>${esc(PAYN[o.pay]||o.pay)}</td><td class="r">${fmt(o.cash,2)}</td></tr>${o.pay==='cash'?`<tr><td>ხურდა</td><td class="r">${fmt(o.change,2)}</td></tr>`:''}</table><hr>
+  <div class="c">${esc(R.foot||'გმადლობთ! astroman.ge')}</div><div class="c" style="font-size:9px;margin-top:4px">არაფისკალური ქვითარი</div></div>`;
+}
+function reportHtml(title,sub,rows,extra){
+  return `<div class="rc"><h2>ასტრომანი</h2><div class="c">${esc(title)}</div><div class="c">${esc(sub)}</div><hr><table>${rows.map(([k,v,cls])=>`<tr class="${cls||''}"><td>${esc(k)}</td><td class="r">${esc(v)}</td></tr>`).join('')}</table>${extra||''}<hr><div class="c">${dtShort(new Date().toISOString())}</div></div>`;
+}
+
+/* ============================== modals & functions menu ============================== */
+function modal(title,body,wide){$('#modalRoot').innerHTML=`<div class="scrim" id="scrim"><div class="modal ${wide?'wide':''}" role="dialog" aria-modal="true"><div class="mh"><span style="width:36px"></span><h3>${esc(title)}</h3><button class="x" data-close aria-label="დახურვა">✕</button></div><div class="mb">${body}</div></div></div>`;
+  $('#scrim').addEventListener('click',e=>{if(e.target.id==='scrim'||e.target.closest('[data-close]'))closeModal()});document.addEventListener('keydown',escClose)}
+function escClose(e){if(e.key==='Escape')closeModal()}
+function closeModal(){$('#modalRoot').innerHTML='';document.removeEventListener('keydown',escClose)}
+function funcMenu(){
+  const sh=openShift();
+  const F=[['shiftClose','ცვლის დახურვა',I.clock,'top',!sh],['dayClose','დღის დახურვა',I.key,'top dark'],
+   ['shiftReport','ცვლის ნავაჭრი',I.sales,'',!sh],['cashOut','თანხის გაცემა',I.cashOut,'',!sh],['cashIn','თანხის მიღება',I.cashIn,'',!sh],['history','გაყიდვების ისტორია',I.history],
+   ['shiftOpen','ცვლის გახსნა',I.clock,'',!!sh],['sync','სინქრონიზაცია',I.sync],['install','დაინსტალირება',I.install,'',!P.install],['refresh','განახლება',I.refresh],
+   ['logout','გასვლა',I.logout],['disconnect','გათიშვა',I.power]];
+  modal('ფუნქციები',`<div class="fn">${F.map(([a,t,ic,cls,dis])=>`<button data-fn="${a}" class="${cls||''}" ${dis?'disabled':''}>${svg(ic,24)}${t}</button>`).join('')}</div>
+   <div class="muted small" style="text-align:center">${esc(P.user.name)} · მოწყობილობა ${esc(DEVICE.slice(-5))} · ${P.cat.size} პროდუქტი კატალოგში</div>`);
+  document.querySelectorAll('[data-fn]').forEach(b=>b.onclick=()=>fn(b.dataset.fn));
+}
+async function fn(a){
+  closeModal();
+  if(a==='sync')return act('sync');
+  if(a==='refresh'){if(navigator.serviceWorker&&navigator.serviceWorker.controller){const r=await navigator.serviceWorker.getRegistration();if(r)await r.update()}location.reload();return}
+  if(a==='install'){if(P.install){P.install.prompt();P.install=null}return}
+  if(a==='logout'){if(outbox.length)toast('ზოგი გაყიდვა ჯერ ინახება — დაელოდეთ');P.user=null;lsSet('pos.user','');P.pin='';render();return}
+  if(a==='disconnect'){if(outbox.length){toast('ჯერ შეინახეთ ყველა გაყიდვა (იხ. ღილაკი ზევით)');return}modal('გათიშვა',`<p>ეს მოწყობილობა გაითიშება სალაროდან და კატალოგი წაიშლება აქედან. ხელახლა დასაკავშირებლად დაგჭირდებათ მოწყობილობის ბმული.</p><div class="row"><button class="btn danger" id="dcGo">გათიშვა</button><button class="btn" data-close>გაუქმება</button></div>`);$('#dcGo').onclick=()=>{['pos.backend','pos.cache','pos.user','pos.cart'].forEach(k=>lsSet(k,''));location.reload()};return}
+  if(a==='shiftOpen')return shiftOpenModal();
+  if(a==='shiftClose')return shiftCloseModal(false);
+  if(a==='dayClose')return shiftCloseModal(true);
+  if(a==='shiftReport')return shiftReport();
+  if(a==='cashIn'||a==='cashOut')return cashMove(a==='cashIn'?'in':'out');
+  if(a==='history')return history();
+}
+function shiftStats(sh){
+  const S={n:0,total:0,by:{},cashIn:0,cashOut:0,voids:0,items:0};
+  P.pos.forEach(o=>{if(o.shift!==sh.id)return;if(o.status==='void'){S.voids++;return}S.n++;S.total+=o.total;S.by[o.pay]=(S.by[o.pay]||0)+o.total;S.items+=o.lines.reduce((a,l)=>a+l.q,0)});
+  (sh.moves||[]).forEach(m=>{if(m.kind==='in')S.cashIn+=m.gel;else S.cashOut+=m.gel});
+  S.cashExpected=r2((+sh.openCash||0)+(S.by.cash||0)+S.cashIn-S.cashOut);return S;
+}
+function lastClose(){let v=null;P.shift.forEach(s=>{if(s.closedAt&&s.device===DEVICE&&(!v||s.closedAt>v.closedAt))v=s});return v?v.closeCash:0}
+function shiftOpenModal(){
+  modal('ცვლის გახსნა',`<p style="margin:0">რამდენი ნაღდი ფულია სალაროში ახლა? (ხურდის თანხა)</p><div class="cashrow"><input id="oc" inputmode="decimal" value="${lastClose()||''}" placeholder="0.00"><button disabled>₾</button></div>
+   <div class="row"><button class="btn primary big" id="ocGo">ცვლის გახსნა</button><button class="btn" data-close>მოგვიანებით</button></div>`);
+  $('#oc').focus();$('#ocGo').onclick=()=>{const s={id:uid('s'),user:P.user,device:DEVICE,day:today(),openedAt:new Date().toISOString(),openCash:r2(parseFloat($('#oc').value)||0),moves:[],closedAt:null};push('shift',s.id,s);closeModal();render();toast('ცვლა გახსნილია')};
+}
+function shiftCloseModal(day){
+  const sh=openShift();if(!sh){if(day)return dayReport();toast('ღია ცვლა არ არის');return}
+  const S=shiftStats(sh);
+  modal(day?'დღის დახურვა':'ცვლის დახურვა',`<div class="kv">${kvRows(sh,S)}</div>
+   <p style="margin:0">დათვალეთ ნაღდი ფული სალაროში და ჩაწერეთ:</p><div class="cashrow"><input id="cc" inputmode="decimal" placeholder="${fmt(S.cashExpected,2)}"><button id="ccExp">მოსალოდნელი</button></div>
+   <div id="ccDiff" class="muted small"></div>
+   <div class="row"><button class="btn primary big" id="ccGo">${day?'დახურვა და Z-ანგარიში':'ცვლის დახურვა'}</button><button class="btn" data-close>გაუქმება</button></div>`);
+  const inp=$('#cc');inp.focus();const diff=()=>{const v=parseFloat(inp.value);$('#ccDiff').textContent=isFinite(v)?(Math.abs(v-S.cashExpected)<0.005?'ემთხვევა მოსალოდნელს':'სხვაობა: '+(v>S.cashExpected?'+':'−')+gel(Math.abs(v-S.cashExpected),2)):''};inp.oninput=diff;
+  $('#ccExp').onclick=()=>{inp.value=fmt(S.cashExpected,2).replace(/,/g,'');diff()};
+  $('#ccGo').onclick=()=>{const v=parseFloat(inp.value);if(!isFinite(v)){inp.focus();return}const c={...sh,closedAt:new Date().toISOString(),closeCash:r2(v),expected:S.cashExpected,closedBy:P.user,stats:{n:S.n,total:r2(S.total),by:S.by,voids:S.voids}};push('shift',c.id,c);closeModal();
+    printHtml(reportHtml(day?'Z-ანგარიში · დღის დახურვა':'ცვლის დახურვა',esc(P.user.name)+' · '+dLong(sh.day),kvList(c,S).concat([['დათვლილი ნაღდი',gel(v,2),'tot'],['სხვაობა',(v-S.cashExpected>=0?'+':'−')+gel(Math.abs(v-S.cashExpected),2)]])));
+    if(day)setTimeout(()=>{P.user=null;lsSet('pos.user','');render();toast('დღე დახურულია')},400);else render()};
+}
+function kvList(sh,S){const rows=[['ცვლა გაიხსნა',dtShort(sh.openedAt)],['გაყიდვები',S.n+' · '+gel(S.total,2)]];PAY.forEach(([k,t])=>{if(S.by[k])rows.push(['  '+t,gel(S.by[k],2)])});rows.push(['საწყისი ნაღდი',gel(sh.openCash,2)],['თანხის მიღება',gel(S.cashIn,2)],['თანხის გაცემა',gel(S.cashOut,2)],['მოსალოდნელი ნაღდი',gel(S.cashExpected,2),'tot']);if(S.voids)rows.push(['გაუქმებული',String(S.voids)]);return rows}
+function kvRows(sh,S){return kvList(sh,S).map(([k,v,c])=>`<div class="${c==='tot'?'sum':''}"><span>${esc(k)}</span><span class="num">${esc(v)}</span></div>`).join('')}
+function shiftReport(){const sh=openShift();if(!sh)return toast('ღია ცვლა არ არის');const S=shiftStats(sh);modal('ცვლის ნავაჭრი',`<div class="kv">${kvRows(sh,S)}</div><div class="row"><button class="btn" id="srPrint">${svg(I.print,18)} ამობეჭდვა</button></div>`);$('#srPrint').onclick=()=>printHtml(reportHtml('ცვლის ნავაჭრი',P.user.name+' · '+dLong(sh.day),kvList(sh,S)))}
+function dayReport(){const d=today();const S={n:0,total:0,by:{}};P.pos.forEach(o=>{if(o.day!==d||o.status==='void')return;S.n++;S.total+=o.total;S.by[o.pay]=(S.by[o.pay]||0)+o.total});const rows=[['გაყიდვები',S.n+' · '+gel(S.total,2)]];PAY.forEach(([k,t])=>{if(S.by[k])rows.push(['  '+t,gel(S.by[k],2)])});modal('დღის ანგარიში',`<div class="kv">${rows.map(([k,v])=>`<div><span>${esc(k)}</span><span class="num">${esc(v)}</span></div>`).join('')}</div><p class="muted small" style="margin:0">ღია ცვლა არ არის. ცვლა გახსენით ფუნქციებიდან, რომ ნაღდი ფულიც დაითვალოს.</p><div class="row"><button class="btn" id="drPrint">${svg(I.print,18)} ამობეჭდვა</button></div>`);$('#drPrint').onclick=()=>printHtml(reportHtml('დღის ანგარიში',dLong(d),rows))}
+function cashMove(kind){
+  const sh=openShift();if(!sh)return toast('ჯერ გახსენით ცვლა');
+  modal(kind==='in'?'თანხის მიღება სალაროში':'თანხის გაცემა სალაროდან',`<div class="cashrow"><input id="cm" inputmode="decimal" placeholder="0.00"><button disabled>₾</button></div><label class="field"><span>რისთვის</span><input class="input" id="cmNote" placeholder="${kind==='in'?'მაგ. ხურდა ბანკიდან':'მაგ. კურიერი, წყალი…'}"></label>
+   <div class="row"><button class="btn primary big" id="cmGo">${kind==='in'?'მიღება':'გაცემა'}</button><button class="btn" data-close>გაუქმება</button></div>`);
+  $('#cm').focus();$('#cmGo').onclick=()=>{const v=parseFloat($('#cm').value);if(!(v>0)){$('#cm').focus();return}const s={...sh,moves:[...(sh.moves||[]),{at:new Date().toISOString(),kind,gel:r2(v),note:$('#cmNote').value.trim(),user:P.user}]};push('shift',s.id,s);closeModal();toast((kind==='in'?'მიღებულია ':'გაცემულია ')+gel(v,2))};
+}
+function history(){
+  const d=today();const L=[...P.pos.values()].filter(o=>o.day===d).sort((a,b)=>b.at.localeCompare(a.at));
+  const tot=L.filter(o=>o.status!=='void').reduce((a,o)=>a+o.total,0);
+  modal('გაყიდვების ისტორია · დღეს',`<div class="row"><b>${L.filter(o=>o.status!=='void').length} გაყიდვა</b><span class="spacer"></span><b class="num">${gel(tot,2)}</b></div>
+   <div class="olist">${L.length?L.map(o=>`<div class="orow ${o.status==='void'?'void':''}" data-o="${esc(o.id)}"><span class="t">${tShort(o.at)}</span><span><div>${esc(o.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '))}</div><div class="d">№${o.no||''} · ${esc(o.user.name)} · ${esc(PAYN[o.pay]||o.pay)}${o.status==='void'?' · გაუქმებული':''}</div></span><b class="num">${gel(o.total,2)}</b></div>`).join(''):'<div class="muted" style="text-align:center;padding:20px">დღეს გაყიდვა ჯერ არ არის</div>'}</div>`,true);
+  document.querySelectorAll('[data-o]').forEach(r=>r.onclick=()=>orderView(r.dataset.o));
+}
+function orderView(id){
+  const o=P.pos.get(id);if(!o)return;
+  modal('ქვითარი №'+(o.no||''),`<div class="kv">${o.lines.map(l=>`<div><span>${esc(l.n)} <span class="muted">× ${l.q}${l.d?' −'+gel(l.d):''}</span></span><span class="num">${gel(lineTot(l),2)}</span></div>`).join('')}${o.disc?`<div><span>ფასდაკლება</span><span class="num">−${gel(o.disc,2)}</span></div>`:''}<div class="sum"><span>სულ · ${esc(PAYN[o.pay]||o.pay)}</span><span class="num">${gel(o.total,2)}</span></div></div>
+   <div class="muted small">${dtShort(o.at)} · ${esc(o.user.name)}${o.note?' · '+esc(o.note):''}${o.status==='void'?' · <b style="color:var(--bad)">გაუქმებულია</b> '+esc(o.voidWhy||''):''}</div>
+   <div class="row"><button class="btn" id="ovPrint">${svg(I.print,18)} ქვითარი</button><span class="spacer"></span>${o.status!=='void'?`<button class="btn danger" id="ovVoid">გაუქმება</button>`:''}<button class="btn" data-close>დახურვა</button></div>`);
+  $('#ovPrint').onclick=()=>printHtml(receiptHtml(o));
+  const v=$('#ovVoid');if(v)v.onclick=()=>{modal('გაყიდვის გაუქმება',`<p>ქვითარი №${o.no||''} · ${gel(o.total,2)} გაუქმდება და მფლობელი ამას დაინახავს.</p><label class="field"><span>მიზეზი</span><input class="input" id="vw" placeholder="მაგ. შეცდომით დაირტყა, დაბრუნება…"></label><div class="row"><button class="btn danger" id="vwGo">გაუქმება</button><button class="btn" data-close>უკან</button></div>`);
+    $('#vwGo').onclick=()=>{const w=$('#vw').value.trim();if(!w){$('#vw').focus();return}push('pos',o.id,{...o,status:'void',voidAt:new Date().toISOString(),voidBy:P.user,voidWhy:w});closeModal();render();toast('გაუქმებულია')}};
+}
+
+/* ============================== barcode scanner (keyboard wedge) ============================== */
+let scanBuf='',scanT=0;
+document.addEventListener('keydown',e=>{
+  if(!P.user||P.view!=='sale'||$('#scrim'))return;
+  const t=e.target;const inInput=t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA');
+  if(inInput&&t.id!=='q')return;
+  if(e.key==='Enter'){if(scanBuf.length>=3){const x=[...P.cat.values()].find(y=>String(y.b)===scanBuf&&!y.hidden);if(x){e.preventDefault();addItem(x);if(inInput){t.value='';P.q=''}toast(x.n)}else if(!inInput)toast('უცნობი შტრიხკოდი: '+scanBuf)}scanBuf='';return}
+  if(e.key.length===1&&/[\w\-$]/.test(e.key)){const now=Date.now();if(now-scanT>120)scanBuf='';scanBuf+=e.key;scanT=now;if(!inInput&&!e.ctrlKey&&!e.metaKey){const q=$('#q');if(q&&/[^\d]/.test(e.key)){q.focus()}}}
+});
+
+/* ============================== boot ============================== */
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();P.install=e});
+if('serviceWorker' in navigator&&location.protocol==='https:')addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+connect();render();
+</script>
+</body>
+</html>
