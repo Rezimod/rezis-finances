@@ -16,56 +16,64 @@
 <body>
 <title>Mars · Astroman</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 /* Enterprise dark: neutral near-black surfaces, hairline borders, one sans family with tabular numbers,
    indigo for data and selection, amber for the one primary action. Light mode (Settings → Appearance) keeps the same tokens. */
 :root{
-  --bg:#0B0D12; --surface:#13161D; --surface-2:#1B1F28; --surface-3:#252A36; --ink:#E9ECF3; --ink-2:#B6BCC9; --muted:#8A92A6; --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.15);
-  --brand:#7C8CF8; --brand-ink:#0B0D12; --brand-bg:rgba(124,140,248,.14); --accent:#F5A623; --accent-ink:#1A1300; --accent-hover:#FFB640;
-  --rail-bg:#0B0D12; --rail-ink:#E9ECF3; --rail-muted:#7E8699; --rail-line:rgba(255,255,255,.08);
-  --night:#0B0D12; --night-2:#13161D; --night-ink:#E9ECF3; --night-muted:#8A92A6;
-  --good:#4CC38A; --warn:#E0A531; --bad:#F2695C; --good-bg:rgba(76,195,138,.14); --warn-bg:rgba(224,165,49,.14); --bad-bg:rgba(242,105,92,.14);
-  --s1:#7C8CF8; --s2:#D9A03A; --grid:rgba(255,255,255,.06); --shadow:none;
-  --glass:var(--surface);
-  --f-ui:"Noto Sans Georgian",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --bg:#EEF1F7; --surface:#FFFFFF; --surface-2:#F6F8FC; --surface-3:#E8EDF6; --ink:#0F172A; --ink-2:#334155; --muted:#3E4C63; --line:rgba(15,23,42,.1); --line-2:rgba(15,23,42,.18);
+  --brand:#3B5BDB; --brand-ink:#FFFFFF; --brand-bg:rgba(59,91,219,.1); --accent:#E89B12; --accent-ink:#1A1200; --accent-hover:#F0AD3A;
+  --rail-bg:#0B1230; --rail-ink:#E6EAF5; --rail-muted:#AEB7D0; --rail-line:rgba(255,255,255,.1);
+  --night:#0B1230; --night-2:#151C3A; --night-ink:#E6EAF5; --night-muted:#AEB7D0;
+  --good:#047857; --warn:#8A5300; --bad:#B42318; --good-bg:#E7F6EF; --warn-bg:#FEF3DC; --bad-bg:#FDECEA;
+  --s1:#3B5BDB; --s2:#E89B12; --grid:#E6EAF1; --shadow:0 1px 2px rgba(15,23,42,.04),0 8px 24px rgba(15,23,42,.06);
+  --glass:rgba(255,255,255,.86);
+  --f-ui:Inter,"Noto Sans Georgian",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-num:var(--f-ui);
   --f-display:var(--f-ui);
-  --r:12px; --ease:cubic-bezier(.2,.7,.2,1); color-scheme:dark;
+  --r:20px; --ease:cubic-bezier(.2,.7,.2,1); color-scheme:light;
 }
-:root[data-theme="light"]{
-  --bg:#F3F4F7; --surface:#FFFFFF; --surface-2:#F0F2F6; --surface-3:#E4E7EE; --ink:#151A26; --ink-2:#4A5165; --muted:#6E7689; --line:#E1E4EB; --line-2:#CDD2DC;
-  --brand:#3D52D5; --brand-ink:#FFFFFF; --brand-bg:rgba(61,82,213,.1);
-  --rail-bg:#FFFFFF; --rail-ink:#151A26; --rail-muted:#6E7689; --rail-line:#E1E4EB;
-  --night:#FFFFFF; --night-2:#F0F2F6; --night-ink:#151A26; --night-muted:#6E7689;
-  --good:#1E8A55; --warn:#A86A12; --bad:#C4382C; --good-bg:#E3F4EA; --warn-bg:#FBF0DC; --bad-bg:#FBE5E2;
-  --s1:#3D52D5; --s2:#C27A06; --grid:#E8EBF1; --shadow:none; --glass:var(--surface); color-scheme:light}
+:root[data-theme="dark"]{
+  --bg:#0B0D12; --surface:#161B28; --surface-2:#1E2536; --surface-3:#2A3348; --ink:#F4F7FB; --ink-2:#D5DCE8; --muted:#C5CEDD; --line:rgba(255,255,255,.1); --line-2:rgba(255,255,255,.2);
+  --brand:#9AABFF; --brand-ink:#0B0D12; --brand-bg:rgba(154,171,255,.16); --accent:#F5A623; --accent-ink:#1A1300; --accent-hover:#FFB640;
+  --rail-bg:#0B1230; --rail-ink:#E6EAF5; --rail-muted:#AEB7D0; --rail-line:rgba(255,255,255,.1);
+  --night:#0B0D12; --night-2:#161B28; --night-ink:#F4F7FB; --night-muted:#C5CEDD;
+  --good:#6EE7B7; --warn:#F6C56B; --bad:#FF8A7E; --good-bg:rgba(16,120,80,.28); --warn-bg:rgba(180,110,0,.28); --bad-bg:rgba(180,40,30,.28);
+  --s1:#9AABFF; --s2:#F5A623; --grid:rgba(255,255,255,.08); --shadow:none; --glass:#161B28; color-scheme:dark}
 *{box-sizing:border-box}
 html,body{height:100%}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:14px;line-height:1.5;margin:0;-webkit-tap-highlight-color:transparent;scrollbar-color:var(--surface-2) transparent}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:14px;line-height:1.5;margin:0;-webkit-tap-highlight-color:transparent;scrollbar-color:var(--surface-3) transparent;background-image:radial-gradient(1200px 600px at 80% -10%,#DCE4FF 0,transparent 60%),radial-gradient(900px 500px at 0% 100%,#FFF0D6 0,transparent 55%)}
+:root[data-theme="dark"] body{background-image:none}
+html,body{overflow-x:clip}
 button,input,select,textarea{font:inherit;color:inherit}
 .num{font-family:var(--f-num);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 .app{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100%}
 .content{min-width:0}
 /* ---------- rail ---------- */
-.rail{background:var(--rail-bg);border-right:1px solid var(--rail-line);color:var(--rail-ink);padding:16px 12px;display:flex;flex-direction:column;gap:14px;position:sticky;top:0;height:100vh;overflow:auto}
+.rail{background:#0B1230;border-right:0;color:#E6EAF5;padding:22px 14px;display:flex;flex-direction:column;gap:14px;position:sticky;top:0;height:100vh;overflow:auto}
+.rail .monthdial{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;height:44px;width:100%}
+.rail .monthdial select{color:#fff;min-width:0;flex:1}
+.rail .monthdial .iconbtn{color:#fff;border:0}
+.rail .monthdial .iconbtn:hover{background:rgba(255,255,255,.1)}
+.rail .cta{background:var(--accent);color:var(--accent-ink);border:0;border-radius:12px;height:44px;width:100%;font-weight:700;font-size:14px}
+.rail .cta:hover{background:var(--accent-hover)}
 .brand{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:2px 8px 6px}
-.brand img{width:112px;height:auto;display:block}
-:root[data-theme="light"] .brand img.lt{display:none}:root:not([data-theme="light"]) .brand img.dk{display:none}
-.brand small{display:block;color:var(--accent);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:700}
+.brand img{width:118px;height:auto;display:block}
+.brand img.dk{display:none}
+.brand small{display:block;color:#FFD28A;font-size:11px;letter-spacing:.04em;text-transform:none;font-weight:500;margin-top:2px}
 .iconbtn{background:transparent;border:1px solid var(--line-2);color:var(--ink);border-radius:8px;width:32px;height:32px;display:grid;place-items:center;cursor:pointer;flex:none;transition:background .15s}
 .iconbtn:hover{background:var(--surface-2)}
 nav.menu{display:flex;flex-direction:column;gap:2px}
-nav.menu button{display:flex;align-items:center;gap:10px;background:transparent;border:1px solid transparent;color:var(--rail-ink);padding:7px 10px;border-radius:8px;cursor:pointer;text-align:left;font-size:13.5px;font-weight:500;opacity:.82;transition:background .15s,opacity .15s}
-nav.menu button svg{color:var(--rail-muted);flex:none}
-nav.menu button:hover{background:var(--surface-2);opacity:1}
-nav.menu button[aria-current="page"]{background:color-mix(in srgb,var(--accent) 12%,transparent);border-color:color-mix(in srgb,var(--accent) 30%,transparent);color:var(--ink);opacity:1;font-weight:600}
-nav.menu button[aria-current="page"] svg{color:var(--accent)}
+nav.menu button{display:flex;align-items:center;gap:10px;background:transparent;border:1px solid transparent;color:#C9D0E4;padding:9px 12px;border-radius:10px;cursor:pointer;text-align:left;font-size:14px;font-weight:500;opacity:1;transition:background .15s,color .15s}
+nav.menu button svg{color:#97A1BD;flex:none}
+nav.menu button:hover{background:rgba(255,255,255,.08);color:#fff}
+nav.menu button[aria-current="page"]{background:rgba(232,155,18,.16);border-color:transparent;color:#FFD28A;font-weight:600}
+nav.menu button[aria-current="page"] svg{color:#FFD28A}
 nav.menu .sep{height:1px;background:var(--rail-line);margin:8px 6px}
 nav.menu .grp{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--rail-muted);padding:4px 10px 4px;font-weight:600}
-.rail .foot{margin-top:auto;font-size:11.5px;color:var(--rail-muted);padding:10px 12px;display:flex;flex-direction:column;gap:3px;border:1px solid var(--rail-line);border-radius:10px;background:var(--surface)}
+.rail .foot{margin-top:auto;font-size:12px;color:#AEB7D0;padding:8px 8px 4px;display:flex;flex-direction:column;gap:3px;border:0;background:transparent}
 .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#4CC38A;margin-right:6px;vertical-align:1px;box-shadow:0 0 0 0 rgba(76,195,138,.6);animation:pulse 2.4s infinite}
 .dot.off{background:#E2B04A;animation:none}
 @keyframes pulse{70%{box-shadow:0 0 0 6px rgba(76,195,138,0)}100%{box-shadow:0 0 0 0 rgba(76,195,138,0)}}
@@ -103,7 +111,8 @@ main:focus{outline:none}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 :focus-visible{outline:2px solid var(--brand);outline-offset:2px}
 a{color:var(--brand)}
-.panel{background:var(--glass);border:1px solid var(--line);border-radius:var(--r);padding:18px;min-width:0;box-shadow:var(--shadow)}
+.panel{background:var(--glass);border:1px solid rgba(255,255,255,.7);border-radius:var(--r);padding:18px;min-width:0;box-shadow:var(--shadow)}
+:root[data-theme="dark"] .panel{border-color:var(--line)}
 .panel h2{margin:0 0 3px;font-size:15px;font-weight:700}
 .sech{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:2px 0 10px}.sech h2{margin:0;font-size:15px;font-weight:700}.sech span{font-size:12.5px;color:var(--muted)}.sech span b{color:var(--ink);font-weight:700}
 .panel .sub{color:var(--muted);font-size:12.5px;margin:0 0 14px}
@@ -148,15 +157,16 @@ a{color:var(--brand)}
 @media (max-width:420px){.money{grid-template-columns:minmax(0,1fr)}}
 .tag{display:inline-block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:999px;background:var(--brand-bg);color:var(--brand);font-weight:700}
 /* ---------- kpi strip (light) ---------- */
-.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:var(--r);background:var(--glass);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow)}
-.kpi{padding:18px 20px;border-right:1px solid var(--line);min-width:0}
-.kpi:last-child{border-right:0}
-.kpi .lbl{font-size:11.5px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
-.kpi .val{font-size:27px;font-weight:500;margin-top:4px;line-height:1.15}
-.kpi .val small{font-size:15px;color:var(--muted);font-weight:500;margin-left:2px}
-.kpi .delta{font-size:12px;margin-top:3px;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;border:0;background:transparent;overflow:visible;margin-bottom:16px;box-shadow:none}
+.kpi{padding:16px 18px;border:1px solid var(--line);border-radius:20px;min-width:0;background:var(--glass);box-shadow:var(--shadow)}
+.kpi:last-child{border-right:1px solid var(--line)}
+.kpi .lbl{font-size:13px;color:var(--ink-2);letter-spacing:0;text-transform:none;font-weight:600;display:flex;align-items:center;gap:6px}
+.kpi .val{font-size:32px;font-weight:700;margin-top:6px;line-height:1.1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi .val small,.val .cur{font-size:.55em;color:var(--ink-2);font-weight:600;margin-left:3px}
+.kpi .delta,.exp{font-size:12.5px;margin-top:4px;color:var(--muted);line-height:1.4}
 .up{color:var(--good)} .down{color:var(--bad)} .neg{color:var(--bad)}
-@media (max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi:nth-child(2){border-right:0}.kpi:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+@media (max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.kpis{grid-template-columns:minmax(0,1fr)}.kpi .val{font-size:26px}}
 /* ---------- flow ---------- */
 .flow{display:flex;flex-direction:column}
 .flow .ln{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:7px 0;border-bottom:1px dashed var(--line);align-items:baseline}
@@ -567,26 +577,26 @@ tr.dayrow td{background:var(--surface-2);font-size:12px;color:var(--ink-2);paddi
 }
 @media (prefers-reduced-motion:reduce){.brand .ring,.dot{animation:none}}
 /* ---------- phone ---------- */
-.tabbar,.moresheet{display:none}
-@media (max-width:860px){
+#topMore,.tabbar,.moresheet{display:none}
+@media (max-width:900px){
   .app{grid-template-columns:minmax(0,1fr)}
-  .rail{display:none}
-  .topbar{padding:calc(8px + env(safe-area-inset-top,0px)) 14px 8px;z-index:20;background:var(--bg)}
-  .topbar .tbrand{display:block}
-  .topbar .spacer{display:none}
-  .monthdial{flex:1;max-width:none}.monthdial .row{width:100%}.monthdial select{flex:1;min-width:0}
-  .topbar .ago,#topRecap,#topAdd{display:none}
+  .rail{flex-direction:row;align-items:center;height:auto;position:sticky;width:100%;padding:10px 12px;gap:8px;z-index:30;overflow:visible}
+  .rail .brand{flex-direction:row;align-items:center;padding:0;gap:0}
+  .rail .brand img{width:42px}
+  .rail .brand small,.rail nav.menu,.rail .foot,.rail .cta{display:none}
+  .rail .monthdial{margin-left:auto;width:auto;flex:1;max-width:230px;height:40px}
+  .topbar{padding:8px 12px;z-index:20;background:transparent;border:0;position:static}
+  .topbar .ago,#topRecap{display:none}
+  #topMore{display:inline-flex}
   #topSync{padding:0 10px}
-  main{padding-block:16px calc(96px + env(safe-area-inset-bottom,0px))}
-  .kpi .val{font-size:21px}
+  main{padding-block:8px calc(108px + env(safe-area-inset-bottom,0px));padding-inline:14px}
+  .kpi .val{font-size:26px}
   .bigamount input{font-size:34px}
-  .pagehead h1{font-size:21px}
-  .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:40;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
-  .tabbar button{background:transparent;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;color:var(--muted);padding:4px 0;cursor:pointer}
-  .tabbar button svg{width:22px;height:22px}
-  .tabbar button[aria-current="page"]{color:var(--accent)}
-  .tabbar .plus{width:52px;height:52px;border-radius:50%;background:var(--accent);color:var(--accent-ink);margin:-22px auto 0;display:grid;place-items:center;font-size:28px;font-weight:600;border:4px solid var(--bg);transition:transform .15s}
-  .tabbar .plus:active{transform:scale(.94)}
+  .pagehead h1{font-size:23px}
+  .tabbar{display:flex;position:fixed;left:12px;right:12px;bottom:12px;z-index:40;justify-content:space-around;background:rgba(11,18,48,.92);backdrop-filter:blur(16px);border-radius:22px;padding:10px 6px calc(10px + env(safe-area-inset-bottom,0px));border:0}
+  .tabbar button{background:transparent;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:#C9D0E4;padding:4px 0;cursor:pointer;min-width:0}
+  .tabbar button svg{width:18px;height:18px}
+  .tabbar button[aria-current="page"]{color:#FFD28A;font-weight:600}
   .moresheet{position:fixed;inset:0;z-index:45;background:rgba(5,10,25,.45);align-items:flex-end;animation:fade .15s both}
   .moresheet.open{display:flex}
   .moresheet .sheet{background:var(--surface);width:100%;border-radius:18px 18px 0 0;padding:10px 12px calc(16px + env(safe-area-inset-bottom,0px));animation:slideup .25s var(--ease) both}
@@ -732,13 +742,13 @@ tr.dim td{opacity:.55}
 @media (max-width:700px){.pedit{grid-template-columns:1fr}.pimg img,.pimg .ph{width:140px;height:140px}}
 
 
-/* ---------- compact layout: more on screen, clearer blocks ---------- */
-main{padding-block:14px 60px}
-.pagehead{margin-bottom:12px;gap:12px}.pagehead h1{font-size:24px}.pagehead p{margin-top:3px;font-size:13px}
-.panel{padding:14px 16px;border-radius:12px}.panel h2{font-size:14px}.panel .sub{margin-bottom:10px;font-size:12px}
-.grid{gap:12px}.mt{margin-top:12px}
-.kpis{margin-bottom:12px;border-radius:12px}.kpi{padding:11px 14px}.kpi .lbl{font-size:10.5px}.kpi .val{font-size:22px;margin-top:2px}.kpi .delta{font-size:11.5px;margin-top:2px}
-.mp .kpi{padding:14px 18px 12px}.mp .kpi .lbl{font-size:12px}.mp .kpi .val{font-size:26px;margin-top:3px}.mp .kpi .delta{font-size:12px;margin-top:3px}
+/* ---------- reading size: big figures, room to scan ---------- */
+main{padding-block:20px 72px}
+.pagehead{margin-bottom:16px;gap:12px}.pagehead h1{font-size:28px}.pagehead p{margin-top:4px;font-size:13.5px}
+.panel{padding:18px;border-radius:20px}.panel h2{font-size:16px}.panel .sub{margin-bottom:10px;font-size:13px}
+.grid{gap:14px}.mt{margin-top:14px}
+.kpis{margin-bottom:14px}.kpi{padding:16px 18px;border-radius:20px}.kpi .lbl{font-size:13px;font-weight:600}.kpi .val{font-size:32px;margin-top:6px;font-weight:700}.kpi .delta{font-size:12.5px;margin-top:4px}
+.mp .kpi{padding:16px 18px}.mp .kpi .lbl{font-size:13px}.mp .kpi .val{font-size:30px}.mp .kpi .delta{font-size:12.5px}
 .tabs{margin-bottom:10px;padding:3px}
 .today{padding:14px 16px 12px;margin-bottom:12px}
 .today .th h2{font-size:20px}.today .ago{font-size:11.5px}
@@ -750,13 +760,13 @@ main{padding-block:14px 60px}
 .tpays{gap:4px;margin-top:10px}.tpays span{padding:3px 9px;font-size:12px;border-radius:7px}
 .tlist{max-height:262px;border-radius:10px}.tlh{padding:7px 10px}.orow{padding:7px 10px;gap:8px}.orow small{font-size:11px}
 .strip{margin-top:10px;gap:3px}.sd{padding:4px 2px 4px;gap:2px}.sd .sb{height:28px;width:12px}.sd .sl{font-size:10px}.sd .sl b{font-size:12px}.sd .sa{font-size:10px}
-.money{gap:10px;margin-bottom:12px}.mcard{padding:11px 14px}.mcard .val{font-size:20px}
+.money{gap:14px;margin-bottom:14px}.mcard{padding:16px 18px;border-radius:20px}.mcard .val{font-size:28px;font-weight:700}
 .kpis.stock4 .kpi.sum{background:color-mix(in srgb,var(--accent) 10%,transparent)}
 /* blocks read as blocks: a firmer edge in day mode, a lighter edge at night */
 :root[data-theme="light"] .panel,:root[data-theme="light"] .kpis,:root[data-theme="light"] .today,:root[data-theme="light"] .cmps,:root[data-theme="light"] .tlist,:root[data-theme="light"] .mp,:root[data-theme="light"] .mcard,:root[data-theme="light"] .dcard{border-color:#D5DAE3}
 :root[data-theme="light"] .panel h2,:root[data-theme="light"] .kpi .lbl{color:#101A31}
-.panel h2{padding-bottom:6px;border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent);margin-bottom:8px}
-.panel .row h2,.panel .row>div>h2{border-bottom:0;padding-bottom:0;margin-bottom:0}
+.panel h2{margin-bottom:4px}
+.panel .row h2,.panel .row>div>h2{margin-bottom:0}
 @media (max-width:1000px){.cmps{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 /* ---------- products page ---------- */
@@ -796,34 +806,96 @@ main{padding-block:14px 60px}
 .inwr .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .inwr b{color:var(--good)}
 @media (max-width:1100px){.ptools{grid-template-columns:1fr 1fr}.ptools .grow{grid-column:1/-1}}
+/* ---------- F1 reading layer ---------- */
+.ka{font-family:"Noto Sans Georgian",Inter,sans-serif}
+.pagehead h1 .ka,.sect h2 .ka{font-weight:500;color:var(--muted);font-size:.58em;margin-left:8px}
+.panel>.lbl{display:flex;align-items:baseline;justify-content:space-between;gap:8px 14px;flex-wrap:wrap;font-weight:600;color:var(--ink-2)}
+.panel>.lbl .exp{margin-left:0;font-weight:500}
+.pagehead h1{font-size:28px}
+.pagehead p,.sub{color:var(--ink-2)}
+.topbar{background:transparent;border-bottom:0;position:static}
+.content{min-width:0}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--glass);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:13px;color:var(--ink-2);font-weight:600}
+.pill .dot{margin:0}
+.sect{margin:22px 0 12px;display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.sect h2{margin:0;font-size:18px;font-weight:700}
+.dchip{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:3px 8px;border-radius:999px;margin-top:8px;line-height:1.3}
+.dchip.good{color:var(--good);background:var(--good-bg)}
+.dchip.bad{color:var(--bad);background:var(--bad-bg)}
+.dchip.warn{color:var(--warn);background:var(--warn-bg)}
+.dchip.neu{color:var(--ink-2);background:var(--surface-3)}
+.i{position:relative;display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;background:#E2E8F0;color:#1E293B;font:600 10px/1 Inter,sans-serif;cursor:help;flex:none}
+:root[data-theme="dark"] .i{background:#2A3348;color:#F4F7FB}
+.i:hover::after,.i:focus::after,.i.show::after{content:attr(data-tip);position:absolute;left:50%;top:22px;transform:translateX(-50%);width:min(260px,70vw);background:#0F172A;color:#F8FAFC;font:500 12.5px/1.45 Inter,sans-serif;padding:10px 12px;border-radius:12px;z-index:30;box-shadow:0 10px 30px rgba(0,0,0,.25);text-align:left;white-space:normal}
+.note{display:flex;gap:10px;align-items:flex-start;background:var(--warn-bg);border:1px solid #E8C98A;color:#5C3A00;border-radius:14px;padding:12px 14px;font-size:13.5px;line-height:1.45;margin-top:12px}
+:root[data-theme="dark"] .note{color:var(--warn)}
+.note.info{background:#EEF2FF;border-color:#C7D2FE;color:#1E2A78}
+:root[data-theme="dark"] .note.info{background:rgba(59,91,219,.16);border-color:rgba(154,171,255,.35);color:var(--ink)}
+.note.good{background:var(--good-bg);border-color:transparent;color:var(--good)}
+.goalbox{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;min-width:132px}
+.goalbox .tring{position:relative;width:84px;height:84px}
+.goalbox .tring span{position:absolute;inset:0;display:grid;place-items:center;font-size:16px;font-weight:700}
+.goalcap{max-width:150px}
+.cmpgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.cmpbox{background:var(--surface-2);border-radius:14px;padding:10px 12px;min-width:0}
+.cmpbox .num{font-weight:700;font-size:17px;margin-top:2px}
+.cmpbox .dchip{margin-top:6px}
+.split2{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:14px}
+.payline{margin-top:8px}
+.payline .top{display:flex;justify-content:space-between;gap:8px;font-size:13px}
+.trackbar.thin{height:10px;background:#E5E9F2;border-radius:99px;overflow:hidden;margin-top:4px}
+:root[data-theme="dark"] .trackbar.thin{background:var(--surface-3)}
+.trackbar.thin i{display:block;height:100%;border-radius:99px}
+.daychart{display:block;width:100%;height:auto}
+.daychart text{font-family:var(--f-ui);font-size:11px;fill:var(--ink-2)}
+.daychart-wrap{min-width:640px}
+.daychart rect{cursor:pointer}
+.swatch{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}
+.money{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.mcard{border-radius:20px;overflow:visible;padding:16px 18px}
+.mcard .lbl{font-size:13px;font-weight:600;color:var(--ink-2)}
+.mcard .val{font-size:28px;font-weight:700;letter-spacing:-.02em}
+.mcard .exp{color:var(--muted);font-size:12.5px;margin-top:4px;line-height:1.4}
+.chip{font-size:12px;letter-spacing:0;text-transform:none;padding:3px 9px;font-weight:600;border-radius:99px;background:#EEF2FF;color:#1E3A8A}
+.tag{letter-spacing:0;text-transform:none;font-size:12px}
+.scrollx{max-width:100%}
+.stmt .sl b,.kpi .val,.mcard .val,.cmpbox .num{font-variant-numeric:tabular-nums}
+@media (max-width:900px){
+  .split2,.cmpgrid{grid-template-columns:minmax(0,1fr)}
+  .money{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .i:hover::after,.i:focus::after,.i.show::after{width:min(220px,68vw);left:auto;right:0;transform:none}
+  .kpi .val{font-size:26px}.mcard .val{font-size:24px}.pagehead h1{font-size:23px}
+  main{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-width:520px){.money{grid-template-columns:minmax(0,1fr)}.cmpgrid{grid-template-columns:minmax(0,1fr)}.kpi .val{font-size:28px}}
 </style>
 
 <div class="app">
   <aside class="rail">
-    <div class="brand"><img class="lt" src="brand/logo-full-light-240.png" alt="Astroman"><img class="dk" src="brand/logo-full-black-240.png" alt="Astroman"><small>Mars · control center</small></div>
+    <div class="brand"><img class="lt" src="brand/logo-full-light-240.png" alt="Astroman"><small>Mars · Control Center</small></div>
+    <div class="monthdial">
+      <label for="monthSel">Month</label>
+      <div class="row">
+        <button class="iconbtn" id="mPrev" aria-label="Previous month">‹</button>
+        <select id="monthSel" aria-label="Month"></select>
+        <button class="iconbtn" id="mNext" aria-label="Next month">›</button>
+      </div>
+    </div>
+    <button class="btn cta" id="topAdd" data-go="add">+ Add expense</button>
     <nav class="menu" id="menu" aria-label="Sections"></nav>
     <div class="foot">
       <div><span class="dot off" id="syncDot"></span><span id="syncTxt">Connecting…</span></div>
-      <div id="fxTxt">1 USD = 2.70 ₾</div>
-      <div>ალ. ყაზბეგის 17, თბილისი</div>
+      <div class="num" id="fxTxt">1 USD = 2.70 ₾</div>
+      <div class="ka">ალ. ყაზბეგის 17, თბილისი</div>
     </div>
   </aside>
   <div class="content">
     <div class="topbar">
-      <img class="tbrand" src="brand/mark-light-160.png" alt="">
-      <div class="monthdial">
-        <label for="monthSel">Month</label>
-        <div class="row">
-          <button class="iconbtn" id="mPrev" aria-label="Previous month">‹</button>
-          <select id="monthSel" aria-label="Month"></select>
-          <button class="iconbtn" id="mNext" aria-label="Next month">›</button>
-        </div>
-      </div>
       <span class="spacer"></span>
       <span class="ago" id="topAgo"></span>
+      <button class="btn sm" id="topMore" data-go="more">More</button>
       <button class="btn" id="topSync" data-act="syncSheet" data-label="↻ Sync sales">↻ Sync sales</button>
       <button class="btn" id="topRecap" data-act="recap">Recap</button>
-      <button class="btn primary" id="topAdd" data-go="add">+ Add expense</button>
     </div>
     <main id="main" tabindex="-1"></main>
   </div>
@@ -1188,7 +1260,7 @@ const salesDoc=(m,source,locked)=>({month:m.m,rows:m.rows,source,syncedAt:new Da
 function localDownloads(){return {save:async({filename,data})=>{const blob=data instanceof Blob?data:new Blob([data]);const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},1500)}}}
 function vConnect(){
   const c=readCreds()||{};
-  return `<div class="pagehead"><div><div class="eyebrow">First-time setup on this device</div><h1>Connect your data</h1><p>Your numbers live in your own Google account, not on this website, so each device connects once.</p></div></div>
+  return `<div class="pagehead"><div><div class="eyebrow">First-time setup on this device</div><h1>Connect your data <span class="ka">დაკავშირება</span></h1><p>Your numbers live in your own Google account, not on this website, so each device connects once.</p></div></div>
   <div class="panel" style="margin-bottom:16px;border-color:color-mix(in srgb,var(--accent) 45%,var(--line))"><h2>Easiest: scan from your computer</h2><p class="sub" style="margin:0">On the computer where Mars already opens, go to <b>Settings → Backup &amp; devices</b> and point this phone's camera at the QR code. It opens here already connected. Or paste the phone link into the first box below.</p></div>
   <div class="grid g2"><div class="panel stack">
    <label class="field"><span>Web-app URL (Apps Script → Deploy → Manage deployments), or the phone link</span><input class="input" id="cnU" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(c.u||'')}"></label>
@@ -1223,7 +1295,7 @@ function importBackup(file){
 
 /* ============================== db ============================== */
 async function boot(){
-  applyTheme(lsGet('af.theme2')||'dark');
+  applyTheme(lsGet('af.theme2')||'light');
   renderShell();
   const C=window.claude;
   if(!C||!C.use){S.hosted=true;S.downloads=localDownloads();const c=readCreds();route();if(!c){S.view='connect';setConn(false,'Not connected');render();return}setConn(false,'Connecting…');connectBackend(c);return}
@@ -1252,9 +1324,9 @@ function errMsg(e){if(!e)return 'Something went wrong';if(e.code==='quota_exceed
 /* ============================== shell & routing ============================== */
 const svg=(d,s=16)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 function renderShell(){
-  $('#menu').innerHTML=PAGES.map((p,i)=>(p.id==='pl'?'<div class="sep"></div><div class="grp">Finance</div>':p.id==='optimo'?'<div class="sep"></div><div class="grp">Store</div>':'')+`<button data-go="${p.id}">${svg(IC[p.id])}${p.t}</button>`).join('');
-  $('#tabbar').innerHTML=[['overview','Overview'],['expenses','Expenses'],['add',''],['optimo','Optimo'],['more','More']].map(([id,t])=>id==='add'?`<button data-go="add" aria-label="Add expense"><span class="plus">+</span></button>`:`<button data-go="${id}">${svg(IC[id],22)}<span>${t}</span></button>`).join('');
-  $('#moreInner').innerHTML='<div class="grab"></div>'+[['recap','Recap'],['sales','Sales'],['products','Products'],['store','Store sales'],['bank','Bank import'],['pl','Profit & loss'],['imports','Imports'],['loan','Loan'],['settings','Settings']].map(([id,t])=>`<button data-go="${id}">${svg(IC[id],20)}${t}</button>`).join('');
+  $('#menu').innerHTML=PAGES.map((p,i)=>(p.id==='pl'?'<div class="sep"></div><div class="grp">Reports</div>':p.id==='optimo'?'<div class="sep"></div><div class="grp">Store</div>':'')+`<button data-go="${p.id}">${svg(IC[p.id])}${p.t}</button>`).join('');
+  $('#tabbar').innerHTML=[['overview','Overview'],['sales','Sales'],['expenses','Expenses'],['pl','P&L'],['loan','Loan']].map(([id,t])=>`<button data-go="${id}">${svg(IC[id],18)}<span>${t}</span></button>`).join('');
+  $('#moreInner').innerHTML='<div class="grab"></div>'+[['add','Add expense'],['recap','Recap'],['products','Products'],['bank','Bank import'],['imports','Imports'],['optimo','Optimo'],['store','Store sales'],['settings','Settings']].map(([id,t])=>`<button data-go="${id}">${svg(IC[id]||IC.more,20)}${t}</button>`).join('');
   document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){e.preventDefault();if(g.dataset.go==='more'){$('#moreSheet').classList.add('open');return}$('#moreSheet').classList.remove('open');go(g.dataset.go)}});
   $('#moreSheet').addEventListener('click',e=>{if(e.target.id==='moreSheet')e.currentTarget.classList.remove('open')});
   $('#monthSel').addEventListener('change',e=>setMonth(e.target.value));
@@ -1308,7 +1380,7 @@ function starfield(cv){
 }
 
 function skyfield(){}
-function applyTheme(t){document.documentElement.dataset.theme=t==='light'?'light':'dark';document.querySelector('meta[name=theme-color]').content=t==='light'?'#FFFFFF':'#0B0D12'}
+function applyTheme(t){const light=t!=='dark';document.documentElement.dataset.theme=light?'light':'dark';const meta=document.querySelector('meta[name=theme-color]');if(meta)meta.content=light?'#EEF1F7':'#0B1230'}
 function topAgo(){const a=$('#todayAgo');if(a)a.textContent=agoTxt(lastCheck());const b=$('#topAgo');if(b)b.textContent=(S.mcp||S.backend)&&lastCheck()?'Sheet checked '+agoTxt(lastCheck()):''}
 setInterval(topAgo,30000);
 {let rt=0;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(skyfield,200)})}
@@ -1340,11 +1412,11 @@ function deeper(){
 function vOverview(){
   const m=S.month,M=metrics(m),P=metrics(addMonth(m,-1));
   const has=M.hasSales||M.list.length;
-  const t=today();
-  const head=`<div class="pagehead"><div><h1>Overview</h1><p>${dLong(t)} · day ${new Date().getDate()} of ${daysIn(thisMonth())}${m!==thisMonth()?' · showing '+mLabel(m):''}</p></div></div>`;
-  if(!has&&(!S.db||S.loaded.tx)&&!S.tx.size&&!S.sales.size)return head+monthPanel(m,M,P)+`<div class="panel empty"><b>No records yet</b>Start by syncing sales from your order sheet, then import a BOG or TBC statement.</div>`;
-  const B=liveBalances();const tot=Object.values(B).reduce((x,o)=>x+o.now,0);
-  return loadingOr(head+monthPanel(m,M,P)+todayPanel()+`<div class="sech"><h2>Money now</h2><span>${Object.keys(B).length?`All accounts <b class="num">${gel(tot)}</b> · moves with every sale and expense`:'Set balances in Settings or import a statement'}</span></div>`+moneyNow(m,M)+`<div class="grid g3b" style="margin-bottom:12px">${pacePanel(m,M)}${attention(m,M)}</div>`+deeper());
+  const t=today();const shown=S.day&&S.day<=t?S.day:t;const wd=new Date(shown+'T12:00').getDay();
+  const head=`<div class="pagehead"><div><h1>${dLong(shown)} <span class="ka">${KA_DAYS[wd]}</span></h1><p class="sub">Today so far · sales sheet checked <b id="todayAgo">${agoTxt(lastCheck())}</b>${m!==thisMonth()?' · showing '+esc(mLabel(m)):''} · day ${new Date().getDate()} of ${daysIn(thisMonth())}</p></div>
+   <div class="actions"><span class="pill"><span class="dot"></span> Live</span><button class="btn sm" data-day="${addDay(shown,-1)}" aria-label="Previous day">‹</button>${shown===t?'':`<button class="btn sm" data-day="${t}">Today</button>`}<button class="btn sm" data-day="${addDay(shown,1)}" aria-label="Next day" ${shown===t?'disabled':''}>›</button>${S.mcp||S.backend?'<button class="btn" data-act="syncSheet" data-label="↻ Refresh">↻ Refresh</button>':''}</div></div>`;
+  if(!has&&(!S.db||S.loaded.tx)&&!S.tx.size&&!S.sales.size)return head+`<div class="panel empty"><b>No records yet</b>Start by syncing sales from your order sheet, then import a BOG or TBC statement.</div>`;
+  return loadingOr(head+todayPanel()+monthCards(m,M,P)+moneyNow()+`<div class="grid g3b mt">${pacePanel(m,M)}${attention(m,M)}</div>`+deeper());
 }
 /* ---------- today, pace, calendar ---------- */
 const DAY_TARGET=1000;
@@ -1360,28 +1432,113 @@ function lastCheck(){const doc=S.sales.get(thisMonth());return Math.max(+lsGet('
 function agoTxt(t){if(!t)return 'not synced yet';const s=(Date.now()-t)/1000;if(s<60)return 'just now';if(s<3600)return Math.round(s/60)+' min ago';if(s<86400)return Math.round(s/3600)+' h ago';return dShort(new Date(t).toISOString().slice(0,10))}
 const pctChip=(a,b)=>{if(!b)return '<em class="flat">—</em>';const ch=Math.round((a-b)/b*100);return `<em class="${ch>=0?'up':'down'}">${ch>=0?'▲':'▼'} ${Math.abs(ch)}%</em>`};
 function payChip(p){return p==='unknown'?'<span class="chip warn">Not recorded</span>':`<span class="chip">${esc(PAYS[p]||p)}</span>`}
-function ring(v,max){const r=30,c=2*Math.PI*r,k=Math.min(1,v/max);return `<svg class="ring" viewBox="0 0 76 76" aria-hidden="true"><circle cx="38" cy="38" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="7"/>${k>0?`<circle cx="38" cy="38" r="${r}" fill="none" stroke="${v>=max?'var(--good)':'var(--accent)'}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${c*k} ${c}" transform="rotate(-90 38 38)"/>`:''}</svg>`}
+const GL={
+  sales:'All money customers paid, before any costs.',
+  gross:'Gross profit = sales minus what the sold products cost you to buy. It shows how much the products themselves earn.',
+  opex:'Running costs = rent, salaries, accountant and the other bills that keep the shop open. Fixed monthly costs are counted in full on day 1.',
+  net:'Net profit = gross profit minus running costs minus taxes. What the business actually kept.',
+  margin:'Margin = gross profit divided by sales. 59% means 59 tetri of every 1 lari stays after paying for the product.',
+  reg:'The store register is what the till recorded. It is compared with the order sheet to catch a missing entry.',
+  pace:'If each remaining day sells the same as the average day so far, this is where the month ends.',
+  cogs:'What the products you sold cost you to buy, including freight. Estimated when a product has no cost on file.',
+  loan:'The bank loan is kept on its own page. It is not a shop cost and it is not taken out of profit.'
+};
+const info=k=>`<span class="i" tabindex="0" role="button" aria-label="What this means" data-tip="${esc(GL[k]||'')}">i</span>`;
+const CHEV_UP='<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 1.2 8.8 8H1.2z" fill="currentColor"/></svg>';
+const CHEV_DN='<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 8.8 1.2 2h7.6z" fill="currentColor"/></svg>';
+const WARN_IC='<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1 11.2 10.5H.8z" fill="currentColor"/></svg>';
+function dFrom(a,b,vs,goodWhenUp){if(!b)return '';const pctn=Math.round((a-b)/Math.abs(b)*100);const up=pctn>=0;const good=up===!!goodWhenUp;return `<span class="dchip ${good?'good':'bad'}">${up?CHEV_UP:CHEV_DN} ${Math.abs(pctn)}% ${up?'higher':'lower'} than ${esc(vs)}</span>`}
+const PAYC={pos:'#3B5BDB',bog:'#F26722',tbc:'#00A3E0',wolt:'#009DE0',glovo:'#059669',cash:'#64748B',personal:'#64748B',extra:'#7C3AED',cod:'#64748B',pending:'#8A5300',installment:'#7C3AED',other:'#64748B',unknown:'#94A3B8'};
+function ring(v,max){const r=30,c=2*Math.PI*r,k=Math.max(0,Math.min(1,max?v/max:0));return `<svg class="ring" viewBox="0 0 76 76" width="84" height="84" aria-hidden="true"><circle cx="38" cy="38" r="${r}" fill="none" stroke="#E5E9F2" stroke-width="8"/>${k>0?`<circle cx="38" cy="38" r="${r}" fill="none" stroke="${v>=max?'#047857':'#E89B12'}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${(c*k).toFixed(2)} ${c.toFixed(2)}" transform="rotate(-90 38 38)"/>`:''}</svg>`}
+function registerNote(d,D){
+  const reg=regDay(d);
+  if(!reg.n&&![...S.pos.values()].length)return '';
+  if(!reg.n&&!D.n)return '';
+  const gap=Math.round((D.a-reg.a)*100)/100;
+  if(Math.abs(gap)<1)return `<div class="note good"><div><b>Register check.</b> The store register and the order sheet both show <b class="num">${gel(D.a)}</b>. ${info('reg')}</div></div>`;
+  const onlinePays=['wolt','glovo','bog','tbc','extra','personal','cod','pending','installment'];
+  const online=D.rows.filter(r=>onlinePays.includes(r.pay));
+  const onlineSum=online.reduce((a,r)=>a+(+r.a||0),0);
+  let why='';
+  if(gap>0&&online.length&&Math.abs(onlineSum-gap)<1){
+    const by={};online.forEach(r=>{by[r.pay]=(by[r.pay]||0)+(+r.a||0)});
+    const bits=Object.entries(by).map(([k,v])=>esc(PAYS[k]||k)+' '+fmt(v)).join(' + ');
+    why=` ${fmt(gap)} ₾ (${bits}) ${online.length>1?'are':'is'} not in the register. That is expected for online payments.`;
+  }else if(gap>1)why=` The sheet is ${gel(gap)} higher than the register.`;
+  else if(gap<-1)why=` The register is ${gel(-gap)} higher than the sheet.`;
+  return `<div class="note">${WARN_IC}<div><b>Register check.</b> The store register shows <b class="num">${gel(reg.a)}</b> and the sheet has <b class="num">${gel(D.a)}</b>.${why} ${info('reg')} <a href="#store" data-go="store">Store sales</a></div></div>`;
+}
+function dayChart(days,selected){
+  const W=880,H=228,L=48,R=12,T=28,B=44;
+  const vals=days.map(d=>dayOf(d).a);
+  const mx=Math.max(DAY_TARGET,...vals,1)*1.18;
+  const bw=(W-L-R)/days.length;
+  const y=v=>T+(H-T-B)*(1-(v/mx));
+  const step=mx>4000?1000:mx>1600?500:250;
+  let s=`<svg class="daychart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Daily sales, last 14 days">`;
+  for(let v=0;v<=mx+0.1;v+=step){s+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end">${v>=1000?fmt(v/1000,v%1000?1:0)+'k':fmt(v)}</text>`}
+  s+=`<line x1="${L}" x2="${W-R}" y1="${y(DAY_TARGET)}" y2="${y(DAY_TARGET)}" stroke="#B45309" stroke-dasharray="5 4"/><text x="${W-R}" y="${Math.max(12,y(DAY_TARGET)-6)}" text-anchor="end" fill="#8A5300" font-weight="600">Daily goal ${fmt(DAY_TARGET)} ₾</text>`;
+  days.forEach((d,i)=>{
+    const o=dayOf(d);const dt=new Date(d+'T12:00');
+    const x=L+i*bw+bw*0.16,w=bw*0.68,last=d===today();
+    const wd=dt.toLocaleDateString('en-GB',{weekday:'short'});
+    const tip=esc(`${wd} ${dt.getDate()} ${dt.toLocaleDateString('en-GB',{month:'short'})}: ${o.n?fmt(o.a)+' ₾ · '+o.n+' order'+(o.n===1?'':'s'):'no sales'}`);
+    s+=`<rect data-day="${d}" data-t="${tip}" x="${L+i*bw}" y="${T}" width="${bw}" height="${H-T-B}" fill="transparent"/>`;
+    if(o.n){s+=`<rect data-day="${d}" data-t="${tip}" x="${x}" y="${y(o.a)}" width="${w}" height="${Math.max(2,H-B-y(o.a))}" rx="5" fill="${last?'#E89B12':'#3B5BDB'}" opacity="${d===selected||last?1:.88}"/>`;
+      s+=`<text x="${x+w/2}" y="${Math.max(12,y(o.a)-5)}" text-anchor="middle" fill="var(--ink)" font-weight="600">${fmt(o.a)}</text>`}
+    else s+=`<text x="${x+w/2}" y="${H-B-8}" text-anchor="middle">no sales</text>`;
+    s+=`<text x="${x+w/2}" y="${H-24}" text-anchor="middle">${wd}</text><text x="${x+w/2}" y="${H-8}" text-anchor="middle" fill="var(--ink)">${dt.getDate()} ${dt.toLocaleDateString('en-GB',{month:'short'})}</text>`;
+  });
+  return `<div class="panel" style="margin-top:14px"><div class="lbl">Daily sales, last 14 days<span class="exp" style="margin-left:auto">today in amber · hover a bar for the exact total</span></div><div class="scrollx"><div class="daychart-wrap">${s}</svg></div></div></div>`;
+}
 function todayPanel(){
   const t=today();const d=S.day&&S.day<=t?S.day:t;const isT=d===t;
   const D=dayOf(d),Y=dayOf(addDay(d,-1)),W=dayOf(addDay(d,-7));
-  let s30=0,n30=0;for(let i=1;i<=30;i++){const x=dayOf(addDay(d,-i));s30+=x.a;n30+=x.n}const avg=s30/30;
-  const wd=new Date(d+'T12:00').getDay();const pc=(a,b)=>isT&&!a?'<em class="flat">no sales yet</em>':pctChip(a,b);
+  let s30=0;for(let i=1;i<=30;i++)s30+=dayOf(addDay(d,-i)).a;const avg=s30/30;
   const pays={};D.rows.forEach(r=>{const o=pays[r.pay]||(pays[r.pay]={n:0,a:0});o.n++;o.a+=+r.a||0});
   let last=null;if(!D.n)for(let i=1;i<60;i++){const x=dayOf(addDay(d,-i));if(x.n){last={d:addDay(d,-i),...x};break}}
-  const list=D.n?`<div class="olist">${D.rows.slice().reverse().map(r=>`<div class="orow"><span class="ob"><span class="op">${esc(r.p||'—')}</span><small>${esc(r.c||'—')}</small></span>${payChip(r.pay)}<b class="num">${gel(r.a,r.a%1?2:0)}</b></div>`).join('')}</div>`
-    :`<div class="oempty"><b>${isT?'No orders in the sheet yet today':'No orders on this day'}</b>${last?`<span>Last orders: ${dShort(last.d)} · ${last.n} order${last.n>1?'s':''} · ${gel(last.a)}</span>`:''}${isT?'<span>New rows show up here within 5 minutes of being typed in the sheet, or press Refresh.</span>':''}</div>`;
+  const rows=D.n?`<div class="olist">${D.rows.slice().reverse().map(r=>`<div class="orow"><span class="ob"><span class="op ka">${esc(r.p||'—')}</span><small>${esc(r.c||'—')}</small></span>${payChip(r.pay)}<b class="num">${gel(r.a,r.a%1?2:0)}</b></div>`).join('')}</div>`
+    :`<div class="oempty"><b>${isT?'No orders in the sheet yet today':'No orders on this day'}</b>${last?`<span>Last orders: ${dShort(last.d)} · ${last.n} order${last.n>1?'s':''} · ${gel(last.a)}</span>`:''}${isT?'<span>New rows show up within 5 minutes of being typed in the sheet, or press Refresh.</span>':''}</div>`;
+  const wdName=new Date(d+'T12:00').toLocaleDateString('en-GB',{weekday:'long'});
+  const over=D.a-DAY_TARGET;
+  const goalTxt=D.a>=DAY_TARGET?`<b class="num">${fmt(D.a)}</b> ₾ · daily goal reached${over>=1?` · ${fmt(over)} ₾ over`:''}`:`<b class="num">${fmt(D.a)}</b> of ${fmt(DAY_TARGET)} ₾<br>daily goal · ${fmt(Math.max(0,DAY_TARGET-D.a))} ₾ to go`;
+  const cmp=(label,base,vs)=>`<div class="cmpbox"><div class="exp">${esc(label)}</div><div class="num">${gel(base)}</div>${dFrom(D.a,base,vs,true)||'<div class="exp">Nothing to compare</div>'}</div>`;
+  const payRows=Object.entries(pays).sort((a,b)=>b[1].a-a[1].a);
   const end=d>=addDay(t,-13)?t:addDay(d,6);const strip=[];for(let i=13;i>=0;i--)strip.push(addDay(end,-i));
-  const smax=Math.max(DAY_TARGET,...strip.map(x=>dayOf(x).a));
-  return `<section class="today" id="today"><div class="th"><div><div class="eyebrow"><span class="dot"></span>${isT?'Today':'Day view'} · ${KA_DAYS[wd]}</div><h2>${dLong(d)}</h2></div><span class="spacer"></span>
-   <div class="actions"><span class="ago">Sheet checked <b id="todayAgo">${agoTxt(lastCheck())}</b></span><button class="btn sm" data-day="${addDay(d,-1)}" aria-label="Previous day">‹</button>${isT?'':`<button class="btn sm" data-day="${t}">Today</button>`}<button class="btn sm" data-day="${addDay(d,1)}" aria-label="Next day" ${isT?'disabled':''}>›</button>${S.mcp||S.backend?`<button class="btn sm" data-act="syncSheet" data-label="↻ Refresh">↻ Refresh</button>`:''}</div></div>
-   <div class="tgrid"><div class="tmain">
-    <div class="tbig"><div><div class="lbl">Sales${isT?' so far':''}</div><div class="val num">${cu(D.a)}<small>₾</small></div><div class="tsub"><b class="num">${D.n}</b> order${D.n===1?'':'s'}${D.n?` · avg <b class="num">${gel(D.a/D.n)}</b>`:''}</div></div>
-     <div class="tring">${ring(D.a,DAY_TARGET)}<span class="num">${pct(D.a,DAY_TARGET)}%</span><small>of ${fmt(DAY_TARGET)} ₾</small></div></div>
-    <div class="cmps"><div class="cmp"><span>Yesterday</span><b class="num">${gel(Y.a)}</b>${pc(D.a,Y.a)}</div><div class="cmp"><span>Last ${new Date(d+'T12:00').toLocaleDateString('en-GB',{weekday:'short'})}</span><b class="num">${gel(W.a)}</b>${pc(D.a,W.a)}</div><div class="cmp"><span>30-day average</span><b class="num">${gel(avg)}</b>${pc(D.a,avg)}</div><div class="cmp"><span>Store register</span><b class="num">${gel(regDay(d).a)}</b>${(()=>{const R=recon(d);return R.sheet.length||R.reg.length?(R.ok?'<em class="flat">= sheet</em>':`<span class="chip warn">sheet ${gel(R.sa)}</span>`):''})()}<a href="#store" data-go="store" class="small">${regDay(d).n} sale${regDay(d).n===1?'':'s'} →</a></div></div>
-    ${Object.keys(pays).length?`<div class="tpays">${Object.entries(pays).sort((a,b)=>b[1].a-a[1].a).map(([k,o])=>`<span><i style="width:${o.a/Math.max(1,D.a)*100}%"></i>${esc(PAYS[k]||k)} <b class="num">${gel(o.a)}</b></span>`).join('')}</div>`:''}
-   </div><div class="tlist"><div class="tlh"><span>Orders</span><b>${D.n?'newest first':''}</b></div>${list}</div></div>
-   <div class="strip" role="list">${strip.map(x=>{const o=dayOf(x);const dd=new Date(x+'T12:00');return `<button role="listitem" class="sd ${x===d?'on':''} ${o.a>=DAY_TARGET?'hit':''}" data-day="${x}" title="${dLong(x)} · ${gel(o.a)}"><span class="sb"><i style="height:${Math.max(o.a?6:0,o.a/smax*100)}%"></i></span><span class="sl">${dd.toLocaleDateString('en-GB',{weekday:'narrow'})}<b>${dd.getDate()}</b></span><span class="sa num">${!o.a?'—':o.a>=1000?fmt(o.a/1000,1)+'k':fmt(o.a)}</span></button>`}).join('')}</div>
-  </section>`;
+  return `<div id="today"><div class="split2">
+    <div class="panel"><div class="lbl">Sales ${isT?'today':'this day'} <span class="ka">· გაყიდვები</span> ${info('sales')}</div>
+      <div style="display:flex;gap:16px;align-items:center;margin-top:6px;flex-wrap:wrap"><div style="flex:1;min-width:0"><div class="val num" style="font-size:clamp(32px,5vw,44px);font-weight:700;letter-spacing:-.03em;line-height:1">${cu(D.a)}<small>₾</small></div><div class="exp">${fmt(D.n)} order${D.n===1?'':'s'}${D.n?` · average order ${gel(D.a/D.n)}`:''}</div></div>
+        <div class="goalbox"><div class="tring">${ring(D.a,DAY_TARGET)}<span>${pct(D.a,DAY_TARGET)}%</span></div><div class="exp goalcap">${goalTxt}</div></div></div>
+      <div class="cmpgrid">${cmp('Yesterday',Y.a,'yesterday')}${cmp('Last '+wdName,W.a,'last '+wdName.toLowerCase())}${cmp('30-day average',avg,'the 30-day average')}</div>
+      ${registerNote(d,D)}
+    </div>
+    <div class="panel"><div class="lbl">Today's orders <span class="ka">· შეკვეთები</span><span class="exp" style="margin-left:auto">${D.n?'newest first':''}</span></div>
+      ${rows}
+      ${payRows.length?`<div class="lbl" style="margin-top:14px">Paid by</div>${payRows.map(([k,o])=>`<div class="payline"><div class="top"><span>${esc(PAYS[k]||k)}</span><b class="num">${fmt(o.a)} ₾ · ${pct(o.a,Math.max(D.a,1))}%</b></div><div class="trackbar thin"><i style="width:${Math.min(100,o.a/Math.max(D.a,1)*100)}%;background:${PAYC[k]||'#3B5BDB'}"></i></div></div>`).join('')}`:''}
+    </div>
+  </div>${dayChart(strip,d)}</div>`;
+}
+function monthCards(m,M,P){
+  const live=m===thisMonth(),dim=daysIn(m),day=live?+today().slice(8):dim;
+  const prevSales=live?P.rows.filter(r=>+String(r.d||'').slice(8,10)<=day).reduce((a,r)=>a+(+r.a||0),0):P.sales;
+  const vs=live?('1–'+day+' '+mShort(addMonth(m,-1))):mShort(addMonth(m,-1));
+  const margin=M.sales?M.gross/M.sales:0,be=margin>0?M.opex/margin:0,pace=live&&day?M.sales/day*dim:M.sales;
+  const endLabel=new Date(m+'-'+String(dim).padStart(2,'0')+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  const costChip=M.est?`<span class="dchip warn">${WARN_IC} Product cost estimated</span>`:(M.src?`<span class="dchip neu">${esc(COGS_SRC[M.src])}</span>`:(M.sales?'<span class="dchip neu">No product cost on file</span>':''));
+  const fixedAll=M.fixed>0&&M.fixed>=M.opex-1;
+  const netExp=(M.net<0?'Loss so far: ':'')+fmt(M.gross)+' gross − '+fmt(M.opex)+' running costs'+(M.tax?' − '+fmt(M.tax)+' tax':'');
+  let note='';
+  if(live&&(M.fixed||M.net<0)){
+    const early=day<=10;
+    note=`<div class="note info"><div><b>${M.net<0?'Why net profit is negative.':'How this month is counted.'}</b> ${M.fixed?`The full month of fixed costs (${gel(M.fixed)}) is counted on day 1, and only ${day} day${day===1?'':'s'} of sales are in.`:''}${M.sales?` At this pace sales reach about <b class="num">${gel(pace)}</b> by ${endLabel}.`:''}${be?` To break even, gross profit has to cover ${gel(M.opex)} of running costs, about <b class="num">${gel(be)}</b> of sales${margin?` at ${pct(M.gross,M.sales)}% margin`:''}.`:''}${M.net<0&&early?' A loss this early is what full-month costs against a few days of sales looks like.':''} ${info('net')}</div></div>`;
+  }
+  return `<div class="sect"><h2>${esc(mLabel(m))} so far <span class="ka">${kaM(m)}</span></h2><span class="sub">Day ${day} of ${dim}</span></div>
+   <div class="kpis">
+    <div class="kpi"><div class="lbl">Sales ${info('sales')}</div><div class="val num">${cu(M.sales)}<small>₾</small></div><div class="exp">${fmt(M.orders)} orders this month</div>${dFrom(M.sales,prevSales,vs,true)}</div>
+    <div class="kpi"><div class="lbl">Gross profit ${info('gross')}</div><div class="val num">${cu(M.gross)}<small>₾</small></div><div class="exp">Kept after product costs${M.sales?` · ${pct(M.gross,M.sales)}% margin`:''} ${info('margin')}</div>${costChip}</div>
+    <div class="kpi"><div class="lbl">Running costs ${info('opex')}</div><div class="val num">${cu(M.opex)}<small>₾</small></div><div class="exp">${fixedAll?'All of it is fixed monthly costs, booked on day 1':(M.fixed?gel(M.fixed)+' is fixed and booked on day 1':'Bills that keep the shop open')}</div>${fixedAll?'<span class="dchip neu">Whole month already counted</span>':''}</div>
+    <div class="kpi" ${M.net<0?'style="border-color:#F7C9C3"':''}><div class="lbl">Net profit ${info('net')}</div><div class="val num ${M.net<0?'neg':''}">${cu(M.net)}<small>₾</small></div><div class="exp">${netExp}</div>${M.net<0?`<span class="dchip bad">${CHEV_DN} Loss so far</span>`:dFrom(M.net,P.net,mShort(addMonth(m,-1)),true)}</div>
+   </div>${note}`;
 }
 function sparkline(vals,cls){
   if(vals.length<2)return '';const W=120,H=30;const mn=Math.min(0,...vals),mx=Math.max(1,...vals);const sx=i=>i/(vals.length-1)*W,sy=v=>H-2-(v-mn)/(mx-mn||1)*(H-4);
@@ -1468,17 +1625,19 @@ function liveBalances(){
   Object.values(out).forEach(o=>o.now=o.base+o.sales+o.inn-o.spent+o.loan);
   S.mc.set('#bal',out);return out;
 }
-function moneyNow(m,M){
+function moneyNow(){
   const B=liveBalances();const L=loanInfo();
   const day=d=>new Date(d+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-  const tot=Object.values(B).reduce((x,o)=>x+Math.max(0,o.now),0);
-  const card=([a,t,c])=>{const o=B[a];
-    return `<div class="mcard" style="--c:${c}"><div class="lbl"><span>${t}</span><span class="hint">${o?'now':'not set'}</span></div><div class="val num ${o&&o.now<0?'neg':''}">${o?cu(o.now)+'<small>₾</small>':'—'}</div>
-     ${o&&tot>0&&o.now>0?`<div class="bar2"><i style="width:${Math.min(100,o.now/tot*100)}%"></i></div>`:''}<div class="parts">${o?`${o.now>0&&tot>0?pct(o.now,tot)+'% of cash on hand · ':''}${gel(o.base)} on ${day(o.asOf)}${o.sales?' · <span class="up">+'+fmt(o.sales)+' sales</span>':''}${o.inn?' · <span class="up">+'+fmt(o.inn)+' in</span>':''}${o.spent?' · <span class="down">−'+fmt(o.spent)+' spent</span>':''}${o.loan?' · <span class="'+(o.loan>0?'up">+':'down">−')+fmt(Math.abs(o.loan))+' loan</span>':''}`:(a==='bog'||a==='tbc'?'Import a statement or type it in Settings.':'Type what is there now in Settings.')}</div></div>`};
   const fold=!B.cash&&payAcct('cash')==='personal';
-  return `<div class="money">${BAL_ACC.filter(x=>!(fold&&x[0]==='cash')).map(x=>fold&&x[0]==='personal'?[x[0],'Rezi personal + cash',x[2]]:x).map(card).join('')}
-   <div class="mcard" data-go="loan" style="--c:#9B7BFF;cursor:pointer;border-style:dashed"><div class="lbl"><span>${esc(loanLabel())}</span><span class="tag">kept separate</span></div>${L?`<div class="val num">${cu(L.left)}<small>₾ left</small></div><div class="bar2"><i style="width:${Math.min(100,L.out/Math.max(1,L.received)*100)}%"></i></div><div class="parts">Not counted in profit or cash · of ${gel(L.received)}: developers ${fmt(L.dev)} · other ${fmt(L.other)}</div>`:`<div class="val">—</div><div class="parts">Open the Loan page to add it.</div>`}</div>
-  </div>`;
+  const rows=BAL_ACC.filter(x=>!(fold&&x[0]==='cash')).map(x=>fold&&x[0]==='personal'?[x[0],'Rezi personal + cash',x[2]]:x);
+  const about={bog:'Bank of Georgia · balance now',tbc:'TBC Bank · balance now',cash:'Cash drawer · balance now',personal:'Kept outside the business · balance now'};
+  const card=([a,t,c])=>{const o=B[a];
+    const moves=o?[o.sales&&'+'+fmt(o.sales)+' sales',o.inn&&'+'+fmt(o.inn)+' in',o.spent&&'−'+fmt(o.spent)+' spent'].filter(Boolean):[];
+    const line=o?((about[a]||'Balance now')+(moves.length?' · '+moves.join(' · ')+' since '+day(o.asOf):'')):(a==='bog'||a==='tbc'?'Not set · import a statement or type it in Settings':'Not set · type what is there in Settings');
+    return `<div class="mcard"><div class="lbl"><i class="swatch" style="background:${c}"></i><span>${esc(t)}</span></div><div class="val num ${o&&o.now<0?'neg':''}">${o?cu(o.now)+'<small>₾</small>':'—'}</div><div class="exp">${esc(line)}</div></div>`};
+  const loan=L?`<div class="mcard" data-go="loan" style="cursor:pointer"><div class="lbl"><i class="swatch" style="background:#B42318"></i><span>${esc(loanLabel())} left</span>${info('loan')}</div><div class="val num">${cu(L.left)}<small>₾</small></div><div class="exp">Tracked separately, not in profit${L.start?' · since '+day(L.start):''}${L.received?' · received '+gel(L.received):''}</div></div>`
+    :`<div class="mcard" data-go="loan" style="cursor:pointer"><div class="lbl"><i class="swatch" style="background:#B42318"></i><span>Loan</span></div><div class="val">—</div><div class="exp">Nothing recorded yet. It stays off the profit figure.</div></div>`;
+  return `<div class="sect"><h2>Money in accounts <span class="ka">ანგარიშები</span></h2><span class="sub">balances as of now</span></div><div class="money">${rows.map(card).join('')}${loan}</div>`;
 }
 function trendChart(ms,cur){
   const cols=periodCols(ms);const multiY=new Set(ms.map(m=>m.slice(0,4))).size>1;
@@ -1523,7 +1682,7 @@ function breakdown(M,P){
 function channels(M){
   const by={};M.rows.forEach(r=>{by[r.pay]=(by[r.pay]||0)+r.a});
   const rows=Object.entries(by).sort((a,b)=>b[1]-a[1]);const max=Math.max(1,...rows.map(r=>r[1]));
-  return `<div class="panel lift"><h2>How customers paid</h2><p class="sub">Use this to match sales against each bank account.</p>${rows.length?`<div class="bars">${rows.map(([k,v])=>`<div class="bar"><div class="name">${esc(PAYS[k]||k)}</div><div class="track"><div class="fill" style="width:${v/max*100}%;background:var(--s1)"></div></div><div class="amt num">${gel(v)}<small>${pct(v,M.sales)}%</small></div></div>`).join('')}</div>`:'<div class="empty">No sales loaded.</div>'}</div>`;
+  return `<div class="panel lift"><h2>By payment channel</h2><p class="sub">How customers paid. Use this to match sales against each bank account.</p>${rows.length?`<div class="bars">${rows.map(([k,v])=>`<div class="bar"><div class="name">${esc(PAYS[k]||k)}</div><div class="track"><div class="fill" style="width:${v/max*100}%;background:var(--s1)"></div></div><div class="amt num">${gel(v)}<small>${pct(v,M.sales)}%</small></div></div>`).join('')}</div>`:'<div class="empty">No sales loaded.</div>'}</div>`;
 }
 function topItemsPanel(M){
   const d=S.items.get(M.m);
@@ -1578,7 +1737,7 @@ function stockRows(M){
 }
 function vStock(){
   const M=opModel();const up=S.canWrite?`<button class="btn" data-act="opPick">${svg('M12 16V4M7 9l5-5 5 5M4 20h16')} Upload Optimo files</button><input type="file" id="opFile" accept=".xlsx,.xls,.csv" multiple hidden>`:'';
-  const head=(sub)=>`<div class="pagehead"><div><div class="eyebrow">Products · პროდუქცია</div><h1>Products</h1><p>${sub}</p></div><div class="actions"><button class="btn" data-act="newOrder">+ Import order</button>${up}</div></div>${prodTabs()}`;
+  const head=(sub)=>`<div class="pagehead"><div><div class="eyebrow">Products · პროდუქცია</div><h1>Products <span class="ka">პროდუქცია</span></h1><p>${sub}</p></div><div class="actions"><button class="btn" data-act="newOrder">+ Import order</button>${up}</div></div>${prodTabs()}`;
   if(!M||!M.D.stock)return loadingOr(head('Every product with its picture, stock, price and profit. The register sells exactly what is here.')+`<div class="drop" data-act="opPick" role="button" tabindex="0">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',28)}<b>Upload the Optimo stock list and sale history</b><span>StockItems.xlsx and SaleHistory….xlsx</span></div>`);
   const {rows,inc}=stockRows(M);const P=S.prod;const sf=P.sf||'all';const st=M.D.stock;
   const incLand=inc.reduce((a,s)=>a+s.land,0),incQty=inc.reduce((a,s)=>a+(+s.qty||0),0);
@@ -1633,7 +1792,7 @@ function vStock(){
 function prodTabs(){const v=S.prod.view||'stock';return `<div class="tabs" role="tablist" style="margin-bottom:16px"><button role="tab" aria-selected="${v==='stock'}" data-act="prodView" data-v="stock">Stock, prices &amp; costs</button><button role="tab" aria-selected="${v==='sales'}" data-act="prodView" data-v="sales">Sales by month</button></div>`}
 function vProdSales(){
   const m=S.month,P=S.prod,ms=P.all?rangeMonths():[m],D=prodData(ms);const M=metrics(m);const OD=P.all?null:(S.items.get(m)?D:null);
-  const head=`<div class="pagehead"><div><div class="eyebrow">${P.all?esc(rangeLabel()):kaM(m)+' · '+m.slice(0,4)}</div><h1>Products</h1><p>Which items sell, which make money and which don't. Uses your Optimo report by item; months without one use the product names in the order sheet${D&&D.srcs.includes('sheet')&&D.hasCost?' and the cost written next to each order':''}.</p></div>
+  const head=`<div class="pagehead"><div><div class="eyebrow">${P.all?esc(rangeLabel()):kaM(m)+' · '+m.slice(0,4)}</div><h1>Products <span class="ka">პროდუქცია</span></h1><p>Which items sell, which make money and which don't. Uses your Optimo report by item; months without one use the product names in the order sheet${D&&D.srcs.includes('sheet')&&D.hasCost?' and the cost written next to each order':''}.</p></div>
    <div class="actions"><div class="seg" role="group" aria-label="Period"><button data-act="prodAll" data-v="0" aria-pressed="${!P.all}">${mShort(m)} ${m.slice(0,4)}</button><button data-act="prodAll" data-v="1" aria-pressed="${P.all}">Period</button></div><button class="btn amber" data-act="optStart">Upload Optimo report</button></div></div>${prodTabs()}${P.all?periodBar({noMonth:true}):''}`;
   if(!D)return loadingOr(head+`<div class="grid g2"><div class="panel stack"><div><h2>No Optimo report for ${mLabel(m)} yet</h2><p class="sub">In Optimo, open the sales report by item (პროდუქციის მიხედვით), pick ${mLabel(m)}, and export it to Excel. Include the cost price column (თვითღირებულება) so profit can be calculated.</p></div><div class="drop" data-act="optStart" role="button" tabindex="0">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',28)}<b>Upload the Optimo report</b><span>.xlsx, .xls or .csv</span></div></div>${reconPanel(m,M,null)}</div>`);
   const rows=D.rows.filter(r=>!P.q||r.n.toLowerCase().includes(P.q.toLowerCase())||(r.c||'').toLowerCase().includes(P.q.toLowerCase()));
@@ -1828,10 +1987,20 @@ function vExpenses(){
   const stamp=t=>t.updatedAt||t.createdAt||t.date||'';
   const recent=list.filter(t=>!t.virtual).sort((a,b)=>stamp(b).localeCompare(stamp(a))).slice(0,8);
   const latest=recent.length?`<section class="eg"><div class="eg-h"><span>Latest entries</span><b>newest first · tap to edit</b></div><div class="recent">${recent.map(t=>`<div class="rrow"><button class="erow" data-edit="${t.id}" data-m="${t.month}"><span><span class="et">${esc(t.vendor||t.employee||catLabel(t.cat))}</span><small>${esc(t.date)} · ${esc(catLabel(t.cat))}${t.note?' · '+esc(t.note.slice(0,40)):''}</small></span><b class="num">${t.skipped?'skipped':gel(t.gel)}</b></button><button class="rdel" data-del="${t.id}" aria-label="Delete this entry">Delete</button></div>`).join('')}</div></section>`:'';
-  return loadingOr(`<div class="pagehead"><div><div class="eyebrow">${f.all?esc(rangeLabel()):kaM(S.month)+' · '+y}</div><h1>Expenses</h1></div><div class="actions"><button class="btn" data-go="bank">Import bank statement</button><button class="btn" data-go="add">+ Expense</button></div></div>
+  const fixedRows=list.filter(t=>t.virtual&&!t.skipped);const fixedSum=fixedRows.reduce((a,t)=>a+(+t.gel||0),0);
+  const expKpis=`<div class="kpis">
+   <div class="kpi"><div class="lbl">Running costs ${info('opex')}</div><div class="val num">${cu(gTot('opex'))}<small>₾</small></div><div class="exp">Bills that keep the shop open</div>${fixedSum&&gTot('opex')&&fixedSum>=gTot('opex')-1?`<span class="dchip neu">All ${gel(fixedSum)} is fixed</span>`:''}</div>
+   <div class="kpi"><div class="lbl">Stock &amp; freight</div><div class="val num">${cu(gTot('goods'))}<small>₾</small></div><div class="exp">Buying products to resell</div>${gTot('goods')?'':'<span class="dchip neu">None in this view</span>'}</div>
+   <div class="kpi"><div class="lbl">Taxes</div><div class="val num">${cu(gTot('tax'))}<small>₾</small></div><div class="exp">VAT and income tax</div>${gTot('tax')?'':'<span class="dchip neu">None booked</span>'}</div>
+   <div class="kpi"><div class="lbl">Taken out of the business</div><div class="val num">${cu(gTot('below'))}<small>₾</small></div><div class="exp">Loan payments and withdrawals. Not a shop cost.</div></div></div>`;
+  const fixedTable=fixedRows.length?`<div class="panel" style="margin-bottom:14px"><div class="lbl">Fixed monthly costs<span class="exp" style="margin-left:auto">Booked on the 1st until the real bank payment replaces the line</span></div>
+   <div class="tablewrap" style="border:0;box-shadow:none"><table><thead><tr><th>What</th><th class="hm">Group</th><th class="hm">Paid from</th><th class="r">Amount</th></tr></thead><tbody>
+   ${fixedRows.map(t=>`<tr><td><b>${esc(t.vendor||catLabel(t.cat))}</b> <span class="ka">${esc(CAT[t.cat]?.ka||'')}</span><div class="exp">Fixed · added automatically</div></td><td class="hm"><span class="chip">${esc(GROUPS[CAT[t.cat]?.g]||'')}</span></td><td class="hm">${esc(ACC[t.account]?.en||'')}</td><td class="r num"><b>${gel(t.gel)}</b></td></tr>`).join('')}
+   <tr><td><b>Total</b></td><td class="hm"></td><td class="hm"></td><td class="r num"><b>${gel(fixedSum)}</b></td></tr></tbody></table></div></div>`:'';
+  return loadingOr(`<div class="pagehead"><div><div class="eyebrow">${f.all?esc(rangeLabel()):kaM(S.month)+' · '+y}</div><h1>Expenses <span class="ka">ხარჯები</span></h1><p class="sub">${f.all?esc(rangeLabel()):mLabel(S.month)} · money that left the business · ${gel(total)} counted as spending</p></div><div class="actions"><button class="btn" data-go="bank">Import bank statement</button><button class="btn" data-go="add">+ Expense</button></div></div>
    <div class="toolbar"><div class="seg" role="group" aria-label="Period"><button data-act="expMode" data-v="0" aria-pressed="${!f.all}">${mShort(S.month)}</button><button data-act="expMode" data-v="1" aria-pressed="${f.all}">Period</button></div><input class="input grow" id="xQ" placeholder="Search…" value="${esc(f.q)}"></div>
    ${f.all?periodBar({noMonth:true}):''}
-   <div class="esum"><div><span>Total spending</span><b class="num">${cu(total)}<small> ₾</small></b></div><div class="esplit">${spendG.map(g=>`<span><i style="background:${g==='goods'?'var(--s2)':g==='tax'?'var(--bad)':'var(--s1)'}"></i>${titles[g]} <b class="num">${fmt(gTot(g))}</b></span>`).join('')}</div></div>
+   ${expKpis}${fixedTable}
    ${loanBox(months,f.all?'this period':mShort(S.month),true)}${latest}${groups||`<div class="panel empty"><b>No expenses ${f.q?'match':'yet'}</b>${f.q?'Try another search.':'Import a bank statement or add one by hand.'}</div>`}
    <p class="hint" style="margin-top:12px">Tap a category to see its payments, then tap a payment to change it.</p>`);
 }
@@ -1840,13 +2009,18 @@ function vSales(){
   const m=S.month,M=metrics(m),doc=S.sales.get(m);
   const q=S.salesQ.toLowerCase();const rows=(doc?.rows||[]).filter(r=>!q||[r.c,r.p,PAYS[r.pay]].join(' ').toLowerCase().includes(q));
   const sid=sheetId();const days=m===thisMonth()?new Date().getDate():daysIn(m);
-  return loadingOr(`<div class="pagehead"><div><div class="eyebrow">${kaM(m)} · ${m.slice(0,4)}</div><h1>Sales</h1><p>From your order sheet <a href="https://docs.google.com/spreadsheets/d/${esc(sid)}/edit" target="_blank" rel="noopener">ასტრომანის შეკვეთები</a>. Each month is its tab in the sheet; one sync makes every month match the sheet.</p></div>
+  const Pm=metrics(addMonth(m,-1));
+  const prev=m===thisMonth()?Pm.rows.filter(r=>+String(r.d||'').slice(8,10)<=days).reduce((a,r)=>a+(+r.a||0),0):Pm.sales;
+  const vs=m===thisMonth()?('1–'+days+' '+mShort(addMonth(m,-1))):mShort(addMonth(m,-1));
+  const fc=M.sales/Math.max(1,days)*daysIn(m);
+  return loadingOr(`<div class="pagehead"><div><div class="eyebrow">${kaM(m)} · ${m.slice(0,4)}</div><h1>Sales <span class="ka">გაყიდვები</span></h1><p>From your order sheet <a href="https://docs.google.com/spreadsheets/d/${esc(sid)}/edit" target="_blank" rel="noopener">ასტრომანის შეკვეთები</a>. Each month is its tab in the sheet; one sync makes every month match the sheet.</p></div>
   <div class="actions">${S.mcp||S.backend?`<button class="btn" data-act="syncSheet" data-label="↻ Sync now">↻ Sync now</button>`:''}<button class="btn" data-act="pickOrders">Upload orders file</button><input type="file" id="ordersFile" accept=".xlsx,.xls,.csv,.ods,.txt,text/plain" hidden></div></div>
-  <div class="kpis"><div class="kpi"><div class="lbl">Sales</div><div class="val num">${cu(M.sales)}<small>₾</small></div><div class="delta">${doc?('Updated '+new Date(doc.syncedAt).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})):'Not loaded yet'}</div></div>
-  <div class="kpi"><div class="lbl">Orders</div><div class="val num">${cu(M.orders)}</div><div class="delta">${(M.orders/Math.max(1,days)).toFixed(1)} per day</div></div>
-  <div class="kpi"><div class="lbl">Average order</div><div class="val num">${cu(M.aov)}<small>₾</small></div><div class="delta">${esc(doc?.source||'')}${doc?.locked?' · kept, sheet sync never replaces it':''}</div></div>
-  <div class="kpi"><div class="lbl">Per day</div><div class="val num">${cu(M.sales/Math.max(1,days))}<small>₾</small></div><div class="delta">target 1,000 ₾ · ${pct(M.sales/Math.max(1,days),1000)}%</div></div></div>
-  <div class="grid g3"><div class="panel chart"><h2>Sales by day</h2><p class="sub">Hover or tap a bar for the day's total. Dashed line is the 1,000 ₾/day target.</p>${dailyChart(M)}</div>${channels(M)}</div>
+  <div class="kpis"><div class="kpi"><div class="lbl">Sales this month ${info('sales')}</div><div class="val num">${cu(M.sales)}<small>₾</small></div><div class="exp">Money customers paid${m===thisMonth()?', 1–'+days+' '+mShort(m):''}</div>${dFrom(M.sales,prev,vs,true)}</div>
+  <div class="kpi"><div class="lbl">Orders</div><div class="val num">${fmt(M.orders)}</div><div class="exp">Separate purchases · ${(M.orders/Math.max(1,days)).toFixed(1)} a day</div></div>
+  <div class="kpi"><div class="lbl">Average order</div><div class="val num">${cu(M.aov)}<small>₾</small></div><div class="exp">${M.orders?'Sales ÷ orders ('+fmt(M.sales)+' ÷ '+fmt(M.orders)+')':'No orders yet'}${doc?.source?' · '+esc(doc.source):''}</div></div>
+  <div class="kpi"><div class="lbl">Month forecast ${info('pace')}</div><div class="val num">${cu(m===thisMonth()?fc:M.sales)}<small>₾</small></div><div class="exp">${m===thisMonth()?'If this pace holds through '+daysIn(m)+' '+mShort(m):'This month is closed'}</div></div></div>
+  <div class="grid g3"><div class="panel chart"><h2>Sales by day</h2><p class="sub">Today is amber. The dashed line is the 1,000 ₾ daily goal. Hover a bar for the total.</p>${dailyChart(M)}</div>${channels(M)}</div>
+  <div class="mt">${topItemsPanel(M)}</div>
   <div class="toolbar mt"><input class="input grow" id="sQ" placeholder="Search customer, product, payment…" value="${esc(S.salesQ)}"><span class="muted small">${rows.length} of ${M.orders} orders</span></div>
   ${rows.length?`<div class="tablewrap"><table><thead><tr><th>Date</th><th>Customer</th><th>Product</th><th>Payment</th><th class="r">Amount</th></tr></thead><tbody>${rows.slice().reverse().map((r,i,A)=>(i===0||A[i-1].d!==r.d?dayHead(r.d,A):'')+`<tr><td class="num">${esc(r.d||'—')}</td><td>${esc(r.c)}</td><td style="min-width:200px">${esc(r.p)}${r.no?' <span class="chip warn">not in Optimo</span>':''}</td><td>${r.pay==='unknown'?'<span class="chip warn">Not recorded</span>':r.pay==='personal'?'<span class="chip">Rezi personal</span>':esc(PAYS[r.pay]||r.pay)}</td><td class="r num">${gel(r.a)}</td></tr>`).join('')}</tbody></table></div>`:`<div class="panel empty"><b>No sales for ${mLabel(m)}</b>${S.mcp||S.backend?'Press “Sync now” to pull them in.':'Download your order sheet and upload it here.'}</div>`}`);
 }
@@ -1857,10 +2031,11 @@ function dailyChart(M){
   const W=640,H=210,pl=40,pb=24,pt=10,iw=W-pl-8,ih=H-pt-pb;const max=Math.max(1100,...v);const step=max>3000?1000:500;const top=Math.ceil(max/step)*step;
   const sy=x=>pt+ih-(x/top)*ih;const bw=iw/days;let g='';for(let t=0;t<=top;t+=step)g+=`<line x1="${pl}" x2="${W-8}" y1="${sy(t)}" y2="${sy(t)}" stroke="var(--grid)"/><text x="${pl-6}" y="${sy(t)+4}" text-anchor="end">${t>=1000?fmt(t/1000,1)+'k':t}</text>`;
   g+=`<line x1="${pl}" x2="${W-8}" y1="${sy(1000)}" y2="${sy(1000)}" stroke="var(--accent)" stroke-dasharray="5 4" stroke-width="1.5"/>`;
-  let b='';v.forEach((x,i)=>{const h=ih*(x/top);const w=Math.max(2,bw-3);const X=pl+i*bw+1.5;if(h>0.5){const r=Math.min(3,h,w/2);b+=`<path class="gy" d="M${X},${pt+ih} v${-(h-r)} q0,${-r} ${r},${-r} h${w-2*r} q${r},0 ${r},${r} v${h-r} z" fill="${x>=1000?'var(--s2)':'var(--s1)'}"/>`}
+  const td=M.m===today().slice(0,7)?+today().slice(8):0;
+  let b='';v.forEach((x,i)=>{const h=ih*(x/top);const w=Math.max(2,bw-3);const X=pl+i*bw+1.5;const todayBar=i+1===td;if(h>0.5){const r=Math.min(3,h,w/2);b+=`<path class="gy" d="M${X},${pt+ih} v${-(h-r)} q0,${-r} ${r},${-r} h${w-2*r} q${r},0 ${r},${r} v${h-r} z" fill="${todayBar?'#E89B12':x>=1000?'var(--s2)':'var(--s1)'}"/>`}
     if((i+1)%5===0||i===0)b+=`<text x="${X+w/2}" y="${H-6}" text-anchor="middle">${i+1}</text>`;
     b+=`<rect class="dhit hitbar" data-d="${i+1}" data-v="${x}" x="${pl+i*bw}" y="${pt}" width="${bw}" height="${ih}" fill="transparent"/>`});
-  return `<div class="legend"><span><i style="background:var(--s1)"></i>Below target</span><span><i style="background:var(--s2)"></i>1,000 ₾ or more</span></div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Sales per day" id="dailySvg">${g}${b}</svg>`;
+  return `<div class="legend"><span><i style="background:var(--s1)"></i>Below target</span><span><i style="background:var(--s2)"></i>1,000 ₾ or more</span><span><i style="background:#E89B12"></i>Today</span></div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Sales per day" id="dailySvg">${g}${b}</svg>`;
 }
 
 /* ---------- order sheet parsing ---------- */
@@ -1988,7 +2163,7 @@ function openSalesPreview(){
 function vBank(){
   const B=S.bank;
   const steps=`<div class="steps"><span class="${!B?'on':''}">1 · Upload</span><span class="${B&&B.stage==='map'?'on':''}">2 · Check columns</span><span class="${B&&B.stage==='review'?'on':''}">3 · Review &amp; save</span></div>`;
-  const head=`<div class="pagehead"><div><div class="eyebrow">BOG · TBC</div><h1>Import a bank statement</h1><p>Export the statement from Business Online as Excel and drop it here. Every payment is sorted into a category, already-imported rows are skipped, and your corrections are remembered.</p></div></div>`;
+  const head=`<div class="pagehead"><div><div class="eyebrow">BOG · TBC</div><h1>Bank import <span class="ka">ბანკი</span></h1><p>Export the statement from Business Online as Excel and drop it here. Every payment is sorted into a category, already-imported rows are skipped, and your corrections are remembered.</p></div></div>`;
   if(!B)return head+steps+`<div class="grid g2"><div class="panel stack"><label class="field"><span>Which account is this statement from?</span><select class="input" id="bAcct">${ACCOUNTS.filter(a=>a.id!=='unknown').map(a=>`<option value="${a.id}" ${a.id===(lsGet('af.bacct')||'bog')?'selected':''}>${esc(a.en)}</option>`).join('')}</select></label>
    <div class="drop" id="bDrop" tabindex="0" role="button">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',28)}<b>Drop the statement here</b><span>.xlsx, .xls or .csv · or tap to choose</span></div><input type="file" id="bFile" accept=".xlsx,.xls,.csv" hidden></div>
    <div class="panel"><h2>How it sorts payments</h2><p class="sub">${S.rules.size+DEFAULT_RULES.length} matching rules. Yours come first.</p><div class="flow">${[...S.rules.values()].slice(0,6).map(r=>`<div class="ln"><span class="k">“${esc(r.match)}”</span><span class="v">${catChip(r.cat)}</span></div>`).join('')}${DEFAULT_RULES.slice(0,7).map(r=>`<div class="ln"><span class="k">“${esc(r[0])}”</span><span class="v">${catChip(r[1])}</span></div>`).join('')}</div><p class="hint" style="margin-top:10px">Money coming in is skipped by default, because sales already come from your order sheet. Money you send in yourself is kept as “Owner money in”. Card-terminal commissions hidden in each card payment are added up into one fee line, and the statement's closing balance updates the account balance. Payments that match a fixed cost (rent, Optimo…) replace the automatic amount for that month.</p></div></div>`;
@@ -2112,12 +2287,12 @@ function statement(A,title,sub){
   const L=(k,v,cls,d)=>d?`<details class="sl ${cls||''}"><summary><span>${k}</span><b class="num">${v}</b></summary><div class="sd">${d}</div></details>`:`<div class="sl ${cls||''}"><span>${k}</span><b class="num">${v}</b></div>`;
   const rev=A.sales+A.otherInc;
   return `<div class="panel stmt"><h2>${title}</h2><p class="sub">${sub}</p>
-   ${L('Revenue',gel(rev),'',det([['Sales ('+fmt(A.orders)+' orders)',A.sales],['Other income',A.otherInc]]))}
-   ${L('Cost of goods sold',z(A.cogs),'',A.allAccurate?`<div class="sdl"><span>Real cost of the items sold (${[...new Set(A.srcs||[])].map(x=>COGS_SRC[x]).join(', ')})</span><span class="num">${pct(A.cogs,A.sales)}% of sales</span></div>`:A.accurate?`<div class="sdl"><span>Cost of the items sold${A.estMs&&A.estMs.length?' · estimated for '+A.estMs.map(mShort).join(', ')+' from the nearest product report':''}</span><span class="num">${pct(A.cogs,A.sales)}% of sales</span></div><div class="sdl muted">Stock bought (${gel(A.stock)}) goes on the shelf as an asset. It becomes a cost only when the items are sold.</div>`:det(cats('goods'))+'<div class="sdl muted">Settings count stock as a cost when it is paid for.</div>')}
-   ${L('Gross profit',gel(A.gross+A.otherInc),'tot',`<div class="sdl"><span>Margin</span><span class="num">${pct(A.gross,A.sales)}%</span></div>`)}
-   ${L('Running costs',z(A.opex),'',det(cats('opex')))}
-   ${L('Taxes',z(A.tax),'',det(cats('tax')))}
-   ${L('Net profit',gel(A.net),'tot big '+(A.net<0?'neg':''),null)}
+   ${L('Sales <span class="ka">შემოსავალი</span> '+info('sales'),gel(rev),'',det([['Sales ('+fmt(A.orders)+' orders)',A.sales],['Other income',A.otherInc]]))}
+   ${L('− Cost of goods sold '+info('cogs'),z(A.cogs),'',A.allAccurate?`<div class="sdl"><span>Real cost of the items sold (${[...new Set(A.srcs||[])].map(x=>COGS_SRC[x]).join(', ')})</span><span class="num">${pct(A.cogs,A.sales)}% of sales</span></div>`:A.accurate?`<div class="sdl"><span>Cost of the items sold${A.estMs&&A.estMs.length?' · estimated for '+A.estMs.map(mShort).join(', ')+' from the nearest product report':''}</span><span class="num">${pct(A.cogs,A.sales)}% of sales</span></div><div class="sdl muted">Stock bought (${gel(A.stock)}) goes on the shelf as an asset. It becomes a cost only when the items are sold.</div>`:det(cats('goods'))+'<div class="sdl muted">Settings count stock as a cost when it is paid for.</div>')}
+   ${L('= Gross profit '+info('gross'),gel(A.gross+A.otherInc),'tot',`<div class="sdl"><span>Margin</span><span class="num">${pct(A.gross,A.sales)}%</span></div>`)}
+   ${L('− Running costs '+info('opex'),z(A.opex),'',det(cats('opex')))}
+   ${L('− Taxes',z(A.tax),'',det(cats('tax')))}
+   ${L('= Net profit '+info('net'),gel(A.net),'tot big '+(A.net<0?'neg':''),null)}
    <div class="sgap"></div>
    ${L('Taken out of the business',z(A.below+A.stockOut),'',det([['Stock bought (imports, freight · an asset)',A.stockOut],...['loan','owner_draw','personal'].map(id=>[CAT[id].en,A.by[id]||0]),['Money you put in',-A.ownerIn]]))}
    ${L('Cash left in Astroman',gel(A.cash),'tot '+(A.cash<0?'neg':''),null)}
@@ -2135,15 +2310,49 @@ function netChart(ms){
     g+=`<text x="${x+bw/2}" y="${H-8}" text-anchor="middle" style="font-family:var(--f-ui);fill:${cur?'var(--ink)':'var(--muted)'};font-weight:${cur?700:400}">${esc(d.lbl)}</text>`});
   return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Net profit over time">${g}</svg>`;
 }
+function plShare(M){
+  if(!(M.sales>0))return `<div class="panel"><h2>Where each 100 ₾ of sales went</h2><p class="sub">No sales in this view yet, so the split has nothing to show.</p></div>`;
+  const cogsP=pct(M.cogs,M.sales),gp=Math.max(0,pct(M.gross,M.sales));
+  const cover=M.opex?Math.round(M.gross/M.opex*100):0;const gap=M.opex-M.gross;
+  return `<div class="panel"><div class="lbl">Where each 100 ₾ of sales went</div>
+   <div style="display:flex;height:28px;border-radius:10px;overflow:hidden;margin:14px 0 8px"><i style="width:${Math.min(100,cogsP)}%;background:#64748B"></i><i style="width:${Math.min(100,gp)}%;background:#047857"></i></div>
+   <div class="legend"><span><i style="background:#64748B"></i>Product cost ${cogsP} ₾</span><span><i style="background:#047857"></i>Gross profit ${gp} ₾</span></div>
+   <div class="exp" style="margin-top:12px">${gap>0?`Running costs are ${M.gross?Math.round(M.opex/Math.max(M.gross,1)*100):0}% of gross profit (${gel(M.opex)} against ${gel(M.gross)}). Gross profit has to grow by ${gel(gap)} to cover them.`:`Gross profit covers running costs, with ${gel(M.gross-M.opex)} left before tax.`}</div>
+   ${M.opex?`<div class="trackbar thin" style="height:14px;margin-top:10px"><i style="width:${Math.max(0,Math.min(100,cover))}%;background:#047857"></i></div><div class="exp">${fmt(M.gross)} of ${fmt(M.opex)} ₾ covered · ${Math.max(0,Math.min(100,cover))}%</div>`:''}
+  </div>`;
+}
+function histLines(endM){
+  const ms=monthsBetween(addMonth(endM,-11),endM).filter(m=>m<=thisMonth());
+  const rows=ms.map(m=>{const x=metrics(m);return {m,sales:x.sales,gross:x.gross,net:x.net}});
+  if(rows.filter(r=>r.sales||r.gross||r.net).length<2)return '';
+  const W=880,H=240,L=56,R=12,T=16,B=28;
+  const all=rows.flatMap(r=>[r.sales,r.gross,r.net]);
+  const mn=Math.min(0,...all),mx=Math.max(1,...all)*1.08;
+  const xi=i=>rows.length<2?L:(L+i*(W-L-R)/(rows.length-1));
+  const y=v=>T+(H-T-B)*(1-(v-mn)/(mx-mn||1));
+  const step=Math.max(1000,Math.ceil((mx-mn)/4/1000)*1000);
+  let s=`<svg class="daychart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Sales, gross profit and net profit over recent months">`;
+  for(let v=Math.floor(mn/step)*step;v<=mx+1;v+=step)s+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="${v===0?'#94A3B8':'var(--grid)'}"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end">${fmt(v/1000,1)}k</text>`;
+  rows.forEach((r,i)=>s+=`<text x="${xi(i)}" y="${H-8}" text-anchor="middle">${mShort(r.m)}${r.m===thisMonth()?'*':''}</text>`);
+  const draw=(key,color,name)=>{s+=`<polyline fill="none" stroke="${color}" stroke-width="2.5" points="${rows.map((r,i)=>xi(i).toFixed(1)+','+y(r[key]).toFixed(1)).join(' ')}"/>`;
+    rows.forEach((r,i)=>{s+=`<circle data-t="${esc(mLabel(r.m)+' · '+name+': '+gel(r[key]))}" cx="${xi(i)}" cy="${y(r[key])}" r="4" fill="#fff" stroke="${color}" stroke-width="2"/>`})};
+  draw('sales','#3B5BDB','Sales');draw('gross','#047857','Gross profit');draw('net','#B42318','Net profit');
+  return `<div class="panel" style="margin-top:14px"><div class="lbl" style="flex-wrap:wrap">Last ${rows.length} months<div class="legend" style="margin:0 0 0 auto"><span><i style="background:#3B5BDB"></i>Sales</span><span><i style="background:#047857"></i>Gross profit</span><span><i style="background:#B42318"></i>Net profit</span></div></div>
+   <div class="scrollx"><div class="daychart-wrap">${s}</svg></div></div>
+   <div class="exp">${rows.some(r=>r.m===thisMonth())?'* '+mLabel(thisMonth())+' is still in progress ('+(+today().slice(8))+' of '+daysIn(thisMonth())+' days). ':''}Hover a point for the exact value.</div></div>`;
+}
 function vPL(){
   let mode=S.plMode||'month';if(mode==='ytd')mode='range';
   const ms=rangeMonths();const many=ms.length>15;
-  const head=`<div class="pagehead"><div><div class="eyebrow">${mode==='month'?kaM(S.month)+' · '+S.month.slice(0,4):esc(rangeLabel())}</div><h1>Profit &amp; loss</h1></div><div class="actions"><button class="btn" data-act="report">▶ Recap</button>${S.downloads?'<button class="btn" data-act="exportXlsx">Download Excel</button>':''}</div></div>
+  const head=`<div class="pagehead"><div><div class="eyebrow">${mode==='month'?kaM(S.month)+' · '+S.month.slice(0,4):esc(rangeLabel())}</div><h1>Profit &amp; loss <span class="ka">მოგება-ზარალი</span></h1><p class="sub">${mode==='month'?mLabel(S.month)+' · read top to bottom: what came in, what it cost, what was left':esc(rangeLabel())}</p></div><div class="actions"><span class="pill">${mode==='month'?mShort(S.month)+' '+S.month.slice(0,4)+(S.month===thisMonth()?' · day '+(+today().slice(8))+' of '+daysIn(S.month):''):esc(rangeLabel())}</span><button class="btn" data-act="report">▶ Recap</button>${S.downloads?'<button class="btn" data-act="exportXlsx">Download Excel</button>':''}</div></div>
    <div class="toolbar"><div class="seg" role="group" aria-label="View"><button data-act="plMode" data-v="month" aria-pressed="${mode==='month'}">${mShort(S.month)} ${S.month.slice(0,4)}</button><button data-act="plMode" data-v="range" aria-pressed="${mode==='range'}">Period</button><button data-act="plMode" data-v="table" aria-pressed="${mode==='table'}">${many?'Year by year':'Month by month'}</button></div></div>
    ${mode==='month'?'':periodBar({noMonth:true})}`;
   if(mode==='table')return loadingOr(head+plTable(ms));
   if(mode==='month'){const M=metrics(S.month);const yms=rangeMonths({p:'ytd'});
-    return loadingOr(head+`<div class="grid g3">${statement(M,mLabel(S.month),'Tap a line to see what is inside.'+(M.src?' Cost of goods from '+COGS_SRC[M.src]+'.':''))}<div class="panel chart" style="align-self:start"><h2>Net profit by month</h2><p class="sub">${S.month.slice(0,4)}. Red means a loss.</p>${netChart(yms)}</div></div>${loanBox([S.month],mShort(S.month),false)}`)}
+    const margin=M.sales?M.gross/M.sales:0,be=margin>0?(M.opex+(M.tax||0))/margin:0;
+    const day=S.month===thisMonth()?+today().slice(8):daysIn(S.month);
+    const loss=M.net<0?`<div class="note">${WARN_IC}<div><b>Loss so far${S.month===thisMonth()?' — the month is still open':''}.</b> ${day} day${day===1?'':'s'} of sales against the running costs booked for the month.${be?` Break-even needs about <b class="num">${gel(be)}</b> in sales.`:''} ${info('net')}</div></div>`:'';
+    return loadingOr(head+`<div class="split2">${statement(M,mLabel(S.month),'Tap a line to see what is inside.'+(M.src?' Cost of goods from '+COGS_SRC[M.src]+'.':''))}<div class="stack">${plShare(M)}${loss}</div></div>${histLines(S.month)}<div class="panel chart mt"><h2>Net profit by month</h2><p class="sub">${S.month.slice(0,4)}. Red means a loss.</p>${netChart(yms)}</div>${loanBox([S.month],mShort(S.month),false)}`)}
   const {A}=rangeAgg(ms);
   return loadingOr(head+`<div class="grid g3">${statement(A,esc(rangeLabel()),rangeSub(ms)+'. Tap a line to see what is inside.')}<div class="panel chart" style="align-self:start"><h2>Net profit by ${many?'year':'month'}</h2><p class="sub">${many?'Whole years; * marks a part year.':'Red means a loss.'}</p>${netChart(ms)}</div></div>${loanBox(ms,'this period',false)}${yearTable(ms)}`);
 }
@@ -2436,7 +2645,7 @@ function vImports(){
   const fws=[...new Set(ships.map(s=>s.forwarder).filter(Boolean))].sort();
   const fwSel=`<select class="input" id="impFw" aria-label="Forwarder"><option value="">All forwarders</option>${fws.map(f=>`<option ${I.fw===f?'selected':''}>${esc(f)}</option>`).join('')}</select>`;
   const vatNote=`<p class="hint mt">Dollars at the rate each shipment was paid at, lari in brackets. Product cost ${vatInCost()?'includes':'leaves out'} import VAT. <button class="linkbtn" data-act="impVat">${vatInCost()?'VAT is reclaimed? Leave it out':'Count VAT in the cost'}</button> · <button class="linkbtn" data-act="impPack">Load an imports file</button></p>`;
-  const head=`<div class="pagehead"><div><div class="eyebrow">Supplier → forwarder → Tbilisi</div><h1>Imports</h1><p class="mhide">Every supplier order, and the truck that brings it. Combine orders into a shipment, add its freight, customs, VAT and transport, and see what each product really cost on the shelf.</p></div><div class="actions"><button class="btn" data-act="newShip">${svg(TRUCK,15)} Shipment</button><button class="btn" data-act="newOrder">+ Order</button><button class="btn amber" data-act="invOrder">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',14)} Upload invoice</button></div></div>`;
+  const head=`<div class="pagehead"><div><div class="eyebrow">Supplier → forwarder → Tbilisi</div><h1>Imports <span class="ka">იმპორტი</span></h1><p class="mhide">Every supplier order, and the truck that brings it. Combine orders into a shipment, add its freight, customs, VAT and transport, and see what each product really cost on the shelf.</p></div><div class="actions"><button class="btn" data-act="newShip">${svg(TRUCK,15)} Shipment</button><button class="btn" data-act="newOrder">+ Order</button><button class="btn amber" data-act="invOrder">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',14)} Upload invoice</button></div></div>`;
   let body='';
   if(I.tab==='orders')body=impOrders(orders,fwSel);
   else if(I.tab==='products')body=impProducts(ships,fwSel);
@@ -3161,8 +3370,8 @@ async function impAct(a,b){const I=impState();
 /* ============================== settings ============================== */
 function vSettings(){
   const fixed=fixedList();const rules=[...S.rules.values()].sort((a,b)=>a.match.localeCompare(b.match));const ft=fixed.reduce((a,f)=>a+(+f.gel||0),0);
-  const theme=lsGet('af.theme2')||'dark';
-  return `<div class="pagehead"><div><div class="eyebrow">Setup</div><h1>Settings</h1><p>The defaults the rest of the app uses.</p></div><div class="actions"><div class="seg" role="group" aria-label="Appearance"><button data-theme-set="dark" aria-pressed="${theme!=='light'}">Dark</button><button data-theme-set="light" aria-pressed="${theme==='light'}">Light</button></div></div></div>
+  const theme=lsGet('af.theme2')||'light';
+  return `<div class="pagehead"><div><div class="eyebrow">Setup</div><h1>Settings <span class="ka">პარამეტრები</span></h1><p>The defaults the rest of the app uses.</p></div><div class="actions"><div class="seg" role="group" aria-label="Appearance"><button data-theme-set="dark" aria-pressed="${theme!=='light'}">Dark</button><button data-theme-set="light" aria-pressed="${theme==='light'}">Light</button></div></div></div>
   <div class="grid g2"><div class="panel" style="grid-column:1/-1"><div class="row"><div><h2>Fixed monthly costs</h2><p class="sub" style="margin:0">Added to every month automatically, from the start month on. A real entry for the same cost (from the bank or added by hand) replaces the automatic one for that month. Total ${gel(ft)} a month.</p></div></div>
    <div class="tablewrap mt"><table><thead><tr><th>Name</th><th>Category</th><th>Matches payments containing</th><th>From month</th><th class="r">Amount ₾</th><th></th></tr></thead><tbody>
    ${fixed.map((f,i)=>`<tr><td><input class="input" data-fx="${i}" data-k="label" value="${esc(f.label)}"></td><td><select class="input" data-fx="${i}" data-k="cat">${catOptions(f.cat)}</select></td><td><input class="input" data-fx="${i}" data-k="match" value="${esc(f.match||'')}" placeholder="any ${esc(catLabel(f.cat).toLowerCase())}"></td><td><input class="input" type="month" data-fx="${i}" data-k="from" value="${esc(f.from||'')}"></td><td><input class="input num" data-fx="${i}" data-k="gel" inputmode="decimal" value="${esc(f.gel)}" style="text-align:right;max-width:110px;margin-left:auto"></td><td class="r"><button class="btn sm ghost" data-rmfx="${i}" aria-label="Remove">✕</button></td></tr>`).join('')}
@@ -3234,14 +3443,14 @@ const loanCash=()=>{const c=S.cfg.loan?.cash;return c&&c.gel!=null?c:null};
 function vLoan(){
   const L=loanInfo();const day=d=>d?new Date(d+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
   const w=S.canWrite?'':'disabled';
-  const head=`<div class="pagehead"><div><div class="eyebrow">სესხი · kept apart from the shop's books</div><h1>${esc(loanLabel())}</h1><p>${L?`${gel(L.received)} received${L.start?' on '+day(L.start):''}. Developers on their own, everything else together, and what is left.`:'What came in, what was paid with it, and what is left.'}</p></div><div class="actions"><button class="btn amber" data-act="loanNew" ${w}>+ Loan entry</button></div></div>`;
+  const head=`<div class="pagehead"><div><div class="eyebrow">Kept apart from the shop's books</div><h1>${esc(loanLabel())} <span class="ka">სესხი</span></h1><p>${L?`${gel(L.received)} received${L.start?' on '+day(L.start):''}. Repayments are money leaving the business, not a cost in profit.`:'What came in, what was paid with it, and what is left. None of it changes profit.'}</p></div><div class="actions"><button class="btn amber" data-act="loanNew" ${w}>+ Loan entry</button></div></div>`;
   if(!L)return loadingOr(head+`<div class="panel empty"><b>No loan recorded yet</b>Start with the money you received.<div class="mt"><button class="btn primary" data-act="loanNew" data-kind="in" ${w}>Add loan received</button></div></div>`);
   const C=loanCash();const P=v=>Math.max(0,v)/Math.max(1,L.received)*100;
   const kpis=`<div class="kpis">
-   <div class="kpi"><div class="lbl">Total loan</div><div class="val num">${cu(L.received)}<small>₾</small></div><div class="delta">${L.start?'received '+day(L.start)+' on TBC':'received'}</div></div>
-   <div class="kpi"><div class="lbl"><i class="ldot" style="background:var(--c4)"></i>Developers</div><div class="val num">${cu(L.dev)}<small>₾</small></div><div class="delta">${pct(L.dev,L.received)}% of the loan</div></div>
-   <div class="kpi"><div class="lbl"><i class="ldot" style="background:var(--c3)"></i>Other expenses</div><div class="val num ${L.other<0?'neg':''}">${cu(L.other)}<small>₾</small></div><div class="delta">${pct(Math.max(0,L.other),L.received)}% of the loan</div></div>
-   <div class="kpi"><div class="lbl"><i class="ldot" style="background:var(--c2)"></i>Left</div><div class="val num ${L.left<0?'neg':''}">${cu(L.left)}<small>₾</small></div><div class="delta">${L.typed?'you entered it '+day(L.typed.date):'from the entries · type the real amount below'}</div></div></div>
+   <div class="kpi"><div class="lbl">Received ${info('loan')}</div><div class="val num">${cu(L.received)}<small>₾</small></div><div class="exp">${L.start?'Borrowed '+day(L.start):'Amount that came in'}</div></div>
+   <div class="kpi"><div class="lbl">Developers <span class="ka">დეველოპერები</span></div><div class="val num">${cu(L.dev)}<small>₾</small></div><div class="exp">${pct(L.dev,L.received)}% of what was received · kept on its own</div></div>
+   <div class="kpi"><div class="lbl">Other spending</div><div class="val num ${L.other<0?'neg':''}">${cu(L.other)}<small>₾</small></div><div class="exp">Everything that is not developers</div></div>
+   <div class="kpi"><div class="lbl">Left of the loan</div><div class="val num ${L.left<0?'neg':''}">${cu(L.left)}<small>₾</small></div><div class="exp">${L.typed?'You entered this on '+day(L.typed.date):'Worked out from the entries'} · not part of profit</div></div></div>
   <div class="panel lsplit"><div class="lbar" role="img" aria-label="Loan split"><i style="width:${P(L.dev)}%;background:var(--c4)"></i><i style="width:${P(L.other)}%;background:var(--c3)"></i><i style="width:${P(L.left)}%;background:var(--c2)"></i></div>
    <div class="legend"><span><i style="background:var(--c4)"></i>Developers ${gel(L.dev)}</span><span><i style="background:var(--c3)"></i>Other expenses ${gel(L.other)}</span><span><i style="background:var(--c2)"></i>Left ${gel(L.left)}</span></div></div>`;
   const months=ob=>{const ks=Object.keys(ob).sort();return ks.length?`<div class="flow mt">${ks.map(m=>`<div class="ln"><span class="k">${mLabel(m)}</span><span class="v num">${gel(ob[m])}</span></div>`).join('')}</div>`:''};
@@ -3277,7 +3486,10 @@ function vLoan(){
   const devE=E.filter(isDev),othE=E.filter(e=>!isDev(e));
   const lists=`<div class="grid g2 mt"><section class="eg"><div class="eg-h"><span>Developer payments</span><b>${devE.length} · tap to edit</b></div>${rows(devE)}</section>
    <section class="eg"><div class="eg-h"><span>Other loan entries</span><b>${othE.length} · tap to edit</b></div>${rows(othE)}</section></div>`;
-  return loadingOr(head+kpis+`<div class="grid g2">${dev}${other}</div><div class="grid g2 mt">${where}${cash}</div>`+lists);
+  const reps=E.filter(e=>e.kind==='repay');
+  const sched=reps.length?(()=>{const by=new Map();reps.forEach(e=>{const mk=(e.date||'').slice(0,7)||'—';const o=by.get(mk)||{pay:0,int:0};o.pay+=+e.gel||0;if(e.part==='interest')o.int+=+e.gel||0;by.set(mk,o)});
+    return `<div class="panel mt"><div class="lbl">Repayments on record</div><div class="tablewrap" style="border:0;box-shadow:none"><table><thead><tr><th>Month</th><th class="r">Payment</th><th class="r hm">Of which interest</th></tr></thead><tbody>${[...by.entries()].sort((a,b)=>a[0].localeCompare(b[0])).map(([mk,o])=>`<tr><td>${mk==='—'?mk:esc(mLabel(mk))}</td><td class="r num">${gel(o.pay)}</td><td class="r num hm">${o.int?gel(o.int):'—'}</td></tr>`).join('')}</tbody></table></div><p class="exp">A month appears here only when a repayment is saved on this page.</p></div>`})():'';
+  return loadingOr(head+kpis+`<div class="grid g2">${dev}${other}</div><div class="grid g2 mt">${where}${cash}</div>`+sched+lists);
 }
 function loanModal(id,kind){
   const e=id?{...S.loan.get(id)}:{date:today(),kind:kind||'spend',pot:'tbc',purpose:'dev',part:'interest',gel:'',what:'',note:''};
@@ -3364,12 +3576,12 @@ function vOptimo(){
   const M=opModel();const T=S.op.tab;
   const tabs=[['overview','Overview'],['items','All items'],['stock','Stock & reorder'],['cats','Categories']];
   const upBtn=S.canWrite?`<button class="btn amber" data-act="opPick">${svg('M12 16V4M7 9l5-5 5 5M4 20h16')} Upload Optimo files</button><input type="file" id="opFile" accept=".xlsx,.xls,.csv" multiple hidden>`:'';
-  if(!M)return loadingOr(`<div class="pagehead"><div><div class="eyebrow">Optimo · ოპტიმო</div><h1>Optimo control center</h1><p>Your best sellers, profit per item, stock value and what to order next, from your Optimo exports. Separate from the books: nothing here changes the profit &amp; loss.</p></div><div class="actions">${upBtn}</div></div>
+  if(!M)return loadingOr(`<div class="pagehead"><div><div class="eyebrow">Optimo · ოპტიმო</div><h1>Optimo <span class="ka">ოპტიმო</span></h1><p>Your best sellers, profit per item, stock value and what to order next, from your Optimo exports. Separate from the books: nothing here changes the profit &amp; loss.</p></div><div class="actions">${upBtn}</div></div>
    <div class="grid g2"><div class="drop" data-act="opPick" role="button" tabindex="0">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',28)}<b>Drop your Optimo exports here</b><span>Sale history (გაყიდვების ისტორია) and stock list (StockItems), .xlsx</span></div>
    <div class="panel"><h2>What to export from Optimo</h2><div class="flow"><div class="ln"><span class="k"><b>1.</b> Sale history for any period, for example since you started</span></div><div class="ln"><span class="k"><b>2.</b> Stock items list: what is on the shelf now</span></div><div class="ln"><span class="k"><b>3.</b> Optional: sale history for the last 90 days, for sharper reorder advice</span></div></div></div></div>`);
   const per=M.sel?`${dLabel(M.sel.from)} – ${dLabel(M.sel.to)}`:'no sale history yet';
   const periodSel=M.D.sales.length>1?`<select class="input" id="opPeriod" aria-label="Sales period" style="width:auto">${M.D.sales.map(x=>`<option value="${esc(x.id)}" ${x.id===M.sel.id?'selected':''}>${dLabel(x.from)} – ${dLabel(x.to)}</option>`).join('')}</select>`:'';
-  const head=`<div class="pagehead"><div><div class="eyebrow">Optimo · ${esc(per)}</div><h1>Optimo control center</h1><p>${M.D.stock?'Stock counted '+dLabel(M.D.stock.at.slice(0,10))+'. ':''}Separate from the books.</p></div><div class="actions">${periodSel}${upBtn}</div></div>
+  const head=`<div class="pagehead"><div><div class="eyebrow">Optimo · ${esc(per)}</div><h1>Optimo <span class="ka">ოპტიმო</span></h1><p>${M.D.stock?'Stock counted '+dLabel(M.D.stock.at.slice(0,10))+'. ':''}Separate from the books.</p></div><div class="actions">${periodSel}${upBtn}</div></div>
    <div class="tabs" role="tablist">${tabs.map(([k,t])=>`<button role="tab" aria-selected="${T===k}" data-act="opTab" data-v="${k}">${t}${k==='stock'&&M.reorder.length?` <span class="chip bad" style="padding:0 6px">${M.reorder.length}</span>`:''}</button>`).join('')}</div>`;
   const body=T==='items'?opItems(M):T==='stock'?opStock(M):T==='cats'?opCats(M):opOverview(M);
   return loadingOr(head+body);
@@ -3505,7 +3717,7 @@ function catLive(x){let q=storeQ(x);const c=String(x.countedAt||'');S.pos.forEac
 function vStore(){
   const T=S.store.tab;
   const tabs=[['live','Live'],['history','History'],['setup','Register setup']];
-  const head=`<div class="pagehead"><div><div class="eyebrow">Store · სალარო</div><h1>Store sales</h1><p>What the consultants ring up on the register, as it happens. Kept apart from the books, like the Optimo pages.</p></div><div class="actions"><a class="btn" href="${esc(storeDir())}" target="_blank" rel="noopener">Open the register ↗</a></div></div>
+  const head=`<div class="pagehead"><div><div class="eyebrow">Store · სალარო</div><h1>Store sales <span class="ka">სალარო</span></h1><p>What the consultants ring up on the register, as it happens. Kept apart from the books, like the Optimo pages.</p></div><div class="actions"><a class="btn" href="${esc(storeDir())}" target="_blank" rel="noopener">Open the register ↗</a></div></div>
   <div class="tabs" role="tablist">${tabs.map(([k,t])=>`<button role="tab" aria-selected="${T===k}" data-act="st_tab" data-v="${k}">${t}</button>`).join('')}</div>`;
   const body=T==='history'?storeHistory():T==='setup'?storeSetup():storeLive();
   return loadingOr(head+body);
@@ -3808,6 +4020,8 @@ function bindView(){
   bindStore();
   const tip=$('#tip');const showTip=(e,html)=>{tip.innerHTML=html;tip.hidden=false;const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8),y=Math.min(e.clientY+14,innerHeight-tip.offsetHeight-8);tip.style.left=Math.max(8,x)+'px';tip.style.top=Math.max(8,y)+'px'};
   const hide=()=>tip.hidden=true;
+  document.querySelectorAll('[data-t]').forEach(el=>{el.addEventListener('pointermove',e=>{e.stopPropagation();showTip(e,esc(el.getAttribute('data-t')||''))});el.addEventListener('pointerleave',hide)});
+  document.querySelectorAll('.i').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();document.querySelectorAll('.i.show').forEach(x=>{if(x!==el)x.classList.remove('show')});el.classList.toggle('show')}));
   document.querySelectorAll('#trendSvg .hit').forEach(h=>{h.addEventListener('pointermove',e=>{const d=trendChart.data[+h.dataset.i];showTip(e,`<div class="t">${esc(d.long)}${d.src?' · '+COGS_SRC[d.src]:''}</div><div class="r"><span>Sales</span><b class="num">${gel(d.sales)}</b></div><div class="r"><span>Cost of goods</span><span class="num">${gel(d.cogs)}</span></div><div class="r"><span>Running costs</span><span class="num">${gel(d.opex)}</span></div><div class="r"><span>Taxes</span><span class="num">${gel(d.tax)}</span></div><div class="r"><span>Net profit</span><b class="num ${d.net<0?'neg':''}">${gel(d.net)}</b></div>`)});h.addEventListener('pointerleave',hide);h.addEventListener('click',()=>{hide();const d=trendChart.data[+h.dataset.i];if(d.isYear)setRange({p:'year',y:d.m});else setMonth(d.m)})});
   document.querySelectorAll('#dailySvg .dhit').forEach(h=>{h.addEventListener('pointermove',e=>showTip(e,`<div class="t">${h.dataset.d} ${mLabel(S.month)}</div><div class="r"><span>Sales</span><b class="num">${gel(+h.dataset.v)}</b></div><div class="r"><span>vs 1,000 ₾ target</span><span class="num">${pct(+h.dataset.v,1000)}%</span></div>`));h.addEventListener('pointerleave',hide)});
   const PD=pacePanel.data;document.querySelectorAll('#paceSvg .phit').forEach(h=>{const i=+h.dataset.i;h.addEventListener('pointermove',e=>{const x=$('#paceX');if(x){const X=+h.getAttribute('x')+ +h.getAttribute('width')/2;x.setAttribute('x1',X);x.setAttribute('x2',X);x.setAttribute('opacity','.35')}
