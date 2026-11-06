@@ -745,6 +745,8 @@ tr.dim td{opacity:.55}
 .aib code{font-family:var(--f-num);font-size:12px;background:rgba(127,127,127,.15);padding:0 4px;border-radius:4px}
 .aisteps{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px}.aisteps span{font-size:10.5px;color:var(--muted);background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:1px 7px;font-family:var(--f-num)}
 .aihint{color:var(--muted);font-size:13px;padding:8px 4px;line-height:1.5}
+.aiwhen{font-size:10.5px;color:var(--muted);margin-top:2px}
+.aib.wait{color:var(--muted);font-style:italic;background:transparent;border:1px dashed var(--line)}
 .typing{display:flex;gap:4px;align-items:center;min-height:20px}.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite}.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
 @keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
 .aiform{display:flex;gap:6px;align-items:flex-end;padding:10px;border-top:1px solid var(--line);background:var(--surface)}
@@ -854,7 +856,7 @@ const DEFAULT_FIXED=[
 
 /* ============================== state ============================== */
 const S={db:null,user:null,canWrite:true,mcp:null,downloads:null,loaded:{},
-  tx:new Map(),loan:new Map(),catalog:new Map(),pos:new Map(),shift:new Map(),site:new Map(),sales:new Map(),ships:new Map(),rules:new Map(),items:new Map(),itemsYear:new Map(),optimo:new Map(),cfg:{},range:null,mc:new Map(),
+  tx:new Map(),loan:new Map(),catalog:new Map(),pos:new Map(),shift:new Map(),site:new Map(),chat:new Map(),sales:new Map(),ships:new Map(),rules:new Map(),items:new Map(),itemsYear:new Map(),optimo:new Map(),cfg:{},range:null,mc:new Map(),
   view:'overview',month:null,draft:null,bank:null,opt:null,salesPreview:null,filters:{cat:'',acct:'',q:'',all:false},salesQ:'',
   prod:{tab:'popular',sort:'p',dir:-1,q:'',all:false},op:{tab:'overview',rank:'profit',period:'',q:'',cat:'',status:'',sort:'profit',dir:-1,full:false},store:{tab:'live',day:null},animate:true};
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
@@ -1152,14 +1154,14 @@ function vConnect(){
 async function connectBackend(c){
   S.backend=backendDB(c.u,c.k);S.db=S.backend;S.canWrite=true;S.mcp=null;
   const sub=(path,key)=>S.db.collection(path).onSnapshot(snap=>{const m=new Map();snap.docs.forEach(d=>m.set(d.id,{id:d.id,...d.data()}));S[key]=m;S.loaded[key]=true;schedule()});
-  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');sub('catalog','catalog');sub('pos','pos');sub('shift','shift');sub('site','site');
+  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');sub('catalog','catalog');sub('pos','pos');sub('shift','shift');sub('site','site');sub('chat','chat');
   S.db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()});
   S.backend.fromCache();
   try{await S.backend.load(true);S.backend.flush();autoSyncSales()}catch(e){if(e.code==='bad_key'){toast('Wrong secret key. Connect again.');S.view='connect';render();return}toast(errMsg(e));setConn(false,'Offline — showing saved copy')}
 }
 function backupDocs(){
   const out=[];const add=(c,m)=>m.forEach((v,id)=>{const d={...v};delete d.id;out.push({c,id,d})});
-  add('tx',S.tx);add('sales',S.sales);add('ships',S.ships);add('rules',S.rules);add('items',S.items);add('itemsYear',S.itemsYear);add('optimo',S.optimo);add('loan',S.loan);add('catalog',S.catalog);add('pos',S.pos);add('shift',S.shift);add('site',S.site);out.push({c:'cfg',id:'main',d:S.cfg});return out;
+  add('tx',S.tx);add('sales',S.sales);add('ships',S.ships);add('rules',S.rules);add('items',S.items);add('itemsYear',S.itemsYear);add('optimo',S.optimo);add('loan',S.loan);add('catalog',S.catalog);add('pos',S.pos);add('shift',S.shift);add('site',S.site);add('chat',S.chat);out.push({c:'cfg',id:'main',d:S.cfg});return out;
 }
 async function exportBackup(){
   const data=JSON.stringify({app:'astroman-finance',v:1,at:new Date().toISOString(),docs:backupDocs()});
@@ -1186,11 +1188,11 @@ async function boot(){
   if(user){try{const w=await user.can('data.write');if(w===false)S.canWrite=false}catch(e){}}
   if(!db){setConn(false,'Sign in to load data');S.loaded.none=true;render();return}
   const sub=(path,key)=>db.collection(path).onSnapshot(snap=>{const m=new Map();snap.docs.forEach(d=>m.set(d.id,{id:d.id,...d.data()}));S[key]=m;S.loaded[key]=true;setConn(true);schedule()},err=>{setConn(false,'Sync paused ('+err.code+')')});
-  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');sub('catalog','catalog');sub('pos','pos');sub('shift','shift');sub('site','site');
+  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');sub('catalog','catalog');sub('pos','pos');sub('shift','shift');sub('site','site');sub('chat','chat');
   db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()},()=>{});
 }
 function setConn(ok,txt){$('#syncDot').className='dot'+(ok?'':' off');$('#syncTxt').textContent=txt||(ok?'Saved to cloud':'Offline')}
-let rq=0;function schedule(){S.mc=new Map();if(rq)return;rq=requestAnimationFrame(()=>{rq=0;S.mc=new Map();fillMonthSel();if(S.view!=='add'||!S.renderedOnce)render()})}
+let rq=0;function schedule(){S.mc=new Map();if(rq)return;rq=requestAnimationFrame(()=>{rq=0;S.mc=new Map();fillMonthSel();if(S.view!=='add'||!S.renderedOnce)render();if(typeof aiRender==='function'&&AI.open&&inboxMode())aiRender()})}
 async function saveTx(t){
   if(!S.db)throw {message:'Not connected — open this page in Claude while signed in'};
   const id=t.id&&!String(t.id).startsWith('fx-')?t.id:uid('t');const body={...t};delete body.id;delete body.virtual;
@@ -3786,8 +3788,16 @@ async function aiCall(messages){
   const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':c.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:c.model||AI_MODELS[0][0],max_tokens:1500,system:aiSystem(),tools:AI_TOOLS,messages})});
   const j=await r.json().catch(()=>({}));if(!r.ok)throw {message:(j.error&&j.error.message)||('API error '+r.status)};return j;
 }
+function inboxMode(){return !aiCfg().key}
+function inboxThread(){return [...S.chat.values()].filter(x=>x&&x.text).sort((a,b)=>String(a.at).localeCompare(String(b.at))).slice(-30)}
+async function inboxSend(text){
+  if(!S.db){toast('Not connected');return}const id=uid('c');
+  await S.db.doc('chat/'+id).set({id,at:new Date().toISOString(),from:'owner',text,page:S.view,month:S.month,status:'new',reply:null,repliedAt:null,by:null});
+  AI.busy=false;aiRender();
+}
 async function aiSend(text){
   text=(text||'').trim();if(!text||AI.busy)return;
+  if(inboxMode())return inboxSend(text);
   AI.msgs.push({role:'user',content:text});AI.busy=true;aiRender();
   let convo=AI.msgs.slice(-20).map(m=>({role:m.role,content:m.content}));const steps=[];
   try{
@@ -3808,11 +3818,11 @@ function aiRender(steps){
   let root=$('#aiRoot');if(!root){root=document.createElement('div');root.id='aiRoot';document.body.appendChild(root)}
   const c=aiCfg();const md=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`(.+?)`/g,'<code>$1</code>').replace(/\n/g,'<br>');
   root.innerHTML=`<button class="aifab ${AI.open?'on':''}" data-ai="toggle" aria-label="Mars assistant">${svg('M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4zM5 16l.9 2.1L8 19l-2.1.9L5 22l-.9-2.1L2 19l2.1-.9zM19 14l.7 1.6 1.6.7-1.6.7L19 18.6l-.7-1.6-1.6-.7 1.6-.7z',22)}</button>
-  <div class="aipanel ${AI.open?'open':''}" role="dialog" aria-label="Mars assistant"><div class="aihead"><b>Mars</b><span class="muted small">${c.key?(AI_MODELS.find(m=>m[0]===c.model)||AI_MODELS[0])[1]:'no API key — Settings → Mars assistant'}</span><span class="spacer"></span><button class="btn sm ghost" data-ai="clear" title="New conversation">↺</button><button class="btn sm ghost" data-ai="toggle">✕</button></div>
-   <div class="aimsgs" id="aiMsgs">${AI.msgs.length?AI.msgs.map(m=>`<div class="aim ${m.role}">${m.steps&&m.steps.length?`<div class="aisteps">${m.steps.map(s=>`<span>${esc(s)}</span>`).join('')}</div>`:''}<div class="aib">${md(m.content)}</div></div>`).join(''):`<div class="aihint">Ask about sales, stock or consultants, change a price or a count, or ask for a change to Mars itself.<br><br>Try: “რამდენი გავყიდეთ დღეს?” · “set 3D კალამი price to 75” · “which products are below zero?” · “add a dark mode toggle to the register”</div>`}${AI.busy?`<div class="aim assistant"><div class="aisteps">${(steps||[]).map(s=>`<span>${esc(s)}</span>`).join('')}</div><div class="aib typing"><i></i><i></i><i></i></div></div>`:''}</div>
+  <div class="aipanel ${AI.open?'open':''}" role="dialog" aria-label="Mars assistant"><div class="aihead"><b>Mars</b><span class="muted small">${c.key?(AI_MODELS.find(m=>m[0]===c.model)||AI_MODELS[0])[1]:'inbox · answered by Claude Code'}</span><span class="spacer"></span><button class="btn sm ghost" data-ai="clear" title="New conversation">↺</button><button class="btn sm ghost" data-ai="toggle">✕</button></div>
+   <div class="aimsgs" id="aiMsgs">${inboxMode()?(inboxThread().length?inboxThread().map(m=>`<div class="aim user"><div class="aib">${md(m.text)}</div><div class="aiwhen">${dtShort(m.at)}</div></div>${m.reply?`<div class="aim assistant"><div class="aib">${md(m.reply)}</div><div class="aiwhen">${esc(m.by||'Claude')} · ${dtShort(m.repliedAt)}</div></div>`:`<div class="aim assistant"><div class="aib wait">sent to Claude · answered within the hour, sooner when Claude Code is open on the Mac</div></div>`}`).join(''):`<div class="aihint">Type or speak what you need: a question about sales or stock, a price or count to change, or a change to Mars itself. Claude reads this inbox and answers here. Within the hour by itself, at once while Claude Code is open.</div>`):AI.msgs.length?AI.msgs.map(m=>`<div class="aim ${m.role}">${m.steps&&m.steps.length?`<div class="aisteps">${m.steps.map(s=>`<span>${esc(s)}</span>`).join('')}</div>`:''}<div class="aib">${md(m.content)}</div></div>`).join(''):`<div class="aihint">Ask about sales, stock or consultants, change a price or a count, or ask for a change to Mars itself.<br><br>Try: “რამდენი გავყიდეთ დღეს?” · “set 3D კალამი price to 75” · “which products are below zero?” · “add a dark mode toggle to the register”</div>`}${AI.busy?`<div class="aim assistant"><div class="aisteps">${(steps||[]).map(s=>`<span>${esc(s)}</span>`).join('')}</div><div class="aib typing"><i></i><i></i><i></i></div></div>`:''}</div>
    <form class="aiform" id="aiForm"><button type="button" class="aimic ${AI.listening?'on':''}" data-ai="mic" aria-label="Voice input" title="Speak">${svg('M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zM19 11a7 7 0 0 1-14 0M12 18v3',20)}</button><textarea id="aiIn" rows="1" placeholder="${AI.listening?'Listening…':'Type or speak…'}" ${AI.busy?'disabled':''}></textarea><button type="submit" class="aisend" ${AI.busy?'disabled':''} aria-label="Send">${svg('M22 2L11 13M22 2l-7 20-4-9-9-4z',18)}</button></form></div>`;
   const box=$('#aiMsgs');if(box)box.scrollTop=box.scrollHeight;
-  root.querySelectorAll('[data-ai]').forEach(b=>b.onclick=e=>{const a=b.dataset.ai;if(a==='toggle')aiToggle();if(a==='clear'){AI.msgs=[];aiPersist();aiRender()}if(a==='mic')aiMic()});
+  root.querySelectorAll('[data-ai]').forEach(b=>b.onclick=e=>{const a=b.dataset.ai;if(a==='toggle')aiToggle();if(a==='clear'){if(inboxMode()){toast('The inbox thread is kept in Mars; old answers stay in the history')}else{AI.msgs=[];aiPersist();aiRender()}}if(a==='mic')aiMic()});
   const f=$('#aiForm'),inp=$('#aiIn');if(f){f.onsubmit=e=>{e.preventDefault();const v=inp.value;inp.value='';aiSend(v)};inp.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();f.requestSubmit()}};inp.oninput=()=>{inp.style.height='auto';inp.style.height=Math.min(120,inp.scrollHeight)+'px'}}
 }
 // voice: the browser's speech recognition (Chrome, Edge, Safari), Georgian first, then English; sends when you stop talking
@@ -3828,7 +3838,7 @@ function aiMic(){
 }
 function aiSettingsPanel(){
   const c=aiCfg();
-  return `<div class="panel stack"><h2>Mars assistant</h2><p class="sub" style="margin:0">The chat in the corner. It runs on Claude with your own Anthropic API key (console.anthropic.com → API keys); the key is kept on this device only, like the backend key. A GitHub token with “repo” scope lets it file change requests to the Mars code as issues in ${AI_REPO}.</p>
+  return `<div class="panel stack"><h2>Mars assistant</h2><p class="sub" style="margin:0">The chat in the corner. <b>Without an API key</b> it is an inbox: what you type or say is kept in Mars and Claude answers it there (a cloud routine every hour, and at once whenever Claude Code is open on the Mac). <b>With</b> an Anthropic API key (console.anthropic.com → API keys); the key is kept on this device only, like the backend key. A GitHub token with “repo” scope lets it file change requests to the Mars code as issues in ${AI_REPO}.</p>
    <div class="grid g2"><label class="field"><span>Anthropic API key</span><input class="input" id="aiKey" type="password" autocomplete="off" value="${esc(c.key||'')}" placeholder="sk-ant-…"></label><label class="field"><span>Model</span><select class="input" id="aiModel">${AI_MODELS.map(([v,t])=>`<option value="${v}" ${(c.model||AI_MODELS[0][0])===v?'selected':''}>${t}</option>`).join('')}</select></label></div>
    <div class="grid g2"><label class="field"><span>GitHub token (for change requests)</span><input class="input" id="aiGh" type="password" autocomplete="off" value="${esc(c.gh||'')}" placeholder="github_pat_… or ghp_…"></label><label class="field"><span>Voice language</span><select class="input" id="aiLang">${[['ka-GE','ქართული'],['en-US','English'],['ru-RU','Русский']].map(([v,t])=>`<option value="${v}" ${(c.lang||'ka-GE')===v?'selected':''}>${t}</option>`).join('')}</select></label></div>
    <div class="row"><button class="btn primary" data-act="ai_save">Save</button><button class="btn" data-act="ai_test">Test</button><span class="muted small" id="aiMsg" aria-live="polite"></span></div></div>`;
@@ -3844,7 +3854,7 @@ function bindStore(){
   if(S.view!=='store')return;
   const qr=$('#stQr');if(qr){const v=storeLink();loadQr().then(()=>{const q=window.qrcode(0,'M');q.addData(v);q.make();const box=$('#stQr');if(box)box.innerHTML=q.createSvgTag({cellSize:4,margin:2,scalable:true})}).catch(()=>{if(qr.closest('.qrbox'))qr.closest('.qrbox').hidden=true})}
 }
-setInterval(()=>{if(S.backend&&S.view==='store'&&S.store.tab==='live'&&!document.hidden&&!S.backend.pending())S.backend.load().catch(()=>{})},30000);
+setInterval(()=>{if(S.backend&&((S.view==='store'&&S.store.tab==='live')||(AI.open&&inboxMode()))&&!document.hidden&&!S.backend.pending())S.backend.load().catch(()=>{})},30000);
 
 function bindView(){
   if(S.view==='add')bindAdd();
