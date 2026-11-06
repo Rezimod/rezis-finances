@@ -775,6 +775,44 @@ nav.menu{gap:1px}nav.menu button{padding:7px 10px;font-size:13.5px;border-radius
 .panel h2{padding-bottom:6px;border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent);margin-bottom:8px}
 .panel .row h2,.panel .row>div>h2{border-bottom:0;padding-bottom:0;margin-bottom:0}
 @media (max-width:1000px){.cmps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* ---------- products page ---------- */
+.pprod{padding:14px 16px 10px}
+.ptop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.ptop h2{border-bottom:0;padding-bottom:0;margin-bottom:2px}.ptop .sub{margin:0;max-width:70ch}
+.ptools{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;margin-top:10px}
+.ptools .input{min-height:36px;padding:6px 10px}
+.pfilters{display:flex;flex-direction:column;gap:8px;margin:10px 0 12px}
+.pills{display:flex;gap:4px;flex-wrap:wrap}
+.pills button{flex:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:transparent;color:var(--ink-2);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.pills button b{font-weight:600;color:var(--muted);font-family:var(--f-num);font-size:11px}
+.pills button:hover{border-color:var(--brand)}
+.pills button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}.pills button[aria-pressed="true"] b{color:inherit;opacity:.8}
+.pills button.warn:not([aria-pressed="true"]){border-color:color-mix(in srgb,var(--warn) 55%,var(--line));color:var(--warn)}.pills button.warn:not([aria-pressed="true"]) b{color:var(--warn)}
+.ptoolsb{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;padding-top:8px;border-top:1px dashed var(--line)}
+.pgrid{grid-template-columns:repeat(auto-fill,minmax(156px,1fr));gap:10px}
+.pcard{border-radius:12px;background:var(--surface)}
+.pcard .pt{padding:8px 10px 9px;gap:4px}
+.pcard .pn{font-size:12.5px;line-height:1.3;min-height:33px;color:var(--ink)}
+.pcard .prow{display:flex;align-items:baseline;justify-content:space-between;gap:6px}
+.pcard .pp{font-size:15px;font-weight:700}.pcard .pp s{font-size:11.5px}.pcard .pp em{font-style:normal;color:var(--accent)}.pcard .pp .np{font-style:normal;color:var(--bad);font-size:12px;font-weight:700}
+.pcard .pmg{font-size:11px;font-weight:600;color:var(--good);background:var(--good-bg);border-radius:999px;padding:1px 7px}.pcard .pmg.low{color:var(--warn);background:var(--warn-bg)}
+.pcard .pst{display:flex;gap:4px}
+.pcard .pst span{flex:1;display:flex;flex-direction:column;align-items:center;gap:0;background:var(--surface-2);border-radius:7px;padding:3px 4px 2px;min-width:0}
+.pcard .pst i{font-style:normal;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.pcard .pst b{font-size:13px;font-weight:700;font-family:var(--f-num);color:var(--ink)}
+.pcard .pst span.zero b{color:var(--muted)}.pcard .pst span.neg b{color:var(--bad)}.pcard .pst span.inc b{color:var(--good)}
+.pcard .pcode{font-size:10.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pcard .pnew{position:absolute;left:6px;bottom:6px;font-size:10.5px;font-weight:800;color:#fff;background:var(--brand);border-radius:999px;padding:2px 7px}
+.pcard .pnoimg{bottom:auto;top:36px}
+.pcard .pq{min-width:28px;height:26px;font-size:13px}
+.inway{display:flex;flex-direction:column;gap:10px}
+.inwg{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.inwh{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--surface-2);cursor:pointer;font-size:12px}
+.inwr{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:8px;align-items:center;padding:5px 10px;border-top:1px solid var(--line);font-size:12.5px}
+.inwr .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.inwr b{color:var(--good)}
+@media (max-width:1100px){.ptools{grid-template-columns:1fr 1fr}.ptools .grow{grid-column:1/-1}}
 </style>
 
 <canvas id="sky" aria-hidden="true"></canvas>
@@ -1561,7 +1599,9 @@ function vStock(){
   const arr=arrivedToStock();
   const incP=`<div class="panel"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">On the way</h2><p class="sub" style="margin:2px 0 0">${inc.length?fmt(incQty)+' pieces · '+gel(incLand)+' landed cost, not in stock yet.':'Nothing on the way.'}</p></div><span class="spacer"></span><button class="btn sm" data-go="imports">All imports</button></div>
    ${arr.length?`<div class="stack mt" style="gap:6px">${arr.map(x=>`<button class="btn amber" data-act="st_stockShip" data-id="${esc(x.id)}">${svg('M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',18)} Put in stock · ${esc(x.forwarder||'shipment')} · arrived ${esc(x.arrivedAt||'')}</button>`).join('')}</div>`:''}
-   ${inc.length?`<div class="flow mt">${inc.map(s=>{const it=s.sku&&items.get(String(s.sku));return `<div class="ln click" ${s.shipId?`data-ship="${s.shipId}"`:`data-order="${s.orderId}"`}><span class="k"><b>${esc(s.item)}</b><div class="small muted">${esc(s.date||'')} · ${s.status==='arrived'?'arrived '+esc(s.arrivedAt):s.status==='order'?'ordered, not shipped yet':stLabel(s.status).toLowerCase()} · ${it?'→ '+esc(it.n):'<span style="color:var(--warn)">new product, not in Optimo yet</span>'}</div></span><span class="v num">${s.qty?'+'+fmt(s.qty):'<span class="muted">qty?</span>'}<div class="small muted">${gel(s.land)}${s.qty?' · '+gel(s.land/s.qty,2)+' each':''}</div></span></div>`}).join('')}</div>`:''}</div>`;
+   ${inc.length?(()=>{const groups=new Map();inc.filter(s=>!/shipp|delivery|internal/i.test(s.item)).forEach(s=>{const k=s.shipId||s.orderId;const g=groups.get(k)||(groups.set(k,{k,ship:s.shipId,order:s.orderId,date:s.date,status:s.status,arrivedAt:s.arrivedAt,rows:[]}),groups.get(k));g.rows.push(s)});
+     return `<div class="inway mt">${[...groups.values()].map(g=>`<div class="inwg"><div class="inwh" ${g.ship?`data-ship="${g.ship}"`:`data-order="${g.order}"`}><span class="chip ${g.status==='arrived'?'good':g.status==='order'?'':'warn'}">${g.status==='arrived'?'arrived '+esc(g.arrivedAt):g.status==='order'?'ordered':esc(stLabel(g.status))}</span><span class="muted small">${esc(g.date||'')}</span><span class="spacer"></span><b class="num">${fmt(g.rows.reduce((a,s)=>a+(+s.qty||0),0))} pcs</b></div>
+      ${g.rows.map(s=>{const it=s.sku&&S.catalog.get(String(s.sku));return `<div class="inwr"><span class="nm" title="${esc(s.item)}">${it?esc(it.n):esc(s.item)}</span>${it?'':'<span class="chip warn">new</span>'}<b class="num">+${fmt(s.qty||0)}</b><span class="num muted">${s.qty?gel(s.land/s.qty,2):gel(s.land)}</span></div>`}).join('')}</div>`).join('')}</div>`})():''}</div>`;
   const un=unlistedImports();
   const unP=un.length?`<div class="panel"><h2>Imports paid, items not listed</h2><p class="sub">${gel(un.reduce((a,t)=>a+t.gel,0))} paid in the last 45 days with no item list. Tap Add items and write what was in the order.</p><div class="flow">${un.map(t=>`<div class="ln"><span class="k"><b>${esc(t.vendor||'Import')}</b><div class="small muted">${esc(t.date)}${usdOfTx(t)?' · $'+fmt(usdOfTx(t),2):''}</div></span><span class="v"><span class="num">${gel(t.gel)}</span> <button class="btn sm" data-act="shipFromTx" data-id="${esc(t.id)}">Add items</button></span></div>`).join('')}</div></div>`:'';
   // the product list is the shared catalog: what the register sells, with Optimo's sold/profit figures joined by barcode
@@ -1587,13 +1627,17 @@ function vStock(){
   fl.sort((a,b)=>{const x=val(a),y=val(b);return typeof x==='string'?x.localeCompare(y):y-x});
   const shown=P.sfull||q?fl:fl.slice(0,120);
   const noImg=cnt('noimg');
-  const card=x=>{const onSale=x.sale>0&&x.sale<x.price;return `<button class="pcard ${x.hidden?'dim':''}" data-act="st_edit" data-b="${esc(x.b)}" title="${esc(x.n)}"><span class="pi">${x.img?`<img src="${esc(x.img)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=\\'ph\\'>${esc(posInitials(x.n))}</span>'">`:`<span class="ph">${esc(posInitials(x.n))}</span>`}<span class="pq ${x.lq<0?'neg':x.lq===0?'zero':''}">${x.lq}</span>${x.inc?`<span class="pinc">+${fmt(x.inc)}</span>`:''}${!x.img?'<span class="pnoimg">no picture</span>':''}${!(+x.price>0)?'<span class="pnoprice">no price</span>':''}</span>
-    <span class="pt"><b class="pn">${esc(x.n)}</b><span class="pp num">${onSale?`<s>${gel(x.price)}</s> <em>${gel(x.sale)}</em>`:gel(x.price)}</span><span class="small muted">${esc(x.b)}${x.cost?' · cost '+gel(x.cost,x.cost<20?2:0):''}${x.mg!=null?' · '+Math.round(x.mg*100)+'%':''}</span><span class="small pst"><b>${x.lq}</b> store · <b>${whQ(x)}</b> wh · <b>${x.lq+whQ(x)}</b> total</span></span></button>`};
-  const main=`<div class="panel" style="padding-bottom:10px"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">All products</h2><p class="sub" style="margin:2px 0 0">Tap a product to change its price, sale price, stock, picture or code. The register shows the same within a minute. Sold and profit are for ${esc(per)}.</p></div><span class="spacer"></span><div class="actions">${noImg?`<button class="btn amber sm" data-act="st_pickNext">Pick pictures (${noImg} left)</button>`:''}<button class="btn sm" data-act="st_add">+ Add product</button><button class="btn sm" data-act="st_dups">Find duplicates</button><button class="btn sm" data-act="st_sync" title="Stock, prices, costs and new items from the Optimo stock list">↻ Update from Optimo list</button></div></div>
-   <div class="toolbar mt"><input class="input grow" id="psQ" placeholder="Search product or barcode…" value="${esc(P.sq||'')}">
+  const card=x=>{const onSale=x.sale>0&&x.sale<x.price;const wh=whQ(x);const noPrice=!(+x.price>0);
+    return `<button class="pcard ${x.hidden?'dim':''}" data-act="st_edit" data-b="${esc(x.b)}" title="${esc(x.n)}"><span class="pi">${x.img?`<img src="${esc(x.img)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=\\'ph\\'>${esc(posInitials(x.n))}</span>'">`:`<span class="ph">${esc(posInitials(x.n))}</span>`}<span class="pq ${x.lq<0?'neg':x.lq===0?'zero':''}" title="In the store">${x.lq}</span>${x.inc?`<span class="pinc" title="On the way">+${fmt(x.inc)}</span>`:''}${!x.img?'<span class="pnoimg">no picture</span>':''}${x.fromOrder&&noPrice?'<span class="pnew">new</span>':''}</span>
+    <span class="pt"><b class="pn">${esc(x.n)}</b><span class="prow"><span class="pp num">${noPrice?'<em class="np">no price</em>':onSale?`<s>${gel(x.price)}</s> <em>${gel(x.sale)}</em>`:gel(x.price)}</span>${x.mg!=null&&!noPrice?`<span class="pmg num ${x.mg<0.25?'low':''}" title="Margin after VAT">${Math.round(x.mg*100)}%</span>`:''}</span>
+    <span class="pst"><span class="${x.lq<0?'neg':x.lq===0?'zero':''}"><i>store</i><b>${x.lq}</b></span><span class="${wh?'':'zero'}"><i>wh</i><b>${wh}</b></span>${x.inc?`<span class="inc"><i>way</i><b>+${fmt(x.inc)}</b></span>`:''}</span>
+    <span class="pcode num">${esc(x.b)}${x.cost?` · cost ${gel(x.cost,x.cost<20?2:0)}`:''}</span></span></button>`};
+  const main=`<div class="panel pprod"><div class="ptop"><div><h2>All products</h2><p class="sub">Tap a product to change price, sale price, stock, picture or code. The register follows within a minute. Sold and profit are for ${esc(per)}.</p></div><div class="actions"><button class="btn sm primary" data-act="st_add">+ Add product</button></div></div>
+   <div class="ptools"><input class="input grow" id="psQ" placeholder="Search product or barcode…" value="${esc(P.sq||'')}">
     <select class="input" id="psCat" aria-label="Category"><option value="">All categories</option>${cats.map(c=>`<option ${P.scat===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
     <select class="input" id="psSort" aria-label="Sort"><option value="sold" ${sort==='sold'?'selected':''}>Best selling</option><option value="n" ${sort==='n'?'selected':''}>Name</option><option value="sv" ${sort==='sv'?'selected':''}>Stock value</option><option value="q" ${sort==='q'?'selected':''}>Total stock</option><option value="price" ${sort==='price'?'selected':''}>Price</option><option value="mg" ${sort==='mg'?'selected':''}>Margin</option><option value="profit" ${sort==='profit'?'selected':''}>Profit</option></select></div>
-   <div class="seg wrap" role="group" aria-label="Show" style="margin-bottom:12px">${[['all','All',cnt('all')],['in','In stock',cnt('in')],['way','On the way',cnt('way')],['out','Out',cnt('out')],['neg','Below zero',cnt('neg')],['sale','On sale',cnt('sale')],['new','New arrivals',cnt('new')],['noprice','No price',cnt('noprice')],['noimg','No picture',noImg],['hidden','Hidden',cnt('hidden')]].map(([k,t,n])=>`<button data-act="psFilter" data-v="${k}" aria-pressed="${sf===k}">${t} <span class="muted">${n}</span></button>`).join('')}</div>
+   <div class="pfilters"><div class="pills" role="group" aria-label="Show">${[['all','All',cnt('all')],['in','In stock',cnt('in')],['out','Out',cnt('out')],['neg','Below zero',cnt('neg')],['way','On the way',cnt('way')],['new','New arrivals',cnt('new')],['noprice','No price',cnt('noprice')],['sale','On sale',cnt('sale')],['noimg','No picture',noImg],['hidden','Hidden',cnt('hidden')]].map(([k,t,n])=>`<button data-act="psFilter" data-v="${k}" aria-pressed="${sf===k}" class="${(k==='neg'&&n)||(k==='noprice'&&n)?'warn':''}">${t}<b>${n}</b></button>`).join('')}</div>
+    <div class="ptoolsb">${noImg?`<button class="btn sm amber" data-act="st_pickNext">Pick pictures · ${noImg}</button>`:''}<button class="btn sm ghost" data-act="st_dups">Find duplicates</button><button class="btn sm ghost" data-act="st_sync" title="Stock, prices, costs and new items from the Optimo stock list">↻ Update from Optimo</button></div></div>
    ${all.length?(shown.length?`<div class="pgrid">${shown.map(card).join('')}</div>${fl.length>shown.length?`<div class="row mt"><button class="btn" data-act="psFull">Show all ${fl.length}</button></div>`:''}`:'<div class="empty"><b>Nothing matches</b></div>')
    :`<div class="empty"><b>No catalog yet</b><span>Press “Update from Optimo list” to build it from the stock list you uploaded.</span></div>`}</div>`;
   return loadingOr(head(`${fmt(totStore)} pieces in the store, ${fmt(totWh)} in the warehouse · ${vis.length} products on the register${noImg?' · '+noImg+' without picture':''}. Values follow every change you make here.`)+kpis+`<div class="grid g3"><div>${main}</div><div class="stack">${incP}${negPanel(all)}${unP}</div></div>`);
