@@ -730,32 +730,6 @@ tr.dim td{opacity:.55}
 .pimg img,.pimg .ph{width:200px;height:200px;border-radius:12px;background:#fff;object-fit:contain;padding:8px}
 @media (max-width:700px){.pedit{grid-template-columns:1fr}.pimg img,.pimg .ph{width:140px;height:140px}}
 
-/* ---------- Mars assistant ---------- */
-.aifab{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:54px;height:54px;border-radius:50%;border:0;background:linear-gradient(180deg,#FFBE4D,var(--accent));color:var(--accent-ink);display:grid;place-items:center;cursor:pointer;z-index:45;box-shadow:0 10px 26px -8px rgba(245,166,35,.8);transition:transform .15s}
-.aifab:hover{transform:translateY(-2px)}.aifab.on{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
-@media (max-width:860px){.aifab{bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
-.aipanel{position:fixed;right:18px;bottom:84px;width:min(420px,calc(100vw - 36px));height:min(620px,calc(100vh - 120px));background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.45);display:none;flex-direction:column;z-index:46;overflow:hidden}
-.aipanel.open{display:flex;animation:pop .22s var(--ease) both}
-@media (max-width:860px){.aipanel{right:0;left:0;bottom:0;width:100%;height:calc(100vh - 20px);border-radius:18px 18px 0 0}}
-.aihead{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--surface-2)}
-.aihead b{font-family:var(--f-display);font-size:17px}
-.aimsgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
-.aim{display:flex;flex-direction:column;max-width:92%}.aim.user{align-self:flex-end;align-items:flex-end}
-.aib{padding:9px 12px;border-radius:14px;background:var(--surface-2);line-height:1.45;font-size:13.5px;word-break:break-word}
-.aim.user .aib{background:var(--brand);color:var(--brand-ink);border-bottom-right-radius:4px}.aim.assistant .aib{border-bottom-left-radius:4px}
-.aib code{font-family:var(--f-num);font-size:12px;background:rgba(127,127,127,.15);padding:0 4px;border-radius:4px}
-.aisteps{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px}.aisteps span{font-size:10.5px;color:var(--muted);background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:1px 7px;font-family:var(--f-num)}
-.aihint{color:var(--muted);font-size:13px;padding:8px 4px;line-height:1.5}
-.aiwhen{font-size:10.5px;color:var(--muted);margin-top:2px}
-.aib.wait{color:var(--muted);font-style:italic;background:transparent;border:1px dashed var(--line)}
-.typing{display:flex;gap:4px;align-items:center;min-height:20px}.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite}.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
-@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
-.aiform{display:flex;gap:6px;align-items:flex-end;padding:10px;border-top:1px solid var(--line);background:var(--surface)}
-.aiform textarea{flex:1;resize:none;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:12px;padding:9px 11px;font:inherit;font-size:13.5px;max-height:120px;outline:none}
-.aiform textarea:focus{border-color:var(--brand)}
-.aimic,.aisend{width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);display:grid;place-items:center;cursor:pointer;flex:none}
-.aimic.on{background:var(--bad);color:#fff;border-color:var(--bad);animation:pulse 1.4s infinite}
-.aisend{background:var(--accent);color:var(--accent-ink);border-color:transparent}.aisend:disabled{opacity:.5}
 </style>
 
 <canvas id="sky" aria-hidden="true"></canvas>
@@ -857,7 +831,7 @@ const DEFAULT_FIXED=[
 
 /* ============================== state ============================== */
 const S={db:null,user:null,canWrite:true,mcp:null,downloads:null,loaded:{},
-  tx:new Map(),loan:new Map(),catalog:new Map(),pos:new Map(),shift:new Map(),site:new Map(),chat:new Map(),sales:new Map(),ships:new Map(),rules:new Map(),items:new Map(),itemsYear:new Map(),optimo:new Map(),cfg:{},range:null,mc:new Map(),
+  tx:new Map(),loan:new Map(),catalog:new Map(),pos:new Map(),shift:new Map(),site:new Map(),sales:new Map(),ships:new Map(),rules:new Map(),items:new Map(),itemsYear:new Map(),optimo:new Map(),cfg:{},range:null,mc:new Map(),
   view:'overview',month:null,draft:null,bank:null,opt:null,salesPreview:null,filters:{cat:'',acct:'',q:'',all:false},salesQ:'',
   prod:{tab:'popular',sort:'p',dir:-1,q:'',all:false},op:{tab:'overview',rank:'profit',period:'',q:'',cat:'',status:'',sort:'profit',dir:-1,full:false},store:{tab:'live',day:null},animate:true};
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
@@ -1155,14 +1129,14 @@ function vConnect(){
 async function connectBackend(c){
   S.backend=backendDB(c.u,c.k);S.db=S.backend;S.canWrite=true;S.mcp=null;
   const sub=(path,key)=>S.db.collection(path).onSnapshot(snap=>{const m=new Map();snap.docs.forEach(d=>m.set(d.id,{id:d.id,...d.data()}));S[key]=m;S.loaded[key]=true;schedule()});
-  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');sub('catalog','catalog');sub('pos','pos');sub('shift','shift');sub('site','site');sub('chat','chat');
+  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');sub('catalog','catalog');sub('pos','pos');sub('shift','shift');sub('site','site');
   S.db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()});
   S.backend.fromCache();
   try{await S.backend.load(true);S.backend.flush();autoSyncSales()}catch(e){if(e.code==='bad_key'){toast('Wrong secret key. Connect again.');S.view='connect';render();return}toast(errMsg(e));setConn(false,'Offline — showing saved copy')}
 }
 function backupDocs(){
   const out=[];const add=(c,m)=>m.forEach((v,id)=>{const d={...v};delete d.id;out.push({c,id,d})});
-  add('tx',S.tx);add('sales',S.sales);add('ships',S.ships);add('rules',S.rules);add('items',S.items);add('itemsYear',S.itemsYear);add('optimo',S.optimo);add('loan',S.loan);add('catalog',S.catalog);add('pos',S.pos);add('shift',S.shift);add('site',S.site);add('chat',S.chat);out.push({c:'cfg',id:'main',d:S.cfg});return out;
+  add('tx',S.tx);add('sales',S.sales);add('ships',S.ships);add('rules',S.rules);add('items',S.items);add('itemsYear',S.itemsYear);add('optimo',S.optimo);add('loan',S.loan);add('catalog',S.catalog);add('pos',S.pos);add('shift',S.shift);add('site',S.site);out.push({c:'cfg',id:'main',d:S.cfg});return out;
 }
 async function exportBackup(){
   const data=JSON.stringify({app:'astroman-finance',v:1,at:new Date().toISOString(),docs:backupDocs()});
@@ -1189,11 +1163,11 @@ async function boot(){
   if(user){try{const w=await user.can('data.write');if(w===false)S.canWrite=false}catch(e){}}
   if(!db){setConn(false,'Sign in to load data');S.loaded.none=true;render();return}
   const sub=(path,key)=>db.collection(path).onSnapshot(snap=>{const m=new Map();snap.docs.forEach(d=>m.set(d.id,{id:d.id,...d.data()}));S[key]=m;S.loaded[key]=true;setConn(true);schedule()},err=>{setConn(false,'Sync paused ('+err.code+')')});
-  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');sub('catalog','catalog');sub('pos','pos');sub('shift','shift');sub('site','site');sub('chat','chat');
+  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');sub('catalog','catalog');sub('pos','pos');sub('shift','shift');sub('site','site');
   db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()},()=>{});
 }
 function setConn(ok,txt){$('#syncDot').className='dot'+(ok?'':' off');$('#syncTxt').textContent=txt||(ok?'Saved to cloud':'Offline')}
-let rq=0;function schedule(){S.mc=new Map();if(rq)return;rq=requestAnimationFrame(()=>{rq=0;S.mc=new Map();fillMonthSel();if(S.view!=='add'||!S.renderedOnce)render();if(typeof aiRender==='function'&&AI.open&&inboxMode())aiRender()})}
+let rq=0;function schedule(){S.mc=new Map();if(rq)return;rq=requestAnimationFrame(()=>{rq=0;S.mc=new Map();fillMonthSel();if(S.view!=='add'||!S.renderedOnce)render()})}
 async function saveTx(t){
   if(!S.db)throw {message:'Not connected — open this page in Claude while signed in'};
   const id=t.id&&!String(t.id).startsWith('fx-')?t.id:uid('t');const body={...t};delete body.id;delete body.virtual;
@@ -3128,7 +3102,6 @@ function vSettings(){
    <label class="field"><span>How to calculate profit</span><select class="input" id="cMethod"><option value="auto" ${(S.cfg.method||'auto')==='auto'?'selected':''}>Cost of items sold: product reports, else the nearest report's cost ratio (recommended)</option><option value="cash" ${S.cfg.method==='cash'?'selected':''}>Always count stock when it's paid for</option></select></label>
    <label class="field"><span>Order sheet ID (Google Sheets)</span><input class="input num small" id="cSheet" value="${esc(sheetId())}"></label>
    <div><button class="btn primary" data-act="saveGeneral" ${S.canWrite?'':'disabled'}>Save</button></div></div>
-  ${aiSettingsPanel()}
   ${S.hosted?sitePanel():''}
   <div class="panel stack"><h2>Backup &amp; devices</h2><p class="sub" style="margin:0">${S.hosted?'Your data is stored in your Google account (Apps Script). Every change waits on this device until Google confirms it, every change is also written to a permanent log, and a full copy of the data goes to the “Astroman Finance backups” folder in your Drive every night (kept 90 days).':'Your data is stored in your Claude account.'} A backup file moves everything between the Claude version and the hosted version.</p>
    <div class="row"><button class="btn" data-act="exportBackup">Download backup</button>${S.canWrite?'<button class="btn" data-act="pickBackup">Import backup</button><input type="file" id="backupFile" accept=".json,application/json" hidden>':''}<span class="muted small" id="impMsg" aria-live="polite"></span></div>
@@ -3441,7 +3414,8 @@ function closeModal(){$('#modalRoot').innerHTML='';document.removeEventListener(
 /* ============================== store register (POS) ============================== */
 // The register (astroman/store/) writes `pos` (one record per sale) and `shift` records with its own limited
 // key; the catalog it sells from is the `catalog` collection, managed here. Nothing here touches the books.
-const POSPAY={cash:'Cash',card_bog:'BOG terminal',card_tbc:'TBC terminal',installment:'Installments',transfer:'Transfer',other:'Other'};
+const POSPAY={cash:'Cash',pos:'Card terminal',bog:'BOG transfer',tbc:'TBC transfer',wolt:'Wolt',glovo:'Glovo',extra:'Extra.ge',cod:'Cash on delivery',personal:'Rezi personal account',pending:'Awaiting transfer',installment:'Installments',other:'Other',card_bog:'BOG terminal',card_tbc:'TBC terminal',transfer:'Transfer'};
+const POS_CARD=new Set(['pos','card_bog','card_tbc']);
 const posInitials=n=>String(n||'').replace(/[^\p{L}\p{N}]/gu,'').slice(0,2).toUpperCase()||'·';
 function thumb(x,s){s=s||36;return x&&x.img?`<img class="thumb" src="${esc(x.img)}" alt="" loading="lazy" style="width:${s}px;height:${s}px" onerror="this.outerHTML='<span class=\\'thumb ph\\' style=\\'width:${s}px;height:${s}px\\'>${esc(posInitials(x.n))}</span>'">`:`<span class="thumb ph" style="width:${s}px;height:${s}px">${esc(posInitials(x&&x.n))}</span>`}
 function posOrders(day){return [...S.pos.values()].filter(o=>o&&o.lines&&(!day||o.day===day)).sort((a,b)=>String(b.at).localeCompare(String(a.at)))}
@@ -3495,7 +3469,7 @@ function storeOrderModal(id){
 }
 function storeHistory(){
   const m=S.month;const L=posOrders().filter(o=>(o.day||'').startsWith(m));
-  const days=new Map();L.forEach(o=>{const D=days.get(o.day)||(days.set(o.day,{d:o.day,n:0,a:0,cash:0,card:0,other:0,v:0}),days.get(o.day));if(o.status==='void'){D.v++;return}D.n++;D.a+=o.total;if(o.pay==='cash')D.cash+=o.total;else if(o.pay==='card_bog'||o.pay==='card_tbc')D.card+=o.total;else D.other+=o.total});
+  const days=new Map();L.forEach(o=>{const D=days.get(o.day)||(days.set(o.day,{d:o.day,n:0,a:0,cash:0,card:0,other:0,v:0}),days.get(o.day));if(o.status==='void'){D.v++;return}D.n++;D.a+=o.total;if(o.pay==='cash')D.cash+=o.total;else if(POS_CARD.has(o.pay))D.card+=o.total;else D.other+=o.total});
   const rows=[...days.values()].sort((a,b)=>b.d.localeCompare(a.d));const tot=rows.reduce((t,D)=>({n:t.n+D.n,a:t.a+D.a,cash:t.cash+D.cash,card:t.card+D.card,other:t.other+D.other,v:t.v+D.v}),{n:0,a:0,cash:0,card:0,other:0,v:0});
   const items=new Map();L.forEach(o=>{if(o.status==='void')return;o.lines.forEach(l=>{const it=items.get(l.b)||{b:l.b,n:l.n,q:0,a:0,img:l.img};it.q+=l.q;it.a+=Math.max(0,l.q*l.p-(+l.d||0));items.set(l.b,it)})});
   const top=[...items.values()].sort((a,b)=>b.a-a.a).slice(0,15);const max=Math.max(1,...top.map(x=>x.a));
@@ -3608,7 +3582,6 @@ async function storeAct(a,b){
   if(a==='st_merge')return mergeGroup(b.dataset.g,b.dataset.codes.split('|'));
   if(a==='st_zero'){const x=S.catalog.get(b.dataset.b);if(!x)return;await saveCat(x.b,{qs:0,countedAt:new Date().toISOString()});return toast('Store count set to 0')}
   if(a.startsWith('si_'))return siteAct(a,b);
-  if(a.startsWith('ai_'))return aiSettingsAct(a);
   if(a==='st_img'){S.pickChain=false;return catPickModal(b.dataset.b)}
   if(a==='st_pick'){const site=await loadSite();const p=site.find(x=>String(x.id)===b.dataset.id);if(!p)return;await saveCat(b.dataset.b,{img:p.img,big:p.big,wooId:p.id});toast('Picture set');const nx=S.pickChain?nextNoImg(b.dataset.b):null;if(nx&&nx.b!==b.dataset.b)return catPickModal(nx.b);closeModal();return}
   if(a==='st_noImg'){await saveCat(b.dataset.b,{img:null,big:null,wooId:null,noImg:true});const nx=S.pickChain?nextNoImg(b.dataset.b):null;if(nx&&nx.b!==b.dataset.b)return catPickModal(nx.b);closeModal();return}
@@ -3726,136 +3699,11 @@ async function siteAct(a,b){
   if(a==='si_sync'){m.textContent='Syncing — up to a minute…';b.disabled=true;try{const r=await gasCall(c.u,c.k,{action:'site_sync'});m.textContent=r.error?'Failed: '+r.error:fmt(r.updated)+' products updated, '+fmt(r.outofstock||0)+' out of stock';if(S.backend)S.backend.load().catch(()=>{})}catch(e){m.textContent=e.message||'Failed'}b.disabled=false;return}
 }
 
-/* ============================== Mars assistant (Claude) ============================== */
-// A chat with Claude that knows this platform: it reads the loaded data through tools, changes products,
-// consultants and settings through the same functions the pages use, and files code changes as GitHub
-// issues in the Mars repo. Keys stay on this device (localStorage), like the backend key.
-const AI_REPO='Rezimod/rezis-finances';
-const AI_MODELS=[['claude-sonnet-5-5','Sonnet 5.5 — fast'],['claude-opus-5-5','Opus 5.5 — strongest']];
-function aiCfg(){try{return JSON.parse(lsGet('af.ai')||'{}')}catch(e){return {}}}
-function aiSave(patch){lsSet('af.ai',JSON.stringify({...aiCfg(),...patch}))}
-const AI={open:false,msgs:[],busy:false,rec:null,listening:false};
-try{AI.msgs=JSON.parse(sessionStorage.getItem('af.ai.msgs')||'[]')}catch(e){}
-function aiPersist(){try{sessionStorage.setItem('af.ai.msgs',JSON.stringify(AI.msgs.slice(-40)))}catch(e){}}
-
-function catalogRows(){return [...S.catalog.values()].filter(x=>x&&x.b).map(x=>({code:x.b,name:x.n,category:x.cat||'',price:+x.price||0,sale:x.sale||null,cost:+x.cost||0,store:catLive(x),warehouse:whQ(x),picture:!!x.img,hidden:!!x.hidden,soldThisYear:x.sold||0,note:x.storeNote||''}))}
-const AI_TOOLS=[
- {name:'overview',description:'Numbers for a month and a day: sheet sales (the books), register sales, stock values, consultants. Use this first for any question about how the business is doing.',input_schema:{type:'object',properties:{month:{type:'string',description:'YYYY-MM, default the selected month'},day:{type:'string',description:'YYYY-MM-DD, default today'}}}},
- {name:'find_products',description:'Search the register catalog by name or code. Returns up to 25 products with price, sale price, cost, store and warehouse counts.',input_schema:{type:'object',properties:{query:{type:'string'},filter:{type:'string',enum:['all','in_stock','out','below_zero','no_picture','hidden','on_sale']}},required:['query']}},
- {name:'update_product',description:'Change a product on the register and in Mars. Only send the fields to change. store = pieces in the store right now, warehouse = pieces in the warehouse.',input_schema:{type:'object',properties:{code:{type:'string'},name:{type:'string'},price:{type:'number'},sale:{type:['number','null'],description:'sale price, null removes the sale'},cost:{type:'number'},store:{type:'integer'},warehouse:{type:'integer'},category:{type:'string'},hidden:{type:'boolean'},note:{type:'string'}},required:['code']}},
- {name:'add_product',description:'Add a new product to the register.',input_schema:{type:'object',properties:{code:{type:'string'},name:{type:'string'},price:{type:'number'},cost:{type:'number'},store:{type:'integer'},warehouse:{type:'integer'},category:{type:'string'}},required:['code','name','price']}},
- {name:'delete_product',description:'Remove a product from the register (keeps past sales).',input_schema:{type:'object',properties:{code:{type:'string'}},required:['code']}},
- {name:'register_sales',description:'Register sales for a day or a month: each sale with time, consultant, products, payment, total; plus the sheet-vs-register comparison for a day.',input_schema:{type:'object',properties:{day:{type:'string'},month:{type:'string'}}}},
- {name:'consultants',description:'List consultants with PINs, their shifts, hours and sales for a month.',input_schema:{type:'object',properties:{month:{type:'string'}}}},
- {name:'set_consultants',description:'Replace the register consultants list. Each has name, 4-digit pin and admin true/false.',input_schema:{type:'object',properties:{users:{type:'array',items:{type:'object',properties:{name:{type:'string'},pin:{type:'string'},admin:{type:'boolean'}},required:['name','pin']}}},required:['users']}},
- {name:'void_sale',description:'Void a register sale by its id (from register_sales).',input_schema:{type:'object',properties:{id:{type:'string'},reason:{type:'string'}},required:['id']}},
- {name:'open_page',description:'Open a page of Mars for the user: overview, sales, products, expenses, bank, pl, imports, loan, optimo, store, settings.',input_schema:{type:'object',properties:{page:{type:'string'}},required:['page']}},
- {name:'request_change',description:'File a change to the Mars code itself (new feature, layout change, bug) as a GitHub issue in the Mars repository, for the developer agent to implement. Use when the user asks for something the data tools cannot do. Write a precise, complete specification.',input_schema:{type:'object',properties:{title:{type:'string'},details:{type:'string',description:'Full description: what, where, how it should look and behave, acceptance criteria'}},required:['title','details']}},
-];
-async function aiToolRun(name,a){
-  const now=today();const m=a.month||S.month;
-  if(name==='overview'){const d=a.day||now;const M=metrics(m);const R=recon(d);const rows=catalogRows().filter(x=>!x.hidden);const posM=posOrders().filter(o=>(o.day||'').startsWith(m)&&o.status!=='void');
-    return {month:m,books:{sales:r2(M.sales),orders:M.orders,cogs:r2(M.cogs),runningCosts:r2(M.opex),net:r2(M.net)},register:{month:{sales:posM.length,total:r2(posM.reduce((x,o)=>x+o.total,0))},day:{date:d,sales:R.reg.length,total:r2(R.ra),sheetBranchRows:R.sheet.length,sheetBranchTotal:r2(R.sa),matches:R.ok,onlyInSheet:R.sheetOnly.map(s=>({products:s.p,amount:s.a})),onlyOnRegister:R.regOnly.map(o=>({products:o.p,amount:o.a}))}},
-      stock:{products:rows.length,storePieces:rows.reduce((x,r)=>x+Math.max(0,r.store),0),storeValueAtCost:r2(rows.reduce((x,r)=>x+Math.max(0,r.store)*r.cost,0)),warehousePieces:rows.reduce((x,r)=>x+r.warehouse,0),warehouseValueAtCost:r2(rows.reduce((x,r)=>x+r.warehouse*r.cost,0)),belowZero:rows.filter(r=>r.store<0).length,withoutPicture:rows.filter(r=>!r.picture).length,onTheWayPieces:incoming().reduce((x,s)=>x+(+s.qty||0),0)},
-      consultants:((S.cfg.pos||{}).users||[]).map(u=>u.name)}}
-  if(name==='find_products'){const q=nrm(a.query||'');const f=a.filter||'all';return catalogRows().filter(r=>(!q||nrm(r.name).includes(q)||String(r.code).includes(q))&&(f==='all'||(f==='in_stock'&&r.store>0)||(f==='out'&&r.store<=0)||(f==='below_zero'&&r.store<0)||(f==='no_picture'&&!r.picture)||(f==='hidden'&&r.hidden)||(f==='on_sale'&&r.sale>0))).slice(0,25)}
-  if(name==='update_product'){const x=S.catalog.get(String(a.code));if(!x)return {error:'no product with code '+a.code};const p={};
-    if(a.name!=null){p.n=a.name;p.nameEdited=true}if(a.price!=null){p.price=+a.price;p.priceEdited=true}if('sale' in a)p.sale=a.sale>0&&a.sale<(a.price??x.price)?+a.sale:null;if(a.cost!=null){p.cost=+a.cost;p.costEdited=true}
-    if(a.store!=null){p.qs=+a.store;p.countedAt=new Date().toISOString()}if(a.warehouse!=null)p.qw=+a.warehouse;if(a.category)p.cat=a.category;if(a.hidden!=null)p.hidden=!!a.hidden;if(a.note!=null)p.storeNote=a.note;
-    await saveCat(x.b,p);return {ok:true,product:catalogRows().find(r=>r.code===x.b)}}
-  if(name==='add_product'){const b=String(a.code);if(S.catalog.has(b))return {error:'code already used by '+S.catalog.get(b).n};await saveCat(b,{b,n:a.name,cat:a.category||'სხვადასხვა',price:+a.price||0,sale:null,cost:+a.cost||0,vat:'',q:0,qs:+a.store||0,qw:+a.warehouse||0,min:0,sold:0,img:null,big:null,wooId:null,hidden:false,countedAt:new Date().toISOString(),nameEdited:true,priceEdited:true});return {ok:true}}
-  if(name==='delete_product'){const x=S.catalog.get(String(a.code));if(!x)return {error:'no such product'};await S.db.doc('catalog/'+x.b).delete();await saveCfg({catalogDeleted:[...new Set([...(S.cfg.catalogDeleted||[]),String(x.b)])]});return {ok:true,deleted:x.n}}
-  if(name==='register_sales'){if(a.month&&!a.day){const L=posOrders().filter(o=>(o.day||'').startsWith(a.month));return {month:a.month,sales:L.length,total:r2(L.filter(o=>o.status!=='void').reduce((x,o)=>x+o.total,0)),byDay:[...new Set(L.map(o=>o.day))].sort().map(d=>({day:d,sales:L.filter(o=>o.day===d&&o.status!=='void').length,total:r2(L.filter(o=>o.day===d&&o.status!=='void').reduce((x,o)=>x+o.total,0)),sheetMatches:recon(d).ok}))}}
-    const d=a.day||now;const R=recon(d);return {day:d,sales:posOrders(d).map(o=>({id:o.id,no:o.no,time:tOf(o.at),consultant:o.user?o.user.name:'',products:o.lines.map(l=>({code:l.b,name:l.n,qty:l.q,price:l.p,discount:l.d||0})),payment:POSPAY[o.pay]||o.pay,total:o.total,status:o.status})),sheetBranchRows:R.sheet.map(s=>({products:s.p,payment:s.pay,amount:s.a})),matches:R.ok,difference:R.diff}}
-  if(name==='consultants'){const users=((S.cfg.pos||{}).users||[]);const sh=[...S.shift.values()].filter(x=>x&&String(x.openedAt||'').slice(0,7)===m);const L=posOrders().filter(o=>(o.day||'').startsWith(m)&&o.status!=='void');
-    return {month:m,consultants:users.map(u=>{const my=sh.filter(x=>x.user&&x.user.id===u.id);const sales=L.filter(o=>o.user&&o.user.id===u.id);return {name:u.name,pin:u.pin,admin:!!u.admin,shifts:my.length,hours:r2(my.reduce((x,s)=>x+Math.max(0,((s.closedAt?Date.parse(s.closedAt):Date.now())-Date.parse(s.openedAt))/36e5),0)),onShiftNow:my.some(s=>!s.closedAt),sales:sales.length,revenue:r2(sales.reduce((x,o)=>x+o.total,0)),endedEarlyMinutes:my.filter(s=>s.early).map(s=>s.early)}})}}
-  if(name==='set_consultants'){const users=(a.users||[]).filter(u=>u.name).map(u=>({id:uid('u'),name:String(u.name).trim(),pin:String(u.pin||'').replace(/\D/g,'').slice(0,4),admin:!!u.admin}));await savePos({users});return {ok:true,users:users.map(u=>u.name)}}
-  if(name==='void_sale'){const o=S.pos.get(String(a.id));if(!o)return {error:'no such sale'};const {id,...rest}=o;await S.db.doc('pos/'+o.id).set({...rest,status:'void',voidAt:new Date().toISOString(),voidBy:{id:'owner',name:'Mars assistant'},voidWhy:a.reason||'Voided from Mars'});return {ok:true}}
-  if(name==='open_page'){const p=String(a.page||'').toLowerCase();if(!PAGES.some(x=>x.id===p))return {error:'unknown page'};go(p);return {ok:true}}
-  if(name==='request_change'){const c=aiCfg();if(!c.gh)return {error:'No GitHub token saved in Settings → Mars assistant, so the change request could not be filed. Tell the user to add a token (repo scope) there.'};
-    const body='**Requested from the Mars assistant** · '+new Date().toISOString().slice(0,16).replace('T',' ')+' · page: '+S.view+'\n\n'+a.details+'\n\n---\n_Implement in `astroman/index.html` (Mars) or `astroman/store/index.html` (register). Run the test suites before pushing._';
-    const r=await fetch('https://api.github.com/repos/'+AI_REPO+'/issues',{method:'POST',headers:{Authorization:'Bearer '+c.gh,Accept:'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify({title:'[Mars] '+a.title,body})});
-    const j=await r.json().catch(()=>({}));if(!r.ok)return {error:'GitHub answered '+r.status+': '+(j.message||'')};return {ok:true,issue:j.number,url:j.html_url}}
-  return {error:'unknown tool'};
-}
-function aiSystem(){
-  const u=((S.cfg.pos||{}).users||[]).map(x=>x.name).join(', ');
-  return `You are the Mars assistant. Mars is Astroman's control center (astroman.ge, an astronomy and space-gift shop in Tbilisi, Georgia): a finance desk (sales from the order sheet = "the books", expenses, bank imports, profit and loss, imports from suppliers, a loan page), an Optimo (the old POS) control center, the Products page (the register catalog: store count, warehouse count, Optimo count, prices, sale prices, pictures), and Store sales (what the shop register records live, sheet-vs-register reconciliation, consultants' shifts and hours). The register is a separate web app the consultants use in the shop; it reads the same catalog and writes sales and shifts within a minute.
-Today is ${today()}; the selected month is ${S.month}; the open page is "${S.view}". Consultants: ${u||'none set'}. Currency is Georgian lari (₾).
-Answer in the user's language (Georgian or English), briefly, with numbers formatted. Use tools to read before you answer about data, and to make the change the user asks for; after changing something say exactly what changed. Prices and counts you change are live on the register within a minute. If a request needs a change to the Mars software itself (new page, new button, different layout, a bug), use request_change with a complete specification and tell the user it was filed for the developer agent. Never invent numbers.`;
-}
-async function aiCall(messages){
-  const c=aiCfg();if(!c.key)throw {message:'No API key yet — open Settings → Mars assistant and paste an Anthropic API key.'};
-  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':c.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:c.model||AI_MODELS[0][0],max_tokens:1500,system:aiSystem(),tools:AI_TOOLS,messages})});
-  const j=await r.json().catch(()=>({}));if(!r.ok)throw {message:(j.error&&j.error.message)||('API error '+r.status)};return j;
-}
-function inboxMode(){return !aiCfg().key}
-function inboxThread(){return [...S.chat.values()].filter(x=>x&&x.text).sort((a,b)=>String(a.at).localeCompare(String(b.at))).slice(-30)}
-async function inboxSend(text){
-  if(!S.db){toast('Not connected');return}const id=uid('c');
-  await S.db.doc('chat/'+id).set({id,at:new Date().toISOString(),from:'owner',text,page:S.view,month:S.month,status:'new',reply:null,repliedAt:null,by:null});
-  AI.busy=false;aiRender();
-}
-async function aiSend(text){
-  text=(text||'').trim();if(!text||AI.busy)return;
-  if(inboxMode())return inboxSend(text);
-  AI.msgs.push({role:'user',content:text});AI.busy=true;aiRender();
-  let convo=AI.msgs.slice(-20).map(m=>({role:m.role,content:m.content}));const steps=[];
-  try{
-    for(let i=0;i<8;i++){
-      const r=await aiCall(convo);const blocks=r.content||[];
-      const uses=blocks.filter(b=>b.type==='tool_use');const text=blocks.filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
-      if(!uses.length){AI.msgs.push({role:'assistant',content:text||'…',steps});break}
-      convo.push({role:'assistant',content:blocks});
-      const results=[];for(const u of uses){let out;try{out=await aiToolRun(u.name,u.input||{})}catch(e){out={error:errMsg(e)}}steps.push(u.name+(u.input&&u.input.code?' '+u.input.code:''));results.push({type:'tool_result',tool_use_id:u.id,content:JSON.stringify(out).slice(0,12000)})}
-      convo.push({role:'user',content:results});aiRender(steps);
-      if(i===7)AI.msgs.push({role:'assistant',content:text||'Stopped after too many steps.',steps});
-    }
-  }catch(e){AI.msgs.push({role:'assistant',content:'⚠ '+(e.message||'Something went wrong'),steps})}
-  AI.busy=false;aiPersist();aiRender();if(S.view!=='add')render();
-}
-function aiToggle(open){AI.open=open==null?!AI.open:open;aiRender();if(AI.open){const i=$('#aiIn');if(i)i.focus()}}
-function aiRender(steps){
-  let root=$('#aiRoot');if(!root){root=document.createElement('div');root.id='aiRoot';document.body.appendChild(root)}
-  const c=aiCfg();const md=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`(.+?)`/g,'<code>$1</code>').replace(/\n/g,'<br>');
-  root.innerHTML=`<button class="aifab ${AI.open?'on':''}" data-ai="toggle" aria-label="Mars assistant">${svg('M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4zM5 16l.9 2.1L8 19l-2.1.9L5 22l-.9-2.1L2 19l2.1-.9zM19 14l.7 1.6 1.6.7-1.6.7L19 18.6l-.7-1.6-1.6-.7 1.6-.7z',22)}</button>
-  <div class="aipanel ${AI.open?'open':''}" role="dialog" aria-label="Mars assistant"><div class="aihead"><b>Mars</b><span class="muted small">${c.key?(AI_MODELS.find(m=>m[0]===c.model)||AI_MODELS[0])[1]:'inbox · answered by Claude Code'}</span><span class="spacer"></span><button class="btn sm ghost" data-ai="clear" title="New conversation">↺</button><button class="btn sm ghost" data-ai="toggle">✕</button></div>
-   <div class="aimsgs" id="aiMsgs">${inboxMode()?(inboxThread().length?inboxThread().map(m=>`<div class="aim user"><div class="aib">${md(m.text)}</div><div class="aiwhen">${dtShort(m.at)}</div></div>${m.reply?`<div class="aim assistant"><div class="aib">${md(m.reply)}</div><div class="aiwhen">${esc(m.by||'Claude')} · ${dtShort(m.repliedAt)}</div></div>`:`<div class="aim assistant"><div class="aib wait">sent to Claude · answered within the hour, sooner when Claude Code is open on the Mac</div></div>`}`).join(''):`<div class="aihint">Type or speak what you need: a question about sales or stock, a price or count to change, or a change to Mars itself. Claude reads this inbox and answers here. Within the hour by itself, at once while Claude Code is open.</div>`):AI.msgs.length?AI.msgs.map(m=>`<div class="aim ${m.role}">${m.steps&&m.steps.length?`<div class="aisteps">${m.steps.map(s=>`<span>${esc(s)}</span>`).join('')}</div>`:''}<div class="aib">${md(m.content)}</div></div>`).join(''):`<div class="aihint">Ask about sales, stock or consultants, change a price or a count, or ask for a change to Mars itself.<br><br>Try: “რამდენი გავყიდეთ დღეს?” · “set 3D კალამი price to 75” · “which products are below zero?” · “add a dark mode toggle to the register”</div>`}${AI.busy?`<div class="aim assistant"><div class="aisteps">${(steps||[]).map(s=>`<span>${esc(s)}</span>`).join('')}</div><div class="aib typing"><i></i><i></i><i></i></div></div>`:''}</div>
-   <form class="aiform" id="aiForm"><button type="button" class="aimic ${AI.listening?'on':''}" data-ai="mic" aria-label="Voice input" title="Speak">${svg('M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zM19 11a7 7 0 0 1-14 0M12 18v3',20)}</button><textarea id="aiIn" rows="1" placeholder="${AI.listening?'Listening…':'Type or speak…'}" ${AI.busy?'disabled':''}></textarea><button type="submit" class="aisend" ${AI.busy?'disabled':''} aria-label="Send">${svg('M22 2L11 13M22 2l-7 20-4-9-9-4z',18)}</button></form></div>`;
-  const box=$('#aiMsgs');if(box)box.scrollTop=box.scrollHeight;
-  root.querySelectorAll('[data-ai]').forEach(b=>b.onclick=e=>{const a=b.dataset.ai;if(a==='toggle')aiToggle();if(a==='clear'){if(inboxMode()){toast('The inbox thread is kept in Mars; old answers stay in the history')}else{AI.msgs=[];aiPersist();aiRender()}}if(a==='mic')aiMic()});
-  const f=$('#aiForm'),inp=$('#aiIn');if(f){f.onsubmit=e=>{e.preventDefault();const v=inp.value;inp.value='';aiSend(v)};inp.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();f.requestSubmit()}};inp.oninput=()=>{inp.style.height='auto';inp.style.height=Math.min(120,inp.scrollHeight)+'px'}}
-}
-// voice: the browser's speech recognition (Chrome, Edge, Safari), Georgian first, then English; sends when you stop talking
-function aiMic(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){toast('Voice input is not available in this browser — use Chrome, Edge or Safari');return}
-  if(AI.listening){try{AI.rec.stop()}catch(e){}return}
-  const rec=new SR();AI.rec=rec;rec.lang=aiCfg().lang||'ka-GE';rec.interimResults=true;rec.continuous=false;let finalText='';
-  rec.onstart=()=>{AI.listening=true;aiRender()};
-  rec.onresult=e=>{let t='';for(const r of e.results){t+=r[0].transcript;if(r.isFinal)finalText=t}const i=$('#aiIn');if(i)i.value=t};
-  rec.onerror=e=>{AI.listening=false;aiRender();if(e.error==='not-allowed')toast('Allow the microphone for this site in the browser');else if(e.error!=='aborted'&&e.error!=='no-speech')toast('Voice: '+e.error)};
-  rec.onend=()=>{AI.listening=false;const i=$('#aiIn');const v=(finalText||(i?i.value:'')).trim();aiRender();if(v)aiSend(v)};
-  try{rec.start()}catch(e){toast('Could not start the microphone')}
-}
-function aiSettingsPanel(){
-  const c=aiCfg();
-  return `<div class="panel stack"><h2>Mars assistant</h2><p class="sub" style="margin:0">The chat in the corner. <b>Without an API key</b> it is an inbox: what you type or say is kept in Mars and Claude answers it there (a cloud routine every hour, and at once whenever Claude Code is open on the Mac). <b>With</b> an Anthropic API key (console.anthropic.com → API keys); the key is kept on this device only, like the backend key. A GitHub token with “repo” scope lets it file change requests to the Mars code as issues in ${AI_REPO}.</p>
-   <div class="grid g2"><label class="field"><span>Anthropic API key</span><input class="input" id="aiKey" type="password" autocomplete="off" value="${esc(c.key||'')}" placeholder="sk-ant-…"></label><label class="field"><span>Model</span><select class="input" id="aiModel">${AI_MODELS.map(([v,t])=>`<option value="${v}" ${(c.model||AI_MODELS[0][0])===v?'selected':''}>${t}</option>`).join('')}</select></label></div>
-   <div class="grid g2"><label class="field"><span>GitHub token (for change requests)</span><input class="input" id="aiGh" type="password" autocomplete="off" value="${esc(c.gh||'')}" placeholder="github_pat_… or ghp_…"></label><label class="field"><span>Voice language</span><select class="input" id="aiLang">${[['ka-GE','ქართული'],['en-US','English'],['ru-RU','Русский']].map(([v,t])=>`<option value="${v}" ${(c.lang||'ka-GE')===v?'selected':''}>${t}</option>`).join('')}</select></label></div>
-   <div class="row"><button class="btn primary" data-act="ai_save">Save</button><button class="btn" data-act="ai_test">Test</button><span class="muted small" id="aiMsg" aria-live="polite"></span></div></div>`;
-}
-async function aiSettingsAct(a){
-  const m=$('#aiMsg');
-  if(a==='ai_save'){aiSave({key:$('#aiKey').value.trim(),model:$('#aiModel').value,gh:$('#aiGh').value.trim(),lang:$('#aiLang').value});m.textContent='Saved on this device';aiRender();return}
-  if(a==='ai_test'){aiSave({key:$('#aiKey').value.trim(),model:$('#aiModel').value,gh:$('#aiGh').value.trim(),lang:$('#aiLang').value});m.textContent='Testing…';try{const r=await aiCall([{role:'user',content:'Reply with the single word OK.'}]);m.textContent='Claude answered: '+((r.content||[]).map(b=>b.text||'').join('').trim()||'(tool call)');}catch(e){m.textContent=e.message||'Failed'}
-    const c=aiCfg();if(c.gh){try{const r=await fetch('https://api.github.com/repos/'+AI_REPO,{headers:{Authorization:'Bearer '+c.gh,Accept:'application/vnd.github+json'}});m.textContent+=r.ok?' · GitHub token works':' · GitHub token refused ('+r.status+')'}catch(e){m.textContent+=' · GitHub unreachable'}}return}
-}
-
 function bindStore(){
   if(S.view!=='store')return;
   const qr=$('#stQr');if(qr){const v=storeLink();loadQr().then(()=>{const q=window.qrcode(0,'M');q.addData(v);q.make();const box=$('#stQr');if(box)box.innerHTML=q.createSvgTag({cellSize:4,margin:2,scalable:true})}).catch(()=>{if(qr.closest('.qrbox'))qr.closest('.qrbox').hidden=true})}
 }
-setInterval(()=>{if(S.backend&&((S.view==='store'&&S.store.tab==='live')||(AI.open&&inboxMode()))&&!document.hidden&&!S.backend.pending())S.backend.load().catch(()=>{})},30000);
+setInterval(()=>{if(S.backend&&S.view==='store'&&S.store.tab==='live'&&!document.hidden&&!S.backend.pending())S.backend.load().catch(()=>{})},30000);
 
 function bindView(){
   if(S.view==='add')bindAdd();
@@ -3985,7 +3833,7 @@ async function act(a,b){
   if(a==='saveFixed'){const f=readFixedForm().filter(x=>x.label);await saveCfg({fixed:f});return toast('Fixed costs saved · '+gel(f.reduce((s,x)=>s+(+x.gel||0),0))+' a month')}
   }catch(e){toast(errMsg(e))}
 }
-boot();aiRender();
+boot();
 </script>
 
 </body>
