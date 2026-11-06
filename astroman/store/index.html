@@ -343,7 +343,7 @@ addEventListener('beforeunload',e=>{if(outbox.length){e.preventDefault();e.retur
 /* ============================== catalog helpers ============================== */
 function items(){return [...P.cat.values()].filter(x=>x&&!x.hidden)}
 // what is on the shelf now: the Optimo count minus what this register sold since that count
-function liveQ(x){let q=+x.q||0;const c=x.countedAt||'';P.pos.forEach(o=>{if(o.status==='void'||!o.lines)return;if(c&&(o.day||'')<c)return;o.lines.forEach(l=>{if(l.b===x.b)q-=+l.q||0})});return q}
+function liveQ(x){let q=x.qs!=null?+x.qs||0:(+x.q||0);const c=x.countedAt||'';P.pos.forEach(o=>{if(o.status==='void'||!o.lines)return;if(c&&(o.day||'')<c)return;o.lines.forEach(l=>{if(l.b===x.b)q-=+l.q||0})});return q}
 function cats(){const s=new Set();items().forEach(x=>s.add(x.cat||'სხვადასხვა'));return [...s].sort((a,b)=>a.localeCompare(b,'ka'))}
 function norm(s){return String(s||'').toLowerCase().replace(/\s+/g,' ').trim()}
 function filtered(){

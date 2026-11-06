@@ -717,6 +717,7 @@ tr.dim td{opacity:.55}
 .pcard .pnoimg{position:absolute;left:6px;bottom:6px;font-size:10.5px;color:#A86A12;background:#FBF0DC;border-radius:999px;padding:2px 7px;font-weight:600}
 .pcard .pt{display:grid;gap:2px;padding:8px 10px 9px;min-width:0}
 .pcard .pn{font-size:12.5px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:33px;font-weight:600}
+.pcard .pst b{font-weight:700;color:var(--ink-2)}
 .pcard .pp{font-weight:700;font-size:14px}.pcard .pp s{color:var(--muted);font-weight:500;font-size:12px}.pcard .pp em{font-style:normal;color:var(--accent)}
 .seg.wrap{flex-wrap:wrap}
 .pedit{display:grid;grid-template-columns:200px minmax(0,1fr);gap:18px}
@@ -1520,22 +1521,23 @@ function vStock(){
   // the product list is the shared catalog: what the register sells, with Optimo's sold/profit figures joined by barcode
   const byInc=new Map(rows.filter(x=>!x.isNew).map(x=>[String(x.b),x.inc]));
   const mgOf=(x,m)=>m&&m.unit!=null&&x.price?m.unit/(x.vat==='ჩვეულებრივი'?x.price/1.18:x.price):null;
-  const all=[...S.catalog.values()].filter(x=>x&&x.b).map(x=>{const m=items.get(String(x.b));return {...x,lq:catLive(x),inc:byInc.get(String(x.b))||0,sq:m?m.sq:0,profit:m?m.profit:0,mg:mgOf(x,m),sv:(Math.max(catLive(x),0)+(byInc.get(String(x.b))||0))*(+x.cost||0)}});
+  const all=[...S.catalog.values()].filter(x=>x&&x.b).map(x=>{const m=items.get(String(x.b));return {...x,lq:catLive(x),inc:byInc.get(String(x.b))||0,sq:m?m.sq:0,profit:m?m.profit:0,mg:mgOf(x,m),sv:(Math.max(catLive(x)+whQ(x),0)+(byInc.get(String(x.b))||0))*(+x.cost||0)}});
+  const totStore=all.reduce((a,x)=>a+Math.max(0,x.lq),0),totWh=all.reduce((a,x)=>a+whQ(x),0);
   const q=(P.sq||'').toLowerCase();
   const cats=[...new Set(all.map(x=>x.cat||'სხვადასხვა'))].sort();
   const test=(x,k)=>k==='all'?!x.hidden:k==='in'?x.lq>0&&!x.hidden:k==='way'?x.inc>0:k==='out'?x.lq===0&&!x.inc&&!x.hidden:k==='neg'?x.lq<0:k==='noimg'?!x.img&&!x.hidden:k==='sale'?x.sale>0&&x.sale<x.price:k==='hidden'?!!x.hidden:true;
   const cnt=k=>all.filter(x=>test(x,k)).length;
   const fl=all.filter(x=>(!q||x.n.toLowerCase().includes(q)||String(x.b).includes(q))&&(!P.scat||(x.cat||'სხვადასხვა')===P.scat)&&test(x,sf));
-  const sort=P.ssort||'sold';const val=x=>sort==='n'?x.n:sort==='sold'?(x.sold||0):sort==='sv'?x.sv:sort==='price'?(+x.price||0):sort==='mg'?(x.mg??-9):sort==='q'?x.lq:sort==='profit'?x.profit:0;
+  const sort=P.ssort||'sold';const val=x=>sort==='n'?x.n:sort==='sold'?(x.sold||0):sort==='sv'?x.sv:sort==='price'?(+x.price||0):sort==='mg'?(x.mg??-9):sort==='q'?x.lq+whQ(x):sort==='profit'?x.profit:0;
   fl.sort((a,b)=>{const x=val(a),y=val(b);return typeof x==='string'?x.localeCompare(y):y-x});
   const shown=P.sfull||q?fl:fl.slice(0,120);
   const noImg=cnt('noimg');
   const card=x=>{const onSale=x.sale>0&&x.sale<x.price;return `<button class="pcard ${x.hidden?'dim':''}" data-act="st_edit" data-b="${esc(x.b)}" title="${esc(x.n)}"><span class="pi">${x.img?`<img src="${esc(x.img)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=\\'ph\\'>${esc(posInitials(x.n))}</span>'">`:`<span class="ph">${esc(posInitials(x.n))}</span>`}<span class="pq ${x.lq<0?'neg':x.lq===0?'zero':''}">${x.lq}</span>${x.inc?`<span class="pinc">+${fmt(x.inc)}</span>`:''}${!x.img?'<span class="pnoimg">no picture</span>':''}</span>
-    <span class="pt"><b class="pn">${esc(x.n)}</b><span class="pp num">${onSale?`<s>${gel(x.price)}</s> <em>${gel(x.sale)}</em>`:gel(x.price)}</span><span class="small muted">${esc(x.b)}${x.cost?' · cost '+gel(x.cost,x.cost<20?2:0):''}${x.mg!=null?' · '+Math.round(x.mg*100)+'%':''}</span></span></button>`};
-  const main=`<div class="panel" style="padding-bottom:10px"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">All products</h2><p class="sub" style="margin:2px 0 0">Tap a product to change its price, sale price, stock, picture or code. The register shows the same within a minute. Sold and profit are for ${esc(per)}.</p></div><span class="spacer"></span><div class="actions">${noImg?`<button class="btn amber sm" data-act="st_pickNext">Pick pictures (${noImg} left)</button>`:''}<button class="btn sm" data-act="st_add">+ Add product</button><button class="btn sm" data-act="st_sync" title="Stock, prices, costs and new items from the Optimo stock list">↻ Update from Optimo list</button></div></div>
+    <span class="pt"><b class="pn">${esc(x.n)}</b><span class="pp num">${onSale?`<s>${gel(x.price)}</s> <em>${gel(x.sale)}</em>`:gel(x.price)}</span><span class="small muted">${esc(x.b)}${x.cost?' · cost '+gel(x.cost,x.cost<20?2:0):''}${x.mg!=null?' · '+Math.round(x.mg*100)+'%':''}</span><span class="small pst"><b>${x.lq}</b> store · <b>${whQ(x)}</b> wh · <b>${x.lq+whQ(x)}</b> total</span></span></button>`};
+  const main=`<div class="panel" style="padding-bottom:10px"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">All products</h2><p class="sub" style="margin:2px 0 0">Tap a product to change its price, sale price, stock, picture or code. The register shows the same within a minute. Sold and profit are for ${esc(per)}.</p><p class="sub" style="margin:4px 0 0"><b>${fmt(totStore)}</b> pieces in the store · <b>${fmt(totWh)}</b> in the warehouse · <b>${fmt(totStore+totWh)}</b> total</p></div><span class="spacer"></span><div class="actions">${noImg?`<button class="btn amber sm" data-act="st_pickNext">Pick pictures (${noImg} left)</button>`:''}<button class="btn sm" data-act="st_add">+ Add product</button><button class="btn sm" data-act="st_sync" title="Stock, prices, costs and new items from the Optimo stock list">↻ Update from Optimo list</button></div></div>
    <div class="toolbar mt"><input class="input grow" id="psQ" placeholder="Search product or barcode…" value="${esc(P.sq||'')}">
     <select class="input" id="psCat" aria-label="Category"><option value="">All categories</option>${cats.map(c=>`<option ${P.scat===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
-    <select class="input" id="psSort" aria-label="Sort"><option value="sold" ${sort==='sold'?'selected':''}>Best selling</option><option value="n" ${sort==='n'?'selected':''}>Name</option><option value="sv" ${sort==='sv'?'selected':''}>Stock value</option><option value="q" ${sort==='q'?'selected':''}>On hand</option><option value="price" ${sort==='price'?'selected':''}>Price</option><option value="mg" ${sort==='mg'?'selected':''}>Margin</option><option value="profit" ${sort==='profit'?'selected':''}>Profit</option></select></div>
+    <select class="input" id="psSort" aria-label="Sort"><option value="sold" ${sort==='sold'?'selected':''}>Best selling</option><option value="n" ${sort==='n'?'selected':''}>Name</option><option value="sv" ${sort==='sv'?'selected':''}>Stock value</option><option value="q" ${sort==='q'?'selected':''}>Total stock</option><option value="price" ${sort==='price'?'selected':''}>Price</option><option value="mg" ${sort==='mg'?'selected':''}>Margin</option><option value="profit" ${sort==='profit'?'selected':''}>Profit</option></select></div>
    <div class="seg wrap" role="group" aria-label="Show" style="margin-bottom:12px">${[['all','All',cnt('all')],['in','In stock',cnt('in')],['way','On the way',cnt('way')],['out','Out',cnt('out')],['neg','Below zero',cnt('neg')],['sale','On sale',cnt('sale')],['noimg','No picture',noImg],['hidden','Hidden',cnt('hidden')]].map(([k,t,n])=>`<button data-act="psFilter" data-v="${k}" aria-pressed="${sf===k}">${t} <span class="muted">${n}</span></button>`).join('')}</div>
    ${all.length?(shown.length?`<div class="pgrid">${shown.map(card).join('')}</div>${fl.length>shown.length?`<div class="row mt"><button class="btn" data-act="psFull">Show all ${fl.length}</button></div>`:''}`:'<div class="empty"><b>Nothing matches</b></div>')
    :`<div class="empty"><b>No catalog yet</b><span>Press “Update from Optimo list” to build it from the stock list you uploaded.</span></div>`}</div>`;
@@ -3408,7 +3410,9 @@ function posOrders(day){return [...S.pos.values()].filter(o=>o&&o.lines&&(!day||
 function regDay(d){const L=posOrders(d).filter(o=>o.status!=='void');return {n:L.length,a:L.reduce((s,o)=>s+(+o.total||0),0),L}}
 function storeDir(){return location.origin+location.pathname.replace(/[^/]*$/,'')+'store/'}
 function storeLink(){const c=readCreds();const k=S.cfg.pos&&S.cfg.pos.key;if(!c||!k)return '';const b=btoa(unescape(encodeURIComponent(JSON.stringify({u:c.u,k})))).replace(/\+/g,'-').replace(/\//g,'_');return storeDir()+'#connect='+b}
-function catLive(x){let q=+x.q||0;const c=x.countedAt||'';S.pos.forEach(o=>{if(o.status==='void'||!o.lines)return;if(c&&(o.day||'')<c)return;o.lines.forEach(l=>{if(l.b===x.b)q-=+l.q||0})});return q}
+const storeQ=x=>x.qs!=null?+x.qs||0:(+x.q||0);
+const whQ=x=>+x.qw||0;
+function catLive(x){let q=storeQ(x);const c=x.countedAt||'';S.pos.forEach(o=>{if(o.status==='void'||!o.lines)return;if(c&&(o.day||'')<c)return;o.lines.forEach(l=>{if(l.b===x.b)q-=+l.q||0})});return q}
 function vStore(){
   const T=S.store.tab;
   const tabs=[['live','Live'],['history','History'],['setup','Register setup']];
@@ -3489,7 +3493,7 @@ function catEditModal(b){
   const x=b?S.catalog.get(b):null;const cats=[...new Set([...S.catalog.values()].map(y=>y.cat||'სხვადასხვა'))].sort();
   const M=opModel();const m=x&&M?M.items.find(y=>String(y.b)===String(x.b)):null;const lq=x?catLive(x):0;
   const vats=['დაუბეგრავი','ჩვეულებრივი','ნულოვანი'];
-  modal(`<h3>${x?esc(x.n):'New product'}</h3><p class="sub">${x?'Everything here is what the register shows. Stock and cost are refreshed from the next Optimo stock list; a name or price you change here stays.':'A product that is not in Optimo yet. Give it the code you will print on its label.'}</p>
+  modal(`<h3>${x?esc(x.n):'New product'}</h3><p class="sub">${x?'Everything here is what the register shows. Store and warehouse counts are yours; the Optimo stock list only refreshes cost and its own count. A name or price you change here stays.':'A product that is not in Optimo yet. Give it the code you will print on its label.'}</p>
    <div class="pedit"><div class="pimg">${x&&x.img?`<img src="${esc(x.img)}" alt="" onerror="this.outerHTML='<span class=\\'ph\\'>${esc(posInitials(x.n))}</span>'">`:`<span class="ph">${esc(posInitials(x?x.n:''))}</span>`}
      <div class="stack">${x?`<button class="btn sm" data-act="st_img" data-b="${esc(x.b)}">Pick from astroman.ge</button>`:''}<label class="field"><span>Picture URL</span><input class="input small" id="ceImg" value="${esc(x?x.img||'':'')}" placeholder="https://…"></label></div></div>
    <div class="stack">
@@ -3497,9 +3501,11 @@ function catEditModal(b){
     <div class="grid g2"><label class="field"><span>Code / barcode</span><input class="input num" id="ceB" value="${esc(x?x.b:'')}" placeholder="e.g. 10123"></label><label class="field"><span>Category</span><input class="input" id="ceC" list="ceCats" value="${esc(x?x.cat||'':'')}"><datalist id="ceCats">${cats.map(c=>`<option value="${esc(c)}">`).join('')}</datalist></label></div>
     <div class="grid g2"><label class="field"><span>Price ₾</span><input class="input num" id="ceP" inputmode="decimal" value="${x?x.price:''}"></label><label class="field"><span>Sale price ₾ (empty = no sale)</span><input class="input num" id="ceS" inputmode="decimal" value="${x&&x.sale>0?x.sale:''}"></label></div>
     <div class="grid g2"><label class="field"><span>Cost ₾ (from Optimo)</span><input class="input num" id="ceK" inputmode="decimal" value="${x?x.cost||'':''}"></label><label class="field"><span>VAT</span><select class="input" id="ceV">${vats.map(v=>`<option ${x&&x.vat===v?'selected':''}>${v}</option>`).join('')}</select></label></div>
-    <div class="grid g2"><label class="field"><span>On the shelf now</span><input class="input num" id="ceQ" inputmode="numeric" value="${x?lq:0}"></label><label class="field"><span>Reorder below</span><input class="input num" id="ceMin" inputmode="numeric" value="${x?x.min||0:0}"></label></div>
+    <div class="grid g2"><label class="field"><span>In the store now</span><input class="input num" id="ceQ" inputmode="numeric" value="${x?lq:0}"></label><label class="field"><span>In the warehouse</span><input class="input num" id="ceW" inputmode="numeric" value="${x?whQ(x):0}"></label></div>
+    <div class="grid g2"><label class="field"><span>Total</span><input class="input num" id="ceTot" value="${x?lq+whQ(x):0}" readonly tabindex="-1" style="opacity:.7"></label><label class="field"><span>Reorder below</span><input class="input num" id="ceMin" inputmode="numeric" value="${x?x.min||0:0}"></label></div>
+    <label class="field"><span>Store note (from the count)</span><input class="input" id="ceNote" value="${esc(x?x.storeNote||'':'')}" placeholder="e.g. one without box"></label>
     ${x?`<label class="row"><input type="checkbox" id="ceH" ${x.hidden?'checked':''}> Hidden from the register</label>`:''}
-    ${x?`<div class="small muted">${m?`Sold ${fmt(m.sq)} · ${gel(m.rev)} revenue · ${gel(m.profit)} profit`:'No sales in the selected Optimo period'}${x.sold?` · ${fmt(x.sold)} sold this year`:''}${x.countedAt?` · counted ${esc(x.countedAt)}`:''}</div>`:''}
+    ${x?`<div class="small muted">${m?`Sold ${fmt(m.sq)} · ${gel(m.rev)} revenue · ${gel(m.profit)} profit`:'No sales in the selected Optimo period'}${x.sold?` · ${fmt(x.sold)} sold this year`:''}${x.countedAt?` · store counted ${esc(x.countedAt)}`:''}${x.q!=null&&x.qs!=null?` · Optimo count ${fmt(x.q)}`:''}</div>`:''}
     <div class="row"><button class="btn primary" data-act="st_saveEdit" data-b="${esc(x?x.b:'')}">Save</button>${x?`<button class="btn danger" data-act="st_del" data-b="${esc(x.b)}">Delete</button>`:''}<span class="spacer"></span><button class="btn" data-close>Cancel</button></div></div></div>`,true);
 }
 let SITE=null;
@@ -3541,10 +3547,11 @@ async function storeAct(a,b){
     const price=parseNum($('#ceP').value),saleV=$('#ceS').value.trim(),sale=saleV?parseNum(saleV):0;
     const patch={n,cat:$('#ceC').value.trim()||'სხვადასხვა',price,sale:sale>0&&sale<price?sale:null,cost:parseNum($('#ceK').value),vat:$('#ceV').value,min:parseNum($('#ceMin').value),img:$('#ceImg').value.trim()||null};
     if(saleV&&!(sale>0&&sale<price)){toast('The sale price must be lower than the price');return}
-    if(cur){const live=catLive(cur);const typed=parseNum($('#ceQ').value);patch.q=(+cur.q||0)+(typed-live);patch.hidden=$('#ceH').checked;patch.nameEdited=n!==cur.n||!!cur.nameEdited;patch.priceEdited=price!==+cur.price||!!cur.priceEdited;
+    patch.qw=parseNum($('#ceW').value);patch.storeNote=$('#ceNote').value.trim();
+    if(cur){const live=catLive(cur);const typed=parseNum($('#ceQ').value);patch.qs=storeQ(cur)+(typed-live);patch.hidden=$('#ceH').checked;patch.nameEdited=n!==cur.n||!!cur.nameEdited;patch.priceEdited=price!==+cur.price||!!cur.priceEdited;
       if(!patch.img){patch.big=null;patch.wooId=null}else if(patch.img!==cur.img){patch.big=patch.img;patch.wooId=null}
       if(bc!==orig){const {id,...rest}=cur;await S.db.doc('catalog/'+bc).set({...rest,...patch,b:bc,updatedAt:new Date().toISOString()});await S.db.doc('catalog/'+orig).delete();closeModal();toast('Saved under the new code');return}}
-    else Object.assign(patch,{b:bc,q:parseNum($('#ceQ').value),sold:0,hidden:false,big:patch.img,wooId:null,countedAt:today(),nameEdited:true,priceEdited:true});
+    else Object.assign(patch,{b:bc,q:0,qs:parseNum($('#ceQ').value),sold:0,hidden:false,big:patch.img,wooId:null,countedAt:today(),nameEdited:true,priceEdited:true});
     await saveCat(bc,patch);closeModal();toast('Saved — the register updates within a minute');return}
   if(a==='st_del'){if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Tap again to delete';return}await S.db.doc('catalog/'+b.dataset.b).delete();closeModal();toast('Product removed from the register');return}
   if(a==='st_img'){S.pickChain=false;return catPickModal(b.dataset.b)}
