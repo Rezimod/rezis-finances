@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#070B18">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Astroman Finance">
+<meta name="apple-mobile-web-app-title" content="Mars">
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" type="image/png" href="icon-192.png">
 <style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.json">
 </head>
 <body>
-<title>Astroman Finance</title>
+<title>Mars · Astroman</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -718,6 +718,9 @@ tr.dim td{opacity:.55}
 .pcard .pp{font-weight:700;font-size:14px}.pcard .pp s{color:var(--muted);font-weight:500;font-size:12px}.pcard .pp em{font-style:normal;color:var(--accent)}
 .seg.wrap{flex-wrap:wrap}
 .kpis.small3{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:12px}
+.kpis.stock4 .kpi.sum{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.kpis.stock4 .kpi.sum .val{color:var(--accent)}
+@media (max-width:900px){.kpis.stock4,.kpis.small3{grid-template-columns:repeat(2,minmax(0,1fr))}.kpis.stock4 .kpi:nth-child(n+3),.kpis.small3 .kpi:nth-child(n+3){border-top:1px solid var(--line)}}
 .kpis.small3 .val{font-size:20px}
 .rh3{font-size:13px;margin:12px 0 4px}
 .ln.click:hover{background:color-mix(in srgb,var(--brand) 8%,transparent)}
@@ -731,7 +734,7 @@ tr.dim td{opacity:.55}
 <div class="app">
   <aside class="rail">
     <div class="railtop">
-      <div class="brand"><img src="brand/logo-full-light-240.png" alt="Astroman"><small>Finance desk</small>
+      <div class="brand"><img src="brand/logo-full-light-240.png" alt="Astroman"><small>Mars · control center</small>
       </div>
       <div class="monthdial">
         <label for="monthSel">Month</label>
@@ -1114,7 +1117,7 @@ function localDownloads(){return {save:async({filename,data})=>{const blob=data 
 function vConnect(){
   const c=readCreds()||{};
   return `<div class="pagehead"><div><div class="eyebrow">First-time setup on this device</div><h1>Connect your data</h1><p>Your numbers live in your own Google account, not on this website, so each device connects once.</p></div></div>
-  <div class="panel" style="margin-bottom:16px;border-color:color-mix(in srgb,var(--accent) 45%,var(--line))"><h2>Easiest: scan from your computer</h2><p class="sub" style="margin:0">On the computer where Astroman Finance already opens, go to <b>Settings → Backup &amp; devices</b> and point this phone's camera at the QR code. It opens here already connected. Or paste the phone link into the first box below.</p></div>
+  <div class="panel" style="margin-bottom:16px;border-color:color-mix(in srgb,var(--accent) 45%,var(--line))"><h2>Easiest: scan from your computer</h2><p class="sub" style="margin:0">On the computer where Mars already opens, go to <b>Settings → Backup &amp; devices</b> and point this phone's camera at the QR code. It opens here already connected. Or paste the phone link into the first box below.</p></div>
   <div class="grid g2"><div class="panel stack">
    <label class="field"><span>Web-app URL (Apps Script → Deploy → Manage deployments), or the phone link</span><input class="input" id="cnU" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(c.u||'')}"></label>
    <label class="field"><span>Secret key</span><input class="input" id="cnK" type="password" autocomplete="current-password" value="${esc(c.k||'')}"></label>
@@ -1138,7 +1141,7 @@ async function exportBackup(){
   try{await S.downloads.save({filename:'astroman-finance-backup-'+today()+'.json',data:new Blob([data],{type:'application/json'})})}catch(e){if(e.code!=='declined')toast('Download unavailable here')}
 }
 function importBackup(file){
-  const r=new FileReader();r.onload=async()=>{let j;try{j=JSON.parse(r.result);if(!j.docs||!Array.isArray(j.docs))throw 0}catch(e){toast('That file is not an Astroman Finance backup');return}
+  const r=new FileReader();r.onload=async()=>{let j;try{j=JSON.parse(r.result);if(!j.docs||!Array.isArray(j.docs))throw 0}catch(e){toast('That file is not a Mars backup');return}
     const st=$('#syncTxt');const show=(d,n)=>{const t='Importing '+d+' / '+n+'…';if(st)st.textContent=t;const b=$('#impMsg');if(b)b.textContent=t};
     show(0,j.docs.length);toast('Importing '+j.docs.length+' records — keep this page open');
     try{if(S.backend)await S.backend.importAll(j.docs,show);else{let d=0;for(const x of j.docs){await S.db.doc(x.c+'/'+x.id).set(x.d);show(++d,j.docs.length)}}
@@ -1507,11 +1510,6 @@ function vStock(){
   const {rows,inc}=stockRows(M);const P=S.prod;const sf=P.sf||'all';const st=M.D.stock;
   const incLand=inc.reduce((a,s)=>a+s.land,0),incQty=inc.reduce((a,s)=>a+(+s.qty||0),0);
   const per=M.sel?dLabel(M.sel.from)+' – '+dLabel(M.sel.to):'';
-  const kpis=`<div class="kpis">
-   <div class="kpi"><div class="lbl">On the shelf</div><div class="val num">${cu(M.units)}<small> pcs</small></div><div class="delta">${M.stocked.filter(x=>x.q>0).length} products · counted ${dLabel(st.at.slice(0,10))}</div></div>
-   <div class="kpi"><div class="lbl">Stock value at cost</div><div class="val num">${cu(M.value)}<small>₾</small></div><div class="delta">${incLand?'+ '+gel(incLand)+' on the way = '+gel(M.value+incLand):'what you paid for it'}</div></div>
-   <div class="kpi"><div class="lbl">At shelf prices</div><div class="val num">${cu(M.retail)}<small>₾</small></div><div class="delta">${gel(M.retail-M.value)} profit waiting on the shelf</div></div>
-   <div class="kpi"><div class="lbl">Sold ${M.sel?esc(per):''}</div><div class="val num">${cu(M.rev)}<small>₾</small></div><div class="delta">${gel(M.profit)} profit · ${pct(M.profit,M.rev)}% margin</div></div></div>`;
   const items=new Map(M.items.map(x=>[String(x.b),x]));
   const arr=arrivedToStock();
   const incP=`<div class="panel"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">On the way</h2><p class="sub" style="margin:2px 0 0">${inc.length?fmt(incQty)+' pieces · '+gel(incLand)+' landed cost, not in stock yet.':'Nothing on the way.'}</p></div><span class="spacer"></span><button class="btn sm" data-go="imports">All imports</button></div>
@@ -1523,7 +1521,16 @@ function vStock(){
   const byInc=new Map(rows.filter(x=>!x.isNew).map(x=>[String(x.b),x.inc]));
   const mgOf=(x,m)=>m&&m.unit!=null&&x.price?m.unit/(x.vat==='ჩვეულებრივი'?x.price/1.18:x.price):null;
   const all=[...S.catalog.values()].filter(x=>x&&x.b).map(x=>{const m=items.get(String(x.b));return {...x,lq:catLive(x),inc:byInc.get(String(x.b))||0,sq:m?m.sq:0,profit:m?m.profit:0,mg:mgOf(x,m),sv:(Math.max(catLive(x)+whQ(x),0)+(byInc.get(String(x.b))||0))*(+x.cost||0)}});
-  const totStore=all.reduce((a,x)=>a+Math.max(0,x.lq),0),totWh=all.reduce((a,x)=>a+whQ(x),0);
+  const vis=all.filter(x=>!x.hidden);
+  const totStore=vis.reduce((a,x)=>a+Math.max(0,x.lq),0),totWh=vis.reduce((a,x)=>a+whQ(x),0);
+  const valStore=vis.reduce((a,x)=>a+Math.max(0,x.lq)*(+x.cost||0),0),valWh=vis.reduce((a,x)=>a+whQ(x)*(+x.cost||0),0);
+  const shelf=vis.reduce((a,x)=>a+Math.max(0,x.lq+whQ(x))*(x.sale>0&&x.sale<x.price?+x.sale:+x.price||0),0);
+  const noCost=vis.filter(x=>(Math.max(0,x.lq)+whQ(x))>0&&!(+x.cost)).length;
+  const kpis=`<div class="kpis stock4">
+   <div class="kpi"><div class="lbl">In the store</div><div class="val num">${cu(valStore)}<small>₾</small></div><div class="delta"><b class="num">${fmt(totStore)}</b> pieces · ${vis.filter(x=>x.lq>0).length} products · at cost</div></div>
+   <div class="kpi"><div class="lbl">In the warehouse</div><div class="val num">${cu(valWh)}<small>₾</small></div><div class="delta"><b class="num">${fmt(totWh)}</b> pieces · ${vis.filter(x=>whQ(x)>0).length} products · at cost</div></div>
+   <div class="kpi"><div class="lbl">On the way</div><div class="val num">${cu(incLand)}<small>₾</small></div><div class="delta"><b class="num">${fmt(incQty)}</b> pieces · ${inc.length} line${inc.length===1?'':'s'} · landed cost</div></div>
+   <div class="kpi sum"><div class="lbl">Total stock</div><div class="val num">${cu(valStore+valWh+incLand)}<small>₾</small></div><div class="delta"><b class="num">${fmt(totStore+totWh+incQty)}</b> pieces · worth ${gel(shelf)} at shelf prices${noCost?` · <span style="color:var(--warn)">${noCost} without cost</span>`:''}</div></div></div>`;
   const q=(P.sq||'').toLowerCase();
   const cats=[...new Set(all.map(x=>x.cat||'სხვადასხვა'))].sort();
   const test=(x,k)=>k==='all'?!x.hidden:k==='in'?x.lq>0&&!x.hidden:k==='way'?x.inc>0:k==='out'?x.lq===0&&!x.inc&&!x.hidden:k==='neg'?x.lq<0:k==='noimg'?!x.img&&!x.hidden:k==='sale'?x.sale>0&&x.sale<x.price:k==='hidden'?!!x.hidden:true;
@@ -1535,14 +1542,14 @@ function vStock(){
   const noImg=cnt('noimg');
   const card=x=>{const onSale=x.sale>0&&x.sale<x.price;return `<button class="pcard ${x.hidden?'dim':''}" data-act="st_edit" data-b="${esc(x.b)}" title="${esc(x.n)}"><span class="pi">${x.img?`<img src="${esc(x.img)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=\\'ph\\'>${esc(posInitials(x.n))}</span>'">`:`<span class="ph">${esc(posInitials(x.n))}</span>`}<span class="pq ${x.lq<0?'neg':x.lq===0?'zero':''}">${x.lq}</span>${x.inc?`<span class="pinc">+${fmt(x.inc)}</span>`:''}${!x.img?'<span class="pnoimg">no picture</span>':''}</span>
     <span class="pt"><b class="pn">${esc(x.n)}</b><span class="pp num">${onSale?`<s>${gel(x.price)}</s> <em>${gel(x.sale)}</em>`:gel(x.price)}</span><span class="small muted">${esc(x.b)}${x.cost?' · cost '+gel(x.cost,x.cost<20?2:0):''}${x.mg!=null?' · '+Math.round(x.mg*100)+'%':''}</span><span class="small pst"><b>${x.lq}</b> store · <b>${whQ(x)}</b> wh · <b>${x.lq+whQ(x)}</b> total</span></span></button>`};
-  const main=`<div class="panel" style="padding-bottom:10px"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">All products</h2><p class="sub" style="margin:2px 0 0">Tap a product to change its price, sale price, stock, picture or code. The register shows the same within a minute. Sold and profit are for ${esc(per)}.</p><p class="sub" style="margin:4px 0 0"><b>${fmt(totStore)}</b> pieces in the store · <b>${fmt(totWh)}</b> in the warehouse · <b>${fmt(totStore+totWh)}</b> total</p></div><span class="spacer"></span><div class="actions">${noImg?`<button class="btn amber sm" data-act="st_pickNext">Pick pictures (${noImg} left)</button>`:''}<button class="btn sm" data-act="st_add">+ Add product</button><button class="btn sm" data-act="st_dups">Find duplicates</button><button class="btn sm" data-act="st_sync" title="Stock, prices, costs and new items from the Optimo stock list">↻ Update from Optimo list</button></div></div>
+  const main=`<div class="panel" style="padding-bottom:10px"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">All products</h2><p class="sub" style="margin:2px 0 0">Tap a product to change its price, sale price, stock, picture or code. The register shows the same within a minute. Sold and profit are for ${esc(per)}.</p></div><span class="spacer"></span><div class="actions">${noImg?`<button class="btn amber sm" data-act="st_pickNext">Pick pictures (${noImg} left)</button>`:''}<button class="btn sm" data-act="st_add">+ Add product</button><button class="btn sm" data-act="st_dups">Find duplicates</button><button class="btn sm" data-act="st_sync" title="Stock, prices, costs and new items from the Optimo stock list">↻ Update from Optimo list</button></div></div>
    <div class="toolbar mt"><input class="input grow" id="psQ" placeholder="Search product or barcode…" value="${esc(P.sq||'')}">
     <select class="input" id="psCat" aria-label="Category"><option value="">All categories</option>${cats.map(c=>`<option ${P.scat===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
     <select class="input" id="psSort" aria-label="Sort"><option value="sold" ${sort==='sold'?'selected':''}>Best selling</option><option value="n" ${sort==='n'?'selected':''}>Name</option><option value="sv" ${sort==='sv'?'selected':''}>Stock value</option><option value="q" ${sort==='q'?'selected':''}>Total stock</option><option value="price" ${sort==='price'?'selected':''}>Price</option><option value="mg" ${sort==='mg'?'selected':''}>Margin</option><option value="profit" ${sort==='profit'?'selected':''}>Profit</option></select></div>
    <div class="seg wrap" role="group" aria-label="Show" style="margin-bottom:12px">${[['all','All',cnt('all')],['in','In stock',cnt('in')],['way','On the way',cnt('way')],['out','Out',cnt('out')],['neg','Below zero',cnt('neg')],['sale','On sale',cnt('sale')],['noimg','No picture',noImg],['hidden','Hidden',cnt('hidden')]].map(([k,t,n])=>`<button data-act="psFilter" data-v="${k}" aria-pressed="${sf===k}">${t} <span class="muted">${n}</span></button>`).join('')}</div>
    ${all.length?(shown.length?`<div class="pgrid">${shown.map(card).join('')}</div>${fl.length>shown.length?`<div class="row mt"><button class="btn" data-act="psFull">Show all ${fl.length}</button></div>`:''}`:'<div class="empty"><b>Nothing matches</b></div>')
    :`<div class="empty"><b>No catalog yet</b><span>Press “Update from Optimo list” to build it from the stock list you uploaded.</span></div>`}</div>`;
-  return loadingOr(head(`${M.units?fmt(M.units)+' pieces on the shelf · ':''}${all.length} products on the register${noImg?' · '+noImg+' without picture':''}.`)+kpis+`<div class="grid g3"><div>${main}</div><div class="stack">${incP}${negPanel(all)}${unP}</div></div>`);
+  return loadingOr(head(`${fmt(totStore)} pieces in the store, ${fmt(totWh)} in the warehouse · ${vis.length} products on the register${noImg?' · '+noImg+' without picture':''}. Values follow every change you make here.`)+kpis+`<div class="grid g3"><div>${main}</div><div class="stack">${incP}${negPanel(all)}${unP}</div></div>`);
 }
 function prodTabs(){const v=S.prod.view||'stock';return `<div class="tabs" role="tablist" style="margin-bottom:16px"><button role="tab" aria-selected="${v==='stock'}" data-act="prodView" data-v="stock">Stock, prices &amp; costs</button><button role="tab" aria-selected="${v==='sales'}" data-act="prodView" data-v="sales">Sales by month</button></div>`}
 function vProdSales(){
@@ -3464,7 +3471,15 @@ function storeHistory(){
   const items=new Map();L.forEach(o=>{if(o.status==='void')return;o.lines.forEach(l=>{const it=items.get(l.b)||{b:l.b,n:l.n,q:0,a:0,img:l.img};it.q+=l.q;it.a+=Math.max(0,l.q*l.p-(+l.d||0));items.set(l.b,it)})});
   const top=[...items.values()].sort((a,b)=>b.a-a.a).slice(0,15);const max=Math.max(1,...top.map(x=>x.a));
   const byU={};L.forEach(o=>{if(o.status==='void')return;const k=o.user?o.user.name:'?';const u=byU[k]||(byU[k]={n:0,a:0});u.n++;u.a+=o.total});
-  return `<div class="kpis"><div class="kpi"><div class="lbl">${esc(mLabel(m))} on the register</div><div class="val num">${cu(tot.a)}<small>₾</small></div><div class="delta">${tot.n} sales · ${rows.length} selling day${rows.length===1?'':'s'}</div></div><div class="kpi"><div class="lbl">Cash</div><div class="val num">${cu(tot.cash)}<small>₾</small></div><div class="delta">${pct(tot.cash,tot.a)}% of sales</div></div><div class="kpi"><div class="lbl">Card terminals</div><div class="val num">${cu(tot.card)}<small>₾</small></div><div class="delta">${pct(tot.card,tot.a)}%${tot.other?' · other '+gel(tot.other):''}</div></div><div class="kpi"><div class="lbl">Average sale</div><div class="val num">${cu(tot.n?tot.a/tot.n:0)}<small>₾</small></div><div class="delta">${tot.v?tot.v+' voided':'no voids'}</div></div></div>
+  const sh=[...S.shift.values()].filter(x=>x&&String(x.openedAt||'').slice(0,7)===m).sort((a,b)=>String(b.openedAt).localeCompare(String(a.openedAt)));
+  const hrs=x=>Math.max(0,((x.closedAt?Date.parse(x.closedAt):Date.now())-Date.parse(x.openedAt))/36e5);
+  const byC={};sh.forEach(x=>{const k=x.user?x.user.name:'?';const c=byC[k]||(byC[k]={shifts:0,h:0,n:0,a:0,open:0});c.shifts++;c.h+=hrs(x);if(!x.closedAt)c.open++});
+  L.forEach(o=>{if(o.status==='void')return;const k=o.user?o.user.name:'?';const c=byC[k]||(byC[k]={shifts:0,h:0,n:0,a:0,open:0});c.n++;c.a+=o.total});
+  const salesOf=x=>L.filter(o=>o.shift===x.id&&o.status!=='void');
+  const staff=`<div class="panel"><h2>Consultants in ${esc(mLabel(m))}</h2><p class="sub">Hours come from the shifts they open and close on the register; sales are what they rang up.</p>
+   ${Object.keys(byC).length?`<div class="tablewrap"><table><thead><tr><th>Consultant</th><th class="r">Shifts</th><th class="r">Hours</th><th class="r">Sales</th><th class="r">Revenue</th><th class="r hm">Avg sale</th><th class="r hm">Per hour</th></tr></thead><tbody>${Object.entries(byC).sort((a,b)=>b[1].a-a[1].a).map(([k,c])=>`<tr><td><b>${esc(k)}</b>${c.open?' <span class="chip good">on shift</span>':''}</td><td class="r num">${c.shifts}</td><td class="r num">${fmt(c.h,1)}</td><td class="r num">${c.n}</td><td class="r num"><b>${gel(c.a)}</b></td><td class="r num hm">${c.n?gel(c.a/c.n):'—'}</td><td class="r num hm">${c.h>=0.5?gel(c.a/c.h):'—'}</td></tr>`).join('')}</tbody></table></div>`:'<div class="muted">No shifts this month.</div>'}
+   ${sh.length?`<h3 class="rh3">Shift log</h3><div class="flow">${sh.slice(0,40).map(x=>{const so=salesOf(x);const E=shiftExpected(x);const diff=x.closedAt?r2(x.closeCash-E):null;return `<div class="ln"><span class="k"><b>${esc(x.user?x.user.name:'?')}</b> · ${esc(dShort(String(x.openedAt).slice(0,10)))} ${tOf(x.openedAt)} → ${x.closedAt?tOf(x.closedAt):'…'}<div class="small muted">${fmt(hrs(x),1)} h · ${so.length} sale${so.length===1?'':'s'} · ${gel(so.reduce((a,o)=>a+o.total,0))}${x.closedAt?' · drawer '+(Math.abs(diff)<0.01?'matched':(diff>0?'+':'−')+gel(Math.abs(diff))):' · open'}</div></span></div>`}).join('')}</div>`:''}</div>`;
+  return staff+`<div class="kpis"><div class="kpi"><div class="lbl">${esc(mLabel(m))} on the register</div><div class="val num">${cu(tot.a)}<small>₾</small></div><div class="delta">${tot.n} sales · ${rows.length} selling day${rows.length===1?'':'s'}</div></div><div class="kpi"><div class="lbl">Cash</div><div class="val num">${cu(tot.cash)}<small>₾</small></div><div class="delta">${pct(tot.cash,tot.a)}% of sales</div></div><div class="kpi"><div class="lbl">Card terminals</div><div class="val num">${cu(tot.card)}<small>₾</small></div><div class="delta">${pct(tot.card,tot.a)}%${tot.other?' · other '+gel(tot.other):''}</div></div><div class="kpi"><div class="lbl">Average sale</div><div class="val num">${cu(tot.n?tot.a/tot.n:0)}<small>₾</small></div><div class="delta">${tot.v?tot.v+' voided':'no voids'}</div></div></div>
   <div class="grid g3b"><div class="panel"><h2>By day</h2><p class="sub">Pick the month in the sidebar. Tap a day to see its sales.</p>${rows.length?`<div class="tablewrap"><table><thead><tr><th>Day</th><th class="r">Sales</th><th class="r">Register</th><th class="r">Sheet</th><th class="r hm">Cash</th><th class="r hm">Cards</th><th class="r hm">Other</th></tr></thead><tbody>${rows.map(D=>{const R=recon(D.d);return `<tr class="click" data-act="st_day" data-d="${D.d}" style="cursor:pointer"><td>${esc(dShort(D.d))}${D.v?` <span class="chip bad" style="padding:0 6px">${D.v} void</span>`:''}</td><td class="r num">${D.n}</td><td class="r num"><b>${gel(D.a)}</b></td><td class="r num">${gel(R.sa)} ${R.ok?'<span class="chip good" style="padding:0 6px">=</span>':`<span class="chip bad" style="padding:0 6px">${R.diff>0?'+':'−'}${gel(Math.abs(R.diff))}</span>`}</td><td class="r num hm">${gel(D.cash)}</td><td class="r num hm">${gel(D.card)}</td><td class="r num hm">${gel(D.other)}</td></tr>`}).join('')}</tbody><tfoot><tr><td><b>Total</b></td><td class="r num">${tot.n}</td><td class="r num"><b>${gel(tot.a)}</b></td><td class="r num">${gel(rows.reduce((a,D)=>a+recon(D.d).sa,0))}</td><td class="r num hm">${gel(tot.cash)}</td><td class="r num hm">${gel(tot.card)}</td><td class="r num hm">${gel(tot.other)}</td></tr></tfoot></table></div>`:`<div class="empty"><b>No register sales in ${esc(mLabel(m))}</b></div>`}</div>
   <div class="stack"><div class="panel"><h2>Best sellers on the register</h2>${top.length?`<div class="bars">${top.map(x=>`<div class="bar"><div class="name" title="${esc(x.n)}">${esc(x.n)}<span>×${fmt(x.q)}</span></div><div class="track"><div class="fill" style="width:${x.a/max*100}%;background:var(--s1)"></div></div><div class="amt num">${gel(x.a)}</div></div>`).join('')}</div>`:'<div class="muted">—</div>'}</div>
    <div class="panel mt"><h2>By consultant</h2>${Object.keys(byU).length?`<div class="flow">${Object.entries(byU).sort((a,b)=>b[1].a-a[1].a).map(([k,u])=>`<div class="ln"><span class="k"><b>${esc(k)}</b><div class="small muted">${u.n} sales · avg ${gel(u.a/u.n)}</div></span><span class="v num">${gel(u.a)}</span></div>`).join('')}</div>`:'<div class="muted">—</div>'}</div></div></div>`;
