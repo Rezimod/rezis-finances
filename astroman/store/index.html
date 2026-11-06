@@ -135,6 +135,8 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 .card .img>.ph{font-size:28px;border-radius:0}
 .card .q{position:absolute;top:8px;right:8px;min-width:26px;height:26px;border-radius:999px;display:grid;place-items:center;font-size:12px;font-weight:800;padding:0 7px;background:var(--good-bg);color:var(--good);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 .card .q.zero{background:var(--bad-bg);color:var(--bad)}.card .q.neg{background:#2F2F2F;color:#fff}
+.card .whb{position:absolute;top:8px;right:42px;height:26px;display:grid;place-items:center;padding:0 8px;border-radius:999px;background:#E6ECFA;color:var(--brand);font-size:11px;font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.grid.list .card .whb{position:static;order:3}
 .card .price s{color:var(--muted);font-weight:500;font-size:12px;margin-right:3px}
 .card .price{position:absolute;left:8px;bottom:8px;background:rgba(255,255,255,.92);backdrop-filter:blur(4px);border-radius:9px;padding:3px 8px;font-weight:800;font-size:15px;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)}
 .card .t{padding:8px 10px 10px;display:grid;gap:1px}
@@ -371,7 +373,7 @@ function filtered(){
   return L;
 }
 function cardHtml(x,q){const sug=P.tab==='sug'&&!P.q;const adm=P.user&&P.user.admin;
-  return `<div class="card" role="button" tabindex="0" data-add="${esc(x.b)}"><div class="img">${pic(x)}${sug?'<span class="sg">შესთავაზე</span>':''}<span class="q ${q<0?'neg':q===0?'zero':''}">${q}</span><span class="price num">${x.sale>0&&x.sale<x.price?`<s>${gel(x.price)}</s> ${gel(x.sale)}`:gel(x.price)}</span>${adm?`<button class="ed" data-edit="${esc(x.b)}" title="რედაქტირება">✎</button>`:''}</div><div class="t"><div class="n">${esc(x.n)}</div><div class="bc">${esc(x.b)}</div>${sug?`<div class="why">შესთავაზე მომხმარებელს</div>`:''}</div></div>`}
+  return `<div class="card" role="button" tabindex="0" data-add="${esc(x.b)}"><div class="img">${pic(x)}${sug?'<span class="sg">შესთავაზე</span>':''}${(+x.qw||0)>0?'<span class="whb" title="საწყობშია">საწყობში</span>':''}<span class="q ${q<0?'neg':q===0?'zero':''}">${q}</span><span class="price num">${x.sale>0&&x.sale<x.price?`<s>${gel(x.price)}</s> ${gel(x.sale)}`:gel(x.price)}</span>${adm?`<button class="ed" data-edit="${esc(x.b)}" title="რედაქტირება">✎</button>`:''}</div><div class="t"><div class="n">${esc(x.n)}</div><div class="bc">${esc(x.b)}</div>${sug?`<div class="why">შესთავაზე მომხმარებელს</div>`:''}</div></div>`}
 function ph(n,cls){return `<div class="ph ${cls||''}">${esc(initials2(n))}</div>`}
 function pic(x,cls){return x.img?`<img src="${esc(x.img)}" alt="" loading="lazy" data-ph="${esc(initials2(x.n))}" data-cls="${esc(cls||'')}" onerror="phFail(this)">`:ph(x.n,cls)}
 const initials2=n=>String(n||'').replace(/[^\p{L}\p{N}]/gu,'').slice(0,2).toUpperCase()||'·';
