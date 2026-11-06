@@ -52,6 +52,7 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 .logo{display:flex;align-items:center;gap:10px;justify-self:center}
 .logo b{font-size:17px;letter-spacing:.08em;font-weight:800}
 .logo .mark{height:38px;width:auto;display:block}
+.user .adm{font-size:10px;color:var(--warn);font-weight:800;letter-spacing:.06em}
 .logo small{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .hleft{display:flex;align-items:center;gap:8px}
 .hright{display:flex;align-items:center;gap:8px;justify-self:end}
@@ -108,10 +109,19 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 .search input{padding-left:40px;font-size:15px;min-height:48px;border-radius:14px}
 .search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted)}
 .search .x{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:var(--surface-2);width:30px;height:30px;border-radius:50%}
-.ctabs{display:flex;align-items:center;gap:6px;margin:10px 0 8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
-.ctabs::-webkit-scrollbar{display:none}
+.ctabs{display:flex;align-items:center;gap:6px;margin:10px 0 8px;flex-wrap:wrap}
 .ctabs button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-weight:600;white-space:nowrap;color:var(--ink-2)}
 .ctabs button[aria-pressed="true"]{background:var(--brand);color:#fff;border-color:var(--brand)}
+.ctabs button.sug{background:var(--warn-bg);color:var(--warn);border-color:transparent}
+.ctabs button.sug[aria-pressed="true"]{background:var(--warn);color:#fff}
+.card .sg{position:absolute;left:8px;top:8px;background:var(--warn-bg);color:var(--warn);font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px}
+.card .ed{position:absolute;right:8px;bottom:8px;width:30px;height:30px;border-radius:9px;border:0;background:var(--brand);color:#fff;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.grid.list .card .ed{position:static;order:5}
+.grid.list .card .sg{position:static;order:0}
+.card .t .why{font-size:11px;color:var(--warn);font-weight:600}
+.bye{display:grid;place-items:center;text-align:center;gap:6px;padding:10px 0}
+.bye h2{margin:0;font-size:24px}
+.bye .big{font-size:40px}
 .ctabs .vw{margin-left:auto;display:flex;gap:4px;flex:none}
 .ctabs .vw button{padding:7px 9px;border-radius:9px}
 /* rows are max-content: a scrolling grid with overflow:hidden items would otherwise size its rows to zero */
@@ -277,7 +287,7 @@ const PAYN=Object.fromEntries(PAY.map(p=>[p[0],p[1]]));
 /* ============================== state ============================== */
 const P={u:null,k:null,cat:new Map(),pos:new Map(),shift:new Map(),cfg:{users:[],receipt:{}},loaded:false,
   user:null,view:'sale',tab:'all',q:'',grid:lsGet('pos.grid')!=='list',cart:{lines:[],disc:0,note:''},sel:-1,mode:'qty',buf:'',
-  pay:{method:'cash',cash:'',receipt:lsGet('pos.receipt')!=='0',note:''},last:null,conn:{ok:false,txt:'კავშირი…'},install:null};
+  pay:{method:'cash',cash:'',receipt:false,note:''},last:null,conn:{ok:false,txt:'კავშირი…'},install:null};
 try{const c=JSON.parse(lsGet('pos.cart')||'null');if(c&&Array.isArray(c.lines))P.cart=c}catch(e){}
 try{P.user=JSON.parse(lsGet('pos.user')||'null')}catch(e){}
 const DEVICE=lsGet('pos.device')||(()=>{const d=uid('d');lsSet('pos.device',d);return d})();
@@ -313,7 +323,8 @@ function saveCache(){clearTimeout(saveCache.t);saveCache.t=setTimeout(()=>{const
 function fromCache(){let c;try{c=JSON.parse(lsGet('pos.cache')||'null')}catch(e){}if(!c||c.u!==P.u||!Array.isArray(c.docs))return false;
   c.docs.forEach(([cc,id,d])=>col(cc).set(id,d));if(c.cfg)P.cfg=c.cfg;since=c.at||0;outbox.forEach(apply);P.loaded=true;return true}
 const col=c=>c==='catalog'?P.cat:c==='pos'?P.pos:P.shift;
-const apply=op=>{col(op.c).set(op.id,op.d)};
+const apply=op=>{if(op.op==='patch'){const cur=col(op.c).get(op.id);if(cur)col(op.c).set(op.id,{...cur,...op.d});return}col(op.c).set(op.id,op.d)};
+function pushPatch(c,id,d){const cur=P.cat.get(id);if(cur)P.cat.set(id,{...cur,...d});const op={op:'patch',c,id,d:JSON.parse(JSON.stringify(d))};outbox.push(op);saveOutbox();saveCache();status();clearTimeout(flushT);flushT=setTimeout(flush,300);render()}
 function push(c,id,d){const op={op:'set',c,id,d:JSON.parse(JSON.stringify(d))};outbox=outbox.filter(o=>!(o.c===c&&o.id===id)||busy);outbox.push(op);saveOutbox();apply(op);saveCache();status();clearTimeout(flushT);flushT=setTimeout(flush,300)}
 async function flush(){
   if(busy||!outbox.length||!P.u)return;busy=true;status();
@@ -347,13 +358,19 @@ function items(){return [...P.cat.values()].filter(x=>x&&!x.hidden)}
 function liveQ(x){let q=x.qs!=null?+x.qs||0:(+x.q||0);const c=String(x.countedAt||'');P.pos.forEach(o=>{if(o.status==='void'||!o.lines)return;if(c&&(c.length>10?String(o.at||'')<c:(o.day||'')<c))return;o.lines.forEach(l=>{if(l.b===x.b)q-=+l.q||0})});return q}
 function cats(){const s=new Set();items().forEach(x=>s.add(x.cat||'სხვადასხვა'));return [...s].sort((a,b)=>a.localeCompare(b,'ka'))}
 function norm(s){return String(s||'').toLowerCase().replace(/\s+/g,' ').trim()}
+function lastSale(b){let t='';P.pos.forEach(o=>{if(o.status==='void'||!o.lines)return;if(o.lines.some(l=>l.b===b)&&o.at>t)t=o.at});return t}
+// products sitting on the shelf: in stock, not sold on the register for 30 days, barely sold this year
+function suggestions(){const now=Date.now();return items().map(x=>{const q=liveQ(x);if(q<=0)return null;const ls=lastSale(x.b);const days=ls?Math.floor((now-Date.parse(ls))/864e5):null;if(days!=null&&days<30)return null;if((x.sold||0)>3)return null;return {...x,_days:days,_score:(days==null?90:days)*Math.min(q,10)*Math.sqrt(+x.price||1)}}).filter(Boolean).sort((a,b)=>b._score-a._score).slice(0,30)}
 function filtered(){
   const q=norm(P.q);let L=items();
   if(q)L=L.filter(x=>norm(x.n).includes(q)||String(x.b).includes(q));
+  else if(P.tab==='sug')return suggestions();
   else if(P.tab!=='all')L=L.filter(x=>(x.cat||'სხვადასხვა')===P.tab);
   L.sort((a,b)=>(b.sold||0)-(a.sold||0)||a.n.localeCompare(b.n,'ka'));
   return L;
 }
+function cardHtml(x,q){const sug=P.tab==='sug'&&!P.q;const adm=P.user&&P.user.admin;
+  return `<div class="card" role="button" tabindex="0" data-add="${esc(x.b)}"><div class="img">${pic(x)}${sug?'<span class="sg">შესთავაზე</span>':''}<span class="q ${q<0?'neg':q===0?'zero':''}">${q}</span><span class="price num">${x.sale>0&&x.sale<x.price?`<s>${gel(x.price)}</s> ${gel(x.sale)}`:gel(x.price)}</span>${adm?`<button class="ed" data-edit="${esc(x.b)}" title="რედაქტირება">✎</button>`:''}</div><div class="t"><div class="n">${esc(x.n)}</div><div class="bc">${esc(x.b)}</div>${sug?`<div class="why">${x._days==null?'სალაროზე არ გაყიდულა':x._days+' დღეა არ გაყიდულა'} · წელს ${x.sold||0} ც · თაროზე ${q}</div>`:''}</div></div>`}
 function ph(n,cls){return `<div class="ph ${cls||''}">${esc(initials2(n))}</div>`}
 function pic(x,cls){return x.img?`<img src="${esc(x.img)}" alt="" loading="lazy" data-ph="${esc(initials2(x.n))}" data-cls="${esc(cls||'')}" onerror="phFail(this)">`:ph(x.n,cls)}
 const initials2=n=>String(n||'').replace(/[^\p{L}\p{N}]/gu,'').slice(0,2).toUpperCase()||'·';
@@ -400,7 +417,7 @@ function render(){
 function header(){
   const u=P.user;const open=openShift();
   return `<header class="top">
-   <div class="hleft">${u?`<div class="user"><span class="avatar">${esc(initials(u.name))}</span><span><b>${esc(u.name)}</b><div class="small muted">${open?'ცვლა '+tShort(open.openedAt)+'-დან':'ცვლა დახურულია'}</div></span></div>`:''}</div>
+   <div class="hleft">${u?`<div class="user"><span class="avatar">${esc(initials(u.name))}</span><span><b>${esc(u.name)}</b>${u.admin?' <span class="adm">ADMIN</span>':''}<div class="small muted">${open?'ცვლა '+tShort(open.openedAt)+'-დან':'ცვლა დახურულია'}</div></span></div>`:''}</div>
    <div class="logo"><img src="../brand/mark-black-160.png" alt="" class="mark"><div><b>ASTROMAN</b><small>სალარო · ${esc(dLong(today()).split(',')[0])}</small></div></div>
    <div class="hright"><span class="conn" id="conn">${connHtml()}</span>
     <button class="ibtn" data-act="sync" title="სინქრონიზაცია">${svg(I.sync,20)}${outbox.length?`<span class="n">${outbox.length}</span>`:''}</button>
@@ -428,7 +445,7 @@ function vLogin(){
    :`<button class="btn primary big" style="width:100%" data-login-go="1">შესვლა</button>`}
    ${!P.loaded?`<p class="muted small" style="text-align:center;margin:12px 0 0">კატალოგი იტვირთება…</p>`:''}</div></div>`;
 }
-function doLogin(u){P.user={id:u.id,name:u.name};lsSet('pos.user',JSON.stringify(P.user));P.pin='';P.pinErr='';P.view='sale';render();if(!openShift())shiftOpenModal()}
+function doLogin(u){clearTimeout(P.byeT);P.user={id:u.id,name:u.name,admin:!!u.admin};lsSet('pos.user',JSON.stringify(P.user));P.pin='';P.pinErr='';P.view='sale';render();if(!openShift())shiftOpenModal()}
 
 function vSale(){
   const T=totals();const L=filtered();const sel=P.cart.lines[P.sel];
@@ -451,10 +468,10 @@ function vSale(){
   </section>
   <section class="catalog" aria-label="პროდუქტები">
    <div class="search">${svg(I.search,20)}<input class="input" id="q" placeholder="პროდუქტის ძიება ან შტრიხკოდი" value="${esc(P.q)}" autocomplete="off">${P.q?`<button class="x" data-act="clearQ">✕</button>`:''}</div>
-   <div class="ctabs"><button data-tab="all" aria-pressed="${P.tab==='all'&&!P.q}">მთავარი</button>${cats().map(c=>`<button data-tab="${esc(c)}" aria-pressed="${P.tab===c&&!P.q}">${esc(c)}</button>`).join('')}
+   <div class="ctabs"><button data-tab="all" aria-pressed="${P.tab==='all'&&!P.q}">მთავარი</button><button data-tab="sug" class="sug" aria-pressed="${P.tab==='sug'&&!P.q}">★ შესთავაზე</button>${cats().map(c=>`<button data-tab="${esc(c)}" aria-pressed="${P.tab===c&&!P.q}">${esc(c)}</button>`).join('')}
     <span class="vw"><button data-act="grid" aria-pressed="${P.grid}" title="ბადე">${svg(I.grid,18)}</button><button data-act="listv" aria-pressed="${!P.grid}" title="სია">${svg(I.list,18)}</button></span></div>
-   <div class="grid ${P.grid?'':'list'}" id="grid">${L.length?L.slice(0,P.q?200:400).map(x=>{const q=liveQ(x);return `<div class="card" role="button" tabindex="0" data-add="${esc(x.b)}"><div class="img">${pic(x)}<span class="q ${q<0?'neg':q===0?'zero':''}">${q}</span><span class="price num">${x.sale>0&&x.sale<x.price?`<s>${gel(x.price)}</s> ${gel(x.sale)}`:gel(x.price)}</span></div><div class="t"><div class="n">${esc(x.n)}</div><div class="bc">${esc(x.b)}</div></div></div>`}).join('')
-    :`<div class="nores">${P.loaded?'ვერაფერი მოიძებნა':'კატალოგი იტვირთება…'}</div>`}</div>
+   <div class="grid ${P.grid?'':'list'}" id="grid">${P.tab==='sug'&&!P.q?`<div class="nores" style="padding:10px 4px 6px;text-align:left;color:var(--ink-2)">პროდუქტები, რომლებიც დიდი ხანია თაროზეა — შესთავაზე მომხმარებელს, აუხსენი რისთვისაა. ${L.length?'':'ყველაფერი იყიდება, შესთავაზებელი ახლა არ არის.'}</div>`:''}${L.length?L.slice(0,P.q?200:400).map(x=>{const q=liveQ(x);return cardHtml(x,q)}).join('')
+    :(P.tab==='sug'&&!P.q?'':`<div class="nores">${P.loaded?'ვერაფერი მოიძებნა':'კატალოგი იტვირთება…'}</div>`)}</div>
   </section></div>`;
 }
 
@@ -465,7 +482,6 @@ function vPay(){
   <div class="body"><div>
    <h3>ნაღდი ანგარიშსწორება</h3>
    <div class="cashrow"><input id="cash" inputmode="decimal" placeholder="0.00" value="${esc(P.pay.cash)}" ${m==='cash'?'':'disabled'}><button data-act="exact">ზუსტი თანხა</button></div>
-   <div class="toggle"><span>ქვითრის ამობეჭდვა</span><button class="sw" role="switch" aria-checked="${P.pay.receipt}" data-act="toggleReceipt"></button></div>
    <h3 style="margin-top:16px">გადახდის წესი</h3>
    <div class="methods">${PAY.map(([k,t,lg,cls])=>`<button data-method="${k}" aria-pressed="${m===k}" class="${cls}"><span class="lg">${esc(lg)}</span>${esc(t)}</button>`).join('')}</div>
    <label class="field note"><span>შენიშვნა (არასავალდებულო)</span><input class="input" id="payNote" value="${esc(P.pay.note)}" placeholder="მაგ. მყიდველის სახელი, მიწოდება…"></label>
@@ -485,7 +501,8 @@ function vDone(){
 
 /* ============================== actions ============================== */
 function bind(){
-  document.querySelectorAll('[data-add]').forEach(b=>{b.onclick=()=>{const x=P.cat.get(b.dataset.add);if(x)addItem(x)};b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();b.click()}}});
+  document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=e=>{e.stopPropagation();adminEdit(b.dataset.edit)});
+  document.querySelectorAll('[data-add]').forEach(b=>{b.onclick=e=>{if(e.target.closest('[data-edit]'))return;const x=P.cat.get(b.dataset.add);if(x)addItem(x)};b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();b.click()}}});
   document.querySelectorAll('[data-line]').forEach(b=>b.onclick=e=>{if(e.target.closest('button'))return;selectLine(+b.dataset.line)});
   document.querySelectorAll('[data-qty]').forEach(b=>b.onclick=()=>{const i=+b.dataset.qty;P.sel=i;setQty(i,P.cart.lines[i].q+ +b.dataset.v)});
   document.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>setQty(+b.dataset.rm,0));
@@ -504,15 +521,15 @@ function bind(){
   const pn=$('#payNote');if(pn)pn.oninput=()=>P.pay.note=pn.value;
   document.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>act(b.dataset.act,b));
 }
-function renderGridOnly(){const g=$('#grid');if(!g)return;const L=filtered();g.innerHTML=L.length?L.slice(0,200).map(x=>{const q=liveQ(x);return `<div class="card" role="button" tabindex="0" data-add="${esc(x.b)}"><div class="img">${pic(x)}<span class="q ${q<0?'neg':q===0?'zero':''}">${q}</span><span class="price num">${x.sale>0&&x.sale<x.price?`<s>${gel(x.price)}</s> ${gel(x.sale)}`:gel(x.price)}</span></div><div class="t"><div class="n">${esc(x.n)}</div><div class="bc">${esc(x.b)}</div></div></div>`}).join(''):`<div class="nores">ვერაფერი მოიძებნა</div>`;
-  g.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const x=P.cat.get(b.dataset.add);if(x){addItem(x)}});
+function renderGridOnly(){const g=$('#grid');if(!g)return;const L=filtered();g.innerHTML=L.length?L.slice(0,200).map(x=>{const q=liveQ(x);return cardHtml(x,q)}).join(''):`<div class="nores">ვერაფერი მოიძებნა</div>`;
+  g.querySelectorAll('[data-edit]').forEach(b=>b.onclick=e=>{e.stopPropagation();adminEdit(b.dataset.edit)});
+  g.querySelectorAll('[data-add]').forEach(b=>b.onclick=e=>{if(e.target.closest('[data-edit]'))return;const x=P.cat.get(b.dataset.add);if(x){addItem(x)}});
   document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tab===P.tab&&!P.q)))}
 function updatePayHdr(){const T=totals();const cash=parseFloat(P.pay.cash)||0;const chg=r2(cash-T.total);const v=document.querySelectorAll('.pay .hdr .val')[1];if(v){v.className='val num '+(chg<0?'neg':chg>0?'pos':'');v.textContent=(chg<0?'−':'')+fmt(Math.abs(chg),2)}const c=$('[data-act="confirm"]');if(c)c.disabled=chg<0;const e=$('.pay .err');if(e)e.hidden=chg>=0}
 async function act(a,b){
   if(a==='pay'){if(!totals().total)return;P.pay.cash='';P.pay.note='';P.view='pay';render();const c=$('#cash');if(c)c.focus();return}
   if(a==='back'){P.view='sale';render();return}
   if(a==='exact'){P.pay.cash=String(totals().total);render();return}
-  if(a==='toggleReceipt'){P.pay.receipt=!P.pay.receipt;lsSet('pos.receipt',P.pay.receipt?'1':'0');render();return}
   if(a==='confirm')return confirmSale();
   if(a==='newSale'){P.view='sale';P.last=null;render();return}
   if(a==='printLast'){if(P.last)printHtml(receiptHtml(P.last));return}
@@ -530,9 +547,8 @@ function confirmSale(){
   const now=new Date();const sh=openShift();
   const o={id:uid('o'),at:now.toISOString(),day:today(),user:P.user,shift:sh?sh.id:null,device:DEVICE,
     lines:P.cart.lines.map(l=>({b:l.b,n:l.n,q:l.q,p:l.p,d:+l.d||0,img:l.img||null})),sub:T.sub,disc:T.disc,total:T.total,pay:m,
-    cash:m==='cash'?r2(cash):T.total,change:m==='cash'?r2(cash-T.total):0,receipt:!!P.pay.receipt,note:(P.pay.note||'').trim(),status:'ok',no:nextNo()};
+    cash:m==='cash'?r2(cash):T.total,change:m==='cash'?r2(cash-T.total):0,receipt:false,note:(P.pay.note||'').trim(),status:'ok',no:nextNo()};
   push('pos',o.id,o);P.last=o;clearCart();P.view='done';render();
-  if(o.receipt)setTimeout(()=>printHtml(receiptHtml(o)),150);
 }
 function nextNo(){let n=0;P.pos.forEach(o=>{if(o.no>n)n=o.no});return n+1}
 
@@ -557,9 +573,9 @@ function escClose(e){if(e.key==='Escape')closeModal()}
 function closeModal(){$('#modalRoot').innerHTML='';document.removeEventListener('keydown',escClose)}
 function funcMenu(){
   const sh=openShift();
-  const F=[['shiftClose','ცვლის დახურვა',I.clock,'top',!sh],['dayClose','დღის დახურვა',I.key,'top dark'],
+  const F=[['shiftClose','ცვლის დასრულება',I.clock,'top',!sh],['shiftOpen','ცვლის დაწყება',I.clock,'top dark',!!sh],
    ['shiftReport','ცვლის ნავაჭრი',I.sales,'',!sh],['cashOut','თანხის გაცემა',I.cashOut,'',!sh],['cashIn','თანხის მიღება',I.cashIn,'',!sh],['history','გაყიდვების ისტორია',I.history],
-   ['shiftOpen','ცვლის გახსნა',I.clock,'',!!sh],['sync','სინქრონიზაცია',I.sync],['install','დაინსტალირება',I.install,'',!P.install],['refresh','განახლება',I.refresh],
+   ['sync','სინქრონიზაცია',I.sync],['install','დაინსტალირება',I.install,'',!P.install],['refresh','განახლება',I.refresh],
    ['logout','გასვლა',I.logout],['disconnect','გათიშვა',I.power]];
   modal('ფუნქციები',`<div class="fn">${F.map(([a,t,ic,cls,dis])=>`<button data-fn="${a}" class="${cls||''}" ${dis?'disabled':''}>${svg(ic,24)}${t}</button>`).join('')}</div>
    <div class="muted small" style="text-align:center">${esc(P.user.name)} · მოწყობილობა ${esc(DEVICE.slice(-5))} · ${P.cat.size} პროდუქტი კატალოგში</div>`);
@@ -570,11 +586,10 @@ async function fn(a){
   if(a==='sync')return act('sync');
   if(a==='refresh'){if(navigator.serviceWorker&&navigator.serviceWorker.controller){const r=await navigator.serviceWorker.getRegistration();if(r)await r.update()}location.reload();return}
   if(a==='install'){if(P.install){P.install.prompt();P.install=null}return}
-  if(a==='logout'){if(outbox.length)toast('ზოგი გაყიდვა ჯერ ინახება — დაელოდეთ');P.user=null;lsSet('pos.user','');P.pin='';render();return}
+  if(a==='logout'){if(outbox.length)toast('ზოგი გაყიდვა ჯერ ინახება — დაელოდეთ');logout();return}
   if(a==='disconnect'){if(outbox.length){toast('ჯერ შეინახეთ ყველა გაყიდვა (იხ. ღილაკი ზევით)');return}modal('გათიშვა',`<p>ეს მოწყობილობა გაითიშება სალაროდან და კატალოგი წაიშლება აქედან. ხელახლა დასაკავშირებლად დაგჭირდებათ მოწყობილობის ბმული.</p><div class="row"><button class="btn danger" id="dcGo">გათიშვა</button><button class="btn" data-close>გაუქმება</button></div>`);$('#dcGo').onclick=()=>{['pos.backend','pos.cache','pos.user','pos.cart'].forEach(k=>lsSet(k,''));location.reload()};return}
   if(a==='shiftOpen')return shiftOpenModal();
   if(a==='shiftClose')return shiftCloseModal(false);
-  if(a==='dayClose')return shiftCloseModal(true);
   if(a==='shiftReport')return shiftReport();
   if(a==='cashIn'||a==='cashOut')return cashMove(a==='cashIn'?'in':'out');
   if(a==='history')return history();
@@ -586,28 +601,37 @@ function shiftStats(sh){
   S.cashExpected=r2((+sh.openCash||0)+(S.by.cash||0)+S.cashIn-S.cashOut);return S;
 }
 function lastClose(){let v=null;P.shift.forEach(s=>{if(s.closedAt&&s.device===DEVICE&&(!v||s.closedAt>v.closedAt))v=s});return v?v.closeCash:0}
+function greeting(){const h=new Date().getHours();return h<12?'დილა მშვიდობისა':h<18?'გამარჯობა':'საღამო მშვიდობისა'}
 function shiftOpenModal(){
-  modal('ცვლის გახსნა',`<p style="margin:0">რამდენი ნაღდი ფულია სალაროში ახლა? (ხურდის თანხა)</p><div class="cashrow"><input id="oc" inputmode="decimal" value="${lastClose()||''}" placeholder="0.00"><button disabled>₾</button></div>
-   <div class="row"><button class="btn primary big" id="ocGo">ცვლის გახსნა</button><button class="btn" data-close>მოგვიანებით</button></div>`);
+  modal('ცვლის დაწყება',`<div class="bye"><div class="big">☀️</div><h2>${esc(greeting())}, ${esc(P.user.name)}!</h2><div class="muted">კარგი დღე გქონდეს. რამდენი ნაღდი ფულია სალაროში? (ხურდის თანხა)</div></div><div class="cashrow"><input id="oc" inputmode="decimal" value="${lastClose()||''}" placeholder="0.00"><button disabled>₾</button></div>
+   <div class="row"><button class="btn primary big" id="ocGo" style="flex:1">ცვლის დაწყება</button><button class="btn" data-close>მოგვიანებით</button></div>`);
   $('#oc').focus();$('#ocGo').onclick=()=>{const s={id:uid('s'),user:P.user,device:DEVICE,day:today(),openedAt:new Date().toISOString(),openCash:r2(parseFloat($('#oc').value)||0),moves:[],closedAt:null};push('shift',s.id,s);closeModal();render();toast('ცვლა გახსნილია')};
 }
-function shiftCloseModal(day){
-  const sh=openShift();if(!sh){if(day)return dayReport();toast('ღია ცვლა არ არის');return}
+const SHIFT_END=[20,30];
+function minutesEarly(){const d=new Date();return SHIFT_END[0]*60+SHIFT_END[1]-(d.getHours()*60+d.getMinutes())}
+function shiftCloseModal(force){
+  const sh=openShift();if(!sh){toast('ღია ცვლა არ არის');return}
+  const early=minutesEarly();
+  if(early>0&&!force){modal('ცვლის დასრულება',`<div class="bye"><div class="big">⏰</div><h2>შენ ამთავრებ ცვლას ${early} წუთით ადრე.</h2><div class="muted">ცვლა ${pad2(SHIFT_END[0])}:${pad2(SHIFT_END[1])}-ზე მთავრდება.</div></div><div class="row"><button class="btn primary big" id="earlyGo" style="flex:1">გაგრძელება</button><button class="btn big" data-close style="flex:1">გაუქმება</button></div>`);$('#earlyGo').onclick=()=>shiftCloseModal(true);return}
   const S=shiftStats(sh);
-  modal(day?'დღის დახურვა':'ცვლის დახურვა',`<div class="kv">${kvRows(sh,S)}</div>
-   <p style="margin:0">დათვალეთ ნაღდი ფული სალაროში და ჩაწერეთ:</p><div class="cashrow"><input id="cc" inputmode="decimal" placeholder="${fmt(S.cashExpected,2)}"><button id="ccExp">მოსალოდნელი</button></div>
+  modal('ცვლის დასრულება',`<div class="kv">${kvRows(sh,S)}</div>
+   <p style="margin:0">დათვალე ნაღდი ფული სალაროში და ჩაწერე:</p><div class="cashrow"><input id="cc" inputmode="decimal" placeholder="${fmt(S.cashExpected,2)}"><button id="ccExp">მოსალოდნელი</button></div>
    <div id="ccDiff" class="muted small"></div>
-   <div class="row"><button class="btn primary big" id="ccGo">${day?'დახურვა და Z-ანგარიში':'ცვლის დახურვა'}</button><button class="btn" data-close>გაუქმება</button></div>`);
+   <div class="row"><button class="btn primary big" id="ccGo" style="flex:1">ცვლის დასრულება</button><button class="btn" data-close>უკან</button></div>`);
   const inp=$('#cc');inp.focus();const diff=()=>{const v=parseFloat(inp.value);$('#ccDiff').textContent=isFinite(v)?(Math.abs(v-S.cashExpected)<0.005?'ემთხვევა მოსალოდნელს':'სხვაობა: '+(v>S.cashExpected?'+':'−')+gel(Math.abs(v-S.cashExpected),2)):''};inp.oninput=diff;
   $('#ccExp').onclick=()=>{inp.value=fmt(S.cashExpected,2).replace(/,/g,'');diff()};
-  $('#ccGo').onclick=()=>{const v=parseFloat(inp.value);if(!isFinite(v)){inp.focus();return}const c={...sh,closedAt:new Date().toISOString(),closeCash:r2(v),expected:S.cashExpected,closedBy:P.user,stats:{n:S.n,total:r2(S.total),by:S.by,voids:S.voids}};push('shift',c.id,c);closeModal();
-    printHtml(reportHtml(day?'Z-ანგარიში · დღის დახურვა':'ცვლის დახურვა',esc(P.user.name)+' · '+dLong(sh.day),kvList(c,S).concat([['დათვლილი ნაღდი',gel(v,2),'tot'],['სხვაობა',(v-S.cashExpected>=0?'+':'−')+gel(Math.abs(v-S.cashExpected),2)]])));
-    if(day)setTimeout(()=>{P.user=null;lsSet('pos.user','');render();toast('დღე დახურულია')},400);else render()};
+  $('#ccGo').onclick=()=>{const v=parseFloat(inp.value);if(!isFinite(v)){inp.focus();return}const c={...sh,closedAt:new Date().toISOString(),closeCash:r2(v),expected:S.cashExpected,closedBy:P.user,early:Math.max(0,minutesEarly()),stats:{n:S.n,total:r2(S.total),by:S.by,voids:S.voids}};push('shift',c.id,c);farewell()};
 }
+// after the shift: a thank-you, and the register signs the consultant out by itself ten minutes later
+function farewell(){
+  modal('',`<div class="bye"><div class="big">🌙</div><h2>სასიამოვნო საღამოს გისურვებ, ${esc(P.user.name)}!</h2><div class="muted">ცვლა დასრულებულია და შენახულია. სალარო 10 წუთში თავისით გამოვა შენი სახელიდან.</div></div><div class="row"><button class="btn primary big" id="byeGo" style="flex:1">გასვლა ახლავე</button><button class="btn" data-close>დარჩენა</button></div>`);
+  $('#byeGo').onclick=()=>{closeModal();logout()};
+  clearTimeout(P.byeT);P.byeT=setTimeout(()=>{if(P.user&&!openShift()){closeModal();logout()}},10*60000);render();
+}
+function logout(){P.user=null;lsSet('pos.user','');P.pin='';clearCart();render()}
 function kvList(sh,S){const rows=[['ცვლა გაიხსნა',dtShort(sh.openedAt)],['გაყიდვები',S.n+' · '+gel(S.total,2)]];PAY.forEach(([k,t])=>{if(S.by[k])rows.push(['  '+t,gel(S.by[k],2)])});rows.push(['საწყისი ნაღდი',gel(sh.openCash,2)],['თანხის მიღება',gel(S.cashIn,2)],['თანხის გაცემა',gel(S.cashOut,2)],['მოსალოდნელი ნაღდი',gel(S.cashExpected,2),'tot']);if(S.voids)rows.push(['გაუქმებული',String(S.voids)]);return rows}
 function kvRows(sh,S){return kvList(sh,S).map(([k,v,c])=>`<div class="${c==='tot'?'sum':''}"><span>${esc(k)}</span><span class="num">${esc(v)}</span></div>`).join('')}
-function shiftReport(){const sh=openShift();if(!sh)return toast('ღია ცვლა არ არის');const S=shiftStats(sh);modal('ცვლის ნავაჭრი',`<div class="kv">${kvRows(sh,S)}</div><div class="row"><button class="btn" id="srPrint">${svg(I.print,18)} ამობეჭდვა</button></div>`);$('#srPrint').onclick=()=>printHtml(reportHtml('ცვლის ნავაჭრი',P.user.name+' · '+dLong(sh.day),kvList(sh,S)))}
-function dayReport(){const d=today();const S={n:0,total:0,by:{}};P.pos.forEach(o=>{if(o.day!==d||o.status==='void')return;S.n++;S.total+=o.total;S.by[o.pay]=(S.by[o.pay]||0)+o.total});const rows=[['გაყიდვები',S.n+' · '+gel(S.total,2)]];PAY.forEach(([k,t])=>{if(S.by[k])rows.push(['  '+t,gel(S.by[k],2)])});modal('დღის ანგარიში',`<div class="kv">${rows.map(([k,v])=>`<div><span>${esc(k)}</span><span class="num">${esc(v)}</span></div>`).join('')}</div><p class="muted small" style="margin:0">ღია ცვლა არ არის. ცვლა გახსენით ფუნქციებიდან, რომ ნაღდი ფულიც დაითვალოს.</p><div class="row"><button class="btn" id="drPrint">${svg(I.print,18)} ამობეჭდვა</button></div>`);$('#drPrint').onclick=()=>printHtml(reportHtml('დღის ანგარიში',dLong(d),rows))}
+function shiftReport(){const sh=openShift();if(!sh)return toast('ღია ცვლა არ არის');const S=shiftStats(sh);modal('ცვლის ნავაჭრი',`<div class="kv">${kvRows(sh,S)}</div>`)}
 function cashMove(kind){
   const sh=openShift();if(!sh)return toast('ჯერ გახსენით ცვლა');
   modal(kind==='in'?'თანხის მიღება სალაროში':'თანხის გაცემა სალაროდან',`<div class="cashrow"><input id="cm" inputmode="decimal" placeholder="0.00"><button disabled>₾</button></div><label class="field"><span>რისთვის</span><input class="input" id="cmNote" placeholder="${kind==='in'?'მაგ. ხურდა ბანკიდან':'მაგ. კურიერი, წყალი…'}"></label>
@@ -629,6 +653,19 @@ function orderView(id){
   $('#ovPrint').onclick=()=>printHtml(receiptHtml(o));
   const v=$('#ovVoid');if(v)v.onclick=()=>{modal('გაყიდვის გაუქმება',`<p>ქვითარი №${o.no||''} · ${gel(o.total,2)} გაუქმდება და მფლობელი ამას დაინახავს.</p><label class="field"><span>მიზეზი</span><input class="input" id="vw" placeholder="მაგ. შეცდომით დაირტყა, დაბრუნება…"></label><div class="row"><button class="btn danger" id="vwGo">გაუქმება</button><button class="btn" data-close>უკან</button></div>`);
     $('#vwGo').onclick=()=>{const w=$('#vw').value.trim();if(!w){$('#vw').focus();return}push('pos',o.id,{...o,status:'void',voidAt:new Date().toISOString(),voidBy:P.user,voidWhy:w});closeModal();render();toast('გაუქმებულია')}};
+}
+
+/* ============================== admin: edit a product from the register ============================== */
+function adminEdit(b){
+  const x=P.cat.get(b);if(!x||!(P.user&&P.user.admin))return;const q=liveQ(x);
+  modal('პროდუქტის რედაქტირება',`<div class="row" style="gap:12px">${pic(x)}<div class="muted small">${esc(x.b)} · ცვლილება Mars-ზეც აისახება ერთ წუთში</div></div>
+   <label class="field"><span>დასახელება</span><input class="input" id="aeN" value="${esc(x.n)}"></label>
+   <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px"><label class="field"><span>მაღაზიაში ახლა (ც)</span><input class="input num" id="aeQ" inputmode="numeric" value="${q}"></label><label class="field"><span>ფასი ₾</span><input class="input num" id="aeP" inputmode="decimal" value="${x.price}"></label></div>
+   <label class="field"><span>შენიშვნა</span><input class="input" id="aeNote" value="${esc(x.storeNote||'')}"></label>
+   <div class="row"><button class="btn primary big" id="aeGo" style="flex:1">შენახვა</button><button class="btn" data-close>გაუქმება</button></div>`);
+  $('#aeGo').onclick=()=>{const n=$('#aeN').value.trim();const nq=parseInt($('#aeQ').value,10);const pr=parseFloat($('#aeP').value);if(!n){$('#aeN').focus();return}
+    const d={n,storeNote:$('#aeNote').value.trim()};if(isFinite(pr)&&pr>=0)d.price=pr;if(isFinite(nq)&&nq!==q){d.qs=nq;d.countedAt=new Date().toISOString()}
+    pushPatch('catalog',b,d);closeModal();toast('შენახულია')};
 }
 
 /* ============================== barcode scanner (keyboard wedge) ============================== */
