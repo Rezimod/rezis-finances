@@ -1,6 +1,6 @@
 // Astroman register: the app shell works offline, product pictures are kept after the first view.
-const V = 'astroman-pos-v1';
-const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './icon-180.png'];
+const V = 'astroman-pos-v2';
+const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './icon-180.png', '../brand/mark-black-160.png', '../brand/logo-full-black-240.png'];
 const IMG = 'astroman-pos-img-v1';
 const IMG_MAX = 900;
 

@@ -50,7 +50,8 @@ input,textarea{user-select:text}
 .app{display:flex;flex-direction:column;height:100dvh}
 header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:8px 14px;background:var(--surface);border-bottom:1px solid var(--line);min-height:60px}
 .logo{display:flex;align-items:center;gap:10px;justify-self:center}
-.logo b{font-size:17px;letter-spacing:.02em;font-weight:800}
+.logo b{font-size:17px;letter-spacing:.08em;font-weight:800}
+.logo .mark{height:38px;width:auto;display:block}
 .logo small{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .hleft{display:flex;align-items:center;gap:8px}
 .hright{display:flex;align-items:center;gap:8px;justify-self:end}
@@ -343,7 +344,7 @@ addEventListener('beforeunload',e=>{if(outbox.length){e.preventDefault();e.retur
 /* ============================== catalog helpers ============================== */
 function items(){return [...P.cat.values()].filter(x=>x&&!x.hidden)}
 // what is on the shelf now: the Optimo count minus what this register sold since that count
-function liveQ(x){let q=x.qs!=null?+x.qs||0:(+x.q||0);const c=x.countedAt||'';P.pos.forEach(o=>{if(o.status==='void'||!o.lines)return;if(c&&(o.day||'')<c)return;o.lines.forEach(l=>{if(l.b===x.b)q-=+l.q||0})});return q}
+function liveQ(x){let q=x.qs!=null?+x.qs||0:(+x.q||0);const c=String(x.countedAt||'');P.pos.forEach(o=>{if(o.status==='void'||!o.lines)return;if(c&&(c.length>10?String(o.at||'')<c:(o.day||'')<c))return;o.lines.forEach(l=>{if(l.b===x.b)q-=+l.q||0})});return q}
 function cats(){const s=new Set();items().forEach(x=>s.add(x.cat||'სხვადასხვა'));return [...s].sort((a,b)=>a.localeCompare(b,'ka'))}
 function norm(s){return String(s||'').toLowerCase().replace(/\s+/g,' ').trim()}
 function filtered(){
@@ -400,16 +401,15 @@ function header(){
   const u=P.user;const open=openShift();
   return `<header class="top">
    <div class="hleft">${u?`<div class="user"><span class="avatar">${esc(initials(u.name))}</span><span><b>${esc(u.name)}</b><div class="small muted">${open?'ცვლა '+tShort(open.openedAt)+'-დან':'ცვლა დახურულია'}</div></span></div>`:''}</div>
-   <div class="logo">${logoSvg(34)}<div><b>ასტრომანი</b><small>სალარო · ${esc(dLong(today()).split(',')[0])}</small></div></div>
+   <div class="logo"><img src="../brand/mark-black-160.png" alt="" class="mark"><div><b>ASTROMAN</b><small>სალარო · ${esc(dLong(today()).split(',')[0])}</small></div></div>
    <div class="hright"><span class="conn" id="conn">${connHtml()}</span>
     <button class="ibtn" data-act="sync" title="სინქრონიზაცია">${svg(I.sync,20)}${outbox.length?`<span class="n">${outbox.length}</span>`:''}</button>
     <button class="ibtn menubtn" data-act="menu" aria-label="ფუნქციები">${svg(I.menu,22)}</button></div></header>`;
 }
 const initials=n=>String(n||'').trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase()||'?';
-const logoSvg=s=>`<svg width="${s}" height="${s}" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="8.5" fill="#F5A623"/><ellipse cx="17" cy="17" rx="15" ry="5" fill="none" stroke="#1C3480" stroke-width="1.8" transform="rotate(-22 17 17)"/><path d="M8.6 14.2a8.5 8.5 0 0 1 16.8 0" fill="#F5A623"/></svg>`;
 
 function vSetup(){
-  return `<div class="setup"><div class="box"><div class="row">${logoSvg(40)}<div><b style="font-size:18px">ასტრომანი · სალარო</b><div class="muted small">ამ მოწყობილობის პირველი დაკავშირება</div></div></div>
+  return `<div class="setup"><div class="box"><div class="row"><img src="../brand/mark-black-160.png" alt="" style="height:44px"><div><b style="font-size:18px">ასტრომანი · სალარო</b><div class="muted small">ამ მოწყობილობის პირველი დაკავშირება</div></div></div>
    <p style="margin:0">მფლობელის კომპიუტერზე, Astroman Finance → <b>Store sales → Register</b> გვერდზე არის <b>მოწყობილობის ბმული</b>. გახსენით ის აქ, ან ჩასვით ქვემოთ.</p>
    <label class="field"><span>მოწყობილობის ბმული</span><input class="input" id="suLink" placeholder="https://rezimod.github.io/…/store/#connect=…"></label>
    <div class="row"><button class="btn primary big" id="suGo">დაკავშირება</button><span class="muted small" id="suMsg"></span></div></div></div>`;
@@ -420,7 +420,7 @@ function vLogin(){
   const users=P.cfg.users&&P.cfg.users.length?P.cfg.users:[{id:'default',name:'კონსულტანტი',pin:''}];
   const sel=P.loginSel||users[0].id;const u=users.find(x=>x.id===sel)||users[0];
   const needPin=!!u.pin;
-  return header()+`<div class="login"><div class="box"><h1>ვინ მუშაობს სალაროზე?</h1><div class="muted">აირჩიეთ სახელი${needPin?' და აკრიფეთ PIN':''}.</div>
+  return header()+`<div class="login"><div class="box"><img src="../brand/logo-full-black-240.png" alt="Astroman" style="height:72px;display:block;margin:0 auto 10px"><h1 style="text-align:center">ვინ მუშაობს სალაროზე?</h1><div class="muted">აირჩიეთ სახელი${needPin?' და აკრიფეთ PIN':''}.</div>
    <div class="users">${users.map(x=>`<button data-login="${esc(x.id)}" aria-pressed="${x.id===u.id}"><span class="avatar">${esc(initials(x.name))}</span>${esc(x.name)}</button>`).join('')}</div>
    ${needPin?`<div class="pin">${[0,1,2,3].map(i=>`<i class="${(P.pin||'').length>i?'on':''}"></i>`).join('')}</div>
    <div class="pinpad">${['1','2','3','4','5','6','7','8','9','⌫','0','OK'].map(k=>`<button data-pin="${k}" ${k==='OK'?'class="num" style="background:var(--brand);color:#fff;border-color:var(--brand)"':''}>${k}</button>`).join('')}</div>
