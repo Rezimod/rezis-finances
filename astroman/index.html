@@ -3651,7 +3651,8 @@ async function mergeGroup(gi,codes){
   const others=docs.filter(x=>x!==keep);const sum=k=>docs.reduce((a,x)=>a+(+x[k]||0),0);const first=k=>keep[k]||others.map(x=>x[k]).find(Boolean)||null;
   const patch={qw:sum('qw'),q:sum('q'),sold:sum('sold'),img:first('img'),big:first('big'),wooId:first('wooId'),price:keep.price||first('price')||0,cost:keep.cost||first('cost')||0,
     storeNote:[keep.storeNote,...others.map(x=>x.storeNote)].filter(Boolean).join(' · '),merged:(keep.merged||[]).concat(others.map(x=>x.b))};
-  if(docs.some(x=>x.qs!=null))patch.qs=docs.reduce((a,x)=>a+storeQ(x),0);
+  // only counted store quantities add up; an Optimo count on an uncounted record would double the stock
+  const counted=docs.filter(x=>x.qs!=null);if(counted.length){patch.qs=counted.reduce((a,x)=>a+(+x.qs||0),0);patch.countedAt=counted.map(x=>String(x.countedAt||'')).sort().pop()}
   await saveCat(keep.b,patch);for(const x of others)await S.db.doc('catalog/'+x.b).delete();
   toast('Merged into '+keep.n);dupModal();
 }
