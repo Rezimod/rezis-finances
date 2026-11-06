@@ -370,7 +370,7 @@ function filtered(){
   return L;
 }
 function cardHtml(x,q){const sug=P.tab==='sug'&&!P.q;const adm=P.user&&P.user.admin;
-  return `<div class="card" role="button" tabindex="0" data-add="${esc(x.b)}"><div class="img">${pic(x)}${sug?'<span class="sg">შესთავაზე</span>':''}<span class="q ${q<0?'neg':q===0?'zero':''}">${q}</span><span class="price num">${x.sale>0&&x.sale<x.price?`<s>${gel(x.price)}</s> ${gel(x.sale)}`:gel(x.price)}</span>${adm?`<button class="ed" data-edit="${esc(x.b)}" title="რედაქტირება">✎</button>`:''}</div><div class="t"><div class="n">${esc(x.n)}</div><div class="bc">${esc(x.b)}</div>${sug?`<div class="why">${x._days==null?'სალაროზე არ გაყიდულა':x._days+' დღეა არ გაყიდულა'} · წელს ${x.sold||0} ც · თაროზე ${q}</div>`:''}</div></div>`}
+  return `<div class="card" role="button" tabindex="0" data-add="${esc(x.b)}"><div class="img">${pic(x)}${sug?'<span class="sg">შესთავაზე</span>':''}<span class="q ${q<0?'neg':q===0?'zero':''}">${q}</span><span class="price num">${x.sale>0&&x.sale<x.price?`<s>${gel(x.price)}</s> ${gel(x.sale)}`:gel(x.price)}</span>${adm?`<button class="ed" data-edit="${esc(x.b)}" title="რედაქტირება">✎</button>`:''}</div><div class="t"><div class="n">${esc(x.n)}</div><div class="bc">${esc(x.b)}</div>${sug?`<div class="why">შესთავაზე მომხმარებელს</div>`:''}</div></div>`}
 function ph(n,cls){return `<div class="ph ${cls||''}">${esc(initials2(n))}</div>`}
 function pic(x,cls){return x.img?`<img src="${esc(x.img)}" alt="" loading="lazy" data-ph="${esc(initials2(x.n))}" data-cls="${esc(cls||'')}" onerror="phFail(this)">`:ph(x.n,cls)}
 const initials2=n=>String(n||'').replace(/[^\p{L}\p{N}]/gu,'').slice(0,2).toUpperCase()||'·';
@@ -470,7 +470,7 @@ function vSale(){
    <div class="search">${svg(I.search,20)}<input class="input" id="q" placeholder="პროდუქტის ძიება ან შტრიხკოდი" value="${esc(P.q)}" autocomplete="off">${P.q?`<button class="x" data-act="clearQ">✕</button>`:''}</div>
    <div class="ctabs"><button data-tab="all" aria-pressed="${P.tab==='all'&&!P.q}">მთავარი</button><button data-tab="sug" class="sug" aria-pressed="${P.tab==='sug'&&!P.q}">★ შესთავაზე</button>${cats().map(c=>`<button data-tab="${esc(c)}" aria-pressed="${P.tab===c&&!P.q}">${esc(c)}</button>`).join('')}
     <span class="vw"><button data-act="grid" aria-pressed="${P.grid}" title="ბადე">${svg(I.grid,18)}</button><button data-act="listv" aria-pressed="${!P.grid}" title="სია">${svg(I.list,18)}</button></span></div>
-   <div class="grid ${P.grid?'':'list'}" id="grid">${P.tab==='sug'&&!P.q?`<div class="nores" style="padding:10px 4px 6px;text-align:left;color:var(--ink-2)">პროდუქტები, რომლებიც დიდი ხანია თაროზეა — შესთავაზე მომხმარებელს, აუხსენი რისთვისაა. ${L.length?'':'ყველაფერი იყიდება, შესთავაზებელი ახლა არ არის.'}</div>`:''}${L.length?L.slice(0,P.q?200:400).map(x=>{const q=liveQ(x);return cardHtml(x,q)}).join('')
+   <div class="grid ${P.grid?'':'list'}" id="grid">${P.tab==='sug'&&!P.q?`<div class="nores" style="padding:10px 4px 6px;text-align:left;color:var(--ink-2)">ეს პროდუქტები შესთავაზე მომხმარებელს — აუხსენი რისთვისაა და რატომ არის კარგი. ${L.length?'':'ყველაფერი იყიდება, შესთავაზებელი ახლა არ არის.'}</div>`:''}${L.length?L.slice(0,P.q?200:400).map(x=>{const q=liveQ(x);return cardHtml(x,q)}).join('')
     :(P.tab==='sug'&&!P.q?'':`<div class="nores">${P.loaded?'ვერაფერი მოიძებნა':'კატალოგი იტვირთება…'}</div>`)}</div>
   </section></div>`;
 }
