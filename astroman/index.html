@@ -728,6 +728,10 @@ tr.dim td{opacity:.55}
 .pedit{display:grid;grid-template-columns:200px minmax(0,1fr);gap:18px}
 .pimg{display:grid;gap:10px;align-content:start}
 .pimg img,.pimg .ph{width:200px;height:200px;border-radius:12px;background:#fff;object-fit:contain;padding:8px}
+.pdrop{position:relative;width:200px;cursor:pointer;border:2px dashed transparent;border-radius:14px;transition:border-color .15s,background .15s}
+.pdrop.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.pdrop.busy{opacity:.5}
+.pdrop .pdhint{display:block;text-align:center;font-size:11px;color:var(--muted);padding:4px 0 2px}
 @media (max-width:700px){.pedit{grid-template-columns:1fr}.pimg img,.pimg .ph{width:140px;height:140px}}
 
 </style>
@@ -3407,7 +3411,7 @@ async function opExport(){
 }
 
 /* ============================== modal & binding ============================== */
-function modal(html,wide){$('#modalRoot').innerHTML=`<div class="scrim" id="scrim"><div class="modal ${wide?'wide':''}" role="dialog" aria-modal="true">${html}</div></div>`;document.querySelectorAll('#modalRoot [data-act]').forEach(b=>b.onclick=e=>act(b.dataset.act,b,e));{const q1=$('#ceQ'),q2=$('#ceW'),tot=$('#ceTot');if(q1&&q2&&tot){const upd=()=>{tot.value=(parseNum(q1.value)||0)+(parseNum(q2.value)||0)};q1.oninput=upd;q2.oninput=upd}}$('#scrim').addEventListener('click',e=>{if(e.target.id==='scrim'||e.target.closest('[data-close]'))closeModal()});document.addEventListener('keydown',escClose)}
+function modal(html,wide){$('#modalRoot').innerHTML=`<div class="scrim" id="scrim"><div class="modal ${wide?'wide':''}" role="dialog" aria-modal="true">${html}</div></div>`;document.querySelectorAll('#modalRoot [data-act]').forEach(b=>b.onclick=e=>act(b.dataset.act,b,e));{const q1=$('#ceQ'),q2=$('#ceW'),tot=$('#ceTot');if(q1&&q2&&tot){const upd=()=>{tot.value=(parseNum(q1.value)||0)+(parseNum(q2.value)||0)};q1.oninput=upd;q2.oninput=upd}}bindPictureDrop();$('#scrim').addEventListener('click',e=>{if(e.target.id==='scrim'||e.target.closest('[data-close]'))closeModal()});document.addEventListener('keydown',escClose)}
 function escClose(e){if(e.key==='Escape')closeModal()}
 function closeModal(){$('#modalRoot').innerHTML='';document.removeEventListener('keydown',escClose)}
 
@@ -3514,7 +3518,7 @@ function catEditModal(b){
   const M=opModel();const m=x&&M?M.items.find(y=>String(y.b)===String(x.b)):null;const lq=x?catLive(x):0;
   const vats=['დაუბეგრავი','ჩვეულებრივი','ნულოვანი'];
   modal(`<h3>${x?esc(x.n):'New product'}</h3><p class="sub">${x?'Everything here is what the register shows. Store and warehouse counts are yours; the Optimo stock list only refreshes cost and its own count. A name or price you change here stays.':'A product that is not in Optimo yet. Give it the code you will print on its label.'}</p>
-   <div class="pedit"><div class="pimg">${x&&x.img?`<img src="${esc(x.img)}" alt="" onerror="this.outerHTML='<span class=\\'ph\\'>${esc(posInitials(x.n))}</span>'">`:`<span class="ph">${esc(posInitials(x?x.n:''))}</span>`}
+   <div class="pedit"><div class="pimg"><div class="pdrop" id="ceDrop" data-b="${esc(x?x.b:'')}" title="Drop a picture here, click to choose one, or paste">${x&&x.img?`<img src="${esc(x.img)}" alt="" onerror="this.outerHTML='<span class=\\'ph\\'>${esc(posInitials(x.n))}</span>'">`:`<span class="ph">${esc(posInitials(x?x.n:''))}</span>`}<span class="pdhint">drop a picture · click · paste</span></div><input type="file" id="ceFile" accept="image/*" hidden>
      <div class="stack">${x?`<button class="btn sm" data-act="st_img" data-b="${esc(x.b)}">Pick from astroman.ge</button>`:''}<label class="field"><span>Picture URL</span><input class="input small" id="ceImg" value="${esc(x?x.img||'':'')}" placeholder="https://…"></label></div></div>
    <div class="stack">
     <label class="field"><span>Name</span><input class="input" id="ceN" value="${esc(x?x.n:'')}"></label>
@@ -3539,6 +3543,27 @@ async function catPickModal(b){
     $('#pkGrid').innerHTML=L.length?L.map(p=>`<button class="pick" data-act="st_pick" data-b="${esc(b)}" data-id="${p.id}" aria-pressed="${x.wooId===p.id}"><img src="${esc(p.img)}" alt="" loading="lazy"><b>${esc(p.n)}</b><span class="small muted">${esc(p.p)} ₾</span></button>`).join(''):'<div class="muted">Nothing matches</div>';
     $('#pkGrid').querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>storeAct(el.dataset.act,el))};
   draw();let t;$('#pkQ').oninput=()=>{clearTimeout(t);t=setTimeout(draw,200)};
+}
+// A picture dropped, chosen or pasted into the product modal: shrunk in the browser, stored by the backend in
+// Drive, and saved on the product right away.
+function bindPictureDrop(){
+  const z=$('#ceDrop'),f=$('#ceFile');if(!z||!f)return;const code=z.dataset.b;
+  const take=file=>{if(file&&/^image\//.test(file.type))productPicture(file,code,z)};
+  z.onclick=()=>f.click();f.onchange=()=>{take(f.files[0]);f.value=''};
+  z.ondragover=e=>{e.preventDefault();z.classList.add('over')};z.ondragleave=()=>z.classList.remove('over');
+  z.ondrop=e=>{e.preventDefault();z.classList.remove('over');take(e.dataTransfer.files[0])};
+  document.onpaste=e=>{if(!$('#ceDrop'))return;const it=[...(e.clipboardData||{}).items||[]].find(i=>i.type.startsWith('image/'));if(it)take(it.getAsFile())};
+}
+function shrinkImage(file,max){return new Promise((res,rej)=>{const img=new Image();const u=URL.createObjectURL(file);img.onload=()=>{const s=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL('image/jpeg',.86).split(',')[1])};img.onerror=()=>rej({message:'Not an image'});img.src=u})}
+async function productPicture(file,code,zone){
+  const c=readCreds();if(!c){toast('Pictures can be stored in the hosted version only');return}
+  zone.classList.add('busy');toast('Storing the picture…');
+  try{const b64=await shrinkImage(file,800);const name=(code&&S.catalog.get(code)?S.catalog.get(code).n:file.name.replace(/\.[^.]+$/,''));
+    const r=await gasCall(c.u,c.k,{action:'image_put',name,b64,mime:'image/jpeg'});if(!r||!r.url)throw {message:'The backend did not store the picture'};
+    const inp=$('#ceImg');if(inp)inp.value=r.url;zone.innerHTML=`<img src="${esc(r.url)}" alt=""><span class="pdhint">drop a picture · click · paste</span>`;
+    if(code&&S.catalog.has(code)){await saveCat(code,{img:r.url,big:r.url,wooId:null,imgSrc:'drive'});delete S.catalog.get(code).noImg;toast('Picture saved')}else toast('Picture ready — press Save')}
+  catch(e){toast(/unknown action/.test(e.message||'')?'The backend still runs the old script — paste the new Code.gs and deploy a new version':(e.message||'Could not store the picture'))}
+  zone.classList.remove('busy');
 }
 function nextNoImg(after){const L=[...S.catalog.values()].filter(x=>!x.img&&!x.hidden&&!x.noImg).sort((a,b)=>(b.sold||0)-(a.sold||0)||a.n.localeCompare(b.n));if(!after)return L[0];const i=L.findIndex(x=>x.b===after);return L[i+1]||L[0]}
 async function saveCat(b,patch){const cur=S.catalog.get(b)||{};const {id,...rest}=cur;await S.db.doc('catalog/'+b).set({...rest,...patch,b,updatedAt:new Date().toISOString()})}
