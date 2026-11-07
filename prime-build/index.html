@@ -479,12 +479,14 @@ function totals(list){
 }
 function byMonth(list){const m=new Map();for(const d of list){const k=calc(d).month||'—';(m.get(k)||m.set(k,[]).get(k)).push(d)}return [...m].sort((a,b)=>b[0].localeCompare(a[0])).map(([k,v])=>({m:k,...totals(v)}))}
 function byWho(list,sideKey){const m=new Map();for(const d of list){const c=calc(d);if(c.cancelled)continue;const w=(side(d[sideKey]).who||'').trim()||'—';if(sideKey==='s'&&!c.sold)continue;if(sideKey==='b'&&!c.buy)continue;const o=m.get(w)||m.set(w,{who:w,n:0,sell:0,buy:0,profit:0}).get(w);o.n++;o.sell+=c.sell;o.buy+=c.buy;o.profit+=c.profit}return [...m.values()]}
-// Money: balance per account = opening balance + every entry on or after the opening date. Entries dated
-// before the opening date are history (they still count for partners) and do not move the balance.
+// Money: balance per account = opening balance + every entry after it. The opening balance is what the bank held
+// when it was typed, so an entry dated earlier, or dated the same day but recorded before the balance was set,
+// is history: it still counts for partners and profit, but does not move the books.
+function isHist(m){const op=S.cfg.opening||{};const from=op.d||'';if(!from)return false;const d=m.d||'';if(d<from)return true;if(d>from)return false;return !!(op.at&&(m.at||'')<=op.at)}
 const moneyArr=()=>[...S.money.values()].sort((a,b)=>(b.d||'').localeCompare(a.d||'')||(b.at||'').localeCompare(a.at||''));
 function balances(){
-  const op=S.cfg.opening||{};const out={bog:+op.bog||0,cash:+op.cash||0};const from=op.d||'';
-  for(const m of S.money.values()){if(from&&(m.d||'')<from)continue;const g=+m.gel||0;
+  const op=S.cfg.opening||{};const out={bog:+op.bog||0,cash:+op.cash||0};
+  for(const m of S.money.values()){if(isHist(m))continue;const g=+m.gel||0;
     if(m.kind==='move'){out[m.acc]=(out[m.acc]||0)-g;out[m.to]=(out[m.to]||0)+g;continue}
     const sg=(KD[m.kind]||KD.other).sign;out[m.acc]=(out[m.acc]||0)+sg*g}
   for(const k in out)out[k]=r2(out[k]);return out;
@@ -722,7 +724,7 @@ function vMoney(){
           ${ACCOUNTS.map(a=>{const sv=st[a.id]||{};const diff=sv.gel!=null&&sv.gel!==''?r2(+sv.gel-bal[a.id]):null;return `<div class="formgrid" style="margin-bottom:10px"><label class="field"><span>${a.en} · real balance</span><input class="input r" id="st_${a.id}" inputmode="decimal" value="${sv.gel!=null?esc(sv.gel):''}" placeholder="0"></label><label class="field"><span>on</span><input class="input" type="date" id="std_${a.id}" value="${esc(sv.d||today())}"></label></div>
             <p class="hint" style="margin:-4px 0 12px">${diff==null?'Not typed yet':Math.abs(diff)<1?'<span class="up">Matches the books</span>':'<span class="'+(diff>0?'up':'down')+'">'+(diff>0?'Bank has '+gel(diff)+' more than the books':'Books show '+gel(-diff)+' more than the bank')+'</span> — a Money entry is missing'}</p>`}).join('')}
           <div class="row"><button class="btn primary" data-act="saveStated">Save real balances</button><button class="btn" data-act="openingFromStated" title="Makes the books start from these real balances today">Start the books from these</button></div></div>
-        <div class="panel"><h2>Opening balances</h2><p class="sub">The books count from this day. Entries dated earlier still count for partners, but not for the balance.</p>
+        <div class="panel"><h2>Opening balances</h2><p class="sub">What the bank and the cash box held when you set this. Entries from before that moment still count for partners and profit, but do not move the books.</p>
           <div class="formgrid"><label class="field"><span>From</span><input class="input" type="date" id="op_d" value="${esc(op.d||'')}"></label><label class="field"><span>BoG bank</span><input class="input r" id="op_bog" inputmode="decimal" value="${esc(op.bog??'')}"></label><label class="field"><span>Cash</span><input class="input r" id="op_cash" inputmode="decimal" value="${esc(op.cash??'')}"></label></div>
           <div class="row" style="margin-top:10px"><button class="btn" data-act="saveOpening">Save opening balances</button></div></div>
       </div></div>`})());
@@ -731,13 +733,12 @@ function renderMoneyTable(){const t=$('#moneyTable');if(t)t.innerHTML=moneyTable
 function moneyTableHTML(){
   const q=norm(S.mq);const list=moneyArr().filter(m=>(S.month==='all'||(m.d||'').startsWith(S.month))&&(!S.mkind||m.kind===S.mkind)&&(!q||norm([m.who,m.ref,m.note,partnerName(m.partner)].join(' ')).includes(q)));
   if(!list.length)return `<div class="panel empty"><b>No money entries</b>Add what came in and what was paid out.</div>`;
-  const from=(S.cfg.opening||{}).d||'';
   // balance of the entry's account after it, replayed from the opening balance in date order
   const op=S.cfg.opening||{};const run={bog:+op.bog||0,cash:+op.cash||0};const after=new Map();
-  for(const m of moneyArr().slice().reverse()){if(from&&(m.d||'')<from)continue;const g=+m.gel||0;if(m.kind==='move'){run[m.acc]=(run[m.acc]||0)-g;run[m.to]=(run[m.to]||0)+g;after.set(m.id,r2(run[m.acc]))}else{const sg=(KD[m.kind]||KD.other).sign;run[m.acc]=(run[m.acc]||0)+sg*g;after.set(m.id,r2(run[m.acc]))}}
+  for(const m of moneyArr().slice().reverse()){if(isHist(m))continue;const g=+m.gel||0;if(m.kind==='move'){run[m.acc]=(run[m.acc]||0)-g;run[m.to]=(run[m.to]||0)+g;after.set(m.id,r2(run[m.acc]))}else{const sg=(KD[m.kind]||KD.other).sign;run[m.acc]=(run[m.acc]||0)+sg*g;after.set(m.id,r2(run[m.acc]))}}
   return `<div class="tablewrap"><table><thead><tr><th>Date</th><th>Kind</th><th>Who / reference</th><th class="hm">Account</th><th class="r">Amount</th><th class="r hm">After</th></tr></thead><tbody>
-  ${list.map(m=>{const k=KD[m.kind]||KD.other;const g=+m.gel||0;const hist=from&&(m.d||'')<from;const amt=m.kind==='move'?gel(g):(k.sign>0?'+':'−')+gel(g);
-    return `<tr class="click ${hist?'dim':''}" data-act="editMoney" data-id="${m.id}"><td class="num">${dShort(m.d)}</td><td><span class="chip ${k.sign>0?'good':m.kind==='move'?'brand':m.kind==='expense'?'warn':''}">${k.short}</span></td><td><span class="it">${esc(m.who||partnerName(m.partner)||k.en)}${m.ref?' · '+esc(m.ref):''}<small>${esc(m.note||'')}${m.onDeal?' · counted on the deal line':''}${hist?' · before the opening date':''}</small></span></td><td class="hm small muted">${m.kind==='move'?ACC[m.acc].en+' → '+(ACC[m.to]||{}).en:(ACC[m.acc]||{}).en||''}</td><td class="r num ${k.sign>0?'up':''}">${amt}</td><td class="r num hm muted">${after.has(m.id)?gel(after.get(m.id)):''}</td></tr>`}).join('')}</tbody></table></div>`;
+  ${list.map(m=>{const k=KD[m.kind]||KD.other;const g=+m.gel||0;const hist=isHist(m);const amt=m.kind==='move'?gel(g):(k.sign>0?'+':'−')+gel(g);
+    return `<tr class="click ${hist?'dim':''}" data-act="editMoney" data-id="${m.id}"><td class="num">${dShort(m.d)}</td><td><span class="chip ${k.sign>0?'good':m.kind==='move'?'brand':m.kind==='expense'?'warn':''}">${k.short}</span></td><td><span class="it">${esc(m.who||partnerName(m.partner)||k.en)}${m.ref?' · '+esc(m.ref):''}<small>${esc(m.note||'')}${m.onDeal?' · counted on the deal line':''}${hist?' · before the opening balance, not in the books':''}</small></span></td><td class="hm small muted">${m.kind==='move'?ACC[m.acc].en+' → '+(ACC[m.to]||{}).en:(ACC[m.acc]||{}).en||''}</td><td class="r num ${k.sign>0?'up':''}">${amt}</td><td class="r num hm muted">${after.has(m.id)?gel(after.get(m.id)):''}</td></tr>`}).join('')}</tbody></table></div>`;
 }
 const partnerName=id=>((S.cfg.partners||[]).find(p=>p.id===id)||{}).name||'';
 function vPartners(){
@@ -923,8 +924,8 @@ async function act(a,b,e){
     if(a==='delMoney'){if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Tap again to delete';return}await delDoc('pb_money/'+b.dataset.id);closeModal();toast('Deleted');render();return}
     if(a==='saveStated'){const st={...(S.cfg.stated||{})};for(const x of ACCOUNTS){const v=$('#st_'+x.id).value.trim();st[x.id]=v===''?{}:{gel:r2(parseNum(v)),d:$('#std_'+x.id).value||today(),at:new Date().toISOString()}}await saveCfg({stated:st});toast('Saved');render();return}
     if(a==='openingFromStated'){const st=S.cfg.stated||{};const bog=st.bog&&st.bog.gel!=null?+st.bog.gel:null,cash=st.cash&&st.cash.gel!=null?+st.cash.gel:null;if(bog==null&&cash==null)return toast('Type the real balances first');
-      const d=st.bog&&st.bog.d||st.cash&&st.cash.d||today();await saveCfg({opening:{bog:bog||0,cash:cash||0,d}});toast('The books now start on '+dShort(d)+' with these balances');render();return}
-    if(a==='saveOpening'){const d=$('#op_d').value;if(d&&!isDate(d))return toast('Check the date');await saveCfg({opening:{d,bog:r2(parseNum($('#op_bog').value)),cash:r2(parseNum($('#op_cash').value))}});toast('Saved');render();return}
+      const d=st.bog&&st.bog.d||st.cash&&st.cash.d||today();await saveCfg({opening:{bog:bog||0,cash:cash||0,d,at:new Date().toISOString()}});toast('The books now start on '+dShort(d)+' with these balances; what was typed before stays as history');render();return}
+    if(a==='saveOpening'){const d=$('#op_d').value;if(d&&!isDate(d))return toast('Check the date');await saveCfg({opening:{d,bog:r2(parseNum($('#op_bog').value)),cash:r2(parseNum($('#op_cash').value)),at:new Date().toISOString()}});toast('Saved');render();return}
     if(a==='saveCompany'){const names=$('#cfg_partners').value.split('\n').map(s=>s.trim()).filter(Boolean);const old=S.cfg.partners||[];
       const partners=names.map((n,i)=>{const o=old.find(p=>p.name===n)||old[i];return {id:o&&!names.slice(0,i).some(x=>(old.find(p=>p.name===x)||{}).id===o.id)?o.id:'p'+hash(n+i),name:n}});
       await saveCfg({company:$('#cfg_company').value.trim(),tin:$('#cfg_tin').value.trim(),partners});$('#footCo').textContent=S.cfg.company;toast('Saved');render();return}
