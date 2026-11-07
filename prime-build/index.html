@@ -293,19 +293,19 @@ input[type=checkbox]{width:17px;height:17px;accent-color:var(--accent);cursor:po
 /* ============================== constants ============================== */
 const STATUSES=[{id:'paid',en:'Paid',ka:'გადახდილი',c:'good'},{id:'partial',en:'Partly paid',ka:'ნაწილობრივ',c:'warn'},{id:'pending',en:'Awaiting payment',ka:'მოლოდინში',c:'warn'},{id:'cancelled',en:'Cancelled',ka:'გაუქმებული',c:'bad'}];
 const ST=Object.fromEntries(STATUSES.map(s=>[s.id,s]));
-const KINDS=[{id:'in',en:'Money in · from a buyer',short:'In',sign:1},{id:'out',en:'Paid to a supplier',short:'Out',sign:-1},{id:'expense',en:'Extra cost · transport, fees',short:'Cost',sign:-1},{id:'draw',en:'Partner takes money out',short:'Draw',sign:-1},{id:'capital',en:'Partner puts money in',short:'Capital',sign:1},{id:'move',en:'Move between bank and cash',short:'Move',sign:0},{id:'other',en:'Other',short:'Other',sign:-1}];
+const KINDS=[{id:'in',en:'Money in · from a buyer',short:'In',sign:1},{id:'out',en:'Paid to a supplier',short:'Supplier',sign:-1},{id:'expense',en:'Expense · transport, fees, anything paid from the account',short:'Expense',sign:-1},{id:'draw',en:'Partner took money out',short:'Draw',sign:-1},{id:'capital',en:'Partner put money in',short:'Put in',sign:1},{id:'move',en:'Moved between bank and cash',short:'Move',sign:0},{id:'other',en:'Other money out',short:'Other',sign:-1}];
 const KD=Object.fromEntries(KINDS.map(k=>[k.id,k]));
 const ACCOUNTS=[{id:'bog',en:'BoG bank'},{id:'cash',en:'Cash'}];
 const ACC=Object.fromEntries(ACCOUNTS.map(a=>[a.id,a]));
 const EN_MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
-const PAGES=[{id:'overview',t:'Overview'},{id:'deals',t:'Deals'},{id:'money',t:'Money'},{id:'partners',t:'Partners'},{id:'checks',t:'Checks'},{id:'settings',t:'Settings'}];
-const IC={overview:'M3 13h4v8H3zM10 3h4v18h-4zM17 9h4v12h-4z',deals:'M4 7h16M4 12h16M4 17h10M17 15l3 3-3 3',money:'M3 10l9-6 9 6M5 10v9h14v-9M9 19v-5h6v5',partners:'M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM4 21a8 8 0 0 1 16 0',checks:'M9 12l2 2 4-4M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z',settings:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z',more:'M5 12h.01M12 12h.01M19 12h.01'};
+const PAGES=[{id:'overview',t:'Overview'},{id:'deals',t:'Deals'},{id:'parties',t:'Buyers & suppliers'},{id:'money',t:'Money'},{id:'partners',t:'Partners'},{id:'checks',t:'Checks'},{id:'settings',t:'Settings'}];
+const IC={overview:'M3 13h4v8H3zM10 3h4v18h-4zM17 9h4v12h-4z',deals:'M4 7h16M4 12h16M4 17h10M17 15l3 3-3 3',parties:'M3 21V8l5-4 5 4v13M8 21v-6h0M13 11h8v10h-8M16 15h2',money:'M3 10l9-6 9 6M5 10v9h14v-9M9 19v-5h6v5',partners:'M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM4 21a8 8 0 0 1 16 0',checks:'M9 12l2 2 4-4M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z',settings:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z',more:'M5 12h.01M12 12h.01M19 12h.01'};
 const SHEET_ID='1JNRLrHnkBPn_yyZduik6YtwaCPPu-YYOt5Gm7Hwwdnw';
 const DEFAULT_CFG={company:'შპს „პრაიმ ბილდი 2020“',tin:'400479157',partners:[{id:'rezi',name:'რეზი'},{id:'datuna',name:'დათუნა'},{id:'third',name:'მესამე'}],opening:{bog:0,cash:0,d:''},stated:{},buyers:[],suppliers:[],units:['ცალი','მეტრი','კგ','ტონა','შეკვრა','რულონი','მ2','მ3','ლიტრი','კომპლექტი','ლოტი'],sheetId:SHEET_ID};
 
 /* ============================== state ============================== */
 const S={db:null,backend:null,loaded:{},deals:new Map(),money:new Map(),cfg:{...DEFAULT_CFG},view:'overview',month:'all',hosted:true,
-  dq:'',dst:'',dwho:'',mq:'',mkind:'',ck:'all',animate:true,renderedOnce:false};
+  dq:'',dst:'',dwho:'',mq:'',mkind:'',pt:'s',ck:'all',animate:true,renderedOnce:false};
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -471,10 +471,41 @@ function balances(){
     const sg=(KD[m.kind]||KD.other).sign;out[m.acc]=(out[m.acc]||0)+sg*g}
   for(const k in out)out[k]=r2(out[k]);return out;
 }
+// Expenses recorded on the Money page (not already counted as extra cost on a deal line) come off the profit.
+function otherExpenses(m){let x=0;for(const e of S.money.values()){if(e.kind!=='expense'||e.onDeal)continue;if(m&&m!=='all'&&!(e.d||'').startsWith(m))continue;x+=+e.gel||0}return r2(x)}
 function partnerStats(){
-  const T=totals(dealsArr());const P=S.cfg.partners||[];const n=P.length||1;
+  const T=totals(dealsArr());const net=r2(T.profit-otherExpenses('all'));const P=S.cfg.partners||[];const n=P.length||1;
   return P.map(p=>{let draw=0,cap=0;for(const m of S.money.values()){if(m.partner!==p.id)continue;if(m.kind==='draw')draw+=+m.gel||0;if(m.kind==='capital')cap+=+m.gel||0}
-    const share=r2(T.profit/n);return {...p,share,draw:r2(draw),cap:r2(cap),due:r2(share-draw)}});
+    const share=r2(net/n);return {...p,share,draw:r2(draw),cap:r2(cap),due:r2(share-draw)}});
+}
+/* ============================== counterparties ============================== */
+// The same company is typed many ways (quotes, შპს, a letter off). Names are grouped by tax ID when there is one,
+// by the cleaned-up name otherwise, plus the merges confirmed on the Buyers & suppliers page.
+const normName=s=>String(s||'').toLowerCase().replace(/[„“”"'’‘«»`]/g,'').replace(/(^|\s)(შპს|ი\/მ|სს|ltd|llc)(\s|$|\.)/g,' ').replace(/[^a-zа-я0-9\u10A0-\u10FF]+/g,' ').trim();
+const tinKey=t=>{const d=String(t||'').replace(/\D/g,'');return d.length>=9?'tin:'+d:''};
+function partyIndex(){
+  const par=new Map();const seen=x=>{if(!par.has(x))par.set(x,x)};const find=x=>{if(!par.has(x))return x;while(par.get(x)!==x)x=par.get(x);return x};const union=(a,b)=>{seen(a);seen(b);a=find(a);b=find(b);if(a!==b)par.set(a,b)};
+  for(const d of dealsArr())for(const k of ['b','s']){const x=side(d[k]);const n=normName(x.who);if(!n)continue;seen(n);const t=tinKey(x.tin);if(t)union(n,t)}
+  for(const [a,b] of (S.cfg.merges||[]))union(a,b);
+  return {root:name=>{const n=normName(name);return n?find(n):''}};
+}
+function parties(sideKey){
+  const idx=partyIndex();const g=new Map();
+  for(const d of dealsArr()){const x=side(d[sideKey]);if(!x.who)continue;const c=calc(d);if(c.cancelled)continue;if(sideKey==='s'&&!c.sold)continue;
+    const k=idx.root(x.who);const o=g.get(k)||g.set(k,{key:k,names:new Map(),tins:new Set(),lines:0,total:0,profit:0,unpaid:0,last:''}).get(k);
+    const who=x.who.trim();o.names.set(who,(o.names.get(who)||0)+1);if(x.tin)o.tins.add(String(x.tin));o.lines++;
+    if(sideKey==='s'){o.total+=c.sell;o.profit+=c.profit;if(d.status!=='paid')o.unpaid+=c.sell}else{o.total+=c.buy;if(d.bPaid===false)o.unpaid+=c.buy}
+    if((x.d||'')>o.last)o.last=x.d}
+  const out=[...g.values()];
+  for(const o of out){const nm=[...o.names].sort((a,b)=>b[1]-a[1]);o.name=nm[0][0];o.n0=normName(o.name);o.variants=nm.map(x=>x[0]);o.total=r2(o.total);o.profit=r2(o.profit);o.unpaid=r2(o.unpaid)}
+  return out.sort((a,b)=>b.total-a.total);
+}
+const bigrams=s=>{s=s.replace(/\s/g,'');const b=new Map();for(let i=0;i<s.length-1;i++){const k=s.slice(i,i+2);b.set(k,(b.get(k)||0)+1)}return b};
+function dice(a,b){const A=bigrams(a),B=bigrams(b);let hit=0,na=0,nb=0;A.forEach(v=>na+=v);B.forEach(v=>nb+=v);A.forEach((v,k)=>{if(B.has(k))hit+=Math.min(v,B.get(k))});return na+nb?2*hit/(na+nb):0}
+function mergeSuggestions(list){
+  const no=new Set(S.cfg.noMerge||[]);const out=[];
+  for(let i=0;i<list.length;i++)for(let j=i+1;j<list.length;j++){const a=list[i],b=list[j];const pk=[a.n0,b.n0].sort().join('|');if(no.has(pk))continue;const sc=dice(a.n0,b.n0);if(sc>=0.5)out.push({a,b,sc,pk})}
+  return out.sort((x,y)=>y.sc-x.sc);
 }
 /* ============================== checks ============================== */
 const norm=s=>String(s||'').toLowerCase().replace(/[„“"'’`]/g,'').replace(/\s+/g,' ').trim();
@@ -524,7 +555,7 @@ function checks(){
 function renderShell(){
   $('#menu').innerHTML=PAGES.map(p=>`<button data-go="${p.id}">${svg(IC[p.id])}${p.t}${p.id==='checks'?'<span class="cnt" id="menuCnt" hidden></span>':''}</button>`).join('');
   $('#tabbar').innerHTML=[['overview','Overview'],['deals','Deals'],['add',''],['money','Money'],['more','More']].map(([id,t])=>id==='add'?`<button data-act="addDeal" aria-label="Add deal"><span class="plus">+</span></button>`:`<button data-go="${id}">${svg(IC[id]||IC.more,22)}<span>${t}</span></button>`).join('');
-  $('#moreInner').innerHTML='<div class="grab"></div>'+[['partners','Partners'],['checks','Checks'],['settings','Settings']].map(([id,t])=>`<button data-go="${id}">${svg(IC[id],20)}${t}</button>`).join('')+`<button data-act="addMoney">${svg(IC.money,20)}Add money entry</button>`;
+  $('#moreInner').innerHTML='<div class="grab"></div>'+[['parties','Buyers & suppliers'],['partners','Partners'],['checks','Checks'],['settings','Settings']].map(([id,t])=>`<button data-go="${id}">${svg(IC[id],20)}${t}</button>`).join('')+`<button data-act="addMoney">${svg(IC.money,20)}Add money entry</button>`;
   document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){e.preventDefault();if(g.dataset.go==='more'){$('#moreSheet').classList.add('open');return}$('#moreSheet').classList.remove('open');go(g.dataset.go);return}
     const a=e.target.closest('[data-act]');if(a){$('#moreSheet').classList.remove('open');act(a.dataset.act,a,e)}});
   $('#moreSheet').addEventListener('click',e=>{if(e.target.id==='moreSheet')e.currentTarget.classList.remove('open')});
@@ -546,7 +577,7 @@ function go(v){S.view=v;try{history.replaceState(null,'','#'+v)}catch(e){}S.anim
 function render(){
   S.renderedOnce=true;
   document.querySelectorAll('#menu button,#tabbar button').forEach(b=>b.setAttribute('aria-current',b.dataset.go===S.view?'page':'false'));
-  const v={connect:vConnect,overview:vOverview,deals:vDeals,money:vMoney,partners:vPartners,checks:vChecks,settings:vSettings}[S.view]||vOverview;
+  const v={connect:vConnect,overview:vOverview,deals:vDeals,parties:vParties,money:vMoney,partners:vPartners,checks:vChecks,settings:vSettings}[S.view]||vOverview;
   const main=$('#main');const y=window.scrollY;
   main.innerHTML=v();
   const anim=S.animate&&!reduced();if(anim)[...main.children].forEach((c,i)=>{c.classList.add('rise');c.style.setProperty('--i',Math.min(i,8))});else window.scrollTo({top:y});
@@ -585,12 +616,12 @@ function vOverview(){
     const all=dealsArr();const list=all.filter(d=>inPeriod(d,S.month));const T=totals(list);const TA=totals(all);const bal=balances();const st=S.cfg.stated||{};
     const ck=checks();const bad=ck.filter(c=>c.sev==='bad').length,warn=ck.filter(c=>c.sev==='warn').length;
     const months=byMonth(all).filter(x=>x.m!=='—');const maxS=Math.max(1,...months.map(x=>x.sell));
-    const P=partnerStats();const buyers=byWho(list,'s').sort((a,b)=>b.sell-a.sell).slice(0,6),sup=byWho(list,'b').sort((a,b)=>b.buy-a.buy).slice(0,6);
-    const mb=Math.max(1,...buyers.map(x=>x.sell)),ms=Math.max(1,...sup.map(x=>x.buy));
+    const P=partnerStats();const buyers=parties('s').slice(0,6),sup=parties('b').slice(0,6);const ex=otherExpenses(S.month),net=r2(T.profit-ex);
+    const mb=Math.max(1,...buyers.map(x=>x.total)),ms=Math.max(1,...sup.map(x=>x.total));
     const statedRow=a=>{const sv=st[a];if(!sv||sv.gel==null||sv.gel==='')return 'Real balance not typed yet';const diff=r2(+sv.gel-bal[a]);return 'Bank said <b>'+gel(+sv.gel)+'</b> on '+dShort(sv.d)+(Math.abs(diff)<1?' · <b class="up">matches</b>':' · <b class="'+(diff>0?'up':'down')+'">'+(diff>0?'+':'')+gel(diff)+' vs books</b>')};
     return `<div class="pagehead"><div><div class="eyebrow">${esc(S.cfg.company||'')} · ${mLabel(S.month)}</div><h1>Deals and profit</h1></div>
       <div class="actions"><button class="btn" data-act="addMoney">+ Money entry</button><button class="btn primary" data-act="addDeal">+ Add deal</button></div></div>
-    <div class="kpis">${kpi('Sales',gel(T.sell),T.n+' deal line'+(T.n===1?'':'s'))}${kpi('Cost of goods + extra',gel(T.buy+T.extra),T.extra?'incl. '+gel(T.extra)+' extra costs':'')}${kpi('Profit',gel(T.profit),T.received?'received '+gel(T.received):'',T.profit<0?'bad':'good')}${kpi('Margin',Math.round(T.margin*100)+'<small>%</small>',TA.margin&&S.month!=='all'?'all time '+Math.round(TA.margin*100)+'%':'')}</div>
+    <div class="kpis">${kpi('Sales',gel(T.sell),T.n+' deal line'+(T.n===1?'':'s'))}${kpi('Cost of goods + extra',gel(T.buy+T.extra),T.extra?'incl. '+gel(T.extra)+' extra costs':'')}${kpi('Net profit',gel(net),ex?'deals '+gel(T.profit)+' − expenses '+gel(ex):'from the deal lines'+(T.received?' · received '+gel(T.received):''),net<0?'bad':'good')}${kpi('Margin',Math.round(T.margin*100)+'<small>%</small>',TA.margin&&S.month!=='all'?'all time '+Math.round(TA.margin*100)+'%':'')}</div>
     <div class="sech"><h2>Money now</h2><span>books = opening balance + Money entries${(S.cfg.opening||{}).d?' since '+dShort(S.cfg.opening.d):''}</span></div>
     <div class="money">
       <div class="mcard click" data-go="money" style="--c:var(--brand)"><div class="lbl"><span>BoG bank · books</span></div><div class="val num">${gel(bal.bog)}</div><div class="sub">${statedRow('bog')}</div></div>
@@ -613,9 +644,10 @@ function vOverview(){
       <div class="panel"><div class="sech"><h2>Partners</h2><span>profit ÷ ${P.length} · all time</span></div>
         <div class="tablewrap"><table><thead><tr><th>Partner</th><th class="r">Share of profit</th><th class="r">Taken out</th><th class="r">Still due</th></tr></thead><tbody>
         ${P.map(p=>`<tr><td>${esc(p.name)}</td><td class="r num">${gel(p.share)}</td><td class="r num">${gel(p.draw)}</td><td class="r num ${p.due<0?'neg':''}">${gel(p.due)}</td></tr>`).join('')}</tbody></table></div></div>
-      <div class="panel"><div class="sech"><h2>Buyers and suppliers</h2><span>${mLabel(S.month)}</span></div>
-        <div class="bars">${buyers.map(x=>`<div class="bar"><div class="name">${esc(x.who)}<span>buyer</span></div><div class="track"><div class="fill" style="width:${Math.round(x.sell/mb*100)}%"></div></div><div class="amt num">${gel(x.sell)}<small>profit ${gel(x.profit)}</small></div></div>`).join('')}
-        ${sup.map(x=>`<div class="bar"><div class="name">${esc(x.who)}<span>supplier</span></div><div class="track"><div class="fill" style="width:${Math.round(x.buy/ms*100)}%;background:var(--s2)"></div></div><div class="amt num">${gel(x.buy)}<small>${x.n} line${x.n>1?'s':''}</small></div></div>`).join('')}</div></div>
+      <div class="panel"><div class="sech"><h2>Buyers and suppliers</h2><span>all time · same names summed</span></div>
+        <div class="bars">${buyers.map(x=>`<div class="bar click" data-go="parties"><div class="name">${esc(x.name)}<span>buyer</span></div><div class="track"><div class="fill" style="width:${Math.round(x.total/mb*100)}%"></div></div><div class="amt num">${gel(x.total)}<small>profit ${gel(x.profit)}</small></div></div>`).join('')}
+        ${sup.map(x=>`<div class="bar click" data-go="parties"><div class="name">${esc(x.name)}<span>supplier</span></div><div class="track"><div class="fill" style="width:${Math.round(x.total/ms*100)}%;background:var(--s2)"></div></div><div class="amt num">${gel(x.total)}<small>${x.lines} line${x.lines>1?'s':''}</small></div></div>`).join('')}</div>
+        <p class="hint" style="margin:10px 0 0"><button class="linkbtn" data-go="parties">All buyers and suppliers, with name merging</button></p></div>
     </div>`})());
 }
 function alertHTML(c){const ic={bad:'!',warn:'!',info:'i',good:'✓'}[c.sev];const go=c.go?(c.go.deal?`data-act="editDeal" data-id="${c.go.deal}"`:`data-go="${c.go.page}"`):'';return `<div class="alert ${c.sev}"><span class="ic">${ic}</span><div><b>${esc(c.title)}</b>${c.sub?`<small>${esc(c.sub)}</small>`:''}</div>${go?`<button class="btn sm" ${go}>Open</button>`:''}</div>`}
@@ -625,15 +657,15 @@ function vChecks(){
     ${ck.length?groups.map(([sev,t])=>{const l=ck.filter(c=>c.sev===sev);return l.length?`<div class="panel" style="margin-bottom:14px"><div class="sech"><h2>${t}</h2><span>${l.length}</span></div><div class="alerts">${l.map(alertHTML).join('')}</div></div>`:''}).join(''):`<div class="panel empty"><b>All clear</b>Nothing to fix.</div>`}`})());
 }
 function dealFilter(){
-  const q=norm(S.dq);return dealsArr().filter(d=>inPeriod(d,S.month)&&(!S.dst||(S.dst==='unsold'?!calc(d).sold:S.dst==='unpaidbuy'?d.bPaid===false:d.status===S.dst))&&(!S.dwho||side(d.s).who===S.dwho||side(d.b).who===S.dwho)&&(!q||norm([side(d.b).item,side(d.s).item,side(d.b).who,side(d.s).who,side(d.b).doc,side(d.s).doc,d.note].join(' ')).includes(q)));
+  const q=norm(S.dq);const PI=partyIndex();return dealsArr().filter(d=>inPeriod(d,S.month)&&(!S.dst||(S.dst==='unsold'?!calc(d).sold:S.dst==='unpaidbuy'?d.bPaid===false:d.status===S.dst))&&(!S.dwho||PI.root(side(d.s).who)===S.dwho||PI.root(side(d.b).who)===S.dwho)&&(!q||norm([side(d.b).item,side(d.s).item,side(d.b).who,side(d.s).who,side(d.b).doc,side(d.s).doc,d.note].join(' ')).includes(q)));
 }
 function vDeals(){
-  return loadingOr((()=>{const whos=[...new Set(dealsArr().flatMap(d=>[side(d.s).who,side(d.b).who]).filter(Boolean))].sort();
+  return loadingOr((()=>{const whos=[...parties('s').map(p=>({k:p.key,n:p.name+' · buyer'})),...parties('b').map(p=>({k:p.key,n:p.name+' · supplier'}))];
     return `<div class="pagehead"><div><div class="eyebrow">${mLabel(S.month)}</div><h1>Deals</h1><p>One line = one item: what it was bought for on the left, what it was sold for on the right. Lines with the same sale invoice are shown together.</p></div>
       <div class="actions"><button class="btn primary" data-act="addDeal">+ Add deal</button></div></div>
     <div class="toolbar"><input class="input grow" id="dq" placeholder="Search item, buyer, supplier, document…" value="${esc(S.dq)}">
       <select class="input" id="dst"><option value="">Any status</option>${STATUSES.map(s=>`<option value="${s.id}" ${S.dst===s.id?'selected':''}>${s.en}</option>`).join('')}<option value="unsold" ${S.dst==='unsold'?'selected':''}>Not sold yet</option><option value="unpaidbuy" ${S.dst==='unpaidbuy'?'selected':''}>Supplier not paid</option></select>
-      <select class="input" id="dwho"><option value="">Anyone</option>${whos.map(w=>`<option ${S.dwho===w?'selected':''}>${esc(w)}</option>`).join('')}</select></div>
+      <select class="input" id="dwho"><option value="">Anyone</option>${whos.map(w=>`<option value="${esc(w.k)}" ${S.dwho===w.k?'selected':''}>${esc(w.n)}</option>`).join('')}</select></div>
     <div id="dealsTable">${dealsTableHTML()}</div>`})());
 }
 function renderDealsTable(){const t=$('#dealsTable');if(t)t.innerHTML=dealsTableHTML()}
@@ -653,11 +685,12 @@ function dealsTableHTML(){
 }
 function vMoney(){
   return loadingOr((()=>{const bal=balances();const st=S.cfg.stated||{};const list=moneyArr().filter(m=>S.month==='all'||(m.d||'').startsWith(S.month));
-    let inn=0,out=0;for(const m of list){const g=+m.gel||0;if(m.kind==='move')continue;if((KD[m.kind]||KD.other).sign>0)inn+=g;else out+=g}
+    let inn=0,out=0,ex=0,dr=0;for(const m of list){const g=+m.gel||0;if(m.kind==='move')continue;if((KD[m.kind]||KD.other).sign>0)inn+=g;else out+=g;if(m.kind==='expense')ex+=g;if(m.kind==='draw')dr+=g}
     const op=S.cfg.opening||{};
-    return `<div class="pagehead"><div><div class="eyebrow">${mLabel(S.month)}</div><h1>Money</h1><p>Every lari that moves: received from buyers, paid to suppliers, extra costs, partner draws. The books then show what should be in the bank.</p></div>
+    return `<div class="pagehead"><div><div class="eyebrow">${mLabel(S.month)}</div><h1>Money</h1><p>Every lari that moves. The books then show what should be in the bank, and expenses come off the profit.</p></div>
       <div class="actions"><button class="btn primary" data-act="addMoney">+ Money entry</button></div></div>
-    <div class="kpis">${kpi('BoG bank · books',gel(bal.bog),op.d?'since '+dShort(op.d):'opening balance not set')}${kpi('Cash · books',gel(bal.cash),'')}${kpi('Came in',gel(inn),mLabel(S.month),'good')}${kpi('Went out',gel(out),mLabel(S.month))}</div>
+    <div class="row" style="margin-bottom:14px"><span class="small muted">Quick add:</span><button class="btn sm" data-act="addMoney" data-kind="in">+ Money in</button><button class="btn sm" data-act="addMoney" data-kind="out">− Paid supplier</button><button class="btn sm" data-act="addMoney" data-kind="expense">− Expense</button><button class="btn sm" data-act="addMoney" data-kind="draw">− Partner took out</button><button class="btn sm" data-act="addMoney" data-kind="move">Bank ⇄ cash</button></div>
+    <div class="kpis">${kpi('BoG bank · books',gel(bal.bog),op.d?'since '+dShort(op.d):'opening balance not set')}${kpi('Cash · books',gel(bal.cash),'')}${kpi('Came in',gel(inn),mLabel(S.month),'good')}${kpi('Went out',gel(out),(ex?'expenses '+gel(ex):'')+(ex&&dr?' · ':'')+(dr?'partners '+gel(dr):'')||mLabel(S.month))}</div>
     <div class="grid g3">
       <div><div class="toolbar"><input class="input grow" id="mq" placeholder="Search who, reference, note…" value="${esc(S.mq)}"><select class="input" id="mkind"><option value="">All kinds</option>${KINDS.map(k=>`<option value="${k.id}" ${S.mkind===k.id?'selected':''}>${k.en}</option>`).join('')}</select></div>
         <div id="moneyTable">${moneyTableHTML()}</div></div>
@@ -676,19 +709,38 @@ function moneyTableHTML(){
   const q=norm(S.mq);const list=moneyArr().filter(m=>(S.month==='all'||(m.d||'').startsWith(S.month))&&(!S.mkind||m.kind===S.mkind)&&(!q||norm([m.who,m.ref,m.note,partnerName(m.partner)].join(' ')).includes(q)));
   if(!list.length)return `<div class="panel empty"><b>No money entries</b>Add what came in and what was paid out.</div>`;
   const from=(S.cfg.opening||{}).d||'';
-  return `<div class="tablewrap"><table><thead><tr><th>Date</th><th>Kind</th><th>Who / reference</th><th class="hm">Account</th><th class="r">Amount</th></tr></thead><tbody>
+  // balance of the entry's account after it, replayed from the opening balance in date order
+  const op=S.cfg.opening||{};const run={bog:+op.bog||0,cash:+op.cash||0};const after=new Map();
+  for(const m of moneyArr().slice().reverse()){if(from&&(m.d||'')<from)continue;const g=+m.gel||0;if(m.kind==='move'){run[m.acc]=(run[m.acc]||0)-g;run[m.to]=(run[m.to]||0)+g;after.set(m.id,r2(run[m.acc]))}else{const sg=(KD[m.kind]||KD.other).sign;run[m.acc]=(run[m.acc]||0)+sg*g;after.set(m.id,r2(run[m.acc]))}}
+  return `<div class="tablewrap"><table><thead><tr><th>Date</th><th>Kind</th><th>Who / reference</th><th class="hm">Account</th><th class="r">Amount</th><th class="r hm">After</th></tr></thead><tbody>
   ${list.map(m=>{const k=KD[m.kind]||KD.other;const g=+m.gel||0;const hist=from&&(m.d||'')<from;const amt=m.kind==='move'?gel(g):(k.sign>0?'+':'−')+gel(g);
-    return `<tr class="click ${hist?'dim':''}" data-act="editMoney" data-id="${m.id}"><td class="num">${dShort(m.d)}</td><td><span class="chip ${k.sign>0?'good':m.kind==='move'?'brand':''}">${k.short}</span></td><td><span class="it">${esc(m.who||partnerName(m.partner)||k.en)}${m.ref?' · '+esc(m.ref):''}<small>${esc(m.note||'')}${hist?' · before the opening date':''}</small></span></td><td class="hm small muted">${m.kind==='move'?ACC[m.acc].en+' → '+(ACC[m.to]||{}).en:(ACC[m.acc]||{}).en||''}</td><td class="r num ${k.sign>0?'up':''}">${amt}</td></tr>`}).join('')}</tbody></table></div>`;
+    return `<tr class="click ${hist?'dim':''}" data-act="editMoney" data-id="${m.id}"><td class="num">${dShort(m.d)}</td><td><span class="chip ${k.sign>0?'good':m.kind==='move'?'brand':m.kind==='expense'?'warn':''}">${k.short}</span></td><td><span class="it">${esc(m.who||partnerName(m.partner)||k.en)}${m.ref?' · '+esc(m.ref):''}<small>${esc(m.note||'')}${m.onDeal?' · counted on the deal line':''}${hist?' · before the opening date':''}</small></span></td><td class="hm small muted">${m.kind==='move'?ACC[m.acc].en+' → '+(ACC[m.to]||{}).en:(ACC[m.acc]||{}).en||''}</td><td class="r num ${k.sign>0?'up':''}">${amt}</td><td class="r num hm muted">${after.has(m.id)?gel(after.get(m.id)):''}</td></tr>`}).join('')}</tbody></table></div>`;
 }
 const partnerName=id=>((S.cfg.partners||[]).find(p=>p.id===id)||{}).name||'';
 function vPartners(){
   return loadingOr((()=>{const P=partnerStats();const T=totals(dealsArr());const ms=moneyArr().filter(m=>m.kind==='draw'||m.kind==='capital');
     return `<div class="pagehead"><div><div class="eyebrow">All time</div><h1>Partners</h1><p>Profit is split equally between the partners. Each draw is a Money entry of kind “Partner takes money out”.</p></div>
       <div class="actions"><button class="btn" data-act="addMoney" data-kind="capital">+ Money put in</button><button class="btn primary" data-act="addMoney" data-kind="draw">+ Partner draw</button></div></div>
-    <div class="kpis">${kpi('Profit to split',gel(T.profit),T.n+' deal lines','good')}${kpi('Per partner',gel(r2(T.profit/(P.length||1))),P.length+' partners')}${kpi('Taken out',gel(P.reduce((a,p)=>a+p.draw,0)),'')}${kpi('Still in the business',gel(r2(T.profit-P.reduce((a,p)=>a+p.draw,0))),'profit not yet drawn')}</div>
+    <div class="kpis">${kpi('Net profit to split',gel(r2(T.profit-otherExpenses('all'))),'deals '+gel(T.profit)+(otherExpenses('all')?' − expenses '+gel(otherExpenses('all')):''),'good')}${kpi('Per partner',gel(r2((T.profit-otherExpenses('all'))/(P.length||1))),P.length+' partners')}${kpi('Taken out',gel(P.reduce((a,p)=>a+p.draw,0)),'')}${kpi('Still in the business',gel(r2(T.profit-otherExpenses('all')-P.reduce((a,p)=>a+p.draw,0))),'profit not yet drawn')}</div>
     <div class="grid g3"><div class="panel"><h2>Each partner</h2><div class="tablewrap" style="margin-top:10px"><table><thead><tr><th>Partner</th><th class="r">Share</th><th class="r">Put in</th><th class="r">Taken out</th><th class="r">Still due</th></tr></thead><tbody>
       ${P.map(p=>`<tr><td>${esc(p.name)}</td><td class="r num">${gel(p.share)}</td><td class="r num">${gel(p.cap)}</td><td class="r num">${gel(p.draw)}</td><td class="r num ${p.due<0?'neg':''}"><b>${gel(p.due)}</b></td></tr>`).join('')}</tbody></table></div><p class="hint" style="margin:10px 0 0">Names are set in Settings.</p></div>
       <div class="panel"><h2>Draws and money put in</h2>${ms.length?`<div class="tablewrap" style="margin-top:10px"><table><thead><tr><th>Date</th><th>Partner</th><th>Kind</th><th class="r">Amount</th></tr></thead><tbody>${ms.map(m=>`<tr class="click" data-act="editMoney" data-id="${m.id}"><td class="num">${dShort(m.d)}</td><td>${esc(partnerName(m.partner)||'—')}</td><td>${KD[m.kind].short}</td><td class="r num">${gel(+m.gel)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty"><b>Nothing yet</b>Record the first draw.</div>'}</div></div>`})());
+}
+function vParties(){
+  return loadingOr((()=>{const buyers=S.pt==='s';const list=parties(S.pt);const sug=mergeSuggestions(list);const sum=r2(list.reduce((a,x)=>a+x.total,0));
+    return `<div class="pagehead"><div><div class="eyebrow">All time · same names summed</div><h1>Buyers &amp; suppliers</h1><p>One row per company, however its name was typed. Names are joined by tax ID and by spelling; confirm the suggested merges below for the rest.</p></div></div>
+    <div class="tabs"><button aria-selected="${buyers}" data-act="pt" data-v="s">Buyers · who we sell to</button><button aria-selected="${!buyers}" data-act="pt" data-v="b">Suppliers · who we buy from</button></div>
+    ${sug.length?`<div class="panel" style="margin-bottom:14px"><div class="sech"><h2>Probably the same company</h2><span>${sug.length} suggestion${sug.length>1?'s':''}</span></div><div class="alerts">${sug.map(x=>`<div class="alert info"><span class="ic">≈</span><div><b>${esc(x.a.name)}</b> and <b>${esc(x.b.name)}</b><small>${gel(x.a.total)} + ${gel(x.b.total)} · ${Math.round(x.sc*100)}% alike</small></div><div class="row"><button class="btn sm primary" data-act="merge" data-a="${esc(x.a.n0)}" data-b="${esc(x.b.n0)}">Merge</button><button class="btn sm ghost" data-act="noMerge" data-k="${esc(x.pk)}">Different</button></div></div>`).join('')}</div></div>`:''}
+    ${list.length?`<div class="tablewrap"><table><thead><tr><th>${buyers?'Buyer':'Supplier'}</th><th class="r">Lines</th><th class="r">${buyers?'Sold to them':'Bought from them'}</th>${buyers?'<th class="r">Our profit</th>':''}<th class="r">${buyers?'They owe':'We owe'}</th><th class="hm">Last deal</th><th></th></tr></thead><tbody>
+      ${list.map(x=>`<tr class="click" data-act="partyDeals" data-k="${esc(x.key)}"><td><span class="it"><b>${esc(x.name)}</b>${x.variants.length>1?` <span class="chip">${x.variants.length} spellings</span>`:''}<small>${x.variants.length>1?esc(x.variants.slice(1).join(' · ')):[...x.tins].map(t=>'ID '+t).join(' · ')}</small></span></td><td class="r num">${x.lines}</td><td class="r num"><b>${gel(x.total)}</b></td>${buyers?`<td class="r num">${gel(x.profit)}</td>`:''}<td class="r num ${x.unpaid?'down':''}">${x.unpaid?gel(x.unpaid):'—'}</td><td class="hm num small muted">${dShort(x.last)}</td><td><button class="btn sm" data-act="mergeInto" data-n="${esc(x.n0)}">Merge…</button></td></tr>`).join('')}
+      <tr class="sum"><td>${list.length} ${buyers?'buyers':'suppliers'}</td><td class="r num">${list.reduce((a,x)=>a+x.lines,0)}</td><td class="r num">${gel(sum)}</td>${buyers?`<td class="r num">${gel(r2(list.reduce((a,x)=>a+x.profit,0)))}</td>`:''}<td class="r num">${gel(r2(list.reduce((a,x)=>a+x.unpaid,0)))}</td><td class="hm"></td><td></td></tr></tbody></table></div>`:`<div class="panel empty"><b>Nothing yet</b></div>`}
+    ${(S.cfg.merges||[]).length?`<div class="panel mt"><div class="sech"><h2>Merged names</h2><span>${S.cfg.merges.length}</span></div><div class="row">${S.cfg.merges.map((m,i)=>`<span class="chip">${esc(m[0])} = ${esc(m[1])} <button class="linkbtn" data-act="unmerge" data-i="${i}">undo</button></span>`).join('')}</div></div>`:''}`})());
+}
+function mergeModal(n0){
+  const list=parties(S.pt).filter(x=>x.n0!==n0);const me=parties(S.pt).find(x=>x.n0===n0);if(!me)return;
+  modal(`<h3>Merge “${esc(me.name)}” with…</h3><p class="muted small">Their deals are summed together from now on. You can undo it on the same page.</p>
+    <select class="input" id="mergeSel">${list.map(x=>`<option value="${esc(x.n0)}">${esc(x.name)} · ${gel(x.total)}</option>`).join('')}</select>
+    <div class="foot"><span></span><div class="row"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-act="merge" data-a="${esc(n0)}" data-sel="1">Merge</button></div></div>`);
 }
 function vSettings(){
   return loadingOr((()=>{const c=S.cfg;const link=phoneLink();
@@ -751,11 +803,12 @@ function moneyModal(m,kind){
     <div class="formgrid" style="margin-top:8px"><label class="field"><span>Amount ₾</span>${numIn('m_gel',m.gel,'0')}</label><label class="field"><span id="m_accLbl">Account</span><select class="input" id="m_acc">${ACCOUNTS.map(a=>`<option value="${a.id}" ${m.acc===a.id?'selected':''}>${a.en}</option>`).join('')}</select></label><label class="field" id="m_toWrap"><span>To</span><select class="input" id="m_to">${ACCOUNTS.map(a=>`<option value="${a.id}" ${m.to===a.id?'selected':''}>${a.en}</option>`).join('')}</select></label><label class="field" id="m_partnerWrap"><span>Partner</span><select class="input" id="m_partner">${P.map(p=>`<option value="${p.id}" ${m.partner===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select></label></div>
     <div class="formgrid" style="margin-top:8px"><label class="field" id="m_whoWrap"><span id="m_whoLbl">Who</span><input class="input" id="m_who" list="buyers" value="${esc(m.who||'')}"></label><label class="field"><span>Invoice / document №</span><input class="input" id="m_ref" value="${esc(m.ref||'')}"></label></div>
     <label class="field" style="margin-top:8px"><span>Note</span><input class="input" id="m_note" value="${esc(m.note||'')}"></label>
+    <label class="row" id="m_onDealWrap" style="margin-top:10px;font-size:13px"><input type="checkbox" id="m_onDeal" ${m.onDeal?'checked':''}> Already counted as extra cost on a deal line <span class="hint">(then it moves the bank but is not taken off the profit again)</span></label>
     <div class="foot">${isNew?'<span></span>':`<button class="btn danger" data-act="delMoney" data-id="${m.id}">Delete</button>`}<div class="row"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-act="saveMoney" data-id="${m.id||''}">${isNew?'Add':'Save'}</button></div></div>`);
-  const upd=()=>{const k=$('#m_kind').value;$('#m_toWrap').hidden=k!=='move';$('#m_partnerWrap').hidden=!(k==='draw'||k==='capital');$('#m_whoWrap').hidden=k==='move'||k==='draw'||k==='capital';$('#m_accLbl').textContent=k==='move'?'From':'Account';$('#m_whoLbl').textContent=k==='in'?'Buyer':k==='out'?'Supplier':'Who';$('#m_who').setAttribute('list',k==='out'?'suppliers':'buyers')};
+  const upd=()=>{const k=$('#m_kind').value;$('#m_toWrap').hidden=k!=='move';$('#m_partnerWrap').hidden=!(k==='draw'||k==='capital');$('#m_whoWrap').hidden=k==='move'||k==='draw'||k==='capital';$('#m_onDealWrap').hidden=k!=='expense';$('#m_accLbl').textContent=k==='move'?'From':'Account';$('#m_whoLbl').textContent=k==='in'?'Buyer':k==='out'?'Supplier':'Who';$('#m_who').setAttribute('list',k==='out'?'suppliers':'buyers')};
   $('#m_kind').onchange=upd;upd();
 }
-function readMoneyForm(){const g=id=>$('#'+id).value.trim();const k=g('m_kind');const m={d:g('m_d'),kind:k,gel:r2(parseNum(g('m_gel'))),acc:g('m_acc'),who:g('m_who'),ref:g('m_ref'),note:g('m_note')};if(k==='move')m.to=g('m_to');if(k==='draw'||k==='capital')m.partner=g('m_partner');for(const x in m)if(m[x]==='')delete m[x];return m}
+function readMoneyForm(){const g=id=>$('#'+id).value.trim();const k=g('m_kind');const m={d:g('m_d'),kind:k,gel:r2(parseNum(g('m_gel'))),acc:g('m_acc'),who:g('m_who'),ref:g('m_ref'),note:g('m_note')};if(k==='move')m.to=g('m_to');if(k==='draw'||k==='capital')m.partner=g('m_partner');if(k==='expense'&&$('#m_onDeal').checked)m.onDeal=true;for(const x in m)if(m[x]==='')delete m[x];return m}
 
 /* ============================== sheet import ============================== */
 // The tracker's "გარიგებები" tab: 24 columns — purchase (date, waybill, seller, tax id, item, unit, qty, price, total),
@@ -853,6 +906,12 @@ async function act(a,b,e){
       await saveCfg({company:$('#cfg_company').value.trim(),tin:$('#cfg_tin').value.trim(),partners});$('#footCo').textContent=S.cfg.company;toast('Saved');render();return}
     if(a==='saveLists'){const L=id=>$('#'+id).value.split('\n').map(s=>s.trim()).filter(Boolean);await saveCfg({buyers:L('cfg_buyers'),suppliers:L('cfg_suppliers'),units:L('cfg_units')});toast('Saved');return}
     if(a==='importSheet'){await importSheet(b);return}
+    if(a==='pt'){S.pt=b.dataset.v;render();return}
+    if(a==='partyDeals'){if(e&&e.target.closest('button'))return;S.dwho=b.dataset.k;S.dq='';S.dst='';go('deals');return}
+    if(a==='mergeInto'){mergeModal(b.dataset.n);return}
+    if(a==='merge'){const x=b.dataset.a,y=b.dataset.sel?$('#mergeSel').value:b.dataset.b;if(!x||!y||x===y)return;await saveCfg({merges:[...(S.cfg.merges||[]),[x,y]]});closeModal();toast('Merged');render();return}
+    if(a==='unmerge'){const m=(S.cfg.merges||[]).slice();m.splice(+b.dataset.i,1);await saveCfg({merges:m});toast('Undone');render();return}
+    if(a==='noMerge'){await saveCfg({noMerge:[...(S.cfg.noMerge||[]),b.dataset.k]});render();return}
     if(a==='theme'){applyTheme(b.dataset.t);lsSet('pb.theme',b.dataset.t);render();return}
     if(a==='exportBackup'){exportBackup();return}
     if(a==='disconnect'){if(S.backend&&S.backend.pending())return toast('Some changes are still saving. Wait until it says “Saved to Google”.');lsSet('pb.backend','');lsSet(CACHE,'');location.reload();return}
