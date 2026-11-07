@@ -154,6 +154,24 @@ tr.dim td{opacity:.55}
 td .it{display:block;max-width:34ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 td .it small{display:block;color:var(--muted);font-size:11.5px}
 td .flag{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--warn);margin-left:6px;vertical-align:1px}
+td .qp{font-size:11.5px;color:var(--muted);white-space:nowrap}td .qp b{color:var(--ink-2);font-weight:500}
+td .tot{font-weight:600;white-space:nowrap}td .tot small{color:var(--muted);font-weight:500;font-size:11px;margin-left:4px}
+td .pf{font-weight:700;white-space:nowrap}td .pf small{display:block;font-weight:500;color:var(--muted);font-size:11px}
+td .pf.up{color:var(--good)}td .pf.down{color:var(--bad)}
+td .edge{font-size:12px;color:var(--ink-2);white-space:nowrap}
+tr.grp .gt{font-weight:700}tr.grp .gt small{color:var(--muted);font-weight:500;font-size:11px;margin-left:4px}
+@media (max-width:640px){
+  table.deals thead{display:none}
+  table.deals tr{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;padding:10px 12px;border-bottom:1px solid var(--line)}
+  table.deals tr.grp{grid-template-columns:1fr 1fr 1fr;background:var(--surface-2);padding:8px 12px}
+  table.deals tr.grp td.item{grid-column:1/-1}table.deals tr.grp td.hm{display:none}
+  table.deals td{display:block;border:0;padding:0}
+  table.deals td.item,table.deals td.stat{grid-column:1/-1}
+  table.deals td[data-l]::before{content:attr(data-l);display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  table.deals td .it{max-width:none;white-space:normal}
+  table.deals td.r{text-align:left}
+  table.deals tr.sum{display:grid}
+}
 td .flag.bad{background:var(--bad)}
 .bars{display:flex;flex-direction:column;gap:8px}
 .bar{display:grid;grid-template-columns:minmax(0,170px) minmax(0,1fr) auto;gap:10px;align-items:center;font-size:13px;border-radius:6px}
@@ -523,7 +541,9 @@ function checks(){
       if(!x.qty&&!x.price&&!x.total)add('warn',k+' has no amount: '+name,'',open)}
     if(hasSide(d.s)&&hasSide(d.b)){
       if(b.qty&&s.qty&&+b.qty!==+s.qty&&norm(b.unit)===norm(s.unit)&&!/ტრანსპორტ|transport/i.test(name))add('warn','Quantity differs: bought '+fmt(b.qty,2)+' '+(b.unit||'')+', sold '+fmt(s.qty,2)+' '+(s.unit||''),name,open);
-      if(b.item&&s.item&&norm(b.item)!==norm(s.item)){const nb=norm(b.item).replace(/[^a-zа-я0-9Ⴀ-ჿ]/g,''),ns=norm(s.item).replace(/[^a-zа-я0-9Ⴀ-ჿ]/g,'');if(!(nb.includes(ns)||ns.includes(nb)))add('warn','Item names differ between purchase and sale','Bought “'+b.item.slice(0,40)+'”, sold “'+s.item.slice(0,40)+'” — check the specification',open)}
+      if(b.item&&s.item&&norm(b.item)!==norm(s.item)){const nums=t=>[...new Set((String(t).replace(/(\d),(\d)/g,'$1.$2').match(/\d+(?:\.\d+)?/g)||[]).map(Number))].sort((a,b)=>a-b).join(',');
+        if(nums(b.item)!==nums(s.item))add('warn','Specification differs: bought “'+b.item.slice(0,40)+'”, sold “'+s.item.slice(0,40)+'”','The numbers in the two names do not match — check which one is right',open);
+        else{const nb=norm(b.item).replace(/[^a-zа-я0-9Ⴀ-ჿ]/g,''),ns=norm(s.item).replace(/[^a-zа-я0-9Ⴀ-ჿ]/g,'');if(!(nb.includes(ns)||ns.includes(nb)))add('info','Item written differently on the two sides: '+name,'Bought “'+b.item.slice(0,40)+'”, sold “'+s.item.slice(0,40)+'”',open)}}
       if(isDate(b.d)&&isDate(s.d)&&s.d<b.d)add('warn','Sold before it was bought: '+name,'Sale '+dShort(s.d)+', purchase '+dShort(b.d),open);
       if(c.profit<0)add('bad','Loss on '+name,gel(c.profit)+' — purchase '+gel(c.buy)+', sale '+gel(c.sell)+(c.extra?', extra '+gel(c.extra):''),open);
       else if(c.margin!=null&&c.margin>.6&&c.sell>100)add('info','Very high margin '+Math.round(c.margin*100)+'% on '+name,'Check the purchase price is complete',open);
@@ -674,14 +694,17 @@ function dealsTableHTML(){
   const T=totals(list);const groups=new Map();
   for(const d of list){const s=side(d.s),b=side(d.b);const k=calc(d).sold?'s|'+(s.doc||'')+'|'+(s.who||'')+'|'+(s.d||''):'b|'+(b.doc||'')+'|'+(b.who||'')+'|'+(b.d||'');(groups.get(k)||groups.set(k,[]).get(k)).push(d)}
   const ck=checks();const flags=new Map();for(const c of ck)if(c.go&&c.go.deal&&c.sev!=='info')flags.set(c.go.deal,c.sev==='bad'?'bad':'warn');
+  const qp=x=>x.qty&&x.price?`<div class="qp">${fmt(x.qty,+x.qty%1?2:0)} ${esc(x.unit||'')} × <b>${fmt(x.price,2)}</b></div>`:(x.total!=null?`<div class="qp">${x.qty?fmt(x.qty,+x.qty%1?2:0)+' '+esc(x.unit||'')+' · ':''}lot</div>`:'');
+  const cell=(x,tot,has,extra)=>has?`${qp(x)}<span class="tot">${gel(tot)}${extra?`<small>+${gel(extra)} extra</small>`:''}</span>`:'<span class="muted">—</span>';
+  const edge=(b,s)=>{if(!(b.qty&&b.price&&s.qty&&s.price))return '';if(norm(b.unit)!==norm(s.unit)&&b.unit&&s.unit)return '';const e=r2(s.price-b.price);return `<span class="edge ${e>0?'up':e<0?'down':''}">${e>0?'+':''}${fmt(e,2)} ₾/${esc(s.unit||b.unit||'unit')}</span>`};
+  const pf=c=>c.sold?`<span class="pf ${c.profit>0?'up':c.profit<0?'down':''}">${c.profit>0?'+':''}${gel(c.profit)}<small>${c.margin!=null?Math.round(c.margin*100)+'% of the sale':''}</small></span>`:'<span class="muted">not sold yet</span>';
   const rows=[];for(const [k,ds] of groups){const g=totals(ds);const d0=ds[0];const sold=k.startsWith('s|');const s=side(d0.s),b=side(d0.b);const stAll=[...new Set(ds.map(d=>d.status||''))];
-    rows.push(`<tr class="grp"><td colspan="3"><b>${sold?esc(s.who||'—'):'Bought from '+esc(b.who||'—')}</b><span class="meta">${sold?(s.doc?'№ '+esc(s.doc)+' · ':''):(b.doc?'№ '+esc(b.doc)+' · ':'')}${dShort(sold?s.d:b.d)}</span></td><td class="r num hm">${gel(g.buy||g.stock)}</td><td class="r num">${gel(g.sell)}</td><td class="r num ${g.profit<0?'neg':''}"><b>${gel(g.profit)}</b></td><td class="r num hm">${g.sell?Math.round(g.margin*100)+'%':''}</td><td>${sold?(stAll.length===1?stChip(stAll[0]):'<span class="chip warn">Mixed</span>'):'<span class="chip">In stock</span>'}</td></tr>`);
+    rows.push(`<tr class="grp"><td class="item"><b>${sold?esc(s.who||'—'):'Bought from '+esc(b.who||'—')}</b><span class="meta">${sold?(s.doc?'№ '+esc(s.doc)+' · ':''):(b.doc?'№ '+esc(b.doc)+' · ':'')}${dShort(sold?s.d:b.d)} · ${ds.length} line${ds.length>1?'s':''}</span></td><td class="num"><span class="gt">${gel(g.buy||g.stock)}${g.extra?`<small>+${gel(g.extra)}</small>`:''}</span></td><td class="num"><span class="gt">${sold?gel(g.sell):'—'}</span></td><td class="hm"></td><td class="num r"><span class="gt ${g.profit<0?'down':g.profit>0?'up':''}">${sold?(g.profit>0?'+':'')+gel(g.profit):'—'}${g.sell?`<small>${Math.round(g.margin*100)}%</small>`:''}</span></td><td>${sold?(stAll.length===1?stChip(stAll[0]):'<span class="chip warn">Mixed</span>'):'<span class="chip">In stock</span>'}</td></tr>`);
     for(const d of ds){const c=calc(d);const bb=side(d.b),ss=side(d.s);const f=flags.get(d.id);
-      rows.push(`<tr class="click ${c.cancelled?'dim':''}" data-act="editDeal" data-id="${d.id}"><td><span class="it">${esc(ss.item||bb.item||'—')}${f?`<span class="flag ${f}"></span>`:''}<small>${bb.who?'from '+esc(bb.who):''}${bb.doc?' · '+esc(bb.doc):''}${d.bPaid===false?' · <span class="down">supplier not paid</span>':''}</small></span></td>
-        <td class="num small muted">${bb.qty?fmt(bb.qty,2)+' '+esc(bb.unit||'')+' × '+fmt(bb.price,2):(hasSide(d.b)?'lot':'')}</td><td class="num small muted">${ss.qty?fmt(ss.qty,2)+' '+esc(ss.unit||'')+' × '+fmt(ss.price,2):(c.sold?'lot':'')}</td>
-        <td class="r num hm">${hasSide(d.b)?gel(c.buy):'—'}${c.extra?'<small class="muted"> +'+gel(c.extra)+'</small>':''}</td><td class="r num">${c.sold?gel(c.sell):'—'}</td><td class="r num ${c.profit<0?'neg':''}">${c.sold?gel(c.profit):'—'}</td><td class="r num hm">${c.margin!=null?Math.round(c.margin*100)+'%':''}</td><td>${d.note?`<span class="hint" title="${esc(d.note)}">${esc(d.note.slice(0,28))}${d.note.length>28?'…':''}</span>`:''}</td></tr>`)}}
-  return `<div class="tablewrap"><table><thead><tr><th>Item</th><th>Bought</th><th>Sold</th><th class="r hm">Purchase</th><th class="r">Sale</th><th class="r">Profit</th><th class="r hm">Margin</th><th>Status / note</th></tr></thead><tbody>${rows.join('')}
-    <tr class="sum"><td>${T.n} line${T.n===1?'':'s'}${T.cancelled?' · '+T.cancelled+' cancelled':''}</td><td></td><td></td><td class="r num hm">${gel(T.buy)}${T.extra?'<small class="muted"> +'+gel(T.extra)+'</small>':''}</td><td class="r num">${gel(T.sell)}</td><td class="r num ${T.profit<0?'neg':''}">${gel(T.profit)}</td><td class="r num hm">${Math.round(T.margin*100)}%</td><td></td></tr></tbody></table></div>`;
+      rows.push(`<tr class="click ${c.cancelled?'dim':''}" data-act="editDeal" data-id="${d.id}"><td class="item"><span class="it">${esc(ss.item||bb.item||'—')}${f?`<span class="flag ${f}"></span>`:''}<small>${bb.who?'from '+esc(bb.who):''}${bb.doc?' · '+esc(bb.doc):''}${d.bPaid===false?' · <span class="down">supplier not paid</span>':''}${ss.who&&!sold?' · to '+esc(ss.who):''}</small></span></td>
+        <td class="num" data-l="Bought">${cell(bb,c.buy,hasSide(d.b),c.extra)}</td><td class="num" data-l="Sold">${cell(ss,c.sell,hasSide(d.s))}</td><td class="num r" data-l="Edge per unit">${edge(bb,ss)||'<span class="muted">—</span>'}</td><td class="num r" data-l="Profit">${pf(c)}</td><td class="stat">${d.note?`<span class="hint" title="${esc(d.note)}">${esc(d.note.slice(0,36))}${d.note.length>36?'…':''}</span>`:''}</td></tr>`)}}
+  return `<div class="tablewrap"><table class="deals"><thead><tr><th>Item</th><th>Bought · qty × price = total</th><th>Sold · qty × price = total</th><th class="r">Edge per unit</th><th class="r">Profit</th><th>Note</th></tr></thead><tbody>${rows.join('')}
+    <tr class="sum"><td class="item">${T.n} line${T.n===1?'':'s'}${T.cancelled?' · '+T.cancelled+' cancelled':''}</td><td class="num" data-l="Bought">${gel(T.buy)}${T.extra?'<small class="muted"> +'+gel(T.extra)+' extra</small>':''}${T.stock?'<small class="muted"> · '+gel(T.stock)+' in stock</small>':''}</td><td class="num" data-l="Sold">${gel(T.sell)}</td><td class="r"></td><td class="num r ${T.profit<0?'neg':''}" data-l="Profit">${gel(T.profit)}<small class="muted"> ${Math.round(T.margin*100)}%</small></td><td></td></tr></tbody></table></div>`;
 }
 function vMoney(){
   return loadingOr((()=>{const bal=balances();const st=S.cfg.stated||{};const list=moneyArr().filter(m=>S.month==='all'||(m.d||'').startsWith(S.month));
@@ -786,7 +809,8 @@ function dealModal(d){
     <label class="field" style="margin-top:8px"><span>Note</span><input class="input" id="d_note" value="${esc(d.note||'')}"></label>
     <div class="pv" id="dealPv"></div>
     <div class="foot">${isNew?'<span></span>':`<button class="btn danger" data-act="delDeal" data-id="${d.id}">Delete</button>`}<div class="row"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-act="saveDeal" data-id="${d.id||''}">${isNew?'Add deal':'Save'}</button></div></div>`,true);
-  const upd=()=>{const x=readDealForm();const c=calc(x);$('#dealPv').innerHTML=`<div>Purchase<b>${gel(c.buy)}</b></div><div>Sale<b>${c.sold?gel(c.sell):'—'}</b></div><div>Profit<b class="${c.profit<0?'bad':c.profit>0?'good':''}">${c.sold?gel(c.profit):'—'}</b></div><div>Margin<b>${c.margin!=null?Math.round(c.margin*100)+'%':'—'}</b></div>`};
+  const upd=()=>{const x=readDealForm();const c=calc(x);const b=side(x.b),s=side(x.s);const e=b.qty&&b.price&&s.qty&&s.price?r2(s.price-b.price):null;
+    $('#dealPv').innerHTML=`<div>Bought for<b>${gel(c.buy)}</b>${c.extra?'<span class="hint">+ '+gel(c.extra)+' extra</span>':''}</div><div>Sold for<b>${c.sold?gel(c.sell):'—'}</b>${e!=null?'<span class="hint">'+(e>0?'+':'')+fmt(e,2)+' ₾ per '+esc(s.unit||b.unit||'unit')+'</span>':''}</div><div>Profit<b class="${c.profit<0?'bad':c.profit>0?'good':''}">${c.sold?(c.profit>0?'+':'')+gel(c.profit):'—'}</b></div><div>Margin<b>${c.margin!=null?Math.round(c.margin*100)+'% of the sale':'—'}</b></div>`};
   document.querySelectorAll('#modalRoot .input').forEach(i=>i.addEventListener('input',upd));upd();
 }
 function readDealForm(){
