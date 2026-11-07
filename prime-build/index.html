@@ -339,8 +339,9 @@ function parseDate(v){
   const s=String(v).trim();
   if(/^\d{5}$/.test(s))return parseDate(+s);
   let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
-  m=s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})\.?$/);if(m){let y=+m[3];if(y<100)y+=2000;return y+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0')}
-  m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);if(m){let y=+m[3];if(y<100)y+=2000;return y+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0')}
+  m=s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})\.?$/);if(m){let y=+m[3];if(y<100)y+=2000;if(+m[2]<1||+m[2]>12||+m[1]<1||+m[1]>31)return '';return y+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0')}
+  // Google shows date cells as d/m/yyyy in this sheet; a first number above 12 or a second one above 12 settles the order
+  m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);if(m){let y=+m[3];if(y<100)y+=2000;let a=+m[1],b=+m[2];let dd=a,mm=b;if(b>12&&a<=12){dd=b;mm=a}if(mm<1||mm>12||dd<1||dd>31)return '';return y+'-'+String(mm).padStart(2,'0')+'-'+String(dd).padStart(2,'0')}
   return '';
 }
 const isDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(s||'');
@@ -770,7 +771,7 @@ function parseTracker(aoa){
   // The total cell is what was agreed and invoiced, so it wins: when it differs from qty × price (a typed total,
   // or a unit price that Google shows rounded to 2 decimals) the unit price is taken from total ÷ qty.
   const rd=(r,o)=>{const x={d:parseDate(r[o]),doc:txt(r[o+1]),who:txt(r[o+2]),tin:txt(r[o+3]),item:txt(r[o+4]).replace(/\s+/g,' '),unit:txt(r[o+5]),qty:num(r[o+6]),price:num(r[o+7])};const tot=num(r[o+8]);
-    if(x.qty&&x.price&&tot&&Math.abs(x.qty*x.price-tot)>0.01){x.price=Math.round(tot/x.qty*10000)/10000;x.total=r2(tot)}
+    if(x.qty&&x.price&&tot&&Math.abs(x.qty*x.price-tot)>0.01){x.price=Math.round(tot/x.qty*10000)/10000;if(Math.abs(x.qty*x.price-tot)>=0.005)x.total=r2(tot)}
     if(!(x.qty&&x.price)&&tot)x.total=r2(tot);if(x.qty!=null&&!x.qty)delete x.qty;if(x.price!=null&&!x.price)delete x.price;for(const k in x)if(x[k]===''||x[k]==null)delete x[k];return x};
   for(let i=hi+1;i<aoa.length;i++){const r=aoa[i];if(!r||!r.some(c=>c!==''&&c!=null))continue;
     const b=rd(r,b0),s=rd(r,s0);if(!hasSide(b)&&!hasSide(s))continue;
