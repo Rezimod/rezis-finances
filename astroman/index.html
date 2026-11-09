@@ -796,6 +796,29 @@ main{padding-block:14px 60px}
 .inwr .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .inwr b{color:var(--good)}
 @media (max-width:1100px){.ptools{grid-template-columns:1fr 1fr}.ptools .grow{grid-column:1/-1}}
+/* ---------- warehouse count ---------- */
+.wcbar .wctop{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.wcbig{font-size:30px;font-weight:700;line-height:1.1;margin-top:2px}.wcbig small{font-size:13px;font-weight:500;color:var(--muted)}
+.wcprog{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden;margin:12px 0 10px}.wcprog i{display:block;height:100%;background:var(--good);border-radius:inherit;transition:width .3s}
+.wcstats{display:flex;gap:6px 18px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}.wcstats b{color:var(--ink);font-family:var(--f-num)}
+.wctools{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-bottom:10px}
+.wctools .input{min-height:44px}
+.wcgh{grid-column:1/-1;font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.03em;padding:8px 2px 0;border-bottom:1px solid var(--line)}
+.wccard.ok{border-color:color-mix(in srgb,var(--good) 65%,var(--line))}
+.wccard .wcq{position:absolute;top:6px;right:6px;background:var(--good);color:#fff;font-weight:800;border-radius:999px;padding:2px 9px;font-size:13px;font-family:var(--f-num)}
+.wccard .wccam{position:absolute;left:6px;bottom:6px;display:inline-flex;gap:4px;align-items:center;font-size:10.5px;color:#A86A12;background:#FBF0DC;border-radius:999px;padding:2px 7px;font-weight:600}
+.wcs .wcpic{height:220px;background:#fff;border-radius:12px;display:grid;place-items:center;overflow:hidden}
+.wcs .wcpic img{max-width:100%;max-height:100%;object-fit:contain}
+.wcs .wcpic .ph{font-size:40px;font-weight:700;color:var(--brand)}
+.wcs .wcpic.busy{opacity:.45}
+.wcpicb{display:flex;gap:8px;margin:8px 0 12px;flex-wrap:wrap}
+.wcstep{display:grid;grid-template-columns:64px minmax(0,1fr) 64px;gap:8px}
+.wcstep .btn{height:58px;font-size:26px}
+.wcstep .input{height:58px;font-size:28px;text-align:center;font-weight:700}
+.wcadd{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}.wcadd .input{max-width:130px}
+body:has(.wcs) .toast{bottom:auto;top:calc(14px + env(safe-area-inset-top,0px));pointer-events:none}
+.wcwas{font-size:13px;background:var(--surface-2);border-radius:8px;padding:9px 11px;margin:6px 0 12px}
+@media (max-width:860px){.wcs .wcpic{height:160px}.wcs .foot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.wcs .foot .spacer{display:none}.wcs .foot #wcNext{grid-column:1/-1;height:48px;font-size:15px}}
 </style>
 
 <div class="app">
@@ -888,8 +911,8 @@ const DEFAULT_RULES=[
  ['საკომისიო','bank_fees',''],['commission','bank_fees',''],['მომსახურების საფასური','bank_fees',''],
  ['ხაზინ','gezi','Treasury'],['treasury','gezi','Treasury'],
 ];
-const IC={store:'M3 9l1.2-5h15.6L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6',overview:'M3 13h4v8H3zM10 3h4v18h-4zM17 9h4v12h-4z',recap:'M12 3l2.6 5.5 6 .8-4.4 4.1 1.1 5.9L12 16.4l-5.3 2.9 1.1-5.9L3.4 9.3l6-.8z',sales:'M3 17l6-6 4 4 8-8M15 7h6v6',products:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',expenses:'M4 6h16M4 12h16M4 18h10',bank:'M3 10l9-6 9 6M5 10v9h14v-9M9 19v-5h6v5',pl:'M5 4h14v16H5zM9 9h6M9 13h6M9 17h3',imports:'M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7',settings:'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM4 12h2M18 12h2M12 4v2M12 18v2',more:'M5 12h.01M12 12h.01M19 12h.01',optimo:'M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10M7.5 5l9 4',loan:'M3 6h18v12H3zM12 9.5a2.5 2.5 0 1 1 0 5a2.5 2.5 0 1 1 0-5M6.5 9v6M17.5 9v6'};
-const PAGES=[{id:'overview',t:'Overview'},{id:'recap',t:'Recap'},{id:'sales',t:'Sales'},{id:'products',t:'Products'},{id:'expenses',t:'Expenses'},{id:'bank',t:'Bank import'},{id:'pl',t:'Profit & loss'},{id:'imports',t:'Imports'},{id:'loan',t:'Loan'},{id:'optimo',t:'Optimo'},{id:'store',t:'Store sales'},{id:'settings',t:'Settings'}];
+const IC={count:'M9 4h6v3H9zM7 5.5H5V21h14V5.5h-2M9 14l2 2 4-4',store:'M3 9l1.2-5h15.6L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6',overview:'M3 13h4v8H3zM10 3h4v18h-4zM17 9h4v12h-4z',recap:'M12 3l2.6 5.5 6 .8-4.4 4.1 1.1 5.9L12 16.4l-5.3 2.9 1.1-5.9L3.4 9.3l6-.8z',sales:'M3 17l6-6 4 4 8-8M15 7h6v6',products:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',expenses:'M4 6h16M4 12h16M4 18h10',bank:'M3 10l9-6 9 6M5 10v9h14v-9M9 19v-5h6v5',pl:'M5 4h14v16H5zM9 9h6M9 13h6M9 17h3',imports:'M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7',settings:'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM4 12h2M18 12h2M12 4v2M12 18v2',more:'M5 12h.01M12 12h.01M19 12h.01',optimo:'M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10M7.5 5l9 4',loan:'M3 6h18v12H3zM12 9.5a2.5 2.5 0 1 1 0 5a2.5 2.5 0 1 1 0-5M6.5 9v6M17.5 9v6'};
+const PAGES=[{id:'overview',t:'Overview'},{id:'recap',t:'Recap'},{id:'sales',t:'Sales'},{id:'products',t:'Products'},{id:'expenses',t:'Expenses'},{id:'bank',t:'Bank import'},{id:'pl',t:'Profit & loss'},{id:'imports',t:'Imports'},{id:'loan',t:'Loan'},{id:'optimo',t:'Optimo'},{id:'store',t:'Store sales'},{id:'count',t:'Warehouse count'},{id:'settings',t:'Settings'}];
 const DEFAULT_FIXED=[
  {id:'rent',label:'Rent',cat:'rent',gel:1500,account:'bog',match:'',from:'2026-09'},
  {id:'accountant',label:'Accountant',cat:'accounting',gel:200,account:'bog',match:'',from:'2026-09'},
@@ -903,7 +926,7 @@ const DEFAULT_FIXED=[
 const S={db:null,user:null,canWrite:true,mcp:null,downloads:null,loaded:{},
   tx:new Map(),loan:new Map(),catalog:new Map(),pos:new Map(),shift:new Map(),site:new Map(),sales:new Map(),ships:new Map(),rules:new Map(),items:new Map(),itemsYear:new Map(),optimo:new Map(),cfg:{},range:null,mc:new Map(),
   view:'overview',month:null,draft:null,bank:null,opt:null,salesPreview:null,filters:{cat:'',acct:'',q:'',all:false},salesQ:'',
-  prod:{tab:'popular',sort:'p',dir:-1,q:'',all:false},op:{tab:'overview',rank:'profit',period:'',q:'',cat:'',status:'',sort:'profit',dir:-1,full:false},store:{tab:'live',day:null},animate:true};
+  prod:{tab:'popular',sort:'p',dir:-1,q:'',all:false},op:{tab:'overview',rank:'profit',period:'',q:'',cat:'',status:'',sort:'profit',dir:-1,full:false},store:{tab:'live',day:null},cnt:{f:'todo',q:'',cat:''},animate:true};
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -1237,7 +1260,7 @@ async function boot(){
   db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()},()=>{});
 }
 function setConn(ok,txt){$('#syncDot').className='dot'+(ok?'':' off');$('#syncTxt').textContent=txt||(ok?'Saved to cloud':'Offline')}
-let rq=0;function schedule(){S.mc=new Map();if(rq)return;rq=requestAnimationFrame(()=>{rq=0;S.mc=new Map();fillMonthSel();if(S.view!=='add'||!S.renderedOnce)render()})}
+let rq=0;function schedule(){S.mc=new Map();if(rq)return;rq=requestAnimationFrame(()=>{rq=0;S.mc=new Map();fillMonthSel();if(S.view==='count'&&document.activeElement&&document.activeElement.id==='wcQ'){S.wcLate=true;return}if(S.view!=='add'||!S.renderedOnce)render()})}
 async function saveTx(t){
   if(!S.db)throw {message:'Not connected — open this page in Claude while signed in'};
   const id=t.id&&!String(t.id).startsWith('fx-')?t.id:uid('t');const body={...t};delete body.id;delete body.virtual;
@@ -1254,7 +1277,7 @@ const svg=(d,s=16)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="n
 function renderShell(){
   $('#menu').innerHTML=PAGES.map((p,i)=>(p.id==='pl'?'<div class="sep"></div><div class="grp">Finance</div>':p.id==='optimo'?'<div class="sep"></div><div class="grp">Store</div>':'')+`<button data-go="${p.id}">${svg(IC[p.id])}${p.t}</button>`).join('');
   $('#tabbar').innerHTML=[['overview','Overview'],['expenses','Expenses'],['add',''],['optimo','Optimo'],['more','More']].map(([id,t])=>id==='add'?`<button data-go="add" aria-label="Add expense"><span class="plus">+</span></button>`:`<button data-go="${id}">${svg(IC[id],22)}<span>${t}</span></button>`).join('');
-  $('#moreInner').innerHTML='<div class="grab"></div>'+[['recap','Recap'],['sales','Sales'],['products','Products'],['store','Store sales'],['bank','Bank import'],['pl','Profit & loss'],['imports','Imports'],['loan','Loan'],['settings','Settings']].map(([id,t])=>`<button data-go="${id}">${svg(IC[id],20)}${t}</button>`).join('');
+  $('#moreInner').innerHTML='<div class="grab"></div>'+[['recap','Recap'],['sales','Sales'],['products','Products'],['store','Store sales'],['count','Warehouse count'],['bank','Bank import'],['pl','Profit & loss'],['imports','Imports'],['loan','Loan'],['settings','Settings']].map(([id,t])=>`<button data-go="${id}">${svg(IC[id],20)}${t}</button>`).join('');
   document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){e.preventDefault();if(g.dataset.go==='more'){$('#moreSheet').classList.add('open');return}$('#moreSheet').classList.remove('open');go(g.dataset.go)}});
   $('#moreSheet').addEventListener('click',e=>{if(e.target.id==='moreSheet')e.currentTarget.classList.remove('open')});
   $('#monthSel').addEventListener('change',e=>setMonth(e.target.value));
@@ -1274,7 +1297,7 @@ function go(v){if(REP)closeRecap();if(v==='recap'){$('#moreSheet').classList.rem
 function render(){
   S.renderedOnce=true;S.mc=new Map();
   document.querySelectorAll('#menu button,#tabbar button').forEach(b=>b.setAttribute('aria-current',b.dataset.go===S.view?'page':'false'));
-  const v={connect:vConnect,overview:vOverview,sales:vSales,products:vProducts,expenses:vExpenses,bank:vBank,pl:vPL,imports:vImports,loan:vLoan,optimo:vOptimo,store:vStore,settings:vSettings,add:vAdd}[S.view]||vOverview;
+  const v={connect:vConnect,overview:vOverview,sales:vSales,products:vProducts,expenses:vExpenses,bank:vBank,pl:vPL,imports:vImports,loan:vLoan,optimo:vOptimo,store:vStore,count:vCount,settings:vSettings,add:vAdd}[S.view]||vOverview;
   const main=$('#main');const y=window.scrollY;
   main.innerHTML=banner()+v();
   const anim=S.animate&&!reduced();main.classList.toggle('anim',anim);
@@ -3627,15 +3650,19 @@ function bindPictureDrop(){
   z.ondrop=e=>{e.preventDefault();z.classList.remove('over');take(e.dataTransfer.files[0])};
   document.onpaste=e=>{if(!$('#ceDrop'))return;const it=[...(e.clipboardData||{}).items||[]].find(i=>i.type.startsWith('image/'));if(it)take(it.getAsFile())};
 }
-function shrinkImage(file,max){return new Promise((res,rej)=>{const img=new Image();const u=URL.createObjectURL(file);img.onload=()=>{const s=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL('image/jpeg',.86).split(',')[1])};img.onerror=()=>rej({message:'Not an image'});img.src=u})}
+function shrinkImage(file,max,qual){return new Promise((res,rej)=>{const img=new Image();const u=URL.createObjectURL(file);img.onload=()=>{const s=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL('image/jpeg',qual||.86).split(',')[1])};img.onerror=()=>rej({message:'Not an image'});img.src=u})}
+// When the backend cannot store it in Drive (old script, or no internet in the warehouse) a small copy is kept
+// inside the product record instead, so a picture is never lost.
+let IMG_PUT=true;
 async function productPicture(file,code,zone){
   const c=readCreds();if(!c){toast('Pictures can be stored in the hosted version only');return}
   zone.classList.add('busy');toast('Storing the picture…');
-  try{const b64=await shrinkImage(file,800);const name=(code&&S.catalog.get(code)?S.catalog.get(code).n:file.name.replace(/\.[^.]+$/,''));
-    const r=await gasCall(c.u,c.k,{action:'image_put',name,b64,mime:'image/jpeg'});if(!r||!r.url)throw {message:'The backend did not store the picture'};
-    const inp=$('#ceImg');if(inp)inp.value=r.url;zone.innerHTML=`<img src="${esc(r.url)}" alt=""><span class="pdhint">drop a picture · click · paste</span>`;
-    if(code&&S.catalog.has(code)){await saveCat(code,{img:r.url,big:r.url,wooId:null,imgSrc:'drive'});delete S.catalog.get(code).noImg;toast('Picture saved')}else toast('Picture ready — press Save')}
-  catch(e){toast(/unknown action/.test(e.message||'')?'The backend still runs the old script — paste the new Code.gs and deploy a new version':(e.message||'Could not store the picture'))}
+  try{const name=(code&&S.catalog.get(code)?S.catalog.get(code).n:file.name.replace(/\.[^.]+$/,''));let url=null,src='drive';
+    if(IMG_PUT&&navigator.onLine!==false){try{const r=await gasCall(c.u,c.k,{action:'image_put',name,b64:await shrinkImage(file,800),mime:'image/jpeg'});url=r&&r.url}catch(e){if(/unknown action/.test(e.message||''))IMG_PUT=false}}
+    if(!url){url='data:image/jpeg;base64,'+await shrinkImage(file,360,.72);src='inline'}
+    const inp=$('#ceImg');if(inp)inp.value=url;const hint=zone.querySelector('.pdhint');zone.innerHTML=`<img src="${esc(url)}" alt="">`+(hint?hint.outerHTML:'');
+    if(code&&S.catalog.has(code)){await saveCat(code,{img:url,big:url,wooId:null,imgSrc:src});delete S.catalog.get(code).noImg;toast('Picture saved')}else toast('Picture ready — press Save')}
+  catch(e){toast(e.message||'Could not store the picture')}
   zone.classList.remove('busy');
 }
 function nextNoImg(after){const L=[...S.catalog.values()].filter(x=>!x.img&&!x.hidden&&!x.noImg).sort((a,b)=>(b.sold||0)-(a.sold||0)||a.n.localeCompare(b.n));if(!after)return L[0];const i=L.findIndex(x=>x.b===after);return L[i+1]||L[0]}
@@ -3797,6 +3824,104 @@ async function siteAct(a,b){
   if(a==='si_sync'){m.textContent='Syncing — up to a minute…';b.disabled=true;try{const r=await gasCall(c.u,c.k,{action:'site_sync'});m.textContent=r.error?'Failed: '+r.error:fmt(r.updated)+' products updated, '+fmt(r.outofstock||0)+' out of stock';if(S.backend)S.backend.load().catch(()=>{})}catch(e){m.textContent=e.message||'Failed'}b.disabled=false;return}
 }
 
+/* ============================== warehouse count (აღწერა) ============================== */
+// A count runs from cfg.whCount.startedAt until it is finished. Every product counted gets qw (what was found),
+// qwAt (when) and qwPrev (the warehouse number before this count); counted = qwAt after the start.
+// Store counts (qs) are not touched.
+const CAM='M4 8h3l2-3h6l2 3h3v11H4zM12 10.5a3 3 0 1 1 0 6a3 3 0 1 1 0-6';
+const WC=()=>S.cfg.whCount&&!S.cfg.whCount.finishedAt?S.cfg.whCount:null;
+const wcDone=x=>{const s=WC();return !!(s&&x.qwAt&&x.qwAt>=s.startedAt)};
+const wcPrev=x=>+x.qwPrev||0;
+function wcItems(){return [...S.catalog.values()].filter(x=>x&&x.b&&!x.hidden&&x.cat!=='მიწოდება')}
+function wcTest(x,f){const d=wcDone(x);return f==='todo'?!d:f==='done'?d:f==='diff'?d&&whQ(x)!==wcPrev(x):f==='noimg'?!x.img:true}
+function wcFilter(){const f=S.cnt.f||'todo';return !WC()&&f!=='noimg'?'all':f}
+function wcList(){const C=S.cnt,q=(C.q||'').toLowerCase().trim(),f=wcFilter();
+  return wcItems().filter(x=>(!q||x.n.toLowerCase().includes(q)||String(x.b).toLowerCase().includes(q))&&(!C.cat||(x.cat||'სხვადასხვა')===C.cat)&&wcTest(x,f))
+    .sort((a,b)=>(a.cat||'სხვადასხვა').localeCompare(b.cat||'სხვადასხვა','ka')||a.n.localeCompare(b.n,'ka'))}
+function wcStats(){const all=wcItems(),done=all.filter(wcDone);return {all,done,pcs:done.reduce((a,x)=>a+whQ(x),0),val:done.reduce((a,x)=>a+whQ(x)*(+x.cost||0),0),diff:done.filter(x=>whQ(x)!==wcPrev(x))}}
+function vCount(){
+  const s=WC(),{all,done,pcs,val,diff}=wcStats(),L=wcList(),C=S.cnt,f=wcFilter();
+  const last=(S.cfg.whCounts||[]).slice(-1)[0];const cats=[...new Set(all.map(x=>x.cat||'სხვადასხვა'))].sort((a,b)=>a.localeCompare(b,'ka'));
+  const head=`<div class="pagehead"><div><div class="eyebrow">Warehouse · აღწერა</div><h1>Warehouse count</h1><p>Count the warehouse product by product. What you type is saved at once, also without internet, and becomes the warehouse stock. Store counts stay as they are.</p></div><div class="actions"><button class="btn" data-act="wc_export">Download Excel</button><button class="btn" data-act="st_add">+ Product not in the list</button></div></div>`;
+  const bar=s?`<div class="panel wcbar"><div class="wctop"><div><div class="eyebrow"><span class="dot"></span>Count started ${esc(dtShort(s.startedAt))}</div><div class="wcbig num">${done.length}<small> of ${all.length} products counted</small></div></div><button class="btn primary" data-act="wc_finish">Finish count</button></div>
+    <div class="wcprog" role="progressbar" aria-valuenow="${done.length}" aria-valuemax="${all.length}"><i style="width:${all.length?done.length/all.length*100:0}%"></i></div>
+    <div class="wcstats"><span><b>${fmt(all.length-done.length)}</b> left</span><span><b>${fmt(pcs)}</b> pieces found</span><span><b>${gel(val)}</b> at cost</span><span><b>${diff.length}</b> differ from before</span></div></div>`
+   :`<div class="panel wcbar"><div class="wctop"><div><h2 style="margin:0">Start a count</h2><p class="sub" style="margin:4px 0 0">Every product starts as “to count”. Tap one, type what you find, save. Products without a picture: take one right there.${last?` Last count: ${esc(dtShort(last.finishedAt))}, ${last.counted} products, ${fmt(last.pcs)} pieces.`:''}</p></div><button class="btn primary" data-act="wc_start">Start the count</button></div></div>`;
+  const pills=(s?[['todo','To count',all.length-done.length],['done','Counted',done.length],['diff','Different from before',diff.length]]:[['all','All',all.length]]).concat([['noimg','No picture',all.filter(x=>!x.img).length]]).concat(s?[['all','All',all.length]]:[]);
+  const card=x=>{const d=wcDone(x);return `<button class="pcard wccard ${d?'ok':''}" data-act="wc_open" data-b="${esc(x.b)}" title="${esc(x.n)}"><span class="pi">${x.img?`<img src="${esc(x.img)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=\\'ph\\'>${esc(posInitials(x.n))}</span>'">`:`<span class="ph">${esc(posInitials(x.n))}</span>`}${d?`<span class="wcq">${whQ(x)}</span>`:''}${x.img?'':`<span class="wccam">${svg(CAM,12)} add photo</span>`}</span><span class="pt"><b class="pn">${esc(x.n)}</b><span class="pcode num">${esc(x.b)} · store ${catLive(x)}</span></span></button>`};
+  let grid='',cat=null;L.forEach(x=>{const c=x.cat||'სხვადასხვა';if(c!==cat&&!C.cat){cat=c;grid+=`<div class="wcgh">${esc(c)}</div>`}grid+=card(x)});
+  const list=`<div class="panel"><div class="wctools"><input class="input" id="wcQ" type="search" enterkeyhint="go" autocomplete="off" placeholder="Search a name or scan a barcode…" value="${esc(C.q||'')}"><select class="input" id="wcCat" aria-label="Category"><option value="">All categories</option>${cats.map(c=>`<option ${C.cat===c?'selected':''}>${esc(c)}</option>`).join('')}</select></div>
+   <div class="pills" role="group" aria-label="Show">${pills.map(([k,t,n])=>`<button data-act="wc_filter" data-v="${k}" aria-pressed="${f===k}">${t}<b>${n}</b></button>`).join('')}</div>
+   ${L.length?`<div class="pgrid mt">${grid}</div>`:`<div class="empty"><b>${f==='todo'&&!C.q&&!C.cat?'Everything is counted':'Nothing here'}</b>${f==='todo'&&!C.q&&!C.cat?'<span>Press Finish count to close it.</span>':''}</div>`}</div>`;
+  return loadingOr(head+bar+list);
+}
+function wcSheet(b){
+  const x=S.catalog.get(b);if(!x)return;const d=wcDone(x);const O=x.q!=null&&x.qs!=null?+x.q:null;
+  modal(`<div class="wcs"><div class="wcpic" id="wcPic">${x.img?`<img src="${esc(x.img)}" alt="">`:`<span class="ph">${esc(posInitials(x.n))}</span>`}</div>
+   <div class="wcpicb"><button class="btn sm ${x.img?'':'amber'}" id="wcCam">${svg(CAM)} Take photo</button><button class="btn sm" id="wcUp">${svg('M12 16V4M7 9l5-5 5 5M4 20h16')} Upload picture</button><input type="file" id="wcFileCam" accept="image/*" capture="environment" hidden><input type="file" id="wcFile" accept="image/*" hidden></div>
+   <h3>${esc(x.n)}</h3><p class="sub">${esc(x.b)} · ${esc(x.cat||'სხვადასხვა')} · in the store ${catLive(x)}</p>
+   ${d?`<div class="wcwas">Counted <b>${whQ(x)}</b> at ${tOf(x.qwAt)} · before the count ${wcPrev(x)}${O!=null?` · store + warehouse = ${catLive(x)+whQ(x)}, Optimo shows ${O}`:''}</div>`:''}
+   <label class="field"><span>Found in the warehouse</span><div class="wcstep"><button class="btn" data-wcs="-1" aria-label="One less">−</button><input class="input num" id="wcN" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="${d?whQ(x):''}" placeholder="0"><button class="btn" data-wcs="1" aria-label="One more">+</button></div></label>
+   ${d?`<div class="wcadd"><span class="small muted">Found more in another spot?</span><input class="input num" id="wcAdd" inputmode="numeric" pattern="[0-9]*" placeholder="+ how many"><button class="btn sm" id="wcAddGo">Add</button></div>`:''}
+   <label class="field mt"><span>Note (optional)</span><input class="input" id="wcNote" value="${esc(x.whNote||'')}" placeholder="e.g. 2 without box"></label>
+   <div class="foot"><button class="btn ghost" data-close>Close</button><span class="spacer"></span><button class="btn" id="wcZero">None here · 0</button><button class="btn" id="wcSave">Save</button><button class="btn primary" id="wcNext">Save · next</button></div></div>`);
+  const n=$('#wcN'),num=()=>Math.max(0,Math.round(parseNum(n.value)||0));
+  document.querySelectorAll('[data-wcs]').forEach(el=>el.onclick=()=>{n.value=Math.max(0,num()+ +el.dataset.wcs)});
+  const go=async(v,next)=>{const order=wcList().map(y=>y.b);try{await wcSave(b,v,$('#wcNote').value.trim())}catch(e){return toast(errMsg(e))}
+    toast(`${x.n}: ${v} in the warehouse`);if(!next)return closeModal();
+    const i=order.indexOf(b);const nx=order.slice(i+1).concat(order.slice(0,Math.max(0,i))).find(c=>c!==b&&!wcDone(S.catalog.get(c)||{}));
+    if(nx)wcSheet(nx);else{closeModal();toast('Everything in this list is counted')}};
+  $('#wcSave').onclick=()=>go(num(),false);$('#wcNext').onclick=()=>go(num(),true);$('#wcZero').onclick=()=>go(0,true);
+  n.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();go(num(),true)}};
+  const add=$('#wcAddGo');if(add){const a=$('#wcAdd');const plus=()=>{const v=Math.round(parseNum(a.value)||0);if(v){n.value=num()+v;a.value=''}};add.onclick=plus;a.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();plus()}}}
+  const pic=$('#wcPic');const take=inp=>{inp.onchange=()=>{const file=inp.files[0];inp.value='';if(file&&/^image\//.test(file.type))productPicture(file,b,pic)}};
+  take($('#wcFileCam'));take($('#wcFile'));$('#wcCam').onclick=()=>$('#wcFileCam').click();$('#wcUp').onclick=()=>$('#wcFile').click();
+  if(matchMedia('(pointer:fine)').matches)n.focus();
+}
+async function wcSave(b,v,note){
+  if(!WC())await saveCfg({whCount:{startedAt:new Date().toISOString()}});
+  const x=S.catalog.get(b);await saveCat(b,{qw:v,qwAt:new Date().toISOString(),qwPrev:wcDone(x)?wcPrev(x):whQ(x),whNote:note||null});
+}
+function wcFinishModal(){
+  const {all,done,pcs,val,diff}=wcStats();const left=all.filter(x=>!wcDone(x)),had=left.filter(x=>whQ(x)>0);
+  diff.sort((a,b)=>Math.abs(whQ(b)-wcPrev(b))-Math.abs(whQ(a)-wcPrev(a)));
+  modal(`<h3>Finish the count</h3><p class="sub">${done.length} of ${all.length} products counted · ${fmt(pcs)} pieces · ${gel(val)} at cost.</p>
+   ${had.length?`<div class="wcwas"><b>${had.length} product${had.length>1?'s were':' was'} not counted but still show${had.length>1?'':'s'} ${fmt(had.reduce((a,x)=>a+whQ(x),0))} pieces in the warehouse from before.</b>
+    <label class="row mt"><input type="radio" name="wcLeft" value="keep" checked> Keep their old warehouse numbers</label><label class="row"><input type="radio" name="wcLeft" value="zero"> Set them to 0 — they are not in the warehouse</label></div>`:left.length?`<p class="muted small">${left.length} products not counted; none of them had warehouse stock before, so they stay at 0.</p>`:''}
+   ${diff.length?`<h4 class="rh3">Changed by the count · ${diff.length}</h4><div class="flow">${diff.slice(0,80).map(x=>{const d=whQ(x)-wcPrev(x);return `<div class="ln"><span class="k row" style="gap:8px">${thumb(x,30)}<span><b>${esc(x.n)}</b><div class="small muted">${esc(x.b)}${x.whNote?' · '+esc(x.whNote):''}</div></span></span><span class="v num">${wcPrev(x)} → <b>${whQ(x)}</b> <span class="${d<0?'neg':''}">${d>0?'+':''}${d}</span></span></div>`}).join('')}</div>`:'<p class="muted">No warehouse number changed.</p>'}
+   <div class="foot"><button class="btn" data-act="wc_export">Download Excel</button><span class="spacer"></span><button class="btn" data-close>Keep counting</button><button class="btn primary" data-act="wc_done">Finish count</button></div>`,true);
+}
+async function wcExport(){
+  await xlsxReady();const s=WC()||S.cfg.whCount||{};
+  const rows=[['Code','Product','Category','Counted','Warehouse','Before the count','Difference','Store now','Cost ₾','Warehouse value ₾','Note','Counted at']];
+  wcItems().sort((a,b)=>(a.cat||'').localeCompare(b.cat||'','ka')||a.n.localeCompare(b.n,'ka')).forEach(x=>{const d=!!(x.qwAt&&s.startedAt&&x.qwAt>=s.startedAt);
+    rows.push([x.b,x.n,x.cat||'',d?'yes':'no',whQ(x),d?wcPrev(x):'',d?whQ(x)-wcPrev(x):'',catLive(x),+x.cost||0,Math.round(whQ(x)*(+x.cost||0)*100)/100,x.whNote||'',d?dtShort(x.qwAt):''])});
+  const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:14},{wch:44},{wch:18}];XLSX.utils.book_append_sheet(wb,ws,'Warehouse count');
+  const buf=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+  try{await S.downloads.save({filename:'astroman-warehouse-count-'+today()+'.xlsx',data:new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})})}catch(e){if(e.code!=='declined')toast('Download unavailable here')}
+}
+async function wcAct(a,b){
+  if(a==='wc_open')return wcSheet(b.dataset.b);
+  if(a==='wc_filter'){S.cnt.f=b.dataset.v;return render()}
+  if(a==='wc_start'){await saveCfg({whCount:{startedAt:new Date().toISOString()}});S.cnt.f='todo';render();return toast('Count started — tap a product')}
+  if(a==='wc_finish')return wcFinishModal();
+  if(a==='wc_export')return wcExport();
+  if(a==='wc_done'){const s=WC();if(!s)return closeModal();const zero=($('input[name="wcLeft"]:checked')||{}).value==='zero';const at=new Date().toISOString();const {all,done,pcs,val,diff}=wcStats();
+    const had=zero?all.filter(x=>!wcDone(x)&&whQ(x)>0):[];for(const x of had)await saveCat(x.b,{qw:0,qwAt:at,qwPrev:whQ(x)});
+    await saveCfg({whCount:{...s,finishedAt:at},whCounts:[...(S.cfg.whCounts||[]).slice(-19),{startedAt:s.startedAt,finishedAt:at,counted:done.length,of:all.length,pcs,value:Math.round(val),changed:diff.length,zeroed:had.length}]});
+    closeModal();render();return toast(`Count finished: ${done.length} products, ${fmt(pcs)} pieces in the warehouse`)}
+}
+function bindCount(){
+  if(S.view!=='count')return;
+  const q=$('#wcQ');if(!q)return;let t;
+  q.oninput=()=>{clearTimeout(t);t=setTimeout(()=>{S.cnt.q=q.value;render();const y=$('#wcQ');y.focus();y.setSelectionRange(y.value.length,y.value.length)},250)};
+  // a barcode scanner types the code and presses Enter: open that product straight away
+  q.onkeydown=e=>{if(e.key!=='Enter')return;e.preventDefault();clearTimeout(t);const v=q.value.trim();if(!v)return;
+    const hit=wcItems().find(x=>String(x.b)===v);S.cnt.q=v;const L=hit?[hit]:wcList();
+    if(L.length===1){S.cnt.q='';render();wcSheet(L[0].b)}else render()};
+  q.onblur=()=>{if(S.wcLate){S.wcLate=false;setTimeout(render,0)}};
+  $('#wcCat').onchange=e=>{S.cnt.cat=e.target.value;render()};
+}
 function bindStore(){
   if(S.view!=='store')return;
   const qr=$('#stQr');if(qr){const v=storeLink();loadQr().then(()=>{const q=window.qrcode(0,'M');q.addData(v);q.make();const box=$('#stQr');if(box)box.innerHTML=q.createSvgTag({cellSize:4,margin:2,scalable:true})}).catch(()=>{if(qr.closest('.qrbox'))qr.closest('.qrbox').hidden=true})}
@@ -3805,7 +3930,7 @@ setInterval(()=>{if(S.backend&&S.view==='store'&&S.store.tab==='live'&&!document
 
 function bindView(){
   if(S.view==='add')bindAdd();
-  bindStore();
+  bindStore();bindCount();
   const tip=$('#tip');const showTip=(e,html)=>{tip.innerHTML=html;tip.hidden=false;const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8),y=Math.min(e.clientY+14,innerHeight-tip.offsetHeight-8);tip.style.left=Math.max(8,x)+'px';tip.style.top=Math.max(8,y)+'px'};
   const hide=()=>tip.hidden=true;
   document.querySelectorAll('#trendSvg .hit').forEach(h=>{h.addEventListener('pointermove',e=>{const d=trendChart.data[+h.dataset.i];showTip(e,`<div class="t">${esc(d.long)}${d.src?' · '+COGS_SRC[d.src]:''}</div><div class="r"><span>Sales</span><b class="num">${gel(d.sales)}</b></div><div class="r"><span>Cost of goods</span><span class="num">${gel(d.cogs)}</span></div><div class="r"><span>Running costs</span><span class="num">${gel(d.opex)}</span></div><div class="r"><span>Taxes</span><span class="num">${gel(d.tax)}</span></div><div class="r"><span>Net profit</span><b class="num ${d.net<0?'neg':''}">${gel(d.net)}</b></div>`)});h.addEventListener('pointerleave',hide);h.addEventListener('click',()=>{hide();const d=trendChart.data[+h.dataset.i];if(d.isYear)setRange({p:'year',y:d.m});else setMonth(d.m)})});
@@ -3877,6 +4002,7 @@ function readFixedForm(){const list=fixedList().map(f=>({...f}));document.queryS
 async function act(a,b){
   try{
   if(a==='syncSheet'){if(!S.mcp&&!S.backend){toast('Live sync needs Google Drive connected (in Claude) or the hosted version');return}return syncSheet(b)}
+  if(a.startsWith('wc_'))return wcAct(a,b);
   if(a.startsWith('st_')||a.startsWith('si_')){const r=await storeAct(a,b);if(r!==false)return}
   if(a==='pickOrders')return $('#ordersFile').click();
   if(a==='opPick')return $('#opFile')?$('#opFile').click():null;
