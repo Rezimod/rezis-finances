@@ -1653,11 +1653,12 @@ function vStock(){
   const valStore=vis.reduce((a,x)=>a+Math.max(0,x.lq)*(+x.cost||0),0),valWh=vis.reduce((a,x)=>a+whQ(x)*(+x.cost||0),0);
   const shelf=vis.reduce((a,x)=>a+Math.max(0,x.lq+whQ(x))*(x.sale>0&&x.sale<x.price?+x.sale:+x.price||0),0);
   const noCost=vis.filter(x=>(Math.max(0,x.lq)+whQ(x))>0&&!(+x.cost)).length;
+  const incSell=sellTotals(incoming().map(r=>({...lineSell({sku:r.sku,unit:r.qty?r.land/r.qty:0}),q:+r.qty||0,land:+r.land||0}))).v;
   const kpis=`<div class="kpis stock4">
    <div class="kpi"><div class="lbl">In the store</div><div class="val num">${cu(valStore)}<small>₾</small></div><div class="delta"><b class="num">${fmt(totStore)}</b> pieces · ${vis.filter(x=>x.lq>0).length} products · at cost</div></div>
    <div class="kpi"><div class="lbl">In the warehouse</div><div class="val num">${cu(valWh)}<small>₾</small></div><div class="delta"><b class="num">${fmt(totWh)}</b> pieces · ${vis.filter(x=>whQ(x)>0).length} products · at cost</div></div>
-   <div class="kpi"><div class="lbl">On the way</div><div class="val num">${cu(incLand)}<small>₾</small></div><div class="delta"><b class="num">${fmt(incQty)}</b> pieces · ${inc.length} line${inc.length===1?'':'s'} · landed cost</div></div>
-   <div class="kpi sum"><div class="lbl">Total stock</div><div class="val num">${cu(valStore+valWh+incLand)}<small>₾</small></div><div class="delta"><b class="num">${fmt(totStore+totWh+incQty)}</b> pieces · worth ${gel(shelf)} at shelf prices${noCost?` · <span style="color:var(--warn)">${noCost} without cost</span>`:''}</div></div></div>`;
+   <div class="kpi"><div class="lbl">On the way</div><div class="val num">${cu(incLand)}<small>₾</small></div><div class="delta"><b class="num">${fmt(incQty)}</b> pieces · ${inc.length} line${inc.length===1?'':'s'} · landed cost · sells for <b class="num" style="color:var(--accent)">${gel(incSell)}</b></div></div>
+   <div class="kpi sum"><div class="lbl">Total stock</div><div class="val num">${cu(valStore+valWh+incLand)}<small>₾</small></div><div class="delta"><b class="num">${fmt(totStore+totWh+incQty)}</b> pieces · worth <b class="num">${gel(shelf+incSell)}</b> at selling prices, ${gel(incSell)} of it on the way${noCost?` · <span style="color:var(--warn)">${noCost} without cost</span>`:''}</div></div></div>`;
   const q=(P.sq||'').toLowerCase();
   const cats=[...new Set(all.map(x=>x.cat||'სხვადასხვა'))].sort();
   const test=(x,k)=>k==='all'?!x.hidden:k==='in'?x.lq>0&&!x.hidden:k==='way'?x.inc>0:k==='out'?x.lq===0&&!x.inc&&!x.hidden:k==='neg'?x.lq<0:k==='noimg'?!x.img&&!x.hidden:k==='sale'?x.sale>0&&x.sale<x.price:k==='noprice'?!(+x.price>0)&&!x.hidden:k==='new'?!!x.fromOrder:k==='hidden'?!!x.hidden:true;
