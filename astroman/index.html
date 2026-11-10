@@ -1066,12 +1066,18 @@ function yearTable(ms){
 }
 
 /* ============================== hosted mode (GitHub Pages + Google Apps Script) ============================== */
+// In Safari on an iPhone the address keeps the connection, so Share → Add to Home Screen saves an icon that opens
+// already connected, even when the phone forgets what the app stored.
+const STANDALONE=navigator.standalone===true||!!(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);
+const KEEP_LINK=!STANDALONE&&(/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1));
+const linkCode=c=>btoa(unescape(encodeURIComponent(JSON.stringify({u:c.u,k:c.k})))).replace(/\+/g,'-').replace(/\//g,'_');
+function keepLink(c){if(KEEP_LINK&&c&&!/connect=/.test(location.hash))try{history.replaceState(null,'',location.pathname+'#connect='+linkCode(c))}catch(e){}}
 function readCreds(){
   const h=location.hash||'';const m=h.match(/connect=([A-Za-z0-9+/=_-]+)/);
-  if(m){try{const o=JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g,'+').replace(/_/g,'/')))));if(o.u&&o.k){lsSet('af.backend',JSON.stringify({u:o.u,k:o.k}));try{history.replaceState(null,'',location.pathname)}catch(e){}}}catch(e){}}
-  try{const c=JSON.parse(lsGet('af.backend')||'null');return c&&c.u&&c.k?c:null}catch(e){return null}
+  if(m){try{const o=JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g,'+').replace(/_/g,'/')))));if(o.u&&o.k){lsSet('af.backend',JSON.stringify({u:o.u,k:o.k}));if(!KEEP_LINK)try{history.replaceState(null,'',location.pathname)}catch(e){}}}catch(e){}}
+  try{const c=JSON.parse(lsGet('af.backend')||'null');if(c&&c.u&&c.k){keepLink(c);return c}return null}catch(e){return null}
 }
-function phoneLink(){const c=readCreds();if(!c)return '';const b=btoa(unescape(encodeURIComponent(JSON.stringify({u:c.u,k:c.k})))).replace(/\+/g,'-').replace(/\//g,'_');return location.origin+location.pathname+'#connect='+b}
+function phoneLink(){const c=readCreds();return c?location.origin+location.pathname+'#connect='+linkCode(c):''}
 // Google sometimes drops the body of a request and answers as if the address was just opened
 // ({ok,info}) or with an HTML error page; those answers are retried instead of taken as data.
 async function gasCall(u,k,body){
@@ -1309,7 +1315,7 @@ function fillMonthSel(){
   $('#topRecap').textContent=mShort(addMonth(thisMonth(),-1))+' recap';topAgo();
 }
 function route(){const h=(location.hash||'').slice(1);if(PAGES.some(p=>p.id===h)||h==='add'){S.view=h}S.animate=true;render()}
-function go(v){if(REP)closeRecap();if(v==='recap'){$('#moreSheet').classList.remove('open');return openRecap('month')}fillMonthSel();S.view=v;try{history.replaceState(null,'','#'+v)}catch(e){}if(v==='add')S.draft=null;S.animate=true;render();$('#main').focus({preventScroll:true});window.scrollTo({top:0})}
+function go(v){if(REP)closeRecap();if(v==='recap'){$('#moreSheet').classList.remove('open');return openRecap('month')}fillMonthSel();S.view=v;if(!KEEP_LINK)try{history.replaceState(null,'','#'+v)}catch(e){}if(v==='add')S.draft=null;S.animate=true;render();$('#main').focus({preventScroll:true});window.scrollTo({top:0})}
 function render(){
   S.renderedOnce=true;S.mc=new Map();
   document.querySelectorAll('#menu button,#tabbar button').forEach(b=>b.setAttribute('aria-current',b.dataset.go===S.view?'page':'false'));
@@ -1599,9 +1605,9 @@ const usdOfTx=t=>t.cur==='USD'&&t.orig?+t.orig:(()=>{const m=String(t.note||'').
 // (those carry goods and fees only, freight comes when they are shipped)
 function incoming(){const sd=lastCountDate();const out=[];
   for(const s of shipList()){if(s.personal)continue;const st=shipSt(s);if(st==='arrived'&&(s.stocked||!(s.arrivedAt&&sd&&s.arrivedAt>sd)))continue;
-    shipCalc(s).lines.forEach((l,i)=>!l.personal&&out.push({id:s.id+':'+i,shipId:s.id,item:l.n,sku:l.sku,qty:l.q,land:l.landed,date:s.shippedAt||s.date||'',status:st,arrivedAt:s.arrivedAt||''}))}
+    const nf=!(+s.freight>0);shipCalc(s).lines.forEach((l,i)=>!l.personal&&out.push({id:s.id+':'+i,shipId:s.id,grp:shipName(s),noFreight:nf,item:l.n,sku:l.sku,qty:l.q,land:l.landed,date:s.shippedAt||s.date||'',status:st,arrivedAt:s.arrivedAt||''}))}
   for(const o of orderList()){if(o.personal||shipOf(o))continue;const c=orderCalc(o);
-    c.lines.forEach((l,i)=>{const g=l.q*l.p;out.push({id:o.id+':'+i,orderId:o.id,item:l.n,sku:l.sku,qty:l.q,land:(g+(c.goods?(c.fee+c.dlv)*g/c.goods:0))*c.rate,date:o.date||'',status:'order',arrivedAt:''})})}
+    c.lines.forEach((l,i)=>{const g=l.q*l.p;out.push({id:o.id+':'+i,orderId:o.id,grp:o.supplier||'Order',noFreight:true,item:l.n,sku:l.sku,qty:l.q,land:(g+(c.goods?(c.fee+c.dlv)*g/c.goods:0))*c.rate,date:o.date||'',status:'order',arrivedAt:''})})}
   return out.sort((a,b)=>(b.date||'').localeCompare(a.date||''))}
 // import payments in the last 45 days of the stock list that no shipment describes
 function unlistedImports(){const sd=opDocs().stock?.at?.slice(0,10)||today();const from=new Date(Date.parse(sd)-45*864e5).toISOString().slice(0,10);
@@ -1624,9 +1630,9 @@ function vStock(){
   const per=M.sel?dLabel(M.sel.from)+' – '+dLabel(M.sel.to):'';
   const items=new Map(M.items.map(x=>[String(x.b),x]));
   const arr=arrivedToStock();
-  const incP=`<div class="panel"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">On the way</h2><p class="sub" style="margin:2px 0 0">${inc.length?fmt(incQty)+' pieces · '+gel(incLand)+' landed cost, not in stock yet.':'Nothing on the way.'}</p></div><span class="spacer"></span><button class="btn sm" data-go="imports">All imports</button></div>
+  const incP=`<div class="panel"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">On the way</h2><p class="sub" style="margin:2px 0 0">${inc.length?fmt(incQty)+' pieces · '+gel(incLand)+' landed cost · '+gel(incLand*MARKUP)+' to sell at 300%, not in stock yet.':'Nothing on the way.'}</p></div><span class="spacer"></span><button class="btn sm" data-go="imports">All imports</button></div>
    ${arr.length?`<div class="stack mt" style="gap:6px">${arr.map(x=>`<button class="btn amber" data-act="st_stockShip" data-id="${esc(x.id)}">${svg('M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',18)} Put in stock · ${esc(x.forwarder||'shipment')} · arrived ${esc(x.arrivedAt||'')}</button>`).join('')}</div>`:''}
-   ${inc.length?(()=>{const groups=new Map();inc.filter(s=>!/shipp|delivery|internal/i.test(s.item)).forEach(s=>{const k=s.shipId||s.orderId;const g=groups.get(k)||(groups.set(k,{k,ship:s.shipId,order:s.orderId,date:s.date,status:s.status,arrivedAt:s.arrivedAt,rows:[]}),groups.get(k));g.rows.push(s)});
+   ${inc.length?(()=>{const groups=new Map();inc.forEach(s=>{const k=s.shipId||s.orderId;const g=groups.get(k)||(groups.set(k,{k,ship:s.shipId,order:s.orderId,date:s.date,status:s.status,arrivedAt:s.arrivedAt,rows:[]}),groups.get(k));g.rows.push(s)});
      return `<div class="inway mt">${[...groups.values()].map(g=>`<div class="inwg"><div class="inwh" ${g.ship?`data-ship="${g.ship}"`:`data-order="${g.order}"`}><span class="chip ${g.status==='arrived'?'good':g.status==='order'?'':'warn'}">${g.status==='arrived'?'arrived '+esc(g.arrivedAt):g.status==='order'?'ordered':esc(stLabel(g.status))}</span><span class="muted small">${esc(g.date||'')}</span><span class="spacer"></span><b class="num">${fmt(g.rows.reduce((a,s)=>a+(+s.qty||0),0))} pcs</b></div>
       ${g.rows.map(s=>{const it=s.sku&&S.catalog.get(String(s.sku));return `<div class="inwr"><span class="nm" title="${esc(s.item)}">${it?esc(it.n):esc(s.item)}</span>${it?'':'<span class="chip warn">new</span>'}<b class="num">+${fmt(s.qty||0)}</b><span class="num muted">${s.qty?gel(s.land/s.qty,2):gel(s.land)}</span></div>`}).join('')}</div>`).join('')}</div>`})():''}</div>`;
   const un=unlistedImports();
@@ -2350,6 +2356,9 @@ function closeRecap(){REP=null;document.removeEventListener('keydown',repKey);$(
 // + its share of the shipment's freight, transport and other costs (by weight, value or pieces)
 // + its share of customs duty and import VAT (by customs value: goods + fees + freight).
 const isOrder=d=>!!d&&d.kind==='order';
+const SHIP_LINE=/^\s*(ship+ing|delivery|freight|internal)/i;
+// what is on the way is valued at 3× its landed cost; new products from a shipment get that price
+const MARKUP=3;
 const shipList=()=>[...S.ships.values()].filter(d=>!isOrder(d));
 const orderList=()=>[...S.ships.values()].filter(isOrder);
 const SHIP_ST=[['collecting','At the agent'],['transit','On the way'],['customs','In customs'],['arrived','Arrived']];
@@ -2382,8 +2391,9 @@ function payTxs(key,id){let ix=S.mc.get('#pay');
 function orderCalc(o){
   const k='#o'+o.id;if(o.id&&S.mc.has(k))return S.mc.get(k);
   const cur=o.cur||'USD';
-  const lines=(o.lines||[]).map(l=>({n:String(l.n||''),sku:l.sku||'',q:+l.q||0,p:+l.p||0,w:+l.w||0})).filter(l=>l.n||l.q||l.p);
-  const goods=lines.reduce((a,l)=>a+l.q*l.p,0),fee=+o.fee||0,dlv=+o.shipFee||0,total=goods+fee+dlv;
+  const all=(o.lines||[]).map(l=>({n:String(l.n||''),sku:l.sku||'',q:+l.q||0,p:+l.p||0,w:+l.w||0})).filter(l=>l.n||l.q||l.p);
+  const lines=all.filter(l=>!SHIP_LINE.test(l.n));
+  const goods=lines.reduce((a,l)=>a+l.q*l.p,0),fee=+o.fee||0,dlv=(+o.shipFee||0)+all.filter(l=>SHIP_LINE.test(l.n)).reduce((a,l)=>a+l.q*l.p,0),total=goods+fee+dlv;
   const pays=o.id?payTxs('o',o.id):[];
   const inCur=pays.filter(t=>cur!=='GEL'&&t.cur===cur&&+t.orig>0);
   let rate=cur==='GEL'?1:(+o.fx||lastRate(cur)),rateSrc=cur==='GEL'?'':'typed';
@@ -3221,7 +3231,7 @@ function vSettings(){
   ${S.hosted?sitePanel():''}
   <div class="panel stack"><h2>Backup &amp; devices</h2><p class="sub" style="margin:0">${S.hosted?'Your data is stored in your Google account (Apps Script). Every change waits on this device until Google confirms it, every change is also written to a permanent log, and a full copy of the data goes to the “Astroman Finance backups” folder in your Drive every night (kept 90 days).':'Your data is stored in your Claude account.'} A backup file moves everything between the Claude version and the hosted version.</p>
    <div class="row"><button class="btn" data-act="exportBackup">Download backup</button>${S.canWrite?'<button class="btn" data-act="pickBackup">Import backup</button><input type="file" id="backupFile" accept=".json,application/json" hidden>':''}<span class="muted small" id="impMsg" aria-live="polite"></span></div>
-   ${S.hosted&&readCreds()?`<label class="field"><span>Phone link: open it once on your phone to connect it (it contains your key, keep it private)</span><input class="input small" id="phLink" readonly value="${esc(phoneLink())}"></label><div class="qrbox"><div id="phQr" class="qr" aria-label="QR code of the phone link"></div><div class="small"><b>Connect a phone</b><div class="muted">Point the phone's camera at the code and open the link. It holds your key, so don't share a photo of it.</div></div></div><div class="row"><button class="btn" data-act="copyPhone">Copy phone link</button><button class="btn ghost" data-act="disconnect">Disconnect this device</button></div>`:''}</div>
+   ${S.hosted&&readCreds()?`<label class="field"><span>Phone link: open it once on your phone to connect it (it contains your key, keep it private)</span><input class="input small" id="phLink" readonly value="${esc(phoneLink())}"></label><div class="qrbox"><div id="phQr" class="qr" aria-label="QR code of the phone link"></div><div class="small"><b>Connect a phone</b><div class="muted">Point the phone's camera at the code and open the link. On an iPhone open it in Safari, then Share → Add to Home Screen: that icon stays connected. It holds your key, so don't share a photo of it.</div></div></div><div class="row"><button class="btn" data-act="copyPhone">Copy phone link</button><button class="btn ghost" data-act="disconnect">Disconnect this device</button></div>`:''}</div>
   <div class="panel"><h2>Your bank sorting rules</h2><p class="sub">Created when you correct a category during bank import.</p>
    ${rules.length?`<div class="flow">${rules.map(r=>`<div class="ln"><span class="k">“${esc(r.match)}” → ${catChip(r.cat)}</span><span class="v"><button class="btn sm ghost" data-rmrule="${r.id}">Remove</button></span></div>`).join('')}</div>`:'<div class="muted">No custom rules yet. Built-in rules cover Wolt, Glovo, Facebook, Optimo, forwarders, Bresser, utilities, the accountant and bank fees.</div>'}</div></div>`;
 }
@@ -3769,7 +3779,7 @@ function stockShipModal(id){
   const s=S.ships.get(id);if(!s)return;if(s.stocked){toast('Already put in stock on '+String(s.stocked.at).slice(0,10));return}
   const L=shipCalc(s).lines.filter(l=>!l.personal);
   const cats=[...S.catalog.values()].filter(x=>x.b).sort((a,b)=>a.n.localeCompare(b.n));
-  modal(`<h3>Put the shipment in stock</h3><p class="sub">${esc(s.forwarder||'Shipment')} · arrived ${esc(s.arrivedAt||'')} · ${L.length} line${L.length===1?'':'s'}. Each line is added to the warehouse or the store. A line whose barcode is on the register is matched already; an empty product box makes a new product. The landed cost per piece becomes the product cost.</p>
+  modal(`<h3>Put the shipment in stock</h3><p class="sub">${esc(s.forwarder||'Shipment')} · arrived ${esc(s.arrivedAt||'')} · ${L.length} line${L.length===1?'':'s'}. Each line is added to the warehouse or the store. A line whose barcode is on the register is matched already; an empty product box makes a new product. The landed cost per piece becomes the product cost; a new product gets 3× that as its price.</p>
    <datalist id="skCats">${cats.map(x=>`<option value="${esc(x.n)} · ${esc(x.b)}">`).join('')}</datalist>
    <div class="tablewrap"><table><thead><tr><th>From the invoice</th><th>Product on the register</th><th class="r">Pieces</th><th>Where</th></tr></thead><tbody>
    ${L.map((l,i)=>{const m=l.sku&&S.catalog.get(String(l.sku));const unit=l.q?l.landed/l.q:0;return `<tr><td><b>${esc(l.n)}</b><div class="small muted">${l.sku?'barcode '+esc(l.sku)+' · ':''}${gel(unit,2)} landed each</div></td><td><input class="input" list="skCats" data-sk="${i}" value="${m?esc(m.n+' · '+m.b):''}" placeholder="type to search · empty = new product"></td><td class="r"><input class="input num" data-skq="${i}" inputmode="numeric" value="${l.q}" style="max-width:80px"></td><td><select class="input" data-skw="${i}"><option value="qw">Warehouse</option><option value="qs">Store</option></select></td></tr>`}).join('')}</tbody></table></div>
@@ -3782,7 +3792,7 @@ async function stockShipGo(id){
     let b=null;const m=v.match(/ · ([^·]+)$/);if(m&&S.catalog.has(m[1].trim()))b=m[1].trim();else if(v){const f=[...S.catalog.values()].find(x=>x.n===v||nrm(x.n)===nrm(v));if(f)b=f.b;else{toast('Product not found: '+v);return}}
     const unit=l.q?l.landed/l.q:0;
     if(b){const cur=S.catalog.get(b);const patch={[to]:(to==='qs'?storeQ(cur):whQ(cur))+q};if(writeCost&&unit>0){patch.cost=r2(unit);patch.costEdited=true}await saveCat(b,patch)}
-    else{b=l.sku&&!S.catalog.has(String(l.sku))?String(l.sku):'I'+uid('').slice(0,8);await saveCat(b,{b,n:l.n,cat:'სხვადასხვა',price:0,sale:null,cost:writeCost?r2(unit):0,vat:'',q:0,qs:to==='qs'?q:0,qw:to==='qw'?q:0,min:0,sold:0,img:null,big:null,wooId:null,hidden:false,countedAt:new Date().toISOString(),nameEdited:true,priceEdited:true,costEdited:writeCost,storeNote:'from shipment '+(s.arrivedAt||'')})}
+    else{b=l.sku&&!S.catalog.has(String(l.sku))?String(l.sku):'I'+uid('').slice(0,8);await saveCat(b,{b,n:l.n,cat:'სხვადასხვა',price:unit>0?Math.round(unit*MARKUP):0,sale:null,cost:writeCost?r2(unit):0,vat:'',q:0,qs:to==='qs'?q:0,qw:to==='qw'?q:0,min:0,sold:0,img:null,big:null,wooId:null,hidden:false,countedAt:new Date().toISOString(),nameEdited:true,priceEdited:true,costEdited:writeCost,storeNote:'from shipment '+(s.arrivedAt||'')})}
     done.push({b,q,to,n:l.n})}
   if(!done.length){toast('Nothing to add');return}
   const {id:_,...rest}=s;await S.db.doc('ships/'+id).set({...rest,stocked:{at:new Date().toISOString(),lines:done}});closeModal();toast(done.length+' line'+(done.length===1?'':'s')+' added to stock');
@@ -3869,7 +3879,7 @@ function wcList(){const C=S.cnt,q=(C.q||'').toLowerCase().trim(),f=wcFilter();
     .sort((a,b)=>(a.cat||'სხვადასხვა').localeCompare(b.cat||'სხვადასხვა','ka')||a.n.localeCompare(b.n,'ka'))}
 function wcStats(){const all=wcItems(),done=all.filter(wcDone);return {all,done,pcs:done.reduce((a,x)=>a+whQ(x),0),val:done.reduce((a,x)=>a+whQ(x)*(+x.cost||0),0),diff:done.filter(x=>whQ(x)!==wcPrev(x))}}
 const storeCount=()=>[...S.counts.values()].filter(x=>x&&x.kind==='store').sort((a,b)=>String(b.enteredAt).localeCompare(String(a.enteredAt)))[0]||null;
-const wayLines=()=>incoming().filter(s=>!/shipp|delivery|internal/i.test(s.item));
+const wayLines=incoming;
 function stockTotals(){const all=wcItems();const way=wayLines();
   const st=all.reduce((a,x)=>{const q=Math.max(0,catLive(x));a.q+=q;a.v+=q*(+x.cost||0);if(q)a.n++;return a},{q:0,v:0,n:0});
   const wh=all.reduce((a,x)=>{const q=whQ(x);a.q+=q;a.v+=q*(+x.cost||0);if(q)a.n++;return a},{q:0,v:0,n:0});
@@ -3879,7 +3889,7 @@ function vCount(){
   const T=S.cnt.tab||'store';const {st,wh,wy}=stockTotals();const nd=dupGroups().length;
   const tile=(k,lbl,o,sub)=>`<button class="kpi wctile" data-act="wc_tab" data-v="${k}" aria-pressed="${T===k}"><div class="lbl">${lbl}</div><div class="val num">${fmt(o.q)}<small> pcs</small></div><div class="delta">${gel(o.v)} ${sub}</div></button>`;
   const head=`<div class="pagehead"><div><div class="eyebrow">აღწერა · მაღაზია · საწყობი · გზაში</div><h1>Stock count</h1><p>All stock in three places: the store (from the store count), the warehouse (counted here) and what is on the way. Deleting or merging a product anywhere shows here at once.</p></div><div class="actions"><button class="btn" data-act="wc_export">Download Excel</button><button class="btn ${nd?'amber':''}" data-act="st_dups">Duplicates${nd?' · '+nd:''}</button><button class="btn" data-act="st_add">+ Product</button></div></div>
-   <div class="kpis wckpis">${tile('store','In the store · მაღაზია',st,'at cost')}${tile('wh','In the warehouse · საწყობი',wh,'at cost')}${tile('way','On the way · გზაში',wy,'landed cost')}<div class="kpi sum"><div class="lbl">Total stock</div><div class="val num">${fmt(st.q+wh.q+wy.q)}<small> pcs</small></div><div class="delta">${gel(st.v+wh.v+wy.v)}</div></div></div>
+   <div class="kpis wckpis">${tile('store','In the store · მაღაზია',st,'at cost')}${tile('wh','In the warehouse · საწყობი',wh,'at cost')}${tile('way','On the way · გზაში',wy,'cost · '+gel(wy.v*MARKUP)+' to sell')}<div class="kpi sum"><div class="lbl">Total stock</div><div class="val num">${fmt(st.q+wh.q+wy.q)}<small> pcs</small></div><div class="delta">${gel(st.v+wh.v+wy.v)}</div></div></div>
    <div class="tabs" role="tablist" style="margin-bottom:14px">${[['store','Store'],['wh','Warehouse count'],['way','On the way']].map(([k,t])=>`<button role="tab" aria-selected="${T===k}" data-act="wc_tab" data-v="${k}">${t}</button>`).join('')}</div>`;
   return loadingOr(head+(T==='store'?countStore():T==='way'?countWay():countWh()));
 }
@@ -3912,10 +3922,21 @@ function countStore(){
 /* ---- on the way ---- */
 function countWay(){
   const inc=wayLines();if(!inc.length)return `<div class="panel empty"><b>Nothing on the way</b></div>`;
-  const groups=new Map();inc.forEach(s=>{const k=s.shipId||s.orderId;const g=groups.get(k)||(groups.set(k,{date:s.date,status:s.status,arrivedAt:s.arrivedAt,rows:[]}),groups.get(k));g.rows.push(s)});
-  return `<div class="stack">${[...groups.values()].map(g=>`<div class="panel"><div class="row" style="gap:8px;flex-wrap:wrap"><span class="chip ${g.status==='arrived'?'good':g.status==='order'?'':'warn'}">${g.status==='arrived'?'arrived '+esc(g.arrivedAt):g.status==='order'?'ordered':esc(stLabel(g.status))}</span><span class="muted small">${esc(g.date||'')}</span><span class="spacer"></span><b class="num">${fmt(g.rows.reduce((a,s)=>a+(+s.qty||0),0))} pcs · ${gel(g.rows.reduce((a,s)=>a+(+s.land||0),0))}</b></div>
-    <div class="flow mt">${g.rows.map(s=>{const x=s.sku&&S.catalog.get(String(s.sku));return `<div class="ln" ${x?`data-act="st_edit" data-b="${esc(x.b)}" style="cursor:pointer"`:''}><span class="k row" style="gap:8px">${thumb(x||{n:s.item},34)}<span><b>${esc(x?x.n:s.item)}</b><div class="small muted">${x?esc(x.b):'new product'}${x?` · store ${catLive(x)} · warehouse ${whQ(x)}`:''}</div></span></span><span class="v num"><b>+${fmt(s.qty||0)}</b><div class="small muted">${s.qty?gel(s.land/s.qty,2)+' each':''}</div></span></div>`}).join('')}</div></div>`).join('')}
-   <p class="hint">When a shipment arrives, put it in stock on the Products page (“Put in stock”): it moves from here to the store or the warehouse.</p></div>`;
+  const by=S.cnt.wayBy||'ship';
+  const merge=rows=>{const m=new Map();rows.forEach(s=>{const k=s.sku?String(s.sku):'n:'+nrm(s.item);const o=m.get(k)||(m.set(k,{sku:s.sku,item:s.item,qty:0,land:0,from:new Set()}),m.get(k));o.qty+=+s.qty||0;o.land+=+s.land||0;o.from.add(s.shipId||s.orderId)});return [...m.values()].sort((x,y)=>y.land-x.land)};
+  const pcs=rows=>rows.reduce((a,s)=>a+(+s.qty||0),0),cost=rows=>rows.reduce((a,s)=>a+(+s.land||0),0);
+  const money3=rows=>`${fmt(pcs(rows))} pcs · ${gel(cost(rows))} cost · <span style="color:var(--accent)">${gel(cost(rows)*MARKUP)} to sell</span>`;
+  const row=s=>{const x=s.sku&&S.catalog.get(String(s.sku));const unit=s.qty?s.land/s.qty:0;
+    return `<div class="ln" ${x?`data-act="st_edit" data-b="${esc(x.b)}" style="cursor:pointer"`:''}><span class="k row" style="gap:8px">${thumb(x||{n:s.item},34)}<span><b>${esc(x?x.n:s.item)}</b><div class="small muted">${x?esc(x.b):'new product'}${x&&+x.price?' · price now '+gel(+x.price):''}${s.from.size>1?' · in '+s.from.size+' shipments':''}</div></span></span><span class="v num"><b>+${fmt(s.qty)}</b><div class="small muted">${gel(unit,2)} → <b style="color:var(--accent)">${gel(unit*MARKUP,2)}</b> each</div></span></div>`};
+  const groups=new Map();inc.forEach(s=>{const k=s.shipId||s.orderId;const g=groups.get(k)||(groups.set(k,{ship:s.shipId,order:s.orderId,name:s.grp,date:s.date,status:s.status,arrivedAt:s.arrivedAt,noFreight:s.noFreight,rows:[]}),groups.get(k));g.rows.push(s)});
+  const G=[...groups.values()];const nf=G.filter(g=>g.noFreight);
+  const head=`<div class="panel"><div class="row" style="gap:10px;flex-wrap:wrap"><div><h2 style="margin:0">On the way · ${gel(cost(inc)*MARKUP)} to sell</h2><p class="sub" style="margin:2px 0 0">${fmt(pcs(inc))} pieces · ${gel(cost(inc))} landed cost · sale price = 300% of the cost · ${gel(cost(inc)*(MARKUP-1))} profit</p></div><span class="spacer"></span>
+    <div class="seg" role="group" aria-label="Group by">${[['ship','By shipment'],['prod','By product']].map(([k,t])=>`<button data-act="wc_way" data-v="${k}" aria-pressed="${by===k}">${t}</button>`).join('')}</div></div>
+    ${nf.length?`<p class="hint" style="margin:10px 0 0">${nf.length} of ${G.length} have no shipping costs yet (${nf.map(g=>esc(g.name)).join(', ')}). Cost and sale price go up as soon as you type freight, customs and transport in the shipment.</p>`:''}</div>`;
+  if(by==='prod')return `<div class="stack">${head}<div class="panel"><div class="flow">${merge(inc).map(row).join('')}</div></div></div>`;
+  return `<div class="stack">${head}${G.map(g=>`<div class="panel"><div class="row" style="gap:8px;flex-wrap:wrap"><span class="chip ${g.status==='arrived'?'good':g.status==='order'?'':'warn'}">${g.status==='arrived'?'arrived '+esc(g.arrivedAt):g.status==='order'?'ordered':esc(stLabel(g.status))}</span><b>${esc(g.name)}</b><span class="muted small">${esc(g.date||'')}</span>${g.noFreight?`<button class="btn sm amber" ${g.ship?`data-ship="${esc(g.ship)}"`:`data-order="${esc(g.order)}"`}>${g.ship?'Add shipping costs':'No shipment yet'}</button>`:`<button class="btn sm" data-ship="${esc(g.ship)}">Shipment</button>`}<span class="spacer"></span><span class="num small">${money3(g.rows)}</span></div>
+    <div class="flow mt">${merge(g.rows).map(row).join('')}</div></div>`).join('')}
+   <p class="hint">When a shipment arrives, put it in stock on the Products page (“Put in stock”): it moves from here to the store or the warehouse, and new products get the 300% price.</p></div>`;
 }
 /* ---- warehouse count ---- */
 function countWh(){
@@ -3985,6 +4006,7 @@ async function wcExport(){
   try{await S.downloads.save({filename:'astroman-stock-'+today()+'.xlsx',data:new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})})}catch(e){if(e.code!=='declined')toast('Download unavailable here')}
 }
 async function wcAct(a,b){
+  if(a==='wc_way'){S.cnt.wayBy=b.dataset.v;S.animate=true;render();return}
   if(a==='wc_tab'){S.cnt.tab=b.dataset.v;lsSet('af.cntTab',S.cnt.tab);S.animate=true;render();return}
   if(a==='wc_open')return wcSheet(b.dataset.b);
   if(a==='wc_filter'){S.cnt.f=b.dataset.v;return render()}
@@ -4064,7 +4086,7 @@ function bindView(){
   const fromLink=v=>{const m=String(v||'').match(/connect=([A-Za-z0-9+/=_-]+)/);if(!m)return null;try{const o=JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g,'+').replace(/_/g,'/')))));return o.u&&o.k?o:null}catch(e){return null}};
   on('#cnU','input',e=>{const o=fromLink(e.target.value);if(o){e.target.value=o.u;$('#cnK').value=o.k;$('#cnMsg').textContent='Phone link recognised — press Connect'}});
   on('#cnGo','click',async()=>{const o0=fromLink($('#cnU').value);if(o0){$('#cnU').value=o0.u;$('#cnK').value=o0.k}const u=$('#cnU').value.trim(),k=$('#cnK').value.trim();const msg=$('#cnMsg');if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(u)){msg.textContent='That doesn’t look like an Apps Script web-app URL';return}msg.textContent='Checking…';
-    try{await gasCall(u,k,{action:'ping'});lsSet('af.backend',JSON.stringify({u,k}));msg.textContent='Connected';S.view='overview';connectBackend({u,k});render()}catch(e){msg.textContent=e.message||'Could not connect'}});
+    try{await gasCall(u,k,{action:'ping'});lsSet('af.backend',JSON.stringify({u,k}));keepLink({u,k});msg.textContent='Connected';S.view='overview';connectBackend({u,k});render()}catch(e){msg.textContent=e.message||'Could not connect'}});
   on('#ordersFile','change',e=>{const f=e.target.files[0];if(f)readFile(f,wb=>{S.salesPreview=parseOrdersWorkbook(wb,f.name,true);openSalesPreview()})});
   document.querySelectorAll('th[data-sort]').forEach(th=>th.onclick=()=>{const k=th.dataset.sort;if(S.prod.sort===k)S.prod.dir*=-1;else{S.prod.sort=k;S.prod.dir=k==='n'?1:-1}render()});
   // drop zones
