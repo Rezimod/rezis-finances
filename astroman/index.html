@@ -9,7 +9,13 @@
 <meta name="apple-mobile-web-app-title" content="Mars">
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" type="image/png" href="icon-192.png">
-<style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
+<style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}#printRoot{display:none}
+@media print{body.printing>*:not(#printRoot){display:none!important}body.printing #printRoot{display:block}body.printing{background:#fff!important;color:#111}
+ #printRoot{font-family:"Helvetica Neue","Noto Sans Georgian",Arial,sans-serif;color:#111;font-size:10.5pt}#printRoot h1{font-size:17pt;margin:0 0 4px}#printRoot .sub{color:#555;margin:0 0 12px;font-size:10pt}
+ #printRoot table{width:100%;border-collapse:collapse}#printRoot thead{display:table-header-group}#printRoot th{text-align:left;font-size:8.5pt;color:#555;border-bottom:1.5px solid #111;padding:5px 6px}
+ #printRoot td{border-bottom:1px solid #ddd;padding:4px 6px;vertical-align:middle}#printRoot tr{break-inside:avoid}#printRoot .im img{width:62px;height:62px;object-fit:contain;display:block}
+ #printRoot .r{text-align:right;white-space:nowrap}#printRoot .q{font-weight:700}#printRoot .nt{color:#555;font-size:9pt}@page{size:A4;margin:12mm}}
+</style>
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.json">
 </head>
@@ -869,6 +875,7 @@ body:has(.wcs) .toast{bottom:auto;top:calc(14px + env(safe-area-inset-top,0px));
 <nav class="tabbar" id="tabbar" aria-label="Sections"></nav>
 <div class="moresheet" id="moreSheet"><div class="sheet" id="moreInner"></div></div>
 <div id="modalRoot"></div>
+<div id="printRoot"></div>
 <div id="toastRoot"></div>
 <div class="tip" id="tip" hidden></div>
 
@@ -3922,15 +3929,24 @@ function vCount(){
   return loadingOr(head+(T==='store'?countStore():T==='way'?countWay():countWh()));
 }
 /* ---- store: the store count with its own names, linked to the products ---- */
+// what is in the store right now: store stock (count minus register sales since) above 0, by name
+function storeNow(){return wcItems().map(x=>({...x,lq:catLive(x)})).filter(x=>x.lq>0).sort((a,b)=>a.n.localeCompare(b.n,'ka'))}
+function storeSoldSince(x){const c=String(x.countedAt||'');let n=0;S.pos.forEach(o=>{if(o.status==='void'||!o.lines)return;if(c&&(c.length>10?String(o.at||'')<c:(o.day||'')<c))return;o.lines.forEach(l=>{if(l.b===x.b)n+=+l.q||0})});return n}
+function storePrint(){const L=storeNow();const pcs=L.reduce((a,x)=>a+x.lq,0),val=L.reduce((a,x)=>a+x.lq*(+x.price||0),0);
+  const root=$('#printRoot');root.innerHTML=`<h1>ASTROMAN — მაღაზიის მარაგი</h1><p class="sub">${esc(dtShort(new Date().toISOString()))} · ${L.length} პროდუქტი · სულ ერთეული: <b>${fmt(pcs)}</b> · ღირებულება გასაყიდ ფასად: <b>${gel(val)}</b></p>
+   <table><thead><tr><th>№</th><th>სურათი</th><th>სახელი</th><th class="r">ფასი (ლარი)</th><th class="r">რაოდენობა</th><th>შენიშვნა</th></tr></thead><tbody>${L.map((x,i)=>`<tr><td>${i+1}</td><td class="im">${x.img?`<img src="${esc(x.img)}" alt="">`:''}</td><td>${esc(x.n)}</td><td class="r">${+x.price?fmt(+x.price,x.price%1?2:0):''}</td><td class="r q">${x.lq}</td><td class="nt">${esc(x.storeNote||'')}</td></tr>`).join('')}</tbody></table>`;
+  const imgs=[...root.querySelectorAll('img')];const go=()=>{document.body.classList.add('printing');const t=document.title;document.title='astroman-store-stock-'+today();window.print();document.title=t;setTimeout(()=>{document.body.classList.remove('printing');root.innerHTML=''},500)};
+  toast('Preparing the PDF…');Promise.all(imgs.map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r;setTimeout(r,8000)}))).then(go)}
 function countStore(){
   const R=storeCount();
   if(!R)return `<div class="panel empty"><b>No store count entered yet</b><span>The store count is entered from its PDF.</span></div>`;
-  const C=S.cnt,q=(C.sq||'').toLowerCase().trim(),f=C.sf||'all';
+  const C=S.cnt,q=(C.sq||'').toLowerCase().trim(),f=C.sf||'now';
   const linkOf=r=>(r.map||[]).map(m=>({...m,x:S.catalog.get(String(m.b))})).filter(m=>m.x&&!catGone(m.b));
   const test=r=>f==='in'?r.q>0:f==='blank'?r.q==null:f==='flag'?!!r.flag:f==='nolink'?!linkOf(r).length:true;
   const L=R.rows.filter(r=>(!q||r.n.toLowerCase().includes(q)||linkOf(r).some(m=>m.x.n.toLowerCase().includes(q)||String(m.b).includes(q)))&&test(r));
   const cnt=k=>R.rows.filter(r=>k==='in'?r.q>0:k==='blank'?r.q==null:k==='flag'?!!r.flag:k==='nolink'?!linkOf(r).length:true).length;
   const sold=new Map();(R.sold||[]).forEach(s=>sold.set(s.b,(sold.get(s.b)||0)+s.q));
+  const pills=[['now','In the store now',storeNow().length],['all','All count rows',cnt('all')],['in','Counted above 0',cnt('in')],['flag','Check',cnt('flag')],['blank','Left blank',cnt('blank')],['nolink','Not linked',cnt('nolink')]].map(([k,t,n])=>`<button data-act="wc_sf" data-v="${k}" aria-pressed="${f===k}" class="${k==='flag'&&n?'warn':''}">${t}<b>${n}</b></button>`).join('');
   const row=r=>{const ms=linkOf(r);const x=ms[0]&&ms[0].x;
     return `<div class="scrow ${r.q>0?'':'zero'}"><span class="scpic">${x&&x.img?`<img src="${esc(x.img)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=\\'ph\\'>${esc(posInitials(r.n))}</span>'">`:`<span class="ph">${esc(posInitials(r.n))}</span>`}</span>
      <span class="scb"><b>${esc(r.n)}</b><span class="small muted">№${r.no}${r.p!=null?' · '+gel(r.p,r.p%1?2:0):''}${r.oos?' · website: not in stock':''}</span>${r.note?`<span class="scnote">${esc(r.note)}</span>`:''}${r.flag?`<span class="scflag">${esc(r.flag)}</span>`:''}
@@ -3939,10 +3955,21 @@ function countStore(){
   const changed=Object.entries(R.prev||{}).map(([b,p])=>({b,p,x:S.catalog.get(b)})).filter(o=>o.x&&!catGone(o.b)&&String(o.p.countedAt||'').includes('T')&&String(o.p.countedAt)<String(R.enteredAt)&&(+o.p.qs||0)!==catLive(o.x));
   const linked=new Set();R.rows.forEach(r=>(r.map||[]).forEach(m=>linked.add(String(m.b))));
   const off=wcItems().filter(x=>!linked.has(String(x.b)));const offIn=off.filter(x=>catLive(x)>0);
+  const counted=new Map();R.rows.forEach(r=>(r.map||[]).forEach(m=>counted.set(String(m.b),(counted.get(String(m.b))||0)+(+m.q||0))));
+  const now=storeNow().filter(x=>!q||x.n.toLowerCase().includes(q)||String(x.b).includes(q));
+  const nowRow=x=>{const c=counted.get(String(x.b));const sl=storeSoldSince(x);
+    return `<div class="scrow"><span class="scpic">${x.img?`<img src="${esc(x.img)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=\\'ph\\'>${esc(posInitials(x.n))}</span>'">`:`<span class="ph">${esc(posInitials(x.n))}</span>`}</span>
+     <span class="scb"><button class="sclink" data-act="st_edit" data-b="${esc(x.b)}" style="padding:0"><b>${esc(x.n)}</b></button><span class="small muted">${esc(x.b)}${+x.price?' · '+gel(+x.price,x.price%1?2:0):''}${c!=null?' · counted '+c:''}${sl?' · '+sl+' sold since':''}</span>${x.storeNote?`<span class="scnote">${esc(x.storeNote)}</span>`:''}</span>
+     <span class="scq num">${x.lq}</span></div>`};
+  const nowPcs=now.reduce((a,x)=>a+x.lq,0);
+  if(f==='now')return `<div class="panel"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">In the store now · ${fmt(nowPcs)} pieces</h2><p class="sub" style="margin:3px 0 0">${now.length} products with stock in the store: the count minus everything sold on the register since. Products at 0 are hidden. The warehouse is not included.</p></div><span class="spacer"></span><button class="btn" data-act="wc_print">Download PDF</button></div>
+   <div class="wctools mt"><input class="input" id="scQ" type="search" autocomplete="off" placeholder="Search the store…" value="${esc(C.sq||'')}"></div>
+   <div class="pills" role="group" aria-label="Show">${pills}</div>
+   <div class="sclist mt">${now.map(nowRow).join('')||'<div class="empty"><b>Nothing here</b></div>'}</div></div>`;
   return `<div class="panel"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">Store count · ${fmt(R.total)} pieces counted</h2><p class="sub" style="margin:3px 0 0">${esc(R.file||'')} · entered ${esc(dtShort(R.enteredAt))}. Counted before the register's first sale (${esc(dtShort(R.before))}); the register sales since then (${(R.sold||[]).reduce((a,s)=>a+s.q,0)} pieces) are taken off. Tap a product to fix it or delete a duplicate.</p></div></div>
    ${changed.length?`<div class="sccheck"><b>Typed by hand on 6 Nov, different from the count (${changed.length})</b><p class="small muted" style="margin:2px 0 8px">The count is used now. If your own number was right, keep it.</p>${changed.map(o=>`<div class="ln"><span class="k row" style="gap:8px">${thumb(o.x,30)}<span><b>${esc(o.x.n)}</b><div class="small muted">${esc(o.b)} · you typed ${+o.p.qs||0} at ${esc(dtShort(o.p.countedAt))} · now ${catLive(o.x)}</div></span></span><span class="v"><button class="btn sm" data-act="wc_keepOld" data-b="${esc(o.b)}" data-q="${+o.p.qs||0}">Keep ${+o.p.qs||0}</button></span></div>`).join('')}</div>`:''}
    <div class="wctools mt"><input class="input" id="scQ" type="search" autocomplete="off" placeholder="Search the count…" value="${esc(C.sq||'')}"></div>
-   <div class="pills" role="group" aria-label="Show">${[['all','All rows',cnt('all')],['in','In the store',cnt('in')],['flag','Check',cnt('flag')],['blank','Left blank',cnt('blank')],['nolink','Not linked',cnt('nolink')]].map(([k,t,n])=>`<button data-act="wc_sf" data-v="${k}" aria-pressed="${f===k}" class="${k==='flag'&&n?'warn':''}">${t}<b>${n}</b></button>`).join('')}</div>
+   <div class="pills" role="group" aria-label="Show">${pills}</div>
    <div class="sclist mt">${L.map(row).join('')||'<div class="empty"><b>Nothing here</b></div>'}</div></div>
    <div class="panel mt"><h2>Not on the count sheet · ${off.length}</h2><p class="sub">The count sheet lists the website products. These others were not on it, so none of them is in the store — all their stock is in the warehouse.${offIn.length?` <b style="color:var(--warn)">${offIn.length} still show store stock:</b>`:''}</p>
     ${offIn.length?`<div class="flow">${offIn.map(x=>`<button class="ln sclink" data-act="st_edit" data-b="${esc(x.b)}"><span class="k row" style="gap:8px">${thumb(x,30)}<span><b>${esc(x.n)}</b><div class="small muted">${esc(x.b)}</div></span></span><span class="v num">store ${catLive(x)}</span></button>`).join('')}</div>`:''}</div>`;
@@ -4051,6 +4078,7 @@ async function wcAct(a,b){
   if(a==='wc_keepOld'){const x=S.catalog.get(b.dataset.b);if(!x)return;await saveCat(x.b,{qs:+b.dataset.q,countedAt:new Date().toISOString()});render();return toast(x.n+': '+b.dataset.q+' in the store')}
   if(a==='wc_finish')return wcFinishModal();
   if(a==='wc_export')return wcExport();
+  if(a==='wc_print')return storePrint();
   if(a==='wc_done'){const s=WC();if(!s)return closeModal();const zero=($('input[name="wcLeft"]:checked')||{}).value==='zero';const at=new Date().toISOString();const {all,done,pcs,val,diff}=wcStats();
     const had=zero?all.filter(x=>!wcDone(x)&&whQ(x)>0):[];for(const x of had)await saveCat(x.b,{qw:0,qwAt:at,qwPrev:whQ(x)});
     const {pausedAt,...rest}=s;
