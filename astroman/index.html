@@ -1605,9 +1605,9 @@ const usdOfTx=t=>t.cur==='USD'&&t.orig?+t.orig:(()=>{const m=String(t.note||'').
 // (those carry goods and fees only, freight comes when they are shipped)
 function incoming(){const sd=lastCountDate();const out=[];
   for(const s of shipList()){if(s.personal)continue;const st=shipSt(s);if(st==='arrived'&&(s.stocked||!(s.arrivedAt&&sd&&s.arrivedAt>sd)))continue;
-    const nf=!(+s.freight>0);shipCalc(s).lines.forEach((l,i)=>!l.personal&&out.push({id:s.id+':'+i,shipId:s.id,grp:shipName(s),noFreight:nf,item:l.n,sku:l.sku,qty:l.q,land:l.landed,date:s.shippedAt||s.date||'',status:st,arrivedAt:s.arrivedAt||''}))}
+    const nf=!(+s.freight>0);shipCalc(s).lines.forEach((l,i)=>!l.personal&&out.push({id:s.id+':'+i,shipId:s.id,ref:{o:l.orderId||'',s:s.id,li:l.li},grp:shipName(s),noFreight:nf,item:l.n,sku:l.sku,qty:l.q,land:l.landed,date:s.shippedAt||s.date||'',status:st,arrivedAt:s.arrivedAt||''}))}
   for(const o of orderList()){if(o.personal||shipOf(o))continue;const c=orderCalc(o);
-    c.lines.forEach((l,i)=>{const g=l.q*l.p;out.push({id:o.id+':'+i,orderId:o.id,grp:o.supplier||'Order',noFreight:true,item:l.n,sku:l.sku,qty:l.q,land:(g+(c.goods?(c.fee+c.dlv)*g/c.goods:0))*c.rate,date:o.date||'',status:'order',arrivedAt:''})})}
+    c.lines.forEach((l,i)=>{const g=l.q*l.p;out.push({id:o.id+':'+i,orderId:o.id,ref:{o:o.id,li:l.i},grp:o.supplier||'Order',noFreight:true,item:l.n,sku:l.sku,qty:l.q,land:(g+(c.goods?(c.fee+c.dlv)*g/c.goods:0))*c.rate,date:o.date||'',status:'order',arrivedAt:''})})}
   return out.sort((a,b)=>(b.date||'').localeCompare(a.date||''))}
 // import payments in the last 45 days of the stock list that no shipment describes
 function unlistedImports(){const sd=opDocs().stock?.at?.slice(0,10)||today();const from=new Date(Date.parse(sd)-45*864e5).toISOString().slice(0,10);
@@ -1638,7 +1638,7 @@ function vStock(){
   const un=unlistedImports();
   const unP=un.length?`<div class="panel"><h2>Imports paid, items not listed</h2><p class="sub">${gel(un.reduce((a,t)=>a+t.gel,0))} paid in the last 45 days with no item list. Tap Add items and write what was in the order.</p><div class="flow">${un.map(t=>`<div class="ln"><span class="k"><b>${esc(t.vendor||'Import')}</b><div class="small muted">${esc(t.date)}${usdOfTx(t)?' · $'+fmt(usdOfTx(t),2):''}</div></span><span class="v"><span class="num">${gel(t.gel)}</span> <button class="btn sm" data-act="shipFromTx" data-id="${esc(t.id)}">Add items</button></span></div>`).join('')}</div></div>`:'';
   // the product list is the shared catalog: what the register sells, with Optimo's sold/profit figures joined by barcode
-  const byInc=new Map(rows.filter(x=>!x.isNew).map(x=>[String(x.b),x.inc]));
+  const byInc=new Map([...incBy()].map(([b,o])=>[b,o.q]));
   const mgOf=(x,m)=>m&&m.unit!=null&&x.price?m.unit/(x.vat==='ჩვეულებრივი'?x.price/1.18:x.price):null;
   const all=[...S.catalog.values()].filter(x=>x&&x.b&&!catGone(x.b)).map(x=>{const m=items.get(String(x.b));return {...x,lq:catLive(x),inc:byInc.get(String(x.b))||0,sq:m?m.sq:0,profit:m?m.profit:0,mg:mgOf(x,m),sv:(Math.max(catLive(x)+whQ(x),0)+(byInc.get(String(x.b))||0))*(+x.cost||0)}});
   const vis=all.filter(x=>!x.hidden);
@@ -2391,7 +2391,7 @@ function payTxs(key,id){let ix=S.mc.get('#pay');
 function orderCalc(o){
   const k='#o'+o.id;if(o.id&&S.mc.has(k))return S.mc.get(k);
   const cur=o.cur||'USD';
-  const all=(o.lines||[]).map(l=>({n:String(l.n||''),sku:l.sku||'',q:+l.q||0,p:+l.p||0,w:+l.w||0})).filter(l=>l.n||l.q||l.p);
+  const all=(o.lines||[]).map((l,i)=>({i,n:String(l.n||''),sku:l.sku||'',q:+l.q||0,p:+l.p||0,w:+l.w||0})).filter(l=>l.n||l.q||l.p);
   const lines=all.filter(l=>!SHIP_LINE.test(l.n));
   const goods=lines.reduce((a,l)=>a+l.q*l.p,0),fee=+o.fee||0,dlv=(+o.shipFee||0)+all.filter(l=>SHIP_LINE.test(l.n)).reduce((a,l)=>a+l.q*l.p,0),total=goods+fee+dlv;
   const pays=o.id?payTxs('o',o.id):[];
@@ -2409,8 +2409,8 @@ function shipCalc(s){
   const L=[];
   for(const o of orders){const c=orderCalc(o);const fv=+o.vatFixed||0,fd=+o.dutyFixed||0,fx2=fv>0||fd>0;
     c.lines.forEach(l=>{const g=l.q*l.p;const sh=c.goods?g/c.goods:1/c.lines.length;
-    L.push({n:l.n,sku:l.sku,q:l.q,kg:l.w*l.q,goods:g*c.rate,fee:(c.fee+c.dlv)*c.rate*sh,orderId:o.id,sup:o.supplier||'',cur:c.cur,price:l.p,personal:!!o.personal,fixed:fx2,fv:fv*sh,fd:fd*sh})})}
-  if(+s.usd>0)L.push({n:s.item||'Goods',sku:s.sku||'',q:+s.qty||0,kg:0,goods:+s.usd*(+s.fx||fx()),fee:0,legacy:true,cur:'USD',price:+s.qty?+s.usd/+s.qty:+s.usd});
+    L.push({li:l.i,n:l.n,sku:l.sku,q:l.q,kg:l.w*l.q,goods:g*c.rate,fee:(c.fee+c.dlv)*c.rate*sh,orderId:o.id,sup:o.supplier||'',cur:c.cur,price:l.p,personal:!!o.personal,fixed:fx2,fv:fv*sh,fd:fd*sh})})}
+  if(+s.usd>0)L.push({li:-1,n:s.item||'Goods',sku:s.sku||'',q:+s.qty||0,kg:0,goods:+s.usd*(+s.fx||fx()),fee:0,legacy:true,cur:'USD',price:+s.qty?+s.usd/+s.qty:+s.usd});
   const fc=s.freightCur||'GEL';const fRate=fc==='GEL'?1:(+s.freightFx||lastRate(fc));
   const freight=(+s.freight||0)*fRate;
   const local=+s.local||0,other=+s.other||0,duty=+s.customs||0,vat=+s.vat||0,vIn=vatInCost();
@@ -3880,6 +3880,34 @@ function wcList(){const C=S.cnt,q=(C.q||'').toLowerCase().trim(),f=wcFilter();
 function wcStats(){const all=wcItems(),done=all.filter(wcDone);return {all,done,pcs:done.reduce((a,x)=>a+whQ(x),0),val:done.reduce((a,x)=>a+whQ(x)*(+x.cost||0),0),diff:done.filter(x=>whQ(x)!==wcPrev(x))}}
 const storeCount=()=>[...S.counts.values()].filter(x=>x&&x.kind==='store').sort((a,b)=>String(b.enteredAt).localeCompare(String(a.enteredAt)))[0]||null;
 const wayLines=incoming;
+// the product an on-the-way line belongs to: its code, or the product that code was merged into; '' = not linked
+function wayProduct(sku){const k=String(sku||'');if(!k)return '';let mv=S.mc.get('#mv');
+  if(!mv){mv=new Map();S.catalog.forEach(x=>(x&&x.merged||[]).forEach(m=>mv.set(String(m),x.b)));S.mc.set('#mv',mv)}
+  const b=mv.get(k)||k;return S.catalog.has(b)&&!goneSet().has(b)?b:''}
+function incBy(){if(S.mc.has('#inc'))return S.mc.get('#inc');const m=new Map();
+  incoming().forEach(s=>{const b=wayProduct(s.sku);if(!b)return;const o=m.get(b)||(m.set(b,{q:0,land:0}),m.get(b));o.q+=+s.qty||0;o.land+=+s.land||0});
+  S.mc.set('#inc',m);return m}
+// link on-the-way lines to a product: writes the code into the order line (or the old-style shipment)
+async function linkWay(refs,b){const by=new Map();refs.forEach(r=>{const id=r.li<0?r.s:r.o;if(id)by.set(id,(by.get(id)||[]).concat(r))});
+  for(const [id,rs] of by){const d=S.ships.get(id);if(!d)continue;const n={...d,lines:(d.lines||[]).map(l=>({...l}))};
+    rs.forEach(r=>{if(r.li<0)n.sku=b;else if(n.lines[r.li])n.lines[r.li].sku=b});await putShip(id,n)}}
+function wayLinkModal(key){const W=S.wayRows&&S.wayRows.get(key);if(!W)return;const cur=wayProduct(W.sku);const x0=cur&&S.catalog.get(cur);
+  const unit=W.qty?W.land/W.qty:0;const words=nrm(W.item).split(' ').filter(w=>w.length>2);
+  const cands=[...S.catalog.values()].filter(x=>x&&x.b&&!catGone(x.b)&&x.cat!=='მიწოდება');
+  const score=x=>{const t=nrm(x.n+' '+x.b);return words.reduce((a,w)=>a+(t.includes(w)?w.length:0),0)};
+  const list=q=>{q=nrm(q);const r=q?cands.filter(x=>nrm(x.n+' '+x.b).includes(q)):cands.map(x=>[x,score(x)]).filter(a=>a[1]>0).sort((a,b)=>b[1]-a[1]).map(a=>a[0]);
+    return r.slice(0,12).map(x=>`<button class="ln wlpick" data-wl="${esc(x.b)}" style="width:100%;text-align:left;cursor:pointer;background:none;border:0;border-bottom:1px solid var(--line);padding:8px 0;color:inherit"><span class="k row" style="gap:8px">${thumb(x,34)}<span><b>${esc(x.n)}</b><div class="small muted">${esc(x.b)} · store ${catLive(x)} · warehouse ${whQ(x)}${(incBy().get(x.b)||{}).q?' · coming '+incBy().get(x.b).q:''}${+x.price?' · '+gel(+x.price):''}</div></span></span><span class="v">${x.b===cur?'<span class="chip good">linked</span>':''}</span></button>`).join('')||'<p class="muted small">No product found. Try another word or the barcode.</p>'};
+  modal(`<h3>Link to a product</h3><p class="sub">From the invoice: <b>${esc(W.item)}</b> · ${fmt(W.qty)} pcs · ${gel(unit,2)} cost each${W.refs.length>1?' · '+W.refs.length+' invoice lines':''}</p>
+   <p class="small">${x0?`Now linked to <b>${esc(x0.n)}</b> (${esc(x0.b)}).`:'<span class="chip warn">Not linked</span> It is not counted as coming for any product.'}</p>
+   <input class="input" id="wlQ" placeholder="Search products by name or barcode" autocomplete="off">
+   <div id="wlList" class="mt" style="max-height:52vh;overflow:auto">${list('')}</div>
+   <div class="row mt" style="flex-wrap:wrap"><button class="btn" id="wlNew">It's a new product: create it</button>${x0?'<button class="btn" id="wlOff">Unlink</button>':''}<span class="spacer"></span><button class="btn" data-close>Cancel</button></div>`,true);
+  const pick=async b=>{await linkWay(W.refs,b);closeModal();const x=S.catalog.get(b);toast(x?'Linked to '+x.n:'Unlinked')};
+  const bindL=()=>document.querySelectorAll('#wlList [data-wl]').forEach(e=>e.onclick=()=>pick(e.dataset.wl));bindL();
+  $('#wlQ').oninput=e=>{$('#wlList').innerHTML=list(e.target.value);bindL()};
+  $('#wlNew').onclick=async()=>{const b='I'+uid('').slice(0,8);await saveCat(b,{b,n:W.item,cat:'სხვადასხვა',price:unit>0?Math.round(unit*MARKUP):0,sale:null,cost:r2(unit),vat:'',q:0,qs:0,qw:0,min:0,sold:0,img:null,big:null,wooId:null,hidden:false,countedAt:new Date().toISOString(),nameEdited:true,priceEdited:true,costEdited:true,storeNote:'on the way'});await pick(b)};
+  if(x0)$('#wlOff').onclick=()=>pick('');
+}
 function stockTotals(){const all=wcItems();const way=wayLines();
   const st=all.reduce((a,x)=>{const q=Math.max(0,catLive(x));a.q+=q;a.v+=q*(+x.cost||0);if(q)a.n++;return a},{q:0,v:0,n:0});
   const wh=all.reduce((a,x)=>{const q=whQ(x);a.q+=q;a.v+=q*(+x.cost||0);if(q)a.n++;return a},{q:0,v:0,n:0});
@@ -3923,19 +3951,24 @@ function countStore(){
 function countWay(){
   const inc=wayLines();if(!inc.length)return `<div class="panel empty"><b>Nothing on the way</b></div>`;
   const by=S.cnt.wayBy||'ship';
-  const merge=rows=>{const m=new Map();rows.forEach(s=>{const k=s.sku?String(s.sku):'n:'+nrm(s.item);const o=m.get(k)||(m.set(k,{sku:s.sku,item:s.item,qty:0,land:0,from:new Set()}),m.get(k));o.qty+=+s.qty||0;o.land+=+s.land||0;o.from.add(s.shipId||s.orderId)});return [...m.values()].sort((x,y)=>y.land-x.land)};
+  S.wayRows=new Map();
+  const merge=(rows,gk)=>{const m=new Map();rows.forEach(s=>{const b=wayProduct(s.sku);const k=(gk||'')+'|'+(b||'n:'+nrm(s.item));const o=m.get(k)||(m.set(k,{key:k,sku:b,item:s.item,qty:0,land:0,from:new Set(),refs:[]}),m.get(k));o.qty+=+s.qty||0;o.land+=+s.land||0;o.from.add(s.shipId||s.orderId);o.refs.push(s.ref)});
+    const r=[...m.values()].sort((x,y)=>!x.sku-!y.sku||y.land-x.land);r.forEach(o=>S.wayRows.set(o.key,o));return r};
+  const unl=inc.filter(s=>!wayProduct(s.sku));
   const pcs=rows=>rows.reduce((a,s)=>a+(+s.qty||0),0),cost=rows=>rows.reduce((a,s)=>a+(+s.land||0),0);
   const money3=rows=>`${fmt(pcs(rows))} pcs · ${gel(cost(rows))} cost · <span style="color:var(--accent)">${gel(cost(rows)*MARKUP)} to sell</span>`;
-  const row=s=>{const x=s.sku&&S.catalog.get(String(s.sku));const unit=s.qty?s.land/s.qty:0;
-    return `<div class="ln" ${x?`data-act="st_edit" data-b="${esc(x.b)}" style="cursor:pointer"`:''}><span class="k row" style="gap:8px">${thumb(x||{n:s.item},34)}<span><b>${esc(x?x.n:s.item)}</b><div class="small muted">${x?esc(x.b):'new product'}${x&&+x.price?' · price now '+gel(+x.price):''}${s.from.size>1?' · in '+s.from.size+' shipments':''}</div></span></span><span class="v num"><b>+${fmt(s.qty)}</b><div class="small muted">${gel(unit,2)} → <b style="color:var(--accent)">${gel(unit*MARKUP,2)}</b> each</div></span></div>`};
+  const row=s=>{const x=s.sku&&S.catalog.get(s.sku);const unit=s.qty?s.land/s.qty:0;const same=x&&nrm(x.n)===nrm(s.item);
+    return `<div class="ln" data-act="wc_link" data-k="${esc(s.key)}" style="cursor:pointer"><span class="k row" style="gap:8px">${thumb(x||{n:s.item},34)}<span><b>${esc(x?x.n:s.item)}</b><div class="small muted">${x?`${esc(x.b)} · store ${catLive(x)} · warehouse ${whQ(x)}${+x.price?' · price now '+gel(+x.price):''}`:'<span class="chip warn">Not linked</span> not counted for any product'}${x&&!same?' · invoice: '+esc(s.item):''}${s.from.size>1?' · in '+s.from.size+' shipments':''}</div></span></span><span class="v num"><b>+${fmt(s.qty)}</b><div class="small muted">${gel(unit,2)} → <b style="color:var(--accent)">${gel(unit*MARKUP,2)}</b> each</div><button class="btn sm ${x?'':'amber'}" style="margin-top:4px" tabindex="-1">${x?'Change':'Link'}</button></span></div>`};
   const groups=new Map();inc.forEach(s=>{const k=s.shipId||s.orderId;const g=groups.get(k)||(groups.set(k,{ship:s.shipId,order:s.orderId,name:s.grp,date:s.date,status:s.status,arrivedAt:s.arrivedAt,noFreight:s.noFreight,rows:[]}),groups.get(k));g.rows.push(s)});
   const G=[...groups.values()];const nf=G.filter(g=>g.noFreight);
   const head=`<div class="panel"><div class="row" style="gap:10px;flex-wrap:wrap"><div><h2 style="margin:0">On the way · ${gel(cost(inc)*MARKUP)} to sell</h2><p class="sub" style="margin:2px 0 0">${fmt(pcs(inc))} pieces · ${gel(cost(inc))} landed cost · sale price = 300% of the cost · ${gel(cost(inc)*(MARKUP-1))} profit</p></div><span class="spacer"></span>
-    <div class="seg" role="group" aria-label="Group by">${[['ship','By shipment'],['prod','By product']].map(([k,t])=>`<button data-act="wc_way" data-v="${k}" aria-pressed="${by===k}">${t}</button>`).join('')}</div></div>
-    ${nf.length?`<p class="hint" style="margin:10px 0 0">${nf.length} of ${G.length} have no shipping costs yet (${nf.map(g=>esc(g.name)).join(', ')}). Cost and sale price go up as soon as you type freight, customs and transport in the shipment.</p>`:''}</div>`;
-  if(by==='prod')return `<div class="stack">${head}<div class="panel"><div class="flow">${merge(inc).map(row).join('')}</div></div></div>`;
+    <div class="seg" role="group" aria-label="Group by">${[['ship','By shipment'],['prod','By product']].concat(unl.length||by==='unl'?[['unl','Not linked · '+unl.length]]:[]).map(([k,t])=>`<button data-act="wc_way" data-v="${k}" aria-pressed="${by===k}">${t}</button>`).join('')}</div></div>
+    ${unl.length?`<p class="hint" style="margin:10px 0 0"><b>${unl.length} line${unl.length===1?' is':'s are'} not linked</b> to a product, so ${unl.length===1?'it is':'they are'} not counted as coming. Tap Not linked to fix.</p>`:''}${nf.length?`<p class="hint" style="margin:10px 0 0">${nf.length} of ${G.length} have no shipping costs yet (${nf.map(g=>esc(g.name)).join(', ')}). Cost and sale price go up as soon as you type freight, customs and transport in the shipment.</p>`:''}</div>`;
+  const tip=`<p class="hint" style="margin:0 0 10px">Tap a line to link it to a product in the store. Linked lines count as “coming” for that product on the Products page.</p>`;
+  if(by==='prod')return `<div class="stack">${head}<div class="panel">${tip}<div class="flow">${merge(inc).map(row).join('')}</div></div></div>`;
+  if(by==='unl')return `<div class="stack">${head}<div class="panel">${unl.length?tip+`<div class="flow">${merge(unl).map(row).join('')}</div>`:'<b>Every line on the way is linked to a product.</b>'}</div></div>`;
   return `<div class="stack">${head}${G.map(g=>`<div class="panel"><div class="row" style="gap:8px;flex-wrap:wrap"><span class="chip ${g.status==='arrived'?'good':g.status==='order'?'':'warn'}">${g.status==='arrived'?'arrived '+esc(g.arrivedAt):g.status==='order'?'ordered':esc(stLabel(g.status))}</span><b>${esc(g.name)}</b><span class="muted small">${esc(g.date||'')}</span>${g.noFreight?`<button class="btn sm amber" ${g.ship?`data-ship="${esc(g.ship)}"`:`data-order="${esc(g.order)}"`}>${g.ship?'Add shipping costs':'No shipment yet'}</button>`:`<button class="btn sm" data-ship="${esc(g.ship)}">Shipment</button>`}<span class="spacer"></span><span class="num small">${money3(g.rows)}</span></div>
-    <div class="flow mt">${merge(g.rows).map(row).join('')}</div></div>`).join('')}
+    <div class="flow mt">${merge(g.rows,g.ship||g.order).map(row).join('')}</div></div>`).join('')}
    <p class="hint">When a shipment arrives, put it in stock on the Products page (“Put in stock”): it moves from here to the store or the warehouse, and new products get the 300% price.</p></div>`;
 }
 /* ---- warehouse count ---- */
@@ -4006,6 +4039,7 @@ async function wcExport(){
   try{await S.downloads.save({filename:'astroman-stock-'+today()+'.xlsx',data:new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})})}catch(e){if(e.code!=='declined')toast('Download unavailable here')}
 }
 async function wcAct(a,b){
+  if(a==='wc_link')return wayLinkModal(b.dataset.k);
   if(a==='wc_way'){S.cnt.wayBy=b.dataset.v;S.animate=true;render();return}
   if(a==='wc_tab'){S.cnt.tab=b.dataset.v;lsSet('af.cntTab',S.cnt.tab);S.animate=true;render();return}
   if(a==='wc_open')return wcSheet(b.dataset.b);
