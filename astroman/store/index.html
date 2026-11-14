@@ -230,6 +230,64 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 .setup{flex:1;display:grid;place-items:center;padding:20px}
 .setup .box{width:min(560px,100%);background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;display:grid;gap:12px}
 
+/* ---------- stock count (აღწერა) ---------- */
+.cpill{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;background:var(--warn-bg);color:var(--warn);font-weight:700;font-size:12.5px;padding:7px 12px;min-height:36px}
+.cpill .num{font-weight:700}
+.backbar .ttl{display:grid;line-height:1.25}.backbar .ttl small{font-size:12px;color:var(--muted)}
+.backbar .acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.cwrap{flex:1;min-height:0;display:flex;flex-direction:column;padding:12px 14px 0;gap:0}
+.chint{margin:0 0 10px;color:var(--ink-2);font-size:13px}
+.cbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+.cbar .btn{min-height:38px;padding:7px 12px;font-size:13px}
+.cbar .on{background:#EEF3FF;border-color:var(--brand);color:var(--brand)}
+.cbar .cnt{font-weight:700;color:var(--brand)}
+.card.csel{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand)}
+.card .ck{position:absolute;top:8px;left:8px;width:26px;height:26px;border-radius:8px;border:2px solid #C7CEE0;background:#fff;display:grid;place-items:center;color:#fff}
+.card.csel .ck{background:var(--brand);border-color:var(--brand)}
+.card.cin{opacity:.5;cursor:default}
+.card.cin .ck{background:var(--good);border-color:var(--good)}
+.grid.list .card .ck{position:static;order:0}
+.cprog{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px;display:grid;gap:8px}
+.cpbar{height:10px;border-radius:999px;background:var(--surface-2);overflow:hidden;display:flex}
+.cpbar i{display:block;height:100%}.cpbar .ok{background:var(--good)}.cpbar .bad{background:var(--bad)}
+.cnums{display:flex;gap:14px;flex-wrap:wrap;align-items:baseline;font-size:13px;color:var(--ink-2)}
+.cnums b{font-size:18px;color:var(--ink)}.cnums .g{color:var(--good);font-weight:700}.cnums .r{color:var(--bad);font-weight:700}
+.clist{flex:1;overflow:auto;min-height:0;display:grid;gap:6px;align-content:start;grid-auto-rows:max-content;padding:2px 2px 16px}
+.crow{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:12px;align-items:center;padding:6px 12px 6px 6px;border:1px solid var(--line);border-radius:12px;background:var(--surface);text-align:left;width:100%;min-height:64px}
+.crow img,.crow .ph{width:52px;height:52px;border-radius:10px;object-fit:contain;background:var(--surface-2);padding:2px}
+.crow .cn{min-width:0;display:grid}.crow .cn b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crow .cn small{font-size:11.5px;color:var(--muted);font-family:var(--f-num)}
+.crow.st-ok{border-color:color-mix(in srgb,var(--good) 45%,var(--line));background:linear-gradient(90deg,var(--good-bg),var(--surface) 40%)}
+.crow.st-bad{border-color:color-mix(in srgb,var(--bad) 45%,var(--line));background:linear-gradient(90deg,var(--bad-bg),var(--surface) 40%)}
+.cres{display:grid;justify-items:end;gap:2px;text-align:right}.cres small{font-size:11.5px;color:var(--ink-2)}
+.chip.big{font-size:13px;padding:4px 11px}
+.cm{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;align-items:center}
+.cm img,.cm .ph{width:120px;height:120px;border-radius:14px;object-fit:contain;background:#fff;border:1px solid var(--line);padding:4px;font-size:26px}
+.cm .cmn{font-weight:700;font-size:17px;line-height:1.3}
+.cm .bc{font-size:12px;color:var(--muted);font-family:var(--f-num)}
+.cq{display:grid;grid-template-columns:64px minmax(0,1fr) 64px;gap:8px}
+.cq button{border:1px solid var(--line);background:var(--surface-2);border-radius:12px;font-size:28px;font-weight:700;min-height:64px}
+.cq input{border:2px solid var(--brand);border-radius:12px;text-align:center;font-size:34px;font-weight:700;font-family:var(--f-num);min-height:64px;outline:none;width:100%}
+.ckeys{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.ckeys button{border:1px solid var(--line);background:var(--surface);border-radius:12px;font-size:22px;min-height:52px;font-family:var(--f-num);font-weight:600}
+.ckeys button:active{background:var(--surface-2)}
+.cmres{border-radius:16px;padding:16px;text-align:center;display:grid;gap:6px;justify-items:center}
+.cmres.ok{background:var(--good-bg);color:var(--good)}.cmres.bad{background:var(--bad-bg);color:var(--bad)}
+.cmres .ic{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:#fff;font-size:30px;font-weight:800;animation:pop .35s var(--ease) both}
+.cmres h2{margin:0;font-size:22px}
+.cmcmp{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;margin-top:4px}
+.cmcmp div{background:#fff;border-radius:12px;padding:8px 6px;display:grid;color:var(--ink)}
+.cmcmp span{font-size:12px;color:var(--muted);font-weight:600}.cmcmp b{font-size:26px;font-family:var(--f-num)}
+.cmres p{margin:2px 0 0;color:var(--ink-2);font-size:13px}
+.csum{flex:1;overflow:auto;min-height:0;padding:16px clamp(14px,3vw,36px)}
+.ctiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.ctiles div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.ctiles span{font-size:12.5px;color:var(--ink-2);font-weight:600}.ctiles b{display:block;font-size:30px;font-family:var(--f-num)}
+.ctiles .g{border-color:color-mix(in srgb,var(--good) 40%,var(--line))}.ctiles .g b{color:var(--good)}
+.ctiles .r{border-color:color-mix(in srgb,var(--bad) 40%,var(--line))}.ctiles .r b{color:var(--bad)}
+.csec{margin:14px 0 8px;font-size:14px;color:var(--ink-2)}
+.chist{display:grid;gap:6px}
+@media (max-width:900px){.backbar{flex-wrap:wrap}.ctiles{grid-template-columns:repeat(2,1fr)}.cm{grid-template-columns:84px minmax(0,1fr)}.cm img,.cm .ph{width:84px;height:84px}}
+
 /* ---------- print ---------- */
 #printRoot{display:none}
 @media print{
@@ -282,7 +340,7 @@ const tShort=iso=>{const d=new Date(iso);return pad2(d.getHours())+':'+pad2(d.ge
 const dtShort=iso=>{const d=new Date(iso);return pad2(d.getDate())+'.'+pad2(d.getMonth()+1)+' '+pad2(d.getHours())+':'+pad2(d.getMinutes())};
 function toast(msg,ms){const r=$('#toastRoot');r.innerHTML=`<div class="toast" role="status">${esc(msg)}</div>`;clearTimeout(toast.t);toast.t=setTimeout(()=>r.innerHTML='',ms||3200)}
 const svg=(d,s=22)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
-const I={cart:'M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H7M9 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm8 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z',search:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-3.5-3.5',menu:'M4 7h16M4 12h16M4 17h16',grid:'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',list:'M4 6h16M4 12h16M4 18h16',cloud:'M7 18a4 4 0 0 1-.6-7.95A6 6 0 0 1 18 9a4.5 4.5 0 0 1 0 9H7z',back:'M15 5l-7 7 7 7',check:'M5 13l4 4L19 7',print:'M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z',clock:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 7v5l3 2',key:'M21 2l-2 2m-7.6 7.6a5 5 0 1 1-7.1 7.1 5 5 0 0 1 7.1-7.1zm0 0L19 3m-3 3l2 2',sales:'M3 17l6-6 4 4 8-8M15 7h6v6',cashIn:'M12 5v14m-6-6l6 6 6-6',cashOut:'M12 19V5m-6 6l6-6 6 6',history:'M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l3 2',sync:'M21 12a9 9 0 0 1-15.5 6.2M3 12a9 9 0 0 1 15.5-6.2M21 4v5h-5M3 20v-5h5',wifi:'M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h.01',refresh:'M4 4v6h6M20 20v-6h-6M20 9A8 8 0 0 0 5.6 6.6L4 10m0 4l1.6 3.4A8 8 0 0 0 20 15',msg:'M4 5h16v11H8l-4 4z',logout:'M10 17l5-5-5-5M15 12H3M21 3v18',power:'M12 3v9M6.3 7a8 8 0 1 0 11.4 0',install:'M12 3v12m-5-5l5 5 5-5M4 21h16',user:'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-8 9a8 8 0 0 1 16 0',day:'M4 5h16v15H4zM4 10h16M8 3v4m8-4v4',pct:'M19 5L5 19M7.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm9 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z',box:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',trash:'M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3',gear:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm7.4-3a7.4 7.4 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a7.5 7.5 0 0 0-1.7-1L14.8 3h-3.6l-.4 2.6a7.5 7.5 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.4 7.4 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.5 7.5 0 0 0 1.7 1l.4 2.6h3.6l.4-2.6a7.5 7.5 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6c.1-.3.1-.7.1-1z'};
+const I={cart:'M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H7M9 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm8 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z',search:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-3.5-3.5',menu:'M4 7h16M4 12h16M4 17h16',grid:'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',list:'M4 6h16M4 12h16M4 18h16',cloud:'M7 18a4 4 0 0 1-.6-7.95A6 6 0 0 1 18 9a4.5 4.5 0 0 1 0 9H7z',back:'M15 5l-7 7 7 7',check:'M5 13l4 4L19 7',print:'M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z',clock:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 7v5l3 2',key:'M21 2l-2 2m-7.6 7.6a5 5 0 1 1-7.1 7.1 5 5 0 0 1 7.1-7.1zm0 0L19 3m-3 3l2 2',sales:'M3 17l6-6 4 4 8-8M15 7h6v6',cashIn:'M12 5v14m-6-6l6 6 6-6',cashOut:'M12 19V5m-6 6l6-6 6 6',history:'M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l3 2',sync:'M21 12a9 9 0 0 1-15.5 6.2M3 12a9 9 0 0 1 15.5-6.2M21 4v5h-5M3 20v-5h5',wifi:'M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h.01',refresh:'M4 4v6h6M20 20v-6h-6M20 9A8 8 0 0 0 5.6 6.6L4 10m0 4l1.6 3.4A8 8 0 0 0 20 15',msg:'M4 5h16v11H8l-4 4z',logout:'M10 17l5-5-5-5M15 12H3M21 3v18',power:'M12 3v9M6.3 7a8 8 0 1 0 11.4 0',install:'M12 3v12m-5-5l5 5 5-5M4 21h16',user:'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-8 9a8 8 0 0 1 16 0',day:'M4 5h16v15H4zM4 10h16M8 3v4m8-4v4',pct:'M19 5L5 19M7.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm9 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z',box:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',trash:'M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3',count:'M9 3h6v4H9zM8 5H5v16h14V5h-3M8.5 13.5l2.5 2.5 4.5-5',gear:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm7.4-3a7.4 7.4 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a7.5 7.5 0 0 0-1.7-1L14.8 3h-3.6l-.4 2.6a7.5 7.5 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.4 7.4 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.5 7.5 0 0 0 1.7 1l.4 2.6h3.6l.4-2.6a7.5 7.5 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6c.1-.3.1-.7.1-1z'};
 // the same payment options as the order sheet
 const PAY=[['cash','ნაღდი','₾','cash'],['pos','ტერმინალი','POS',''],['bog','BOG გადარიცხვა','BOG','bog'],['tbc','TBC გადარიცხვა','TBC','tbc'],['wolt','Wolt','W',''],['glovo','Glovo','G',''],['extra','Extra.ge','E',''],['cod','კურიერი · ნაღდი','🛵',''],['personal','რეზის პირადი','R',''],['pending','გადარიცხვა მოლოდინში','⏳',''],['installment','განვადება','0%',''],['other','სხვა','…','']];
 const PAY_CASH=new Set(['cash','cod']);
@@ -292,7 +350,8 @@ const PAYN={...PAYN_OLD,...Object.fromEntries(PAY.map(p=>[p[0],p[1]]))};
 /* ============================== state ============================== */
 const P={u:null,k:null,cat:new Map(),pos:new Map(),shift:new Map(),cfg:{users:[],receipt:{}},loaded:false,
   user:null,view:'sale',tab:'all',q:'',grid:lsGet('pos.grid')!=='list',cart:{lines:[],disc:0,note:''},sel:-1,mode:'qty',buf:'',
-  pay:{method:'cash',cash:'',receipt:false,note:''},last:null,conn:{ok:false,txt:'კავშირი…'},install:null};
+  pay:{method:'cash',cash:'',receipt:false,note:''},last:null,conn:{ok:false,txt:'კავშირი…'},install:null,
+  cnt:{sel:new Set(),q:'',tab:'all',f:'todo',only:false,adding:false,done:null}};
 try{const c=JSON.parse(lsGet('pos.cart')||'null');if(c&&Array.isArray(c.lines))P.cart=c}catch(e){}
 try{P.user=JSON.parse(lsGet('pos.user')||'null')}catch(e){}
 const DEVICE=lsGet('pos.device')||(()=>{const d=uid('d');lsSet('pos.device',d);return d})();
@@ -330,12 +389,14 @@ function fromCache(){let c;try{c=JSON.parse(lsGet('pos.cache')||'null')}catch(e)
 const col=c=>c==='catalog'?P.cat:c==='pos'?P.pos:P.shift;
 const apply=op=>{if(op.op==='patch'){const cur=col(op.c).get(op.id);if(cur)col(op.c).set(op.id,{...cur,...op.d});return}col(op.c).set(op.id,op.d)};
 function pushPatch(c,id,d){const cur=P.cat.get(id);if(cur)P.cat.set(id,{...cur,...d});const op={op:'patch',c,id,d:JSON.parse(JSON.stringify(d))};outbox.push(op);saveOutbox();saveCache();status();clearTimeout(flushT);flushT=setTimeout(flush,300);render()}
-function push(c,id,d){const op={op:'set',c,id,d:JSON.parse(JSON.stringify(d))};outbox=outbox.filter(o=>!(o.c===c&&o.id===id)||busy);outbox.push(op);saveOutbox();apply(op);saveCache();status();clearTimeout(flushT);flushT=setTimeout(flush,300)}
+// a newer version of a record replaces older unsent ones, except the copy being sent right now
+let inflight=[];
+function push(c,id,d){const op={op:'set',c,id,d:JSON.parse(JSON.stringify(d))};outbox=outbox.filter(o=>!(o.op==='set'&&o.c===c&&o.id===id&&!inflight.includes(o)));outbox.push(op);saveOutbox();apply(op);saveCache();status();clearTimeout(flushT);flushT=setTimeout(flush,300)}
 async function flush(){
   if(busy||!outbox.length||!P.u)return;busy=true;status();
-  const batch=outbox.slice(0,25);
-  try{await gasCall({action:'pos_write',ops:batch});const ids=new Set(batch.map(o=>o.c+'/'+o.id+JSON.stringify(o.d)));outbox=outbox.filter(o=>!ids.has(o.c+'/'+o.id+JSON.stringify(o.d)));saveOutbox();fails=0;busy=false;status();if(outbox.length)flush()}
-  catch(e){busy=false;fails++;status();if(e.code==='bad_key'||e.code==='old_backend'||e.code==='not_allowed'){toast(e.message,6000);return}clearTimeout(flushT);flushT=setTimeout(flush,Math.min(60000,4000*fails))}
+  const batch=outbox.slice(0,25);inflight=batch;
+  try{await gasCall({action:'pos_write',ops:batch});const ids=new Set(batch.map(o=>o.c+'/'+o.id+JSON.stringify(o.d)));outbox=outbox.filter(o=>!ids.has(o.c+'/'+o.id+JSON.stringify(o.d)));inflight=[];saveOutbox();fails=0;busy=false;status();if(outbox.length)flush()}
+  catch(e){inflight=[];busy=false;fails++;status();if(e.code==='bad_key'||e.code==='old_backend'||e.code==='not_allowed'){toast(e.message,6000);return}clearTimeout(flushT);flushT=setTimeout(flush,Math.min(60000,4000*fails))}
 }
 // A delta read only adds and updates; records that vanished are dropped on the full read (on open and every 30 min).
 async function load(full){
@@ -417,13 +478,14 @@ function render(){
   if(!P.user)app.innerHTML=vLogin();
   else if(P.view==='pay')app.innerHTML=vPay();
   else if(P.view==='done')app.innerHTML=vDone();
+  else if(P.view==='count')app.innerHTML=vCount();
   else app.innerHTML=vSale();
   bind();
 }
 function header(){
-  const u=P.user;const open=openShift();
+  const u=P.user;const open=openShift();const oc=u&&openCount();const ocs=oc&&cStats(oc);
   return `<header class="top">
-   <div class="hleft">${u?`<div class="user"><span class="avatar">${esc(initials(u.name))}</span><span><b>${esc(u.name)}</b>${u.admin?' <span class="adm">ADMIN</span>':''}<div class="small muted">${open?'ცვლა '+tShort(open.openedAt)+'-დან':'ცვლა დახურულია'}</div></span></div>`:''}</div>
+   <div class="hleft">${u?`<div class="user"><span class="avatar">${esc(initials(u.name))}</span><span><b>${esc(u.name)}</b>${u.admin?' <span class="adm">ADMIN</span>':''}<div class="small muted">${open?'ცვლა '+tShort(open.openedAt)+'-დან':'ცვლა დახურულია'}</div></span></div>`:''}${oc?`<button class="cpill" data-act="cOpen" title="აღწერის გაგრძელება">${svg(I.count,16)} აღწერა · <span class="num">${ocs.done}/${ocs.n}</span></button>`:''}</div>
    <div class="logo"><img src="../brand/mark-black-160.png" alt="" class="mark"><div><b>ASTROMAN</b><small>სალარო · ${esc(dLong(today()).split(',')[0])}</small></div></div>
    <div class="hright"><span class="conn" id="conn">${connHtml()}</span>
     <button class="ibtn" data-act="sync" title="სინქრონიზაცია">${svg(I.sync,20)}${outbox.length?`<span class="n">${outbox.length}</span>`:''}</button>
@@ -525,6 +587,7 @@ function bind(){
   const q=$('#q');if(q){q.oninput=()=>{P.q=q.value;renderGridOnly()};q.onkeydown=e=>{if(e.key==='Enter'){const v=q.value.trim();const x=[...P.cat.values()].find(y=>String(y.b)===v&&!y.hidden);if(x){addItem(x);P.q='';render();$('#q').focus()}else{const L=filtered();if(L.length===1){addItem(L[0]);P.q='';render();$('#q').focus()}}}};}
   const cash=$('#cash');if(cash){cash.oninput=()=>{P.pay.cash=cash.value.replace(/[^\d.]/g,'');updatePayHdr()};cash.onkeydown=e=>{if(e.key==='Enter')act('confirm')}}
   const pn=$('#payNote');if(pn)pn.oninput=()=>P.pay.note=pn.value;
+  if(P.view==='count')bindCount();
   document.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>act(b.dataset.act,b));
 }
 function renderGridOnly(){const g=$('#grid');if(!g)return;const L=filtered();g.innerHTML=L.length?L.slice(0,200).map(x=>{const q=liveQ(x);return cardHtml(x,q)}).join(''):`<div class="nores">ვერაფერი მოიძებნა</div>`;
@@ -545,8 +608,9 @@ async function act(a,b){
   if(a==='listv'){P.grid=false;lsSet('pos.grid','list');render();return}
   if(a==='sync'){toast('სინქრონიზაცია…');flush();await load(true);toast(outbox.length?'ზოგი ჩანაწერი ჯერ ინახება':'განახლებულია');return}
   if(a==='menu')return funcMenu();
+  if(a[0]==='c'&&a[1]>='A'&&a[1]<='Z')return countAct(a,b);
 }
-function openShift(){let best=null;P.shift.forEach(s=>{if(!s.closedAt&&s.device===DEVICE&&(!best||s.openedAt>best.openedAt))best=s});return best}
+function openShift(){let best=null;P.shift.forEach(s=>{if(!isCount(s)&&!s.closedAt&&s.device===DEVICE&&(!best||s.openedAt>best.openedAt))best=s});return best}
 function confirmSale(){
   const T=totals();if(!T.total)return;const m=P.pay.method;const isCash=PAY_CASH.has(m);const cash=isCash?parseFloat(P.pay.cash)||0:T.total;
   if(isCash&&cash<T.total){toast('ნაღდი თანხა ნაკლებია');return}
@@ -581,7 +645,7 @@ function funcMenu(){
   const sh=openShift();
   const F=[['shiftClose','ცვლის დასრულება',I.clock,'top',!sh],['shiftOpen','ცვლის დაწყება',I.clock,'top dark',!!sh],
    ['shiftReport','ცვლის ნავაჭრი',I.sales,'',!sh],['cashOut','თანხის გაცემა',I.cashOut,'',!sh],['cashIn','თანხის მიღება',I.cashIn,'',!sh],['history','გაყიდვების ისტორია',I.history],
-   ['sync','სინქრონიზაცია',I.sync],['install','დაინსტალირება',I.install,'',!P.install],['refresh','განახლება',I.refresh],
+   ['count',openCount()?'აღწერის გაგრძელება':'აღწერა',I.count],['sync','სინქრონიზაცია',I.sync],['install','დაინსტალირება',I.install,'',!P.install],['refresh','განახლება',I.refresh],
    ['logout','გასვლა',I.logout],['disconnect','გათიშვა',I.power]];
   modal('ფუნქციები',`<div class="fn">${F.map(([a,t,ic,cls,dis])=>`<button data-fn="${a}" class="${cls||''}" ${dis?'disabled':''}>${svg(ic,24)}${t}</button>`).join('')}</div>
    <div class="muted small" style="text-align:center">${esc(P.user.name)} · მოწყობილობა ${esc(DEVICE.slice(-5))} · ${P.cat.size} პროდუქტი კატალოგში</div>`);
@@ -599,6 +663,7 @@ async function fn(a){
   if(a==='shiftReport')return shiftReport();
   if(a==='cashIn'||a==='cashOut')return cashMove(a==='cashIn'?'in':'out');
   if(a==='history')return history();
+  if(a==='count')return countOpen();
 }
 function shiftStats(sh){
   const S={n:0,total:0,by:{},cashIn:0,cashOut:0,voids:0,items:0};
@@ -606,7 +671,7 @@ function shiftStats(sh){
   (sh.moves||[]).forEach(m=>{if(m.kind==='in')S.cashIn+=m.gel;else S.cashOut+=m.gel});
   S.cashExpected=r2((+sh.openCash||0)+(S.by.cash||0)+S.cashIn-S.cashOut);return S;
 }
-function lastClose(){let v=null;P.shift.forEach(s=>{if(s.closedAt&&s.device===DEVICE&&(!v||s.closedAt>v.closedAt))v=s});return v?v.closeCash:0}
+function lastClose(){let v=null;P.shift.forEach(s=>{if(!isCount(s)&&s.closedAt&&s.device===DEVICE&&(!v||s.closedAt>v.closedAt))v=s});return v?v.closeCash:0}
 function greeting(){const h=new Date().getHours();return h<12?'დილა მშვიდობისა':h<18?'გამარჯობა':'საღამო მშვიდობისა'}
 function shiftOpenModal(){
   modal('ცვლის დაწყება',`<div class="bye"><div class="big">☀️</div><h2>${esc(greeting())}, ${esc(P.user.name)}!</h2><div class="muted">კარგი დღე გქონდეს. რამდენი ნაღდი ფულია სალაროში? (ხურდის თანხა)</div></div><div class="cashrow"><input id="oc" inputmode="decimal" value="${lastClose()||''}" placeholder="0.00"><button disabled>₾</button></div>
@@ -673,6 +738,186 @@ function adminEdit(b){
     const d={n,storeNote:$('#aeNote').value.trim()};if(isFinite(pr)&&pr>=0)d.price=pr;if(isFinite(nq)&&nq!==q){d.qs=nq;d.countedAt=new Date().toISOString()}
     pushPatch('catalog',b,d);closeModal();toast('შენახულია')};
 }
+
+/* ============================== stock count (აღწერა) ============================== */
+// A count is saved as a `shift` record with kind 'count', because the register's key may write sales and shifts only.
+// items = the products chosen; lines[code] = {q: counted, e: what the register expected at that moment, t: time, u: who}.
+// The expected number is shown only after the count is typed, so nobody just copies it. Mars shows right and wrong.
+const isCount=s=>!!(s&&s.kind==='count');
+function openCount(){let best=null;P.shift.forEach(s=>{if(isCount(s)&&!s.finishedAt&&s.device===DEVICE&&(!best||s.startedAt>best.startedAt))best=s});return best}
+function countable(){const away=new Set();P.cat.forEach(x=>(x&&x.merged||[]).forEach(m=>away.add(String(m))));return [...P.cat.values()].filter(x=>x&&x.b&&!x.hidden&&x.cat!=='მიწოდება'&&!away.has(String(x.b)))}
+const cLine=(c,b)=>(c.lines||{})[b];
+const cState=(c,b)=>{const l=cLine(c,b);return !l?'todo':l.q===l.e?'ok':'bad'};
+function cStats(c){const T={n:c.items.length,done:0,ok:0,bad:0,todo:0,plus:0,minus:0};c.items.forEach(b=>{const st=cState(c,b);T[st]++;const l=cLine(c,b);if(!l)return;T.done++;if(l.q>l.e)T.plus+=l.q-l.e;else T.minus+=l.e-l.q});return T}
+const cName=b=>{const x=P.cat.get(b);return String(x&&x.n||b)};
+const cSort=(c,L)=>L.slice().sort((a,b)=>cName(a).localeCompare(cName(b),'ka'));
+function saveCount(c){c.updatedAt=new Date().toISOString();push('shift',c.id,c)}
+function countOpen(){P.view='count';P.cnt.q='';P.cnt.adding=false;P.cnt.done=null;P.cnt.f='todo';if(!openCount())P.cnt.sel=new Set();render();const q=$('#cq');if(q)q.focus()}
+function cCats(){const s=new Set();countable().forEach(x=>s.add(x.cat||'სხვადასხვა'));return [...s].sort((a,b)=>a.localeCompare(b,'ka'))}
+function cPickList(){const C=P.cnt,q=norm(C.q);let L=countable();
+  if(q)L=L.filter(x=>norm(x.n).includes(q)||String(x.b).includes(q));else if(C.tab!=='all')L=L.filter(x=>(x.cat||'სხვადასხვა')===C.tab);
+  if(C.only)L=L.filter(x=>liveQ(x)>0);
+  return L.sort((a,b)=>String(a.n||'').localeCompare(String(b.n||''),'ka'))}
+function cRunList(c){const C=P.cnt,q=norm(C.q);let L=c.items;
+  if(q)L=L.filter(b=>norm(cName(b)).includes(q)||String(b).includes(q));else if(C.f!=='all')L=L.filter(b=>cState(c,b)===C.f);
+  return cSort(c,L)}
+function vCount(){
+  if(P.cnt.done){const d=P.shift.get(P.cnt.done);if(d)return vCountDone(d);P.cnt.done=null}
+  const c=openCount();
+  return c&&!P.cnt.adding?vCountRun(c):vCountPick(c);
+}
+function pickCard(x,c){const inC=c&&c.items.includes(x.b);const sel=P.cnt.sel.has(x.b);
+  return `<div class="card ${sel?'csel':''} ${inC?'cin':''}" role="checkbox" aria-checked="${sel||inC}" tabindex="0" data-pick="${esc(x.b)}"><div class="img">${pic(x)}<span class="ck">${sel||inC?svg(I.check,16):''}</span></div><div class="t"><div class="n">${esc(x.n)}</div><div class="bc">${esc(x.b)}${inC?' · უკვე სიაშია':''}</div></div></div>`}
+function pickGrid(c){const L=cPickList();return L.length?L.slice(0,500).map(x=>pickCard(x,c)).join(''):`<div class="nores">${P.loaded?'ვერაფერი მოიძებნა':'კატალოგი იტვირთება…'}</div>`}
+function vCountPick(c){
+  const C=P.cnt,n=C.sel.size,L=cPickList();const free=L.filter(x=>!(c&&c.items.includes(x.b)));const allOn=free.length&&free.every(x=>C.sel.has(x.b));
+  return header()+`<div class="backbar"><button class="ibtn" data-act="cBack" aria-label="უკან">${svg(I.back,20)}</button><div class="ttl"><h2>${c?'პროდუქტების დამატება აღწერაში':'ახალი აღწერა'}</h2><small>${c?'მონიშნე, რაც სიას უნდა დაემატოს':'ნაბიჯი 1 — აირჩიე, რისი დათვლა გინდა'}</small></div><span class="spacer"></span>
+   <div class="acts">${c?'':`<button class="btn ghost" data-act="cHist">${svg(I.history,18)} წინა აღწერები</button>`}<button class="btn primary" data-act="cStart" ${n?'':'disabled'}>${c?'დამატება':'დათვლის დაწყება'} · <span class="num">${n}</span></button></div></div>
+  <div class="cwrap">
+   <p class="chint">მონიშნე პროდუქტები (შეეხე სურათს ან დაასკანერე შტრიხკოდი). დათვლის დროს აკრიფავ რამდენი ცალია მაღაზიაში და სისტემა მაშინვე გაჩვენებს, ემთხვევა თუ არა.</p>
+   <div class="search">${svg(I.search,20)}<input class="input" id="cq" placeholder="ძიება სახელით ან შტრიხკოდით" value="${esc(C.q)}" autocomplete="off">${C.q?`<button class="x" data-act="cClearQ">✕</button>`:''}</div>
+   <div class="ctabs"><button data-ctab="all" aria-pressed="${C.tab==='all'&&!C.q}">ყველა</button>${cCats().map(k=>`<button data-ctab="${esc(k)}" aria-pressed="${C.tab===k&&!C.q}">${esc(k)}</button>`).join('')}
+    <span class="vw"><button data-act="grid" aria-pressed="${P.grid}" title="ბადე">${svg(I.grid,18)}</button><button data-act="listv" aria-pressed="${!P.grid}" title="სია">${svg(I.list,18)}</button></span></div>
+   <div class="cbar"><button class="btn" data-act="cAll" ${free.length?'':'disabled'}>${allOn?'მოხსნა ამ სიიდან':'ყველას მონიშვნა'} · <span class="num">${free.length}</span></button>${n?`<button class="btn" data-act="cNone">ყველაფრის მოხსნა</button>`:''}<button class="btn ${C.only?'on':''}" data-act="cOnly" aria-pressed="${C.only}">მხოლოდ მარაგში მყოფი</button><span class="spacer"></span><span class="cnt" id="cSelN">მონიშნულია ${n}</span></div>
+   <div class="grid ${P.grid?'':'list'}" id="cgrid">${pickGrid(c)}</div>
+  </div>`;
+}
+function runRow(c,b){const x=P.cat.get(b)||{b,n:b};const l=cLine(c,b);const st=cState(c,b);const d=l?l.q-l.e:0;
+  return `<button class="crow st-${st}" data-cnt="${esc(b)}">${pic(x)}<span class="cn"><b>${esc(x.n)}</b><small>${esc(b)}${l?' · '+tShort(l.t)+(l.u?' · '+esc(l.u):''):''}</small></span>
+   <span class="cres">${st==='todo'?'<span class="chip big">დასათვლელი</span>':st==='ok'?`<span class="chip big good">${svg(I.check,14)} ${l.q} ც · სწორია</span>`:`<span class="chip big bad">დათვლილი ${l.q} ც</span><small>სისტემაში ${l.e} · <b style="color:var(--bad)">${d>0?'+':'−'}${Math.abs(d)}</b></small>`}</span></button>`}
+function runList(c){const L=cRunList(c);const T=cStats(c);
+  return L.length?L.map(b=>runRow(c,b)).join(''):`<div class="nores">${P.cnt.q?'ამ აღწერაში ასეთი პროდუქტი არ არის — დააჭირე Enter და დაემატება':P.cnt.f==='todo'&&T.n?'ყველა პროდუქტი დათვლილია. დააჭირე „დასრულება“.':'აქ ჯერ არაფერია'}</div>`}
+function vCountRun(c){
+  const T=cStats(c),C=P.cnt;const w=v=>T.n?v/T.n*100:0;
+  const F=[['todo','დასათვლელი',T.todo],['bad','არასწორი',T.bad],['ok','სწორი',T.ok],['all','ყველა',T.n]];
+  return header()+`<div class="backbar"><button class="ibtn" data-act="cBack" aria-label="გაყიდვებზე დაბრუნება" title="გაყიდვებზე დაბრუნება (აღწერა შენახული რჩება)">${svg(I.back,20)}</button><div class="ttl"><h2>აღწერა</h2><small>დაიწყო ${esc(dtShort(c.startedAt))} · ${esc(c.user?c.user.name:'')}</small></div><span class="spacer"></span>
+   <div class="acts"><button class="btn" data-act="cAdd">+ პროდუქტის დამატება</button><button class="btn amber" data-act="cFinish">${svg(I.check,18)} დასრულება</button></div></div>
+  <div class="cwrap">
+   <div class="cprog"><div class="cpbar" aria-hidden="true"><i class="ok" style="width:${w(T.ok)}%"></i><i class="bad" style="width:${w(T.bad)}%"></i></div>
+    <div class="cnums"><span><b class="num">${T.done} / ${T.n}</b> დათვლილია</span><span class="g">✓ ${T.ok} სწორი</span><span class="r">✗ ${T.bad} არასწორი</span>${T.bad?`<span>${T.minus?'აკლია '+T.minus+' ც':''}${T.minus&&T.plus?' · ':''}${T.plus?'მეტია '+T.plus+' ც':''}</span>`:''}</div></div>
+   <div class="search">${svg(I.search,20)}<input class="input" id="cq" placeholder="ძიება ან შტრიხკოდი — Enter გახსნის დასათვლელად" value="${esc(C.q)}" autocomplete="off">${C.q?`<button class="x" data-act="cClearQ">✕</button>`:''}</div>
+   <div class="ctabs">${F.map(([k,t,n])=>`<button data-cf="${k}" aria-pressed="${C.f===k&&!C.q}">${t} · ${n}</button>`).join('')}</div>
+   <div class="clist" id="clist">${runList(c)}</div>
+  </div>`;
+}
+function cSummary(c){
+  const T=cStats(c);const rows=st=>cSort(c,c.items.filter(b=>cState(c,b)===st));
+  const bad=rows('bad'),ok=rows('ok'),todo=rows('todo');
+  const line=b=>{const x=P.cat.get(b)||{b,n:b};const l=cLine(c,b);const d=l?l.q-l.e:0;return `<div class="crow st-${cState(c,b)}" style="cursor:default">${pic(x)}<span class="cn"><b>${esc(x.n)}</b><small>${esc(b)}${l?' · '+tShort(l.t)+(l.u?' · '+esc(l.u):''):''}</small></span><span class="cres">${!l?'<span class="chip big">არ დათვლილა</span>':d?`<span class="chip big bad">დათვლილი ${l.q} ც</span><small>სისტემაში ${l.e} · <b style="color:var(--bad)">${d>0?'+':'−'}${Math.abs(d)}</b></small>`:`<span class="chip big good">${svg(I.check,14)} ${l.q} ც</span>`}</span></div>`};
+  return `<div class="ctiles"><div><span>დათვლილი</span><b>${T.done}<small style="font-size:15px;color:var(--muted)"> / ${T.n}</small></b></div><div class="g"><span>სწორი</span><b>${T.ok}</b></div><div class="r"><span>არასწორი</span><b>${T.bad}</b></div><div><span>სხვაობა (ცალი)</span><b style="font-size:22px;padding-top:6px">${T.minus?'−'+T.minus:''}${T.minus&&T.plus?' / ':''}${T.plus?'+'+T.plus:''}${!T.minus&&!T.plus?'0':''}</b></div></div>
+   ${bad.length?`<h3 class="csec">არასწორი · ${bad.length}</h3><div class="chist">${bad.map(line).join('')}</div>`:''}
+   ${ok.length?`<h3 class="csec">სწორი · ${ok.length}</h3><div class="chist">${ok.map(line).join('')}</div>`:''}
+   ${todo.length?`<h3 class="csec">არ დათვლილა · ${todo.length}</h3><div class="chist">${todo.map(line).join('')}</div>`:''}`;
+}
+function vCountDone(c){
+  return header()+`<div class="backbar"><div class="ttl"><h2>აღწერა დასრულებულია</h2><small>${esc(dtShort(c.startedAt))} — ${esc(dtShort(c.finishedAt))} · ${esc(c.user?c.user.name:'')} · შედეგს მფლობელი Mars-ზე ხედავს</small></div><span class="spacer"></span>
+   <div class="acts"><button class="btn" data-act="cPrint">${svg(I.print,18)} ბეჭდვა</button><button class="btn primary" data-act="cHome">გაყიდვებზე დაბრუნება</button></div></div>
+  <div class="csum">${cSummary(c)}</div>`;
+}
+function bindCount(){
+  document.querySelectorAll('[data-pick]').forEach(e=>{e.onclick=()=>cToggle(e.dataset.pick);e.onkeydown=k=>{if(k.key===' '||k.key==='Enter'){k.preventDefault();e.click()}}});
+  document.querySelectorAll('[data-cnt]').forEach(e=>e.onclick=()=>countModal(e.dataset.cnt));
+  document.querySelectorAll('[data-ctab]').forEach(e=>e.onclick=()=>{P.cnt.tab=e.dataset.ctab;P.cnt.q='';render()});
+  document.querySelectorAll('[data-cf]').forEach(e=>e.onclick=()=>{P.cnt.f=e.dataset.cf;P.cnt.q='';render()});
+  const q=$('#cq');if(!q)return;
+  q.oninput=()=>{P.cnt.q=q.value;const c=openCount();if(c&&!P.cnt.adding){const el=$('#clist');if(el){el.innerHTML=runList(c);el.querySelectorAll('[data-cnt]').forEach(e=>e.onclick=()=>countModal(e.dataset.cnt))}}else{const g=$('#cgrid');if(g){g.innerHTML=pickGrid(c);g.querySelectorAll('[data-pick]').forEach(e=>e.onclick=()=>cToggle(e.dataset.pick))}}
+    document.querySelectorAll('[data-ctab],[data-cf]').forEach(b=>b.setAttribute('aria-pressed',String(!P.cnt.q&&(b.dataset.ctab?b.dataset.ctab===P.cnt.tab:b.dataset.cf===P.cnt.f))))};
+  q.onkeydown=e=>{if(e.key!=='Enter')return;e.preventDefault();const v=q.value.trim();if(!v)return;
+    const c=openCount();const exact=[...P.cat.values()].find(y=>y&&String(y.b)===v&&!y.hidden);
+    if(exact){countScan(v);return}
+    if(c&&!P.cnt.adding){const L=cRunList(c);if(L.length===1){P.cnt.q='';countModal(L[0]);render()}}else{const L=cPickList();if(L.length===1){P.cnt.q='';cToggle(L[0].b,true);render();$('#cq').focus()}}};
+}
+function cToggle(b,on){const c=openCount();if(c&&c.items.includes(b))return;const S=P.cnt.sel;if(on===true||!S.has(b))S.add(b);else S.delete(b);
+  const g=$('#cgrid'),y=g?g.scrollTop:0,f=document.activeElement&&document.activeElement.id;render();const g2=$('#cgrid');if(g2)g2.scrollTop=y;if(f==='cq')$('#cq').focus()}
+// a barcode: on the choosing screen it ticks the product, during the count it opens it (and adds it if it was not chosen)
+function countScan(code){
+  const x=[...P.cat.values()].find(y=>y&&String(y.b)===code&&!y.hidden);
+  if(!x){toast('უცნობი შტრიხკოდი: '+code);return}
+  P.cnt.q='';const c=openCount();
+  if(!c||P.cnt.adding){if(c&&c.items.includes(x.b)){toast(x.n+' — უკვე სიაშია');render();return}cToggle(x.b,true);render();toast(x.n+' — მონიშნულია');const q=$('#cq');if(q)q.focus();return}
+  if(!c.items.includes(x.b)){c.items=[...c.items,x.b];saveCount(c);toast(x.n+' — დაემატა აღწერას')}
+  render();countModal(x.b);
+}
+function nextTodo(c,after){const L=cSort(c,c.items);const i=L.indexOf(after);for(let k=1;k<=L.length;k++){const b=L[(i+k)%L.length];if(cState(c,b)==='todo'&&b!==after)return b}return null}
+function countModal(b){
+  const c=openCount();const x=P.cat.get(b);if(!c||!x)return;const l=cLine(c,b);
+  modal('დათვლა',`<div class="cm">${pic(x)}<div><div class="cmn">${esc(x.n)}</div><div class="bc">${esc(x.b)}${x.cat?' · '+esc(x.cat):''}</div>${l?`<div class="small muted" style="margin-top:4px">ბოლოს დაითვალა ${tShort(l.t)}${l.u?' · '+esc(l.u):''}</div>`:''}</div></div><div id="cmBody"></div>`);
+  P.cnt.cur=b;cmEntry(l?String(l.q):'');
+}
+function cmEntry(v){
+  const c=openCount(),b=P.cnt.cur;if(!c||!b)return;const l=cLine(c,b);
+  $('#cmBody').innerHTML=`<div class="field"><span style="text-align:center;font-size:14px">რამდენი ცალია მაღაზიაში?</span>
+    <div class="cq"><button data-cs="-1" aria-label="ერთით ნაკლები">−</button><input id="cmQ" inputmode="numeric" autocomplete="off" value="${esc(v)}" placeholder="0" aria-label="რაოდენობა"><button data-cs="1" aria-label="ერთით მეტი">+</button></div></div>
+   <div class="ckeys">${['1','2','3','4','5','6','7','8','9','C','0','⌫'].map(k=>`<button data-ck="${k}">${k}</button>`).join('')}</div>
+   <button class="btn primary big" id="cmGo" style="width:100%">${svg(I.check,20)} შენახვა</button>
+   <div class="row" style="justify-content:center">${l?'':`<button class="btn ghost small" id="cmDrop">სიიდან ამოღება</button>`}<button class="btn ghost small" data-close>დახურვა</button></div>`;
+  const inp=$('#cmQ');const set=s=>{inp.value=String(s).replace(/\D/g,'').slice(0,4)};
+  inp.oninput=()=>set(inp.value);inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();cmSave()}};
+  document.querySelectorAll('[data-cs]').forEach(k=>k.onclick=()=>{set(Math.max(0,(parseInt(inp.value,10)||0)+ +k.dataset.cs));inp.focus()});
+  document.querySelectorAll('[data-ck]').forEach(k=>k.onclick=()=>{const t=k.dataset.ck;set(t==='C'?'':t==='⌫'?inp.value.slice(0,-1):inp.value+t);inp.focus()});
+  $('#cmGo').onclick=cmSave;
+  const dr=$('#cmDrop');if(dr)dr.onclick=()=>{c.items=c.items.filter(y=>y!==b);saveCount(c);closeModal();render();toast('ამოღებულია სიიდან')};
+  inp.focus();inp.select();
+}
+function cmSave(){
+  const c=openCount(),b=P.cnt.cur;const x=P.cat.get(b);const inp=$('#cmQ');if(!c||!x||!inp)return;
+  if(inp.value===''){inp.focus();toast('აკრიფე რაოდენობა (ან 0)');return}
+  const q=parseInt(inp.value,10);const e=liveQ(x);
+  c.lines={...(c.lines||{}),[b]:{q,e,t:new Date().toISOString(),u:P.user?P.user.name:''}};saveCount(c);render();
+  const d=q-e;const nx=nextTodo(c,b);
+  $('#cmBody').innerHTML=(d===0?`<div class="cmres ok" role="status"><div class="ic">✓</div><h2>სწორია</h2><div>დათვლილი <b>${q}</b> · სისტემაშიც <b>${e}</b></div></div>`
+    :`<div class="cmres bad" role="alert"><div class="ic">!</div><h2>არ ემთხვევა</h2><div class="cmcmp"><div><span>დათვლილი</span><b>${q}</b></div><div><span>სისტემაში</span><b>${e}</b></div><div><span>სხვაობა</span><b style="color:var(--bad)">${d>0?'+':'−'}${Math.abs(d)}</b></div></div><p>${d<0?'აკლია '+Math.abs(d)+' ცალი':'მეტია '+d+' ცალით'}. გადაამოწმე — თუ შეცდომაა, დათვალე თავიდან. მფლობელი ამას Mars-ზე დაინახავს.</p></div>`)
+   +`<div class="row" style="gap:8px"><button class="btn big" id="cmRe" style="flex:1">თავიდან დათვლა</button>${nx?`<button class="btn primary big" id="cmNext" style="flex:1.4">შემდეგი →</button>`:`<button class="btn primary big" data-close style="flex:1.4">${cStats(c).todo?'დახურვა':'ყველა დათვლილია ✓'}</button>`}</div>
+   ${nx?`<div class="muted small" style="text-align:center">შემდეგი: ${esc(cName(nx))}</div>`:''}`;
+  $('#cmRe').onclick=()=>cmEntry(String(q));
+  const n=$('#cmNext');if(n){n.onclick=()=>countModal(nx);n.focus()}else{const cl=document.querySelector('#cmBody [data-close]');if(cl)cl.focus()}
+}
+function countFinishModal(){
+  const c=openCount();if(!c)return;const T=cStats(c);
+  modal('აღწერის დასრულება',`<div class="ctiles" style="margin:0"><div><span>დათვლილი</span><b>${T.done}/${T.n}</b></div><div class="g"><span>სწორი</span><b>${T.ok}</b></div><div class="r"><span>არასწორი</span><b>${T.bad}</b></div><div><span>დაუთვლელი</span><b>${T.todo}</b></div></div>
+   ${T.todo?`<p style="margin:0">${T.todo} პროდუქტი არ დათვლილა — შედეგში ჩაიწერება როგორც „არ დათვლილა“.</p>`:''}
+   <div class="row"><button class="btn primary big" id="cfGo" style="flex:1" ${T.done?'':'disabled'}>აღწერის დასრულება</button><button class="btn big" data-close>გაგრძელება</button></div>
+   <div class="row" style="justify-content:center"><button class="btn ghost danger small" id="cfCancel">აღწერის გაუქმება</button></div>`);
+  $('#cfGo').onclick=()=>{const now=new Date().toISOString();const d={...c,finishedAt:now,finishedBy:P.user?P.user.name:''};saveCount(d);closeModal();P.cnt.done=d.id;P.cnt.sel=new Set();render();toast('აღწერა შენახულია')};
+  $('#cfCancel').onclick=e=>{const b=e.currentTarget;if(!b.dataset.sure){b.dataset.sure=1;b.textContent='ნამდვილად გავაუქმო? დააჭირე კიდევ ერთხელ';return}saveCount({...c,finishedAt:new Date().toISOString(),cancelled:true,finishedBy:P.user?P.user.name:''});closeModal();P.view='sale';P.cnt.sel=new Set();render();toast('აღწერა გაუქმდა')};
+}
+function countHistory(){
+  const L=[...P.shift.values()].filter(s=>isCount(s)&&s.finishedAt&&!s.cancelled).sort((a,b)=>String(b.startedAt).localeCompare(String(a.startedAt))).slice(0,30);
+  modal('წინა აღწერები',L.length?`<div class="olist">${L.map(c=>{const T=cStats(c);return `<div class="orow" data-ch="${esc(c.id)}"><span class="t">${esc(dtShort(c.startedAt))}</span><span><div>${esc(c.user?c.user.name:'')} · ${T.done} დათვლილი</div><div class="d"><span style="color:var(--good);font-weight:700">✓ ${T.ok}</span> · <span style="color:var(--bad);font-weight:700">✗ ${T.bad}</span>${T.todo?' · '+T.todo+' დაუთვლელი':''}</div></span><span class="chip ${T.bad?'bad':'good'}">${T.bad?T.bad+' არასწორი':'ყველა სწორია'}</span></div>`}).join('')}</div>`:'<div class="muted" style="text-align:center;padding:20px">აღწერა ჯერ არ ჩატარებულა</div>',true);
+  document.querySelectorAll('[data-ch]').forEach(r=>r.onclick=()=>{const c=P.shift.get(r.dataset.ch);if(!c)return;modal('აღწერა · '+dtShort(c.startedAt),cSummary(c)+`<div class="row"><button class="btn" id="chPrint">${svg(I.print,18)} ბეჭდვა</button><span class="spacer"></span><button class="btn" data-close>დახურვა</button></div>`,true);$('#chPrint').onclick=()=>printHtml(countReceipt(c))});
+}
+function countReceipt(c){const T=cStats(c);const bad=cSort(c,c.items.filter(b=>cState(c,b)==='bad'));
+  return reportHtml('აღწერა',dtShort(c.startedAt)+' · '+(c.user?c.user.name:''),[['დათვლილი',T.done+' / '+T.n],['სწორი',String(T.ok)],['არასწორი',String(T.bad),'tot'],['დაუთვლელი',String(T.todo)]],
+   bad.length?`<hr><table>${bad.map(b=>{const l=cLine(c,b);const d=l.q-l.e;return `<tr><td colspan="2">${esc(cName(b))}</td></tr><tr><td>დათვლ. ${l.q} · სისტ. ${l.e}</td><td class="r">${d>0?'+':'−'}${Math.abs(d)}</td></tr>`}).join('')}</table>`:'')}
+function countAct(a,b){
+  const c=openCount();
+  if(a==='cOpen')return countOpen();
+  if(a==='cBack'){if(P.cnt.adding){P.cnt.adding=false;P.cnt.sel=new Set();P.cnt.q='';render();return}P.view='sale';P.cnt.q='';render();return}
+  if(a==='cHome'){P.cnt.done=null;P.view='sale';render();return}
+  if(a==='cClearQ'){P.cnt.q='';render();$('#cq').focus();return}
+  if(a==='cHist')return countHistory();
+  if(a==='cOnly'){P.cnt.only=!P.cnt.only;render();return}
+  if(a==='cAll'){const free=cPickList().filter(x=>!(c&&c.items.includes(x.b)));const allOn=free.every(x=>P.cnt.sel.has(x.b));free.forEach(x=>allOn?P.cnt.sel.delete(x.b):P.cnt.sel.add(x.b));render();return}
+  if(a==='cNone'){P.cnt.sel=new Set();render();return}
+  if(a==='cAdd'){P.cnt.adding=true;P.cnt.sel=new Set();P.cnt.q='';render();$('#cq').focus();return}
+  if(a==='cStart'){const sel=[...P.cnt.sel].filter(x=>P.cat.has(x));if(!sel.length)return;
+    if(c){c.items=[...c.items,...sel.filter(x=>!c.items.includes(x))];saveCount(c);P.cnt.adding=false;toast(sel.length+' პროდუქტი დაემატა')}
+    else{const now=new Date().toISOString();saveCount({id:uid('c'),kind:'count',day:today(),startedAt:now,user:P.user,device:DEVICE,items:sel,lines:{},finishedAt:null});toast('აღწერა დაიწყო — შეეხე პროდუქტს და დათვალე')}
+    P.cnt.sel=new Set();P.cnt.q='';P.cnt.f='todo';render();return}
+  if(a==='cFinish')return countFinishModal();
+  if(a==='cPrint'){const d=P.shift.get(P.cnt.done);if(d)printHtml(countReceipt(d));return}
+}
+// a scanner types fast and ends with Enter; inside the quantity box that would become the count, so it is taken back
+let cScan='',cScanT=0,cScanPrev='';
+document.addEventListener('keydown',e=>{
+  if(!P.user||P.view!=='count')return;const t=e.target;const now=Date.now();
+  if(e.key==='Enter'){const code=cScan;const fast=code.length>=3&&now-cScanT<80;cScan='';
+    if(!fast)return;
+    const known=[...P.cat.values()].some(y=>y&&String(y.b)===code);if(!known&&code.length<6)return;
+    e.preventDefault();e.stopPropagation();if(t&&t.id==='cmQ')t.value=cScanPrev;if(t&&t.id==='cq'){t.value='';P.cnt.q=''}
+    if($('#scrim'))closeModal();countScan(code);return}
+  if(e.key.length===1){if(now-cScanT>50){cScan='';cScanPrev=t&&t.id==='cmQ'?t.value:''}cScan+=e.key;cScanT=now}
+},true);
 
 /* ============================== barcode scanner (keyboard wedge) ============================== */
 let scanBuf='',scanT=0;

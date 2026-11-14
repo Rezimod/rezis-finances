@@ -840,6 +840,29 @@ main{padding-block:14px 60px}
 body:has(.wcs) .toast{bottom:auto;top:calc(14px + env(safe-area-inset-top,0px));pointer-events:none}
 .wcwas{font-size:13px;background:var(--surface-2);border-radius:8px;padding:9px 11px;margin:6px 0 12px}
 @media (max-width:860px){.wcs .wcpic{height:160px}.wcs .foot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.wcs .foot .spacer{display:none}.wcs .foot #wcNext{grid-column:1/-1;height:48px;font-size:15px}}
+/* store checks (აღწერა on the register) */
+.rcp{margin-bottom:12px}
+.rcnone{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;padding:10px 16px}
+.rchd{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.rchd h2{border:0!important;padding:0!important;margin:2px 0 2px!important}
+.rchd .actions{display:flex;gap:6px;flex-wrap:wrap}
+.rcp .eyebrow.live{color:var(--good)}
+.rck{margin:6px 0 12px}
+.rck .val{font-size:22px}
+.rcg{gap:18px}
+.rch{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;font-weight:700;margin:0 0 4px;color:var(--ink-2)}
+.rcl{display:grid;grid-template-columns:34px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.rcl:last-of-type{border-bottom:0}
+.rcl .rcn{min-width:0;display:flex;flex-direction:column}
+.rcl .rcn b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rcl .rcn small{font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rcl .rcd{display:flex;flex-direction:column;align-items:flex-end;line-height:1.2}
+.rcl .rcd>b{font-size:16px}
+.rcl .rcd small{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.rcl .rcf:empty{display:none}
+.rcl.st-bad{box-shadow:inset 3px 0 0 var(--bad);padding-left:8px}
+.rcrow{grid-template-columns:minmax(0,1fr) auto auto auto;cursor:pointer}
+@media (max-width:560px){.rcl{grid-template-columns:34px minmax(0,1fr) auto}.rcl .rcf{grid-column:2/-1;justify-self:end}.rcrow{grid-template-columns:minmax(0,1fr) auto auto}.rcrow>b{display:none}}
 </style>
 
 <div class="app">
@@ -1396,7 +1419,7 @@ function vOverview(){
   const head=`<div class="pagehead"><div><h1>Overview</h1><p>${dLong(t)} · day ${new Date().getDate()} of ${daysIn(thisMonth())}${m!==thisMonth()?' · showing '+mLabel(m):''}</p></div></div>`;
   if(!has&&(!S.db||S.loaded.tx)&&!S.tx.size&&!S.sales.size)return head+monthPanel(m,M,P)+`<div class="panel empty"><b>No records yet</b>Start by syncing sales from your order sheet, then import a BOG or TBC statement.</div>`;
   const B=liveBalances();const tot=Object.values(B).reduce((x,o)=>x+o.now,0);
-  return loadingOr(head+monthPanel(m,M,P)+todayPanel()+`<div class="sech"><h2>Money now</h2><span>${Object.keys(B).length?`All accounts <b class="num">${gel(tot)}</b> · moves with every sale and expense`:'Set balances in Settings or import a statement'}</span></div>`+moneyNow(m,M)+`<div class="grid g3b" style="margin-bottom:12px">${pacePanel(m,M)}${attention(m,M)}</div>`+deeper());
+  return loadingOr(head+monthPanel(m,M,P)+todayPanel()+rcPanel()+`<div class="sech"><h2>Money now</h2><span>${Object.keys(B).length?`All accounts <b class="num">${gel(tot)}</b> · moves with every sale and expense`:'Set balances in Settings or import a statement'}</span></div>`+moneyNow(m,M)+`<div class="grid g3b" style="margin-bottom:12px">${pacePanel(m,M)}${attention(m,M)}</div>`+deeper());
 }
 /* ---------- today, pace, calendar ---------- */
 const DAY_TARGET=1000;
@@ -3579,7 +3602,7 @@ function storeLive(){
   const t=today();const d=S.store.day&&S.store.day<=t?S.store.day:t;const isT=d===t;const R=regDay(d);const all=posOrders(d);
   const by={};R.L.forEach(o=>{by[o.pay]=(by[o.pay]||0)+o.total});
   const byU={};R.L.forEach(o=>{const k=o.user?o.user.name:'?';const u=byU[k]||(byU[k]={n:0,a:0});u.n++;u.a+=o.total});
-  const shifts=[...S.shift.values()].filter(s=>s&&(s.day===d||(!s.closedAt&&isT))).sort((a,b)=>String(b.openedAt).localeCompare(String(a.openedAt)));
+  const shifts=[...S.shift.values()].filter(s=>s&&!isCount(s)&&(s.day===d||(!s.closedAt&&isT))).sort((a,b)=>String(b.openedAt).localeCompare(String(a.openedAt)));
   const drawer=shifts.filter(s=>!s.closedAt).reduce((a,s)=>a+shiftExpected(s),0);
   const voids=all.filter(o=>o.status==='void');
   const items=new Map();R.L.forEach(o=>o.lines.forEach(l=>{const it=items.get(l.b)||{b:l.b,n:l.n,q:0,a:0,img:l.img};it.q+=l.q;it.a+=Math.max(0,l.q*l.p-(+l.d||0));items.set(l.b,it)}));
@@ -3616,7 +3639,7 @@ function storeHistory(){
   const items=new Map();L.forEach(o=>{if(o.status==='void')return;o.lines.forEach(l=>{const it=items.get(l.b)||{b:l.b,n:l.n,q:0,a:0,img:l.img};it.q+=l.q;it.a+=Math.max(0,l.q*l.p-(+l.d||0));items.set(l.b,it)})});
   const top=[...items.values()].sort((a,b)=>b.a-a.a).slice(0,15);const max=Math.max(1,...top.map(x=>x.a));
   const byU={};L.forEach(o=>{if(o.status==='void')return;const k=o.user?o.user.name:'?';const u=byU[k]||(byU[k]={n:0,a:0});u.n++;u.a+=o.total});
-  const sh=[...S.shift.values()].filter(x=>x&&String(x.openedAt||'').slice(0,7)===m).sort((a,b)=>String(b.openedAt).localeCompare(String(a.openedAt)));
+  const sh=[...S.shift.values()].filter(x=>x&&!isCount(x)&&String(x.openedAt||'').slice(0,7)===m).sort((a,b)=>String(b.openedAt).localeCompare(String(a.openedAt)));
   const hrs=x=>Math.max(0,((x.closedAt?Date.parse(x.closedAt):Date.now())-Date.parse(x.openedAt))/36e5);
   const byC={};sh.forEach(x=>{const k=x.user?x.user.name:'?';const c=byC[k]||(byC[k]={shifts:0,h:0,n:0,a:0,open:0});c.shifts++;c.h+=hrs(x);if(!x.closedAt)c.open++});
   L.forEach(o=>{if(o.status==='void')return;const k=o.user?o.user.name:'?';const c=byC[k]||(byC[k]={shifts:0,h:0,n:0,a:0,open:0});c.n++;c.a+=o.total});
@@ -3874,6 +3897,69 @@ async function siteAct(a,b){
   if(a==='si_sync'){m.textContent='Syncing — up to a minute…';b.disabled=true;try{const r=await gasCall(c.u,c.k,{action:'site_sync'});m.textContent=r.error?'Failed: '+r.error:fmt(r.updated)+' products updated, '+fmt(r.outofstock||0)+' out of stock';if(S.backend)S.backend.load().catch(()=>{})}catch(e){m.textContent=e.message||'Failed'}b.disabled=false;return}
 }
 
+/* ============================== store checks (აღწერა on the register) ============================== */
+// The register saves each count as a `shift` record with kind 'count' (its key may write sales and shifts only):
+// items = the products chosen, lines[code] = {q counted, e what the register expected at that moment, t when, u who}.
+// Correct = q equals e. "Fix" sets the store count to what was counted at that moment (qs = q, countedAt = t),
+// so register sales made after the count still come off the shelf number.
+const isCount=s=>!!(s&&s.kind==='count');
+function regCounts(){return [...S.shift.values()].filter(s=>isCount(s)&&!s.cancelled&&Array.isArray(s.items)).sort((a,b)=>String(b.startedAt).localeCompare(String(a.startedAt)))}
+function rcRows(c){return c.items.map(b=>{const l=(c.lines||{})[b]||null;const x=S.catalog.get(b)||null;const st=!l?'todo':l.q===l.e?'ok':'bad';
+  const ca=String(x&&x.countedAt||'');const fix=st!=='bad'||!x?'':ca===l.t&&storeQ(x)===l.q?'fixed':ca>l.t?'later':'open';
+  return {b,x,l,st,n:String(x&&x.n||b),d:l?l.q-l.e:0,cost:x?+x.cost||0:0,fix}})}
+function rcStats(c){const R=rcRows(c);const T={R,n:R.length,ok:0,bad:0,todo:0,minus:0,plus:0,vMinus:0,vPlus:0,open:0};
+  R.forEach(r=>{T[r.st]++;if(r.d<0){T.minus-=r.d;T.vMinus-=r.d*r.cost}if(r.d>0){T.plus+=r.d;T.vPlus+=r.d*r.cost}if(r.fix==='open')T.open++});T.done=T.ok+T.bad;return T}
+function rcLine(c,r){
+  const res=r.st==='todo'?'<span class="chip">not counted</span>':r.st==='ok'?`<span class="chip good">✓ ${fmt(r.l.q)} pcs</span>`
+    :`<span class="rcd"><b class="num neg">${r.d>0?'+':'−'}${fmt(Math.abs(r.d))}</b><small>counted <b class="num">${fmt(r.l.q)}</b> · system <b class="num">${fmt(r.l.e)}</b></small></span>`;
+  const fix=r.st!=='bad'?'':r.fix==='fixed'?'<span class="chip good">fixed</span>':r.fix==='later'?'<span class="chip" title="The store stock was set again after this check">changed since</span>':r.fix==='open'?`<button class="btn sm" data-act="rc_fix" data-id="${esc(c.id)}" data-b="${esc(r.b)}" title="Set the store stock to ${r.l.q} as counted on ${esc(dtShort(r.l.t))}; register sales after that still come off">Fix to ${fmt(r.l.q)}</button>`:'';
+  return `<div class="rcl st-${r.st}">${thumb(r.x||{n:r.n},34)}<span class="rcn"><b>${esc(r.n)}</b><small>${esc(r.b)}${r.l?' · '+esc(dtShort(r.l.t))+(r.l.u?' · '+esc(r.l.u):''):''}${r.st==='bad'&&r.cost?' · '+(r.d<0?'−':'+')+gel(Math.abs(r.d)*r.cost)+' at cost':''}</small></span>${res}<span class="rcf">${fix}</span></div>`}
+function rcBody(c,lim){const T=rcStats(c);const live=!c.finishedAt;const K=8;
+  const bad=T.R.filter(r=>r.st==='bad').sort((a,b)=>Math.abs(b.d)*b.cost-Math.abs(a.d)*a.cost||a.n.localeCompare(b.n,'ka'));
+  const ok=T.R.filter(r=>r.st==='ok').sort((a,b)=>a.n.localeCompare(b.n,'ka'));const todo=T.R.filter(r=>r.st==='todo').sort((a,b)=>a.n.localeCompare(b.n,'ka'));
+  const list=(L,empty)=>L.length?(lim?L.slice(0,K):L).map(r=>rcLine(c,r)).join('')+(lim&&L.length>K?`<button class="btn sm mt" data-act="rc_open" data-id="${esc(c.id)}">+ ${L.length-K} more</button>`:''):`<p class="muted small">${empty}</p>`;
+  return `<div class="kpis rck">
+    <div class="kpi"><div class="lbl">Checked</div><div class="val num">${T.done}<small> of ${T.n}</small></div><div class="delta">${live?(T.todo?T.todo+' still to count':'all counted, not finished yet'):T.todo?T.todo+' left uncounted':'every chosen product'}</div></div>
+    <div class="kpi"><div class="lbl">Correct</div><div class="val num up">${T.ok}</div><div class="delta">${T.done?pct(T.ok,T.done)+'% match the system':'—'}</div></div>
+    <div class="kpi"><div class="lbl">Incorrect</div><div class="val num ${T.bad?'neg':''}">${T.bad}</div><div class="delta">${T.bad?(T.open?T.open+' to fix':'all handled'):'nothing is off'}</div></div>
+    <div class="kpi"><div class="lbl">Difference</div><div class="val num ${T.minus?'neg':''}">${T.minus?'−'+fmt(T.minus):T.plus?'':'0'}${T.plus?(T.minus?'<small> / </small>':'')+'+'+fmt(T.plus):''}<small> pcs</small></div><div class="delta">${T.vMinus||T.vPlus?[T.vMinus?'−'+gel(T.vMinus)+' missing':'',T.vPlus?'+'+gel(T.vPlus)+' extra':''].filter(Boolean).join(' · ')+' at cost':'counted = system'}</div></div></div>
+   <div class="grid g2 rcg"><div><div class="rch"><span>Incorrect · ${bad.length}</span>${T.open>1?`<button class="btn sm" data-act="rc_fixall" data-id="${esc(c.id)}">Fix all ${T.open}</button>`:''}</div>${list(bad,T.done?'No product is off.':'Nothing counted yet.')}</div>
+   <div><div class="rch"><span>Correct · ${ok.length}</span></div>${list(ok,'None yet.')}${todo.length&&!lim?`<div class="rch mt"><span>Not counted · ${todo.length}</span></div>${list(todo,'')}`:''}</div></div>`;
+}
+function rcPanel(){
+  const c=regCounts()[0];
+  if(!c)return `<div class="panel rcp rcnone"><div class="eyebrow">Store check · აღწერა</div><span class="muted small">No check yet. On the register: ☰ → აღწერა, choose products and count them; right and wrong show up here.</span></div>`;
+  const live=!c.finishedAt;
+  return `<section class="panel rcp"><div class="rchd"><div><div class="eyebrow ${live?'live':''}">${live?'<span class="dot"></span>Store check in progress':'Store check · აღწერა'}</div><h2>${esc(dLong(c.day||String(c.startedAt).slice(0,10)))} · ${esc(c.user?c.user.name:'')}</h2><p class="sub">${live?'Being counted on the register now — this updates every 30 seconds. ':'Finished '+esc(dtShort(c.finishedAt))+'. '}Correct = the count matched what the register expected at that moment.</p></div><span class="spacer"></span><div class="actions"><button class="btn sm" data-act="rc_open" data-id="${esc(c.id)}">Full list</button><button class="btn sm" data-act="rc_all">All checks${regCounts().length>1?' · '+regCounts().length:''} →</button></div></div>${rcBody(c,true)}</section>`;
+}
+function rcModal(id){const c=S.shift.get(id);if(!c)return;
+  modal(`<h3>Store check · ${esc(dShort(c.day||String(c.startedAt).slice(0,10)))} · ${esc(c.user?c.user.name:'')}</h3><p class="sub">${esc(dtShort(c.startedAt))}${c.finishedAt?' → '+esc(dtShort(c.finishedAt))+(c.finishedBy?' · finished by '+esc(c.finishedBy):''):' · still counting'}. “System” is what the register expected when the product was counted: the store count minus register sales.</p>${rcBody(c,false)}
+   <div class="row mt"><button class="btn" data-act="rc_xlsx" data-id="${esc(c.id)}">Download Excel</button><span class="spacer"></span><button class="btn" data-close>Close</button></div>`,true)}
+function countChecks(){
+  const L=regCounts();
+  if(!L.length)return `<div class="panel empty"><b>No store checks yet</b><span>On the register: ☰ → აღწერა. Consultants choose products, count them, and each check shows here with what was right and wrong.</span></div>`;
+  return `<div class="panel"><h2>Store checks · აღწერა</h2><p class="sub">Every count made on the register, newest first. Tap one for the full list.</p><div class="olist">${L.map(c=>{const T=rcStats(c);
+    return `<div class="orow click rcrow" data-act="rc_open" data-id="${esc(c.id)}"><span class="ob"><span class="op">${esc(dShort(c.day||String(c.startedAt).slice(0,10)))} · ${esc(c.user?c.user.name:'?')}${c.finishedAt?'':' <span class="chip good">in progress</span>'}</span><small>${esc(dtShort(c.startedAt))}${c.finishedAt?' → '+esc(dtShort(c.finishedAt)):''} · ${T.done} of ${T.n} counted${T.open?' · '+T.open+' to fix':''}</small></span><span class="chip good">✓ ${T.ok}</span><span class="chip ${T.bad?'bad':''}">✗ ${T.bad}</span><b class="num ${T.minus?'neg':''}">${T.minus?'−'+fmt(T.minus):'0'}${T.plus?' / +'+fmt(T.plus):''} pcs</b></div>`}).join('')}</div></div>`;
+}
+async function rcExport(id){const c=S.shift.get(id);if(!c)return;await xlsxReady();const wb=XLSX.utils.book_new();
+  const rows=[['Code','Product','Result','Counted','System','Difference','Cost ₾','Difference at cost ₾','Counted at','By','Stock']];
+  rcRows(c).forEach(r=>rows.push([r.b,r.n,r.st==='ok'?'correct':r.st==='bad'?'incorrect':'not counted',r.l?r.l.q:'',r.l?r.l.e:'',r.l?r.d:'',r.cost,r.l?Math.round(r.d*r.cost*100)/100:'',r.l?dtShort(r.l.t):'',r.l?r.l.u||'':'',r.fix==='fixed'?'fixed':r.fix==='later'?'changed since':r.fix==='open'?'not fixed':'']));
+  const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:14},{wch:44},{wch:12}];XLSX.utils.book_append_sheet(wb,ws,'Store check');
+  const buf=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+  try{await S.downloads.save({filename:'astroman-store-check-'+(c.day||today())+'.xlsx',data:new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})})}catch(e){if(e.code!=='declined')toast('Download unavailable here')}}
+async function rcAct(a,b){
+  if(a==='rc_open')return rcModal(b.dataset.id);
+  if(a==='rc_all'){closeModal();S.cnt.tab='checks';lsSet('af.cntTab','checks');return go('count')}
+  if(a==='rc_xlsx')return rcExport(b.dataset.id);
+  if(a==='rc_fix'||a==='rc_fixall'){const c=S.shift.get(b.dataset.id);if(!c)return;const R=rcRows(c).filter(r=>r.fix==='open'&&(a==='rc_fixall'||r.b===b.dataset.b));if(!R.length)return;
+    if(a==='rc_fixall'&&!b.dataset.sure){b.dataset.sure=1;b.textContent='Tap again: set '+R.length+' to the counted numbers';return}
+    b.disabled=true;for(const r of R)await saveCat(r.b,{qs:r.l.q,countedAt:r.l.t});
+    toast(R.length===1?R[0].n+': store stock set to '+R[0].l.q+' as counted':R.length+' products set to the counted numbers');
+    if($('#scrim'))rcModal(c.id);return}
+}
+// while a check is running on the register, the overview picks up each counted product within 30 seconds
+setInterval(()=>{if(S.backend&&S.view==='overview'&&!document.hidden&&!S.backend.pending()&&regCounts().some(c=>!c.finishedAt))S.backend.load().catch(()=>{})},30000);
+
 /* ============================== stock count (აღწერა) ============================== */
 // Stock = store + warehouse + on the way.
 // Store: the store count (collection `counts`, kind 'store') entered into qs, minus register sales since.
@@ -3939,8 +4025,8 @@ function vCount(){
   const tile=(k,lbl,o,sub)=>`<button class="kpi wctile" data-act="wc_tab" data-v="${k}" aria-pressed="${T===k}"><div class="lbl">${lbl}</div><div class="val num">${fmt(o.q)}<small> pcs</small></div><div class="delta">${gel(o.v)} ${sub}</div></button>`;
   const head=`<div class="pagehead"><div><div class="eyebrow">აღწერა · მაღაზია · საწყობი · გზაში</div><h1>Stock count</h1><p>All stock in three places: the store (from the store count), the warehouse (counted here) and what is on the way. Deleting or merging a product anywhere shows here at once.</p></div><div class="actions"><button class="btn" data-act="wc_export">Download Excel</button><button class="btn ${nd?'amber':''}" data-act="st_dups">Duplicates${nd?' · '+nd:''}</button><button class="btn" data-act="st_add">+ Product</button></div></div>
    <div class="kpis wckpis">${tile('store','In the store · მაღაზია',st,'at cost')}${tile('wh','In the warehouse · საწყობი',wh,'at cost')}${tile('way','On the way · გზაში',wy,'cost · '+gel(wy.v*MARKUP)+' to sell')}<div class="kpi sum"><div class="lbl">Total stock</div><div class="val num">${fmt(st.q+wh.q+wy.q)}<small> pcs</small></div><div class="delta">${gel(st.v+wh.v+wy.v)}</div></div></div>
-   <div class="tabs" role="tablist" style="margin-bottom:14px">${[['store','Store'],['wh','Warehouse count'],['way','On the way']].map(([k,t])=>`<button role="tab" aria-selected="${T===k}" data-act="wc_tab" data-v="${k}">${t}</button>`).join('')}</div>`;
-  return loadingOr(head+(T==='store'?countStore():T==='way'?countWay():countWh()));
+   <div class="tabs" role="tablist" style="margin-bottom:14px">${[['store','Store'],['wh','Warehouse count'],['way','On the way'],['checks','Store checks'+(regCounts().length?' · '+regCounts().length:'')]].map(([k,t])=>`<button role="tab" aria-selected="${T===k}" data-act="wc_tab" data-v="${k}">${t}</button>`).join('')}</div>`;
+  return loadingOr(head+(T==='store'?countStore():T==='way'?countWay():T==='checks'?countChecks():countWh()));
 }
 /* ---- store: the store count with its own names, linked to the products ---- */
 // what is in the store right now: store stock (count minus register sales since) above 0, by name
@@ -4194,6 +4280,7 @@ async function act(a,b){
   try{
   if(a==='syncSheet'){if(!S.mcp&&!S.backend){toast('Live sync needs Google Drive connected (in Claude) or the hosted version');return}return syncSheet(b)}
   if(a.startsWith('wc_'))return wcAct(a,b);
+  if(a.startsWith('rc_'))return rcAct(a,b);
   if(a.startsWith('st_')||a.startsWith('si_')){const r=await storeAct(a,b);if(r!==false)return}
   if(a==='pickOrders')return $('#ordersFile').click();
   if(a==='opPick')return $('#opFile')?$('#opFile').click():null;
