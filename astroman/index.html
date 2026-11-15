@@ -2903,7 +2903,8 @@ function orderModal(id,pre){
   const o=o0?JSON.parse(JSON.stringify(o0)):{kind:'order',date:today(),supplier:'',platform:'Alibaba',ref:'',cur:'USD',fx:fx(),lines:[],fee:'',shipFee:'',shipId:'',personal:false,note:'',...(pre||{})};
   if(!o.lines||!o.lines.length)o.lines=[{n:'',sku:'',q:'',p:'',w:''}];
   const oid=id||uid('o');
-  const prods=opDocs().stock?.items||[];const pName=new Map(prods.map(x=>[String(x[0]),x[1]]));
+  const opIt=opDocs().stock?.items||[];const opB=new Set(opIt.map(x=>String(x[0])));const gone=goneSet();
+  const prods=[...opIt,...[...S.catalog.values()].filter(x=>x&&x.b&&!opB.has(String(x.b))&&!gone.has(String(x.b))).map(x=>[x.b,x.n])];const pName=new Map(prods.map(x=>[String(x[0]),x[1]]));
   const sups=[...new Set(orderList().map(x=>x.supplier).filter(Boolean))].sort();
   const opens=shipList().filter(s=>shipSt(s)!=='arrived'||s.id===o.shipId).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   const lineTxt=l=>l.sku&&pName.has(String(l.sku))?pName.get(String(l.sku))+' · '+l.sku:(l.n||'');
@@ -2939,7 +2940,7 @@ function orderModal(id,pre){
    <label class="row small" style="margin-top:6px"><input type="checkbox" id="oPers" ${o.personal?'checked':''}> Not for Astroman (personal or other business)</label>
    <label class="field mt"><span>Note</span><input class="input" id="oNote" value="${esc(o.note||'')}"></label>
    <div class="foot">${id?'<button class="btn danger" id="oDel">Delete</button>':'<span></span>'}<div class="row"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" id="oSave" ${S.canWrite?'':'disabled'}>Save</button></div></div>`,true);
-  const L=o.lines.map(l=>({t:lineTxt(l),q:l.q??'',p:l.p??'',w:+l.w?l.w:''}));
+  const L=o.lines.map(l=>({t:lineTxt(l),t0:lineTxt(l),sku0:l.sku||'',q:l.q??'',p:l.p??'',w:+l.w?l.w:''}));
   const cur=()=>$('#oCur').value;
   const draw=()=>{$('#oLines').innerHTML=L.map((l,i)=>`<tr><td style="min-width:220px"><input class="input" data-li="${i}" data-lk="t" list="skuList" value="${esc(l.t)}" placeholder="Product"></td>
     <td><input class="input num r" data-li="${i}" data-lk="q" inputmode="decimal" value="${esc(l.q)}" style="width:70px" placeholder="Qty" aria-label="Quantity"></td>
@@ -2983,7 +2984,7 @@ function orderModal(id,pre){
    d.addEventListener('drop',e=>{e.preventDefault();d.classList.remove('over');takeInv(e.dataTransfer.files[0])});$('#invFile').onchange=e=>takeInv(e.target.files[0]);
    if(pre&&pre.pickInvoice){pre.pickInvoice=false;$('#invFile').click()}}
   const build=()=>{const c=cur();
-    const lines=L.map(l=>{const t=l.t.trim();const hit=prods.find(x=>t===x[1]+' · '+x[0]);return {n:hit?hit[1]:t,sku:hit?String(hit[0]):'',q:parseNum(l.q),p:parseNum(l.p),w:parseNum(l.w)||0}}).filter(l=>l.n||l.q||l.p);
+    const lines=L.map(l=>{const t=l.t.trim();const hit=prods.find(x=>t===x[1]+' · '+x[0]);return {n:hit?hit[1]:t,sku:hit?String(hit[0]):(l.sku0&&t===String(l.t0||'').trim()?l.sku0:''),q:parseNum(l.q),p:parseNum(l.p),w:parseNum(l.w)||0}}).filter(l=>l.n||l.q||l.p);
     const b={...(o0||{}),kind:'order',date:$('#oDate').value||today(),supplier:$('#oSup').value.trim(),platform:$('#oPlat').value.trim(),ref:$('#oRef').value.trim(),cur:c,fx:c==='GEL'?1:parseNum($('#oFx').value),lines,fee:parseNum($('#oFee').value),shipFee:parseNum($('#oDlv').value),shipId:$('#oShip').value==='__new'?(o.shipId||''):$('#oShip').value,personal:$('#oPers').checked,note:$('#oNote').value.trim(),invoice:invName,vatFixed:parseNum($('#oVatF').value)||0,dutyFixed:parseNum($('#oDutyF').value)||0,paid:$('#oPaid').checked};delete b.id;delete b.pickInvoice;
     if(!b.supplier){toast('Write the supplier');$('#oSup').focus();return null}
     if(!lines.length){toast('Add at least one product');return null}
