@@ -202,6 +202,14 @@ a{color:var(--brand)}
 .alert.good .ic{background:var(--good-bg);color:var(--good)}
 .alert.info .ic{background:var(--surface);color:var(--brand)}
 .alert b{font-weight:600}
+.stks{background:#fff;color:#000}.stk{width:40mm;height:30mm;box-sizing:border-box;padding:1.6mm 2mm 1.2mm;background:#fff;color:#000;font-family:"Noto Sans Georgian","Helvetica Neue",Arial,sans-serif;display:flex;flex-direction:column;overflow:hidden;break-inside:avoid;page-break-inside:avoid}
+.stkn{font-size:7pt;line-height:1.15;font-weight:600;max-height:2.3em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.stkp{font-size:13pt;font-weight:800;line-height:1.1;margin-top:auto;white-space:nowrap}.stkp s{font-size:8pt;font-weight:500;color:#444}
+.stkc svg{display:block;width:100%;height:9mm}.stkb{font-size:6pt;text-align:center;letter-spacing:.05em;line-height:1.1;font-family:Arial,sans-serif}
+.stks.roll .stk{page-break-after:always;break-after:page}.stks.roll .stk:last-child{page-break-after:auto;break-after:auto}
+.stks.a4{display:grid;grid-template-columns:repeat(3,70mm);grid-auto-rows:37mm}.stks.a4 .stk{width:70mm;height:37mm;padding:3mm 4mm 2mm}.stks.a4 .stkn{font-size:9pt}.stks.a4 .stkp{font-size:16pt}.stks.a4 .stkc svg{height:11mm}.stks.a4 .stkb{font-size:7pt}
+.stkprev{display:flex;flex-wrap:wrap;gap:10px;padding:12px;border-radius:8px}.stkprev .stk{outline:1px dashed #bbb}.stkprev.a4{display:flex}
+.tlhit{width:100%;text-align:left;cursor:pointer;background:none;border:0;border-bottom:1px solid var(--line);padding:8px 0;color:inherit;display:flex;gap:10px;align-items:center}.tlhit .k{flex:1}
 /* ---------- tables ---------- */
 .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--glass);box-shadow:var(--shadow)}
 table{border-collapse:collapse;width:100%;font-size:13px}
@@ -956,8 +964,8 @@ const DEFAULT_RULES=[
  ['საკომისიო','bank_fees',''],['commission','bank_fees',''],['მომსახურების საფასური','bank_fees',''],
  ['ხაზინ','gezi','Treasury'],['treasury','gezi','Treasury'],
 ];
-const IC={count:'M9 4h6v3H9zM7 5.5H5V21h14V5.5h-2M9 14l2 2 4-4',store:'M3 9l1.2-5h15.6L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6',overview:'M3 13h4v8H3zM10 3h4v18h-4zM17 9h4v12h-4z',recap:'M12 3l2.6 5.5 6 .8-4.4 4.1 1.1 5.9L12 16.4l-5.3 2.9 1.1-5.9L3.4 9.3l6-.8z',sales:'M3 17l6-6 4 4 8-8M15 7h6v6',products:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',expenses:'M4 6h16M4 12h16M4 18h10',bank:'M3 10l9-6 9 6M5 10v9h14v-9M9 19v-5h6v5',pl:'M5 4h14v16H5zM9 9h6M9 13h6M9 17h3',imports:'M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7',settings:'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM4 12h2M18 12h2M12 4v2M12 18v2',more:'M5 12h.01M12 12h.01M19 12h.01',optimo:'M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10M7.5 5l9 4',loan:'M3 6h18v12H3zM12 9.5a2.5 2.5 0 1 1 0 5a2.5 2.5 0 1 1 0-5M6.5 9v6M17.5 9v6'};
-const PAGES=[{id:'overview',t:'Overview'},{id:'recap',t:'Recap'},{id:'sales',t:'Sales'},{id:'products',t:'Products'},{id:'expenses',t:'Expenses'},{id:'bank',t:'Bank import'},{id:'pl',t:'Profit & loss'},{id:'imports',t:'Imports'},{id:'loan',t:'Loan'},{id:'optimo',t:'Optimo'},{id:'store',t:'Store sales'},{id:'count',t:'Stock count'},{id:'settings',t:'Settings'}];
+const IC={tools:'M3 12V4h8l9 9-8 8zM7.5 7.5h.01',count:'M9 4h6v3H9zM7 5.5H5V21h14V5.5h-2M9 14l2 2 4-4',store:'M3 9l1.2-5h15.6L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6',overview:'M3 13h4v8H3zM10 3h4v18h-4zM17 9h4v12h-4z',recap:'M12 3l2.6 5.5 6 .8-4.4 4.1 1.1 5.9L12 16.4l-5.3 2.9 1.1-5.9L3.4 9.3l6-.8z',sales:'M3 17l6-6 4 4 8-8M15 7h6v6',products:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',expenses:'M4 6h16M4 12h16M4 18h10',bank:'M3 10l9-6 9 6M5 10v9h14v-9M9 19v-5h6v5',pl:'M5 4h14v16H5zM9 9h6M9 13h6M9 17h3',imports:'M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7',settings:'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM4 12h2M18 12h2M12 4v2M12 18v2',more:'M5 12h.01M12 12h.01M19 12h.01',optimo:'M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10M7.5 5l9 4',loan:'M3 6h18v12H3zM12 9.5a2.5 2.5 0 1 1 0 5a2.5 2.5 0 1 1 0-5M6.5 9v6M17.5 9v6'};
+const PAGES=[{id:'overview',t:'Overview'},{id:'recap',t:'Recap'},{id:'sales',t:'Sales'},{id:'products',t:'Products'},{id:'expenses',t:'Expenses'},{id:'bank',t:'Bank import'},{id:'pl',t:'Profit & loss'},{id:'imports',t:'Imports'},{id:'loan',t:'Loan'},{id:'optimo',t:'Optimo'},{id:'store',t:'Store sales'},{id:'count',t:'Stock count'},{id:'tools',t:'Tools'},{id:'settings',t:'Settings'}];
 const DEFAULT_FIXED=[
  {id:'rent',label:'Rent',cat:'rent',gel:1500,account:'bog',match:'',from:'2026-09'},
  {id:'accountant',label:'Accountant',cat:'accounting',gel:200,account:'bog',match:'',from:'2026-09'},
@@ -972,7 +980,7 @@ const lsGet0=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
 const S={db:null,user:null,canWrite:true,mcp:null,downloads:null,loaded:{},
   tx:new Map(),loan:new Map(),catalog:new Map(),pos:new Map(),shift:new Map(),site:new Map(),sales:new Map(),ships:new Map(),rules:new Map(),items:new Map(),itemsYear:new Map(),optimo:new Map(),cfg:{},range:null,mc:new Map(),
   view:'overview',month:null,draft:null,bank:null,opt:null,salesPreview:null,filters:{cat:'',acct:'',q:'',all:false},salesQ:'',
-  prod:{tab:'popular',sort:'p',dir:-1,q:'',all:false},op:{tab:'overview',rank:'profit',period:'',q:'',cat:'',status:'',sort:'profit',dir:-1,full:false},store:{tab:'live',day:null},cnt:{tab:lsGet0('af.cntTab')||'store',f:'todo',q:'',cat:'',sf:'all',sq:''},counts:new Map(),animate:true};
+  prod:{tab:'popular',sort:'p',dir:-1,q:'',all:false},op:{tab:'overview',rank:'profit',period:'',q:'',cat:'',status:'',sort:'profit',dir:-1,full:false},store:{tab:'live',day:null},cnt:{tab:lsGet0('af.cntTab')||'store',f:'todo',q:'',cat:'',sf:'all',sq:''},counts:new Map(),tools:{tab:lsGet0('af.toolsTab')||'labels',lq:'',size:lsGet0('af.lblSize')||'roll',pct:20,sf:'slow',sq:'',sel:new Set(),of:'now',lead:+lsGet0('af.lead')||2,cover:+lsGet0('af.cover')||3},animate:true};
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -1329,7 +1337,7 @@ const svg=(d,s=16)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="n
 function renderShell(){
   $('#menu').innerHTML=PAGES.map((p,i)=>(p.id==='pl'?'<div class="sep"></div><div class="grp">Finance</div>':p.id==='optimo'?'<div class="sep"></div><div class="grp">Store</div>':'')+`<button data-go="${p.id}">${svg(IC[p.id])}${p.t}</button>`).join('');
   $('#tabbar').innerHTML=[['overview','Overview'],['expenses','Expenses'],['add',''],['optimo','Optimo'],['more','More']].map(([id,t])=>id==='add'?`<button data-go="add" aria-label="Add expense"><span class="plus">+</span></button>`:`<button data-go="${id}">${svg(IC[id],22)}<span>${t}</span></button>`).join('');
-  $('#moreInner').innerHTML='<div class="grab"></div>'+[['recap','Recap'],['sales','Sales'],['products','Products'],['store','Store sales'],['count','Stock count'],['bank','Bank import'],['pl','Profit & loss'],['imports','Imports'],['loan','Loan'],['settings','Settings']].map(([id,t])=>`<button data-go="${id}">${svg(IC[id],20)}${t}</button>`).join('');
+  $('#moreInner').innerHTML='<div class="grab"></div>'+[['recap','Recap'],['sales','Sales'],['products','Products'],['store','Store sales'],['count','Stock count'],['tools','Tools'],['bank','Bank import'],['pl','Profit & loss'],['imports','Imports'],['loan','Loan'],['settings','Settings']].map(([id,t])=>`<button data-go="${id}">${svg(IC[id],20)}${t}</button>`).join('');
   document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){e.preventDefault();if(g.dataset.go==='more'){$('#moreSheet').classList.add('open');return}$('#moreSheet').classList.remove('open');go(g.dataset.go)}});
   $('#moreSheet').addEventListener('click',e=>{if(e.target.id==='moreSheet')e.currentTarget.classList.remove('open')});
   $('#monthSel').addEventListener('change',e=>setMonth(e.target.value));
@@ -1349,7 +1357,7 @@ function go(v){if(REP)closeRecap();if(v==='recap'){$('#moreSheet').classList.rem
 function render(){
   S.renderedOnce=true;S.mc=new Map();
   document.querySelectorAll('#menu button,#tabbar button').forEach(b=>b.setAttribute('aria-current',b.dataset.go===S.view?'page':'false'));
-  const v={connect:vConnect,overview:vOverview,sales:vSales,products:vProducts,expenses:vExpenses,bank:vBank,pl:vPL,imports:vImports,loan:vLoan,optimo:vOptimo,store:vStore,count:vCount,settings:vSettings,add:vAdd}[S.view]||vOverview;
+  const v={connect:vConnect,overview:vOverview,sales:vSales,products:vProducts,expenses:vExpenses,bank:vBank,pl:vPL,imports:vImports,loan:vLoan,optimo:vOptimo,store:vStore,count:vCount,tools:vTools,settings:vSettings,add:vAdd}[S.view]||vOverview;
   const main=$('#main');const y=window.scrollY;
   main.innerHTML=banner()+v();
   const anim=S.animate&&!reduced();main.classList.toggle('anim',anim);
@@ -4206,9 +4214,161 @@ function bindStore(){
 }
 setInterval(()=>{if(S.backend&&S.view==='store'&&S.store.tab==='live'&&!document.hidden&&!S.backend.pending())S.backend.load().catch(()=>{})},30000);
 
+/* ============================== tools: labels · sale manager · next order ============================== */
+// sales per month for every product: newest Optimo sale history + register sales after it
+function rateOf(x){let R=S.mc.get('#rate');
+  if(!R){const doc=opDocs().sales[0];const m=new Map();const to=doc?String(doc.to):'';
+    if(doc)doc.rows.forEach(r=>{const b=String(r[0]);m.set(b,(m.get(b)||0)+(+r[2]||0))});
+    let first='';S.pos.forEach(o=>{if(!o||o.status==='void'||!o.lines||(to&&String(o.day||'')<=to))return;if(!first||o.day<first)first=o.day;o.lines.forEach(l=>{const b=String(l.b);m.set(b,(m.get(b)||0)+(+l.q||0))})});
+    const days=doc?spanDays(doc)+Math.max(0,dayDiff(to,today())):(first?dayDiff(first,today())+1:30);
+    const known=new Set((opDocs().stock?.items||[]).map(r=>String(r[0])));if(doc)doc.rows.forEach(r=>known.add(String(r[0])));
+    R={m,months:Math.max(days,1)/30.44,known,doc};S.mc.set('#rate',R)}
+  const codes=[x.b,...(x.merged||[])].map(String);
+  return {rate:codes.reduce((a,c)=>a+(R.m.get(c)||0),0)/R.months,sold:codes.reduce((a,c)=>a+(R.m.get(c)||0),0),known:codes.some(c=>R.known.has(c))}}
+function rateInfo(){rateOf({b:''});const R=S.mc.get('#rate');return R.doc?`Optimo sales ${dLabel(R.doc.from)} – ${dLabel(R.doc.to)} + register sales since`:'register sales'}
+// last time each product was bought: supplier, unit price, date
+function lastBuys(){if(S.mc.has('#buy'))return S.mc.get('#buy');const m=new Map();
+  orderList().forEach(o=>(o.lines||[]).forEach(l=>{const b=wayProduct(l.sku);if(!b)return;const c=m.get(b);if(!c||String(o.date||'')>c.date)m.set(b,{sup:o.supplier||'Supplier?',p:+l.p||0,cur:o.cur||'USD',date:String(o.date||''),id:o.id})}));
+  S.mc.set('#buy',m);return m}
+const curSym=c=>c==='USD'?'$':c==='EUR'?'€':c==='CNY'?'¥':'';
+const curMoney=(v,c)=>c==='GEL'?gel(v,2):curSym(c)+fmt(v,2);
+
+function vTools(){
+  const T=S.tools.tab;
+  const tabs=[['labels','Barcode labels'],['sale','Sale prices'],['order','Next order']];
+  const head=`<div class="pagehead"><div><div class="eyebrow">Tools · ხელსაწყოები</div><h1>Tools</h1><p>Print barcode price stickers, put products on sale in one go, and see what to order next.</p></div></div>
+   <div class="tabs" role="tablist">${tabs.map(([k,t])=>`<button role="tab" aria-selected="${T===k}" data-act="tl_tab" data-v="${k}">${t}</button>`).join('')}</div>`;
+  return loadingOr(head+(T==='sale'?toolSale():T==='order'?toolOrder():toolLabels()));
+}
+
+/* ---- barcode labels ---- */
+const C128=['212222','222122','222221','121223','121322','131222','122213','122312','132212','221213','221312','231212','112232','122132','122231','113222','123122','123221','223211','221132','221231','213212','223112','312131','311222','321122','321221','312212','322112','322211','212123','212321','232121','111323','131123','131321','112313','132113','132311','211313','231113','231311','112133','112331','132131','113123','113321','133121','313121','211331','231131','213113','213311','213131','311123','311321','331121','312113','312311','332111','314111','221411','431111','111224','111422','121124','121421','141122','141221','112214','112412','122114','122411','142112','142211','241211','221114','413111','241112','134111','111242','121142','121241','114212','124112','124211','411212','421112','421211','212141','214121','412121','111143','111341','131141','114113','114311','411113','411311','113141','114131','311141','411131','211412','211214','211232','2331112'];
+// Code 128: set C for runs of 4+ digits, set B for everything else
+function code128(s){s=String(s).replace(/[^\x20-\x7e]/g,'');const v=[];let set='',i=0;
+  const to=k=>{if(set===k)return;v.push(set?(k==='B'?100:99):(k==='B'?104:105));set=k};
+  while(i<s.length){let n=0;while(i+n<s.length&&/\d/.test(s[i+n]))n++;
+    if(n>=4||(n>=2&&n%2===0&&n===s.length)){if(n%2){to('B');v.push(s.charCodeAt(i)-32);i++;n--}to('C');for(let k=0;k<n;k+=2)v.push(+s.substr(i+k,2));i+=n}
+    else{to('B');v.push(s.charCodeAt(i)-32);i++}}
+  if(!v.length)to('B');
+  let sum=v[0];for(let k=1;k<v.length;k++)sum+=v[k]*k;v.push(sum%103,106);
+  return v.map(x=>C128[x]).join('')}
+function barSvg(s){const p=code128(s);const q=10;let x=q,r='';for(let k=0;k<p.length;k++){const w=+p[k];if(k%2===0)r+=`<rect x="${x}" y="0" width="${w}" height="40"/>`;x+=w}
+  return `<svg viewBox="0 0 ${x+q} 40" preserveAspectRatio="none" shape-rendering="crispEdges" aria-label="Barcode ${esc(s)}"><rect width="${x+q}" height="40" fill="#fff"/><g fill="#000">${r}</g></svg>`}
+function labelHtml(x){const p=+x.price||0,s=+x.sale>0&&+x.sale<p?+x.sale:0,v=s||p;
+  return `<div class="stk"><div class="stkn">${esc(x.n)}</div><div class="stkp">${v?`${s?`<s>${fmt(p,p%1?2:0)}</s> `:''}<b>${fmt(v,v%1?2:0)} ₾</b>`:''}</div><div class="stkc">${barSvg(x.b)}</div><div class="stkb">${esc(x.b)}</div></div>`}
+function labList(){if(!S.tools.lab){let a=[];try{a=JSON.parse(lsGet('af.labels')||'[]')}catch(e){}S.tools.lab=Array.isArray(a)?a:[]}
+  return S.tools.lab.map(l=>({...l,x:S.catalog.get(wayProduct(l.b)||String(l.b))})).filter(l=>l.x)}
+function labSave(){lsSet('af.labels',JSON.stringify(S.tools.lab||[]))}
+function labAdd(b,c){labList();const L=S.tools.lab;const e=L.find(l=>l.b===b);if(e)e.c=(+e.c||0)+(c||1);else L.push({b,c:c||1});labSave()}
+function toolLabels(){
+  const L=labList();const n=L.reduce((a,l)=>a+(+l.c||0),0);const q=nrm(S.tools.lq||'');const size=S.tools.size;
+  const hits=q?wcItems().filter(x=>nrm(x.n+' '+x.b).includes(q)).slice(0,8):[];
+  const ords=orderList().filter(o=>(o.lines||[]).some(l=>wayProduct(l.sku))).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))).slice(0,30);
+  const prev=L.slice(0,8);
+  return `<div class="grid g2 tlgrid"><div class="panel"><h2>Add products</h2><p class="sub">Search, or scan a barcode and press Enter. Whole orders add one sticker per piece.</p>
+    <input class="input" id="tlQ" placeholder="Name or barcode" value="${esc(S.tools.lq||'')}" autocomplete="off">
+    ${hits.length?`<div class="flow mt">${hits.map(x=>`<button class="tlhit" data-act="tl_add" data-b="${esc(x.b)}">${thumb(x,32)}<span class="k"><b>${esc(x.n)}</b><div class="small muted">${esc(x.b)}${+x.price?' · '+gel(+x.price):''}</div></span><span class="v chip">+ add</span></button>`).join('')}</div>`:q?'<p class="small muted mt">No product matches.</p>':''}
+    <div class="row mt" style="gap:8px;flex-wrap:wrap"><select class="input" id="tlOrd" style="flex:1;min-width:200px">${ords.map(o=>{const pcs=(o.lines||[]).filter(l=>wayProduct(l.sku)).reduce((a,l)=>a+(+l.q||0),0);return `<option value="${esc(o.id)}">${esc(shortSup(o.supplier))} · ${esc(o.date||'')} · ${fmt(pcs)} pcs</option>`}).join('')}</select><button class="btn" data-act="tl_addOrd">Add the whole order</button></div></div>
+   <div class="panel"><h2>Sticker size</h2><div class="seg mt" role="group" aria-label="Sticker size"><button data-act="tl_size" data-v="roll" aria-pressed="${size==='roll'}">Roll 40 × 30 mm</button><button data-act="tl_size" data-v="a4" aria-pressed="${size==='a4'}">A4 sheet 3 × 8 (70 × 37 mm)</button></div>
+    <p class="small muted mt">Roll: one sticker per page, for a label printer. A4: 24 stickers per sheet. In the print dialog choose scale 100% and no margins. Sale prices print with the old price crossed out.</p>
+    <div class="row mt" style="gap:8px"><button class="btn primary" data-act="tl_print" ${n?'':'disabled'}>Print ${fmt(n)} sticker${n===1?'':'s'}</button><button class="btn" data-act="tl_clear" ${L.length?'':'disabled'}>Clear the list</button></div></div></div>
+   ${L.length?`<div class="tablewrap mt"><table class="mstack"><thead><tr><th>Product</th><th class="r">Price</th><th class="r">Stickers</th><th></th></tr></thead><tbody>${L.map(l=>{const x=l.x;return `<tr><td class="mn"><div class="row" style="gap:10px;flex-wrap:nowrap">${thumb(x,34)}<div><b>${esc(x.n)}</b><div class="small muted">${esc(x.b)}</div></div></div></td><td class="r num" data-l="Price">${+x.price?gel(+x.price):'<span class="chip warn">no price</span>'}${+x.sale>0&&+x.sale<+x.price?`<div class="small up">sale ${gel(+x.sale)}</div>`:''}</td><td class="r" data-l="Stickers"><input class="input num" data-tlc="${esc(l.b)}" inputmode="numeric" value="${+l.c||0}" style="width:76px;text-align:right"></td><td class="r"><button class="btn sm" data-act="tl_rm" data-b="${esc(l.b)}">Remove</button></td></tr>`}).join('')}</tbody></table></div>
+   <div class="panel mt"><h2>Preview</h2><p class="sub">Actual size${L.length>prev.length?', first '+prev.length+' products':''}.</p><div class="stkprev stks ${size}">${prev.map(l=>labelHtml(l.x)).join('')}</div></div>`
+   :`<div class="panel empty mt"><b>No stickers yet</b><span>Add products or a whole order above.</span></div>`}`}
+function labelsPrint(){const L=labList();const all=[];L.forEach(l=>{for(let k=0;k<(+l.c||0);k++)all.push(l.x)});if(!all.length)return toast('Add stickers first');
+  const size=S.tools.size;const root=$('#printRoot');root.innerHTML=`<div class="stks ${size}">${all.map(labelHtml).join('')}</div>`;
+  const st=document.createElement('style');st.id='lblPage';st.textContent=size==='a4'?'@page{size:A4;margin:0}':'@page{size:40mm 30mm;margin:0}';document.head.appendChild(st);
+  document.body.classList.add('printing');const t=document.title;document.title='astroman-stickers-'+today();window.print();document.title=t;
+  setTimeout(()=>{document.body.classList.remove('printing');root.innerHTML='';st.remove()},500)}
+
+/* ---- sale prices ---- */
+function saleRows(){const pct=Math.min(90,Math.max(1,+S.tools.pct||0));
+  return wcItems().map(x=>{const st=Math.max(0,catLive(x))+whQ(x);const r=rateOf(x);const price=+x.price||0,cost=+x.cost||0;
+    const np=price?Math.round(price*(1-pct/100)):0;const on=+x.sale>0&&+x.sale<price;
+    const cover=r.rate>0?st/r.rate:null;const slow=st>0&&r.known&&(cover==null||cover>12);
+    return {x,st,rate:r.rate,sold:r.sold,price,cost,np,on,cover,slow,low:cost>0&&np<cost}}).filter(o=>o.price>0)}
+function toolSale(){
+  const T=S.tools;const all=saleRows();const q=nrm(T.sq||'');const f=T.sf;
+  const test=o=>f==='on'?o.on:f==='stock'?o.st>0:f==='all'?true:o.slow;
+  const L=all.filter(o=>test(o)&&(!q||nrm(o.x.n+' '+o.x.b).includes(q))).sort((a,b)=>(b.cover??1e9)-(a.cover??1e9)||b.st*b.cost-a.st*a.cost);
+  const sel=T.sel;const S1=all.filter(o=>sel.has(o.x.b));const ok=S1.filter(o=>!o.low);
+  const tied=L.reduce((a,o)=>a+o.st*o.cost,0);
+  const cnt=k=>all.filter(o=>k==='on'?o.on:k==='stock'?o.st>0:k==='all'?true:o.slow).length;
+  return `<div class="panel"><div class="row" style="gap:12px;flex-wrap:wrap;align-items:flex-end">
+     <label class="field" style="margin:0"><span>Discount %</span><input class="input num" id="tlPct" inputmode="numeric" value="${esc(T.pct)}" style="width:90px"></label>
+     <div style="flex:1;min-width:220px"><div class="small muted">Selected</div><b>${fmt(S1.length)} product${S1.length===1?'':'s'}</b>${S1.length-ok.length?` <span class="chip warn">${S1.length-ok.length} would go below cost, skipped</span>`:''}</div>
+     <button class="btn primary" data-act="tl_apply" ${ok.length?'':'disabled'}>Put ${fmt(ok.length)} on sale −${esc(T.pct)}%</button><button class="btn" data-act="tl_end" ${S1.some(o=>o.on)?'':'disabled'}>End sale for selected</button></div>
+    <p class="small muted" style="margin:10px 0 0">The register charges the sale price at once. Prices round to whole lari and never go below cost. Sales rate: ${esc(rateInfo())}.</p></div>
+   <div class="row mt" style="gap:8px;flex-wrap:wrap"><div class="pills">${[['slow','Slow movers'],['stock','All in stock'],['on','On sale now'],['all','All with a price']].map(([k,t])=>`<button data-act="tl_sf" data-v="${k}" aria-pressed="${f===k}">${t}<b>${cnt(k)}</b></button>`).join('')}</div><span class="spacer"></span>
+    <input class="input" id="tlSQ" placeholder="Search" value="${esc(T.sq||'')}" style="max-width:200px"><button class="btn sm" data-act="tl_selAll">Select shown</button><button class="btn sm" data-act="tl_selNone">Clear selection</button></div>
+   <p class="small muted">${fmt(L.length)} products · ${gel(tied)} tied up at cost. Slow movers: in stock and more than a year's sales on hand, slowest first.</p>
+   ${L.length?`<div class="tablewrap"><table class="mstack"><thead><tr><th></th><th>Product</th><th class="r">Stock</th><th class="r">Sells / month</th><th class="r">Price</th><th class="r">Cost</th><th class="r">Sale −${esc(T.pct)}%</th></tr></thead><tbody>${L.slice(0,T.sfull?9999:150).map(o=>{const x=o.x;const m=o.np?Math.round((o.np-o.cost)/o.np*100):0;
+     return `<tr class="click" data-act="tl_sel" data-b="${esc(x.b)}"><td class="ck"><input type="checkbox" tabindex="-1" ${sel.has(x.b)?'checked':''} aria-label="Select ${esc(x.n)}"></td><td class="mn"><div class="row" style="gap:10px;flex-wrap:nowrap">${thumb(x,34)}<div><b>${esc(x.n)}</b><div class="small muted">${esc(x.b)} · store ${Math.max(0,catLive(x))} · warehouse ${whQ(x)}</div></div></div></td>
+      <td class="r num" data-l="Stock">${fmt(o.st)}${o.cover!=null&&o.st?`<div class="small muted">${o.cover>99?'99+':fmt(o.cover,o.cover<10?1:0)} mo</div>`:''}</td><td class="r num" data-l="Sells / month">${o.rate?fmt(o.rate,o.rate<10?1:0):'<span class="muted">none</span>'}<div class="small muted">${fmt(o.sold)} sold</div></td>
+      <td class="r num" data-l="Price">${gel(o.price)}${o.on?`<div class="small up">on sale ${gel(+x.sale)}</div>`:''}</td><td class="r num" data-l="Cost">${o.cost?gel(o.cost,2):'—'}</td><td class="r num" data-l="Sale price">${o.low?`<span class="chip warn">below cost</span>`:`<b>${gel(o.np)}</b><div class="small muted">${o.cost?m+'% margin':''}</div>`}</td></tr>`}).join('')}</tbody></table></div>${L.length>150&&!T.sfull?`<button class="btn mt" data-act="tl_sfull">Show all ${fmt(L.length)}</button>`:''}`
+   :`<div class="panel empty"><b>Nothing here</b><span>Try another filter.</span></div>`}`}
+async function saleApply(end){const T=S.tools;const rows=saleRows().filter(o=>T.sel.has(o.x.b)&&(end?o.on:!o.low));if(!rows.length)return;
+  let n=0;for(const o of rows){await saveCat(o.x.b,{sale:end?null:o.np});n++;if(n%5===0)toast((end?'Ending sale… ':'Saving… ')+n+' / '+rows.length,20000)}
+  T.sel.clear();toast(end?`Sale ended for ${n} product${n===1?'':'s'}`:`${n} product${n===1?'':'s'} on sale −${T.pct}%`);render()}
+
+/* ---- next order ---- */
+function orderRows(){const T=S.tools;const lead=Math.max(0.25,+T.lead||2),cover=Math.max(0.5,+T.cover||3);const inc=incBy();const buy=lastBuys();
+  return wcItems().map(x=>{const r=rateOf(x);const st=Math.max(0,catLive(x)),wh=whQ(x),co=(inc.get(x.b)||{}).q||0;const have=st+wh+co;
+    const fast=r.rate>=0.3;const lasts=r.rate>0?have/r.rate:null;
+    const status=!fast?'slow':have<r.rate*lead?'now':have<r.rate*(lead+1)?'soon':'ok';
+    const qty=status==='now'||status==='soon'?Math.max(1,Math.ceil(r.rate*(lead+cover)-have)):0;
+    return {x,rate:r.rate,sold:r.sold,st,wh,co,have,lasts,status,qty,buy:buy.get(x.b)||null}}).filter(o=>o.rate>0)}
+function toolOrder(){
+  const T=S.tools;const all=orderRows();const f=T.of;const L=all.filter(o=>f==='all'?true:f==='soon'?o.status==='soon':f==='ok'?o.status==='ok':o.status==='now');
+  const g=new Map();L.forEach(o=>{const k=o.buy?o.buy.sup:'';(g.get(k)||g.set(k,[]).get(k)).push(o)});
+  const groups=[...g].sort((a,b)=>(a[0]?0:1)-(b[0]?0:1)||b[1].length-a[1].length);
+  const cnt=k=>all.filter(o=>k==='all'?true:o.status===k).length;
+  const ST={now:['bad','Order now'],soon:['warn','Order soon'],ok:['good','Enough'],slow:['','Slow seller']};
+  return `<div class="panel"><div class="row" style="gap:12px;flex-wrap:wrap;align-items:flex-end">
+     <label class="field" style="margin:0"><span>Delivery takes (months)</span><input class="input num" id="tlLead" inputmode="decimal" value="${esc(T.lead)}" style="width:110px"></label>
+     <label class="field" style="margin:0"><span>Order enough for (months)</span><input class="input num" id="tlCover" inputmode="decimal" value="${esc(T.cover)}" style="width:110px"></label>
+     <span class="spacer"></span><button class="btn" data-act="tl_oxls">Download Excel</button></div>
+    <p class="small muted" style="margin:10px 0 0">Counts what is in the store now, in the warehouse and already on the way. “Order now” = it runs out before a new order could arrive. Sales rate: ${esc(rateInfo())}.</p></div>
+   <div class="pills mt">${[['now','Order now'],['soon','Order soon'],['ok','Enough'],['all','All selling']].map(([k,t])=>`<button data-act="tl_of" data-v="${k}" aria-pressed="${f===k}">${t}<b>${cnt(k)}</b></button>`).join('')}</div>
+   ${groups.length?groups.map(([sup,rows])=>{const cost=rows.reduce((a,o)=>a+(o.buy?o.qty*o.buy.p:0),0);const cur=rows.find(o=>o.buy)?.buy.cur||'';
+     return `<div class="panel mt" style="padding:0;overflow:hidden"><div class="row" style="padding:12px 14px;gap:10px"><h2 style="margin:0">${sup?esc(shortSup(sup)):'Not bought through an order in Mars'}</h2><span class="chip">${rows.length}</span><span class="spacer"></span>${sup&&cost?`<span class="small muted">about <b>${curMoney(cost,cur)}</b> at the last prices</span>`:''}</div>
+     <div class="tablewrap" style="border:0;border-radius:0;box-shadow:none"><table class="mstack"><thead><tr><th>Product</th><th class="r">Sells / month</th><th class="r">Store</th><th class="r">Warehouse</th><th class="r">Coming</th><th class="r">Lasts</th><th class="r">Order</th><th>Last bought</th></tr></thead><tbody>${rows.sort((a,b)=>(a.lasts??0)-(b.lasts??0)).map(o=>`<tr><td class="mn"><div class="row" style="gap:10px;flex-wrap:nowrap">${thumb(o.x,34)}<div><b>${esc(o.x.n)}</b><div class="small muted">${esc(o.x.b)} · <span class="chip ${ST[o.status][0]}" style="padding:0 6px">${ST[o.status][1]}</span></div></div></div></td>
+       <td class="r num" data-l="Sells / mo">${fmt(o.rate,o.rate<10?1:0)}</td><td class="r num" data-l="Store">${fmt(o.st)}</td><td class="r num" data-l="Warehouse">${fmt(o.wh)}</td><td class="r num" data-l="Coming">${o.co?fmt(o.co):'—'}</td><td class="r num" data-l="Lasts">${o.have<=0?'<span class="chip bad">out of stock</span>':o.lasts==null?'—':o.lasts>99?'99+ mo':fmt(o.lasts,o.lasts<10?1:0)+' mo'}</td><td class="r num" data-l="Order">${o.qty?`<b>${fmt(o.qty)}</b>`:'—'}</td>
+       <td class="small" data-l="Last bought">${o.buy?`${curMoney(o.buy.p,o.buy.cur)} each<div class="muted">${esc(o.buy.date)}</div>`:(optimoCost(o.x.b)||{}).cost?`${gel(optimoCost(o.x.b).cost,2)} cost<div class="muted">Optimo</div>`:'<span class="muted">—</span>'}</td></tr>`).join('')}</tbody></table></div></div>`}).join('')
+   :`<div class="panel empty mt"><b>${f==='now'?'Nothing needs ordering right now':'Nothing here'}</b><span>${f==='now'?'Everything selling has enough stock for the delivery time.':'Try another filter.'}</span></div>`}`}
+async function orderXlsx(){await xlsxReady();const rows=[['Supplier','Product','Code','Status','Sells / month','Store','Warehouse','Coming','Lasts (months)','Order qty','Last price','Currency','Last bought']];
+  const ST={now:'Order now',soon:'Order soon',ok:'Enough',slow:'Slow seller'};
+  orderRows().sort((a,b)=>String(a.buy?a.buy.sup:'~').localeCompare(String(b.buy?b.buy.sup:'~'))||(a.lasts??0)-(b.lasts??0)).forEach(o=>rows.push([o.buy?o.buy.sup:'',o.x.n,o.x.b,ST[o.status],r2(o.rate),o.st,o.wh,o.co,o.lasts==null?'':r2(o.lasts),o.qty||'',o.buy?o.buy.p:'',o.buy?o.buy.cur:'',o.buy?o.buy.date:'']));
+  const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:24},{wch:40},{wch:14},{wch:12}];XLSX.utils.book_append_sheet(wb,ws,'Next order');XLSX.writeFile(wb,'astroman-next-order-'+today()+'.xlsx')}
+
+async function toolsAct(a,b){const T=S.tools;const v=b&&b.dataset.v,bc=b&&b.dataset.b;
+  if(a==='tl_tab'){T.tab=v;lsSet('af.toolsTab',v);S.animate=true;render();window.scrollTo({top:0});return}
+  if(a==='tl_add'){labAdd(bc,1);T.lq='';toast('Added');render();const q=$('#tlQ');if(q)q.focus();return}
+  if(a==='tl_rm'){T.lab=(T.lab||[]).filter(l=>l.b!==bc);labSave();return render()}
+  if(a==='tl_clear'){if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Tap again to clear';setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent='Clear the list'}},4000);return}T.lab=[];labSave();return render()}
+  if(a==='tl_addOrd'){const o=S.ships.get(($('#tlOrd')||{}).value);if(!o)return;let n=0;(o.lines||[]).forEach(l=>{const p=wayProduct(l.sku);const q=Math.round(+l.q||0);if(p&&q>0){labAdd(p,q);n+=q}});toast(n+' stickers added from '+shortSup(o.supplier));return render()}
+  if(a==='tl_size'){T.size=v;lsSet('af.lblSize',v);return render()}
+  if(a==='tl_print')return labelsPrint();
+  if(a==='tl_sf'){T.sf=v;T.sfull=false;return render()}
+  if(a==='tl_sfull'){T.sfull=true;return render()}
+  if(a==='tl_sel'){if(T.sel.has(bc))T.sel.delete(bc);else T.sel.add(bc);return render()}
+  if(a==='tl_selAll'){const q=nrm(T.sq||'');saleRows().filter(o=>(T.sf==='on'?o.on:T.sf==='stock'?o.st>0:T.sf==='all'?true:o.slow)&&(!q||nrm(o.x.n+' '+o.x.b).includes(q))).forEach(o=>T.sel.add(o.x.b));return render()}
+  if(a==='tl_selNone'){T.sel.clear();return render()}
+  if(a==='tl_apply'||a==='tl_end'){if(!b.dataset.sure){const t=b.textContent;b.dataset.sure=1;b.textContent='Tap again to confirm';setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent=t}},4000);return}return saleApply(a==='tl_end')}
+  if(a==='tl_of'){T.of=v;return render()}
+  if(a==='tl_oxls')return orderXlsx();
+}
+function bindTools(){if(S.view!=='tools')return;const T=S.tools;
+  const live=(id,set)=>{const e=$(id);if(!e)return;let t;e.oninput=()=>{clearTimeout(t);t=setTimeout(()=>{set(e.value);render();const y=$(id);if(y){y.focus();y.setSelectionRange(y.value.length,y.value.length)}},300)}};
+  live('#tlQ',v=>T.lq=v);live('#tlSQ',v=>{T.sq=v;T.sfull=false});
+  const q=$('#tlQ');if(q)q.onkeydown=e=>{if(e.key!=='Enter')return;const s=q.value.trim();const x=s&&(S.catalog.get(s)||S.catalog.get(wayProduct(s)));if(x&&!catGone(x.b)){e.preventDefault();labAdd(x.b,1);T.lq='';toast('Added '+x.n);render();const y=$('#tlQ');if(y)y.focus()}};
+  document.querySelectorAll('[data-tlc]').forEach(i=>i.onchange=()=>{const l=(T.lab||[]).find(l=>l.b===i.dataset.tlc);if(l){l.c=Math.max(0,Math.round(parseNum(i.value)));labSave();render()}});
+  const num=(id,k,ls)=>{const e=$(id);if(e)e.onchange=()=>{const v=parseNum(e.value);if(v>0){T[k]=v;if(ls)lsSet(ls,String(v))}render()}};
+  num('#tlPct','pct');num('#tlLead','lead','af.lead');num('#tlCover','cover','af.cover');
+}
 function bindView(){
   if(S.view==='add')bindAdd();
-  bindStore();bindCount();
+  bindStore();bindCount();bindTools();
   const tip=$('#tip');const showTip=(e,html)=>{tip.innerHTML=html;tip.hidden=false;const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8),y=Math.min(e.clientY+14,innerHeight-tip.offsetHeight-8);tip.style.left=Math.max(8,x)+'px';tip.style.top=Math.max(8,y)+'px'};
   const hide=()=>tip.hidden=true;
   document.querySelectorAll('#trendSvg .hit').forEach(h=>{h.addEventListener('pointermove',e=>{const d=trendChart.data[+h.dataset.i];showTip(e,`<div class="t">${esc(d.long)}${d.src?' · '+COGS_SRC[d.src]:''}</div><div class="r"><span>Sales</span><b class="num">${gel(d.sales)}</b></div><div class="r"><span>Cost of goods</span><span class="num">${gel(d.cogs)}</span></div><div class="r"><span>Running costs</span><span class="num">${gel(d.opex)}</span></div><div class="r"><span>Taxes</span><span class="num">${gel(d.tax)}</span></div><div class="r"><span>Net profit</span><b class="num ${d.net<0?'neg':''}">${gel(d.net)}</b></div>`)});h.addEventListener('pointerleave',hide);h.addEventListener('click',()=>{hide();const d=trendChart.data[+h.dataset.i];if(d.isYear)setRange({p:'year',y:d.m});else setMonth(d.m)})});
@@ -4281,6 +4441,7 @@ async function act(a,b){
   try{
   if(a==='syncSheet'){if(!S.mcp&&!S.backend){toast('Live sync needs Google Drive connected (in Claude) or the hosted version');return}return syncSheet(b)}
   if(a.startsWith('wc_'))return wcAct(a,b);
+  if(a.startsWith('tl_'))return toolsAct(a,b);
   if(a.startsWith('rc_'))return rcAct(a,b);
   if(a.startsWith('st_')||a.startsWith('si_')){const r=await storeAct(a,b);if(r!==false)return}
   if(a==='pickOrders')return $('#ordersFile').click();
