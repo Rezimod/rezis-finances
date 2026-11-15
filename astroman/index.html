@@ -202,14 +202,6 @@ a{color:var(--brand)}
 .alert.good .ic{background:var(--good-bg);color:var(--good)}
 .alert.info .ic{background:var(--surface);color:var(--brand)}
 .alert b{font-weight:600}
-.stks{background:#fff;color:#000}.stk{width:40mm;height:30mm;box-sizing:border-box;padding:1.6mm 2mm 1.2mm;background:#fff;color:#000;font-family:"Noto Sans Georgian","Helvetica Neue",Arial,sans-serif;display:flex;flex-direction:column;overflow:hidden;break-inside:avoid;page-break-inside:avoid}
-.stkn{font-size:7pt;line-height:1.15;font-weight:600;max-height:2.3em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.stkp{font-size:13pt;font-weight:800;line-height:1.1;margin-top:auto;white-space:nowrap}.stkp s{font-size:8pt;font-weight:500;color:#444}
-.stkc svg{display:block;width:100%;height:9mm}.stkb{font-size:6pt;text-align:center;letter-spacing:.05em;line-height:1.1;font-family:Arial,sans-serif}
-.stks.roll .stk{page-break-after:always;break-after:page}.stks.roll .stk:last-child{page-break-after:auto;break-after:auto}
-.stks.a4{display:grid;grid-template-columns:repeat(3,70mm);grid-auto-rows:37mm}.stks.a4 .stk{width:70mm;height:37mm;padding:3mm 4mm 2mm}.stks.a4 .stkn{font-size:9pt}.stks.a4 .stkp{font-size:16pt}.stks.a4 .stkc svg{height:11mm}.stks.a4 .stkb{font-size:7pt}
-.stkprev{display:flex;flex-wrap:wrap;gap:10px;padding:12px;border-radius:8px}.stkprev .stk{outline:1px dashed #bbb}.stkprev.a4{display:flex}
-.tlhit{width:100%;text-align:left;cursor:pointer;background:none;border:0;border-bottom:1px solid var(--line);padding:8px 0;color:inherit;display:flex;gap:10px;align-items:center}.tlhit .k{flex:1}
 /* ---------- tables ---------- */
 .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--glass);box-shadow:var(--shadow)}
 table{border-collapse:collapse;width:100%;font-size:13px}
@@ -980,7 +972,7 @@ const lsGet0=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
 const S={db:null,user:null,canWrite:true,mcp:null,downloads:null,loaded:{},
   tx:new Map(),loan:new Map(),catalog:new Map(),pos:new Map(),shift:new Map(),site:new Map(),sales:new Map(),ships:new Map(),rules:new Map(),items:new Map(),itemsYear:new Map(),optimo:new Map(),cfg:{},range:null,mc:new Map(),
   view:'overview',month:null,draft:null,bank:null,opt:null,salesPreview:null,filters:{cat:'',acct:'',q:'',all:false},salesQ:'',
-  prod:{tab:'popular',sort:'p',dir:-1,q:'',all:false},op:{tab:'overview',rank:'profit',period:'',q:'',cat:'',status:'',sort:'profit',dir:-1,full:false},store:{tab:'live',day:null},cnt:{tab:lsGet0('af.cntTab')||'store',f:'todo',q:'',cat:'',sf:'all',sq:''},counts:new Map(),tools:{tab:lsGet0('af.toolsTab')||'labels',lq:'',size:lsGet0('af.lblSize')||'roll',pct:20,sf:'slow',sq:'',sel:new Set(),of:'now',lead:+lsGet0('af.lead')||2,cover:+lsGet0('af.cover')||3},animate:true};
+  prod:{tab:'popular',sort:'p',dir:-1,q:'',all:false},op:{tab:'overview',rank:'profit',period:'',q:'',cat:'',status:'',sort:'profit',dir:-1,full:false},store:{tab:'live',day:null},cnt:{tab:lsGet0('af.cntTab')||'store',f:'todo',q:'',cat:'',sf:'all',sq:''},counts:new Map(),tools:{tab:lsGet0('af.toolsTab')==='order'?'order':'sale',pct:20,sf:'slow',sq:'',sel:new Set(),of:'now',lead:+lsGet0('af.lead')||2,cover:+lsGet0('af.cover')||3},animate:true};
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -4214,7 +4206,7 @@ function bindStore(){
 }
 setInterval(()=>{if(S.backend&&S.view==='store'&&S.store.tab==='live'&&!document.hidden&&!S.backend.pending())S.backend.load().catch(()=>{})},30000);
 
-/* ============================== tools: labels · sale manager · next order ============================== */
+/* ============================== tools: sale manager · next order ============================== */
 // sales per month for every product: newest Optimo sale history + register sales after it
 function rateOf(x){let R=S.mc.get('#rate');
   if(!R){const doc=opDocs().sales[0];const m=new Map();const to=doc?String(doc.to):'';
@@ -4235,51 +4227,11 @@ const curMoney=(v,c)=>c==='GEL'?gel(v,2):curSym(c)+fmt(v,2);
 
 function vTools(){
   const T=S.tools.tab;
-  const tabs=[['labels','Barcode labels'],['sale','Sale prices'],['order','Next order']];
-  const head=`<div class="pagehead"><div><div class="eyebrow">Tools · ხელსაწყოები</div><h1>Tools</h1><p>Print barcode price stickers, put products on sale in one go, and see what to order next.</p></div></div>
+  const tabs=[['sale','Sale prices'],['order','Next order']];
+  const head=`<div class="pagehead"><div><div class="eyebrow">Tools · ხელსაწყოები</div><h1>Tools</h1><p>Put products on sale in one go, and see what to order next.</p></div></div>
    <div class="tabs" role="tablist">${tabs.map(([k,t])=>`<button role="tab" aria-selected="${T===k}" data-act="tl_tab" data-v="${k}">${t}</button>`).join('')}</div>`;
-  return loadingOr(head+(T==='sale'?toolSale():T==='order'?toolOrder():toolLabels()));
+  return loadingOr(head+(T==='order'?toolOrder():toolSale()));
 }
-
-/* ---- barcode labels ---- */
-const C128=['212222','222122','222221','121223','121322','131222','122213','122312','132212','221213','221312','231212','112232','122132','122231','113222','123122','123221','223211','221132','221231','213212','223112','312131','311222','321122','321221','312212','322112','322211','212123','212321','232121','111323','131123','131321','112313','132113','132311','211313','231113','231311','112133','112331','132131','113123','113321','133121','313121','211331','231131','213113','213311','213131','311123','311321','331121','312113','312311','332111','314111','221411','431111','111224','111422','121124','121421','141122','141221','112214','112412','122114','122411','142112','142211','241211','221114','413111','241112','134111','111242','121142','121241','114212','124112','124211','411212','421112','421211','212141','214121','412121','111143','111341','131141','114113','114311','411113','411311','113141','114131','311141','411131','211412','211214','211232','2331112'];
-// Code 128: set C for runs of 4+ digits, set B for everything else
-function code128(s){s=String(s).replace(/[^\x20-\x7e]/g,'');const v=[];let set='',i=0;
-  const to=k=>{if(set===k)return;v.push(set?(k==='B'?100:99):(k==='B'?104:105));set=k};
-  while(i<s.length){let n=0;while(i+n<s.length&&/\d/.test(s[i+n]))n++;
-    if(n>=4||(n>=2&&n%2===0&&n===s.length)){if(n%2){to('B');v.push(s.charCodeAt(i)-32);i++;n--}to('C');for(let k=0;k<n;k+=2)v.push(+s.substr(i+k,2));i+=n}
-    else{to('B');v.push(s.charCodeAt(i)-32);i++}}
-  if(!v.length)to('B');
-  let sum=v[0];for(let k=1;k<v.length;k++)sum+=v[k]*k;v.push(sum%103,106);
-  return v.map(x=>C128[x]).join('')}
-function barSvg(s){const p=code128(s);const q=10;let x=q,r='';for(let k=0;k<p.length;k++){const w=+p[k];if(k%2===0)r+=`<rect x="${x}" y="0" width="${w}" height="40"/>`;x+=w}
-  return `<svg viewBox="0 0 ${x+q} 40" preserveAspectRatio="none" shape-rendering="crispEdges" aria-label="Barcode ${esc(s)}"><rect width="${x+q}" height="40" fill="#fff"/><g fill="#000">${r}</g></svg>`}
-function labelHtml(x){const p=+x.price||0,s=+x.sale>0&&+x.sale<p?+x.sale:0,v=s||p;
-  return `<div class="stk"><div class="stkn">${esc(x.n)}</div><div class="stkp">${v?`${s?`<s>${fmt(p,p%1?2:0)}</s> `:''}<b>${fmt(v,v%1?2:0)} ₾</b>`:''}</div><div class="stkc">${barSvg(x.b)}</div><div class="stkb">${esc(x.b)}</div></div>`}
-function labList(){if(!S.tools.lab){let a=[];try{a=JSON.parse(lsGet('af.labels')||'[]')}catch(e){}S.tools.lab=Array.isArray(a)?a:[]}
-  return S.tools.lab.map(l=>({...l,x:S.catalog.get(wayProduct(l.b)||String(l.b))})).filter(l=>l.x)}
-function labSave(){lsSet('af.labels',JSON.stringify(S.tools.lab||[]))}
-function labAdd(b,c){labList();const L=S.tools.lab;const e=L.find(l=>l.b===b);if(e)e.c=(+e.c||0)+(c||1);else L.push({b,c:c||1});labSave()}
-function toolLabels(){
-  const L=labList();const n=L.reduce((a,l)=>a+(+l.c||0),0);const q=nrm(S.tools.lq||'');const size=S.tools.size;
-  const hits=q?wcItems().filter(x=>nrm(x.n+' '+x.b).includes(q)).slice(0,8):[];
-  const ords=orderList().filter(o=>(o.lines||[]).some(l=>wayProduct(l.sku))).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))).slice(0,30);
-  const prev=L.slice(0,8);
-  return `<div class="grid g2 tlgrid"><div class="panel"><h2>Add products</h2><p class="sub">Search, or scan a barcode and press Enter. Whole orders add one sticker per piece.</p>
-    <input class="input" id="tlQ" placeholder="Name or barcode" value="${esc(S.tools.lq||'')}" autocomplete="off">
-    ${hits.length?`<div class="flow mt">${hits.map(x=>`<button class="tlhit" data-act="tl_add" data-b="${esc(x.b)}">${thumb(x,32)}<span class="k"><b>${esc(x.n)}</b><div class="small muted">${esc(x.b)}${+x.price?' · '+gel(+x.price):''}</div></span><span class="v chip">+ add</span></button>`).join('')}</div>`:q?'<p class="small muted mt">No product matches.</p>':''}
-    <div class="row mt" style="gap:8px;flex-wrap:wrap"><select class="input" id="tlOrd" style="flex:1;min-width:200px">${ords.map(o=>{const pcs=(o.lines||[]).filter(l=>wayProduct(l.sku)).reduce((a,l)=>a+(+l.q||0),0);return `<option value="${esc(o.id)}">${esc(shortSup(o.supplier))} · ${esc(o.date||'')} · ${fmt(pcs)} pcs</option>`}).join('')}</select><button class="btn" data-act="tl_addOrd">Add the whole order</button></div></div>
-   <div class="panel"><h2>Sticker size</h2><div class="seg mt" role="group" aria-label="Sticker size"><button data-act="tl_size" data-v="roll" aria-pressed="${size==='roll'}">Roll 40 × 30 mm</button><button data-act="tl_size" data-v="a4" aria-pressed="${size==='a4'}">A4 sheet 3 × 8 (70 × 37 mm)</button></div>
-    <p class="small muted mt">Roll: one sticker per page, for a label printer. A4: 24 stickers per sheet. In the print dialog choose scale 100% and no margins. Sale prices print with the old price crossed out.</p>
-    <div class="row mt" style="gap:8px"><button class="btn primary" data-act="tl_print" ${n?'':'disabled'}>Print ${fmt(n)} sticker${n===1?'':'s'}</button><button class="btn" data-act="tl_clear" ${L.length?'':'disabled'}>Clear the list</button></div></div></div>
-   ${L.length?`<div class="tablewrap mt"><table class="mstack"><thead><tr><th>Product</th><th class="r">Price</th><th class="r">Stickers</th><th></th></tr></thead><tbody>${L.map(l=>{const x=l.x;return `<tr><td class="mn"><div class="row" style="gap:10px;flex-wrap:nowrap">${thumb(x,34)}<div><b>${esc(x.n)}</b><div class="small muted">${esc(x.b)}</div></div></div></td><td class="r num" data-l="Price">${+x.price?gel(+x.price):'<span class="chip warn">no price</span>'}${+x.sale>0&&+x.sale<+x.price?`<div class="small up">sale ${gel(+x.sale)}</div>`:''}</td><td class="r" data-l="Stickers"><input class="input num" data-tlc="${esc(l.b)}" inputmode="numeric" value="${+l.c||0}" style="width:76px;text-align:right"></td><td class="r"><button class="btn sm" data-act="tl_rm" data-b="${esc(l.b)}">Remove</button></td></tr>`}).join('')}</tbody></table></div>
-   <div class="panel mt"><h2>Preview</h2><p class="sub">Actual size${L.length>prev.length?', first '+prev.length+' products':''}.</p><div class="stkprev stks ${size}">${prev.map(l=>labelHtml(l.x)).join('')}</div></div>`
-   :`<div class="panel empty mt"><b>No stickers yet</b><span>Add products or a whole order above.</span></div>`}`}
-function labelsPrint(){const L=labList();const all=[];L.forEach(l=>{for(let k=0;k<(+l.c||0);k++)all.push(l.x)});if(!all.length)return toast('Add stickers first');
-  const size=S.tools.size;const root=$('#printRoot');root.innerHTML=`<div class="stks ${size}">${all.map(labelHtml).join('')}</div>`;
-  const st=document.createElement('style');st.id='lblPage';st.textContent=size==='a4'?'@page{size:A4;margin:0}':'@page{size:40mm 30mm;margin:0}';document.head.appendChild(st);
-  document.body.classList.add('printing');const t=document.title;document.title='astroman-stickers-'+today();window.print();document.title=t;
-  setTimeout(()=>{document.body.classList.remove('printing');root.innerHTML='';st.remove()},500)}
 
 /* ---- sale prices ---- */
 function saleRows(){const pct=Math.min(90,Math.max(1,+S.tools.pct||0));
@@ -4343,12 +4295,6 @@ async function orderXlsx(){await xlsxReady();const rows=[['Supplier','Product','
 
 async function toolsAct(a,b){const T=S.tools;const v=b&&b.dataset.v,bc=b&&b.dataset.b;
   if(a==='tl_tab'){T.tab=v;lsSet('af.toolsTab',v);S.animate=true;render();window.scrollTo({top:0});return}
-  if(a==='tl_add'){labAdd(bc,1);T.lq='';toast('Added');render();const q=$('#tlQ');if(q)q.focus();return}
-  if(a==='tl_rm'){T.lab=(T.lab||[]).filter(l=>l.b!==bc);labSave();return render()}
-  if(a==='tl_clear'){if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Tap again to clear';setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent='Clear the list'}},4000);return}T.lab=[];labSave();return render()}
-  if(a==='tl_addOrd'){const o=S.ships.get(($('#tlOrd')||{}).value);if(!o)return;let n=0;(o.lines||[]).forEach(l=>{const p=wayProduct(l.sku);const q=Math.round(+l.q||0);if(p&&q>0){labAdd(p,q);n+=q}});toast(n+' stickers added from '+shortSup(o.supplier));return render()}
-  if(a==='tl_size'){T.size=v;lsSet('af.lblSize',v);return render()}
-  if(a==='tl_print')return labelsPrint();
   if(a==='tl_sf'){T.sf=v;T.sfull=false;return render()}
   if(a==='tl_sfull'){T.sfull=true;return render()}
   if(a==='tl_sel'){if(T.sel.has(bc))T.sel.delete(bc);else T.sel.add(bc);return render()}
@@ -4360,9 +4306,7 @@ async function toolsAct(a,b){const T=S.tools;const v=b&&b.dataset.v,bc=b&&b.data
 }
 function bindTools(){if(S.view!=='tools')return;const T=S.tools;
   const live=(id,set)=>{const e=$(id);if(!e)return;let t;e.oninput=()=>{clearTimeout(t);t=setTimeout(()=>{set(e.value);render();const y=$(id);if(y){y.focus();y.setSelectionRange(y.value.length,y.value.length)}},300)}};
-  live('#tlQ',v=>T.lq=v);live('#tlSQ',v=>{T.sq=v;T.sfull=false});
-  const q=$('#tlQ');if(q)q.onkeydown=e=>{if(e.key!=='Enter')return;const s=q.value.trim();const x=s&&(S.catalog.get(s)||S.catalog.get(wayProduct(s)));if(x&&!catGone(x.b)){e.preventDefault();labAdd(x.b,1);T.lq='';toast('Added '+x.n);render();const y=$('#tlQ');if(y)y.focus()}};
-  document.querySelectorAll('[data-tlc]').forEach(i=>i.onchange=()=>{const l=(T.lab||[]).find(l=>l.b===i.dataset.tlc);if(l){l.c=Math.max(0,Math.round(parseNum(i.value)));labSave();render()}});
+  live('#tlSQ',v=>{T.sq=v;T.sfull=false});
   const num=(id,k,ls)=>{const e=$(id);if(e)e.onchange=()=>{const v=parseNum(e.value);if(v>0){T[k]=v;if(ls)lsSet(ls,String(v))}render()}};
   num('#tlPct','pct');num('#tlLead','lead','af.lead');num('#tlCover','cover','af.cover');
 }
