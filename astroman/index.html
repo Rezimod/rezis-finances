@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0B0D12">
+<meta name="theme-color" content="#05070D">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Mars">
@@ -22,32 +22,34 @@
 <body>
 <title>Mars · Astroman</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700;800&display=swap">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter+Tight:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=Marcellus&family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap">
 <style>
 /* Enterprise dark: neutral near-black surfaces, hairline borders, one sans family with tabular numbers,
    indigo for data and selection, amber for the one primary action. Light mode (Settings → Appearance) keeps the same tokens. */
 :root{
-  --bg:#0B0D12; --surface:#13161D; --surface-2:#1B1F28; --surface-3:#252A36; --ink:#E9ECF3; --ink-2:#B6BCC9; --muted:#8A92A6; --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.15);
-  --brand:#7C8CF8; --brand-ink:#0B0D12; --brand-bg:rgba(124,140,248,.14); --accent:#F5A623; --accent-ink:#1A1300; --accent-hover:#FFB640;
-  --rail-bg:#0B0D12; --rail-ink:#E9ECF3; --rail-muted:#7E8699; --rail-line:rgba(255,255,255,.08);
-  --night:#0B0D12; --night-2:#13161D; --night-ink:#E9ECF3; --night-muted:#8A92A6;
-  --good:#4CC38A; --warn:#E0A531; --bad:#F2695C; --good-bg:rgba(76,195,138,.14); --warn-bg:rgba(224,165,49,.14); --bad-bg:rgba(242,105,92,.14);
-  --s1:#7C8CF8; --s2:#D9A03A; --grid:rgba(255,255,255,.06); --shadow:none;
-  --glass:var(--surface);
-  --f-ui:"Noto Sans Georgian",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --f-num:var(--f-ui);
-  --f-display:var(--f-ui);
-  --r:12px; --ease:cubic-bezier(.2,.7,.2,1); color-scheme:dark;
+  --bg:#05070D; --surface:#12151C; --surface-2:#181C25; --surface-3:#222734; --ink:#F1F2F6; --ink-2:#C9CDD9; --muted:#A3A9BA; --faint:#7C8398; --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.13);
+  --brand:#8C9BFF; --brand-ink:#0B0D12; --brand-bg:rgba(140,155,255,.14); --accent:#F5A623; --accent-ink:#1A1100; --accent-hover:#FFC65A;
+  --gold:#E2C384; --gold-2:#C9A35B; --gold-line:rgba(226,195,132,.38); --gold-bg:rgba(226,195,132,.1);
+  --rail-bg:transparent; --rail-ink:#F1F2F6; --rail-muted:#A3A9BA; --rail-line:rgba(255,255,255,.08);
+  --night:#05070D; --night-2:#12151C; --night-ink:#F1F2F6; --night-muted:#A3A9BA;
+  --good:#56D39A; --warn:#F0B54A; --bad:#FF7A6B; --good-bg:rgba(86,211,154,.14); --warn-bg:rgba(240,181,74,.14); --bad-bg:rgba(255,122,107,.14);
+  --s1:#8C9BFF; --s2:#E2C384; --grid:rgba(255,255,255,.07); --shadow:0 24px 50px -32px rgba(0,0,0,.8);
+  --glass:rgba(17,21,34,.72);
+  --f-ui:"Inter","Noto Sans Georgian",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-num:"Inter Tight","Inter","Noto Sans Georgian",system-ui,sans-serif;
+  --f-display:"Marcellus","Noto Sans Georgian",serif;
+  --f-deco:"Cinzel","Noto Sans Georgian",serif;
+  --r:20px; --ease:cubic-bezier(.2,.7,.2,1); color-scheme:dark;
 }
 :root[data-theme="light"]{
-  --bg:#F3F4F7; --surface:#FFFFFF; --surface-2:#F0F2F6; --surface-3:#E4E7EE; --ink:#151A26; --ink-2:#4A5165; --muted:#6E7689; --line:#E1E4EB; --line-2:#CDD2DC;
+  --bg:#F4F1EA; --surface:#FFFFFF; --surface-2:#F3EFE6; --surface-3:#E7E1D4; --ink:#16141A; --ink-2:#3E4456; --muted:#5C6478; --faint:#7A7180; --line:rgba(22,20,26,.1); --line-2:rgba(22,20,26,.18);
   --brand:#3D52D5; --brand-ink:#FFFFFF; --brand-bg:rgba(61,82,213,.1);
-  --rail-bg:#FFFFFF; --rail-ink:#151A26; --rail-muted:#6E7689; --rail-line:#E1E4EB;
-  --night:#FFFFFF; --night-2:#F0F2F6; --night-ink:#151A26; --night-muted:#6E7689;
+  --gold:#8A6A2F; --gold-2:#8A6A2F; --gold-line:rgba(138,106,47,.45); --gold-bg:rgba(138,106,47,.1);
+  --rail-bg:#FFFFFF; --rail-ink:#16141A; --rail-muted:#5C6478; --rail-line:rgba(22,20,26,.1);
+  --night:#16141A; --night-2:#F3EFE6; --night-ink:#16141A; --night-muted:#5C6478;
   --good:#1E8A55; --warn:#A86A12; --bad:#C4382C; --good-bg:#E3F4EA; --warn-bg:#FBF0DC; --bad-bg:#FBE5E2;
-  --s1:#3D52D5; --s2:#C27A06; --grid:#E8EBF1; --shadow:none; --glass:var(--surface); color-scheme:light}
+  --s1:#3D52D5; --s2:#A86A12; --grid:#E6E0D4; --shadow:0 16px 40px -28px rgba(40,30,10,.35); --glass:#fff; color-scheme:light}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:14px;line-height:1.5;margin:0;-webkit-tap-highlight-color:transparent;scrollbar-color:var(--surface-2) transparent}
@@ -863,18 +865,271 @@ body:has(.wcs) .toast{bottom:auto;top:calc(14px + env(safe-area-inset-top,0px));
 .rcl.st-bad{box-shadow:inset 3px 0 0 var(--bad);padding-left:8px}
 .rcrow{grid-template-columns:minmax(0,1fr) auto auto auto;cursor:pointer}
 @media (max-width:560px){.rcl{grid-template-columns:34px minmax(0,1fr) auto}.rcl .rcf{grid-column:2/-1;justify-self:end}.rcrow{grid-template-columns:minmax(0,1fr) auto auto}.rcrow>b{display:none}}
+
+/* ---------- v2 visual language (presentation only) ---------- */
+html,body{background:var(--bg);min-height:100%}
+body{position:relative}
+.sky{position:fixed;inset:0;z-index:0;pointer-events:none;background:
+  radial-gradient(900px 520px at 78% -80px, rgba(88,104,220,.22), transparent 70%),
+  radial-gradient(680px 480px at 6% 36%, rgba(226,195,132,.06), transparent 72%),
+  radial-gradient(860px 640px at 62% 110%, rgba(60,70,160,.16), transparent 70%)}
+.stars{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.app{position:relative;z-index:1;grid-template-columns:276px minmax(0,1fr);background:transparent}
+:root[data-theme="light"] .sky,:root[data-theme="light"] .stars{display:none}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.railwrap{padding:14px 0 14px 14px}
+.rail{position:sticky;top:14px;height:calc(100vh - 28px);max-height:none;border-right:0;border-radius:24px;padding:18px 12px 12px;overflow:hidden;
+  background:linear-gradient(180deg,rgba(18,22,36,.88),rgba(9,11,19,.92)) padding-box,linear-gradient(180deg,rgba(226,195,132,.32),rgba(255,255,255,.05) 28%,rgba(255,255,255,.07)) border-box;
+  border:1px solid transparent;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  box-shadow:0 30px 60px -36px rgba(0,0,0,.85)}
+:root[data-theme="light"] .rail{background:#fff;border:1px solid var(--line);box-shadow:var(--shadow)}
+.brand{align-items:center;text-align:center;padding:4px 8px 8px;gap:0}
+.brand img{width:118px;filter:drop-shadow(0 8px 18px rgba(226,195,132,.22))}
+.brand small{font-family:var(--f-deco);font-weight:600;letter-spacing:.28em;font-size:9px;color:var(--gold);margin-top:8px}
+.decorule{display:flex;align-items:center;gap:8px;width:100%;margin-top:12px}
+.decorule::before,.decorule::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold-line))}
+.decorule::after{background:linear-gradient(90deg,var(--gold-line),transparent)}
+.decorule i{width:5px;height:5px;transform:rotate(45deg);border:1px solid var(--gold-2);display:block}
+nav.menu{gap:1px;flex:1;min-height:0;overflow:auto}
+@media (min-width:861px){.pagehead .seg[aria-label="Appearance"]{display:none}}
+.hero-wrap .pstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:4px 0 8px}
+.hero-wrap .pstats>div{min-width:0}
+nav.menu .grp{font-family:var(--f-deco);letter-spacing:.2em;font-size:10px;color:var(--faint);padding:14px 10px 6px}
+nav.menu button{gap:10px;padding:5px 8px 5px 5px;border-radius:12px;border:0;font-weight:500;opacity:1;color:var(--ink-2)}
+nav.menu button .ico{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);color:var(--ink-2);flex:none}
+:root[data-theme="light"] nav.menu button .ico{background:var(--surface-2);border-color:var(--line)}
+nav.menu button svg{color:inherit}
+nav.menu button:hover{background:rgba(255,255,255,.04)}
+nav.menu button[aria-current="page"]{background:linear-gradient(90deg,rgba(226,195,132,.16),rgba(226,195,132,.03));color:#fff;font-weight:600;border:0;box-shadow:inset 0 0 0 1px rgba(226,195,132,.2)}
+:root[data-theme="light"] nav.menu button[aria-current="page"]{color:var(--ink);background:linear-gradient(90deg,rgba(138,106,47,.14),transparent)}
+nav.menu button[aria-current="page"] .ico{background:linear-gradient(135deg,#F7C25A,#D58E12);border-color:transparent;color:#1A1100;box-shadow:0 6px 16px -6px rgba(245,166,35,.75)}
+nav.menu button[aria-current="page"] svg{color:#1A1100}
+.rail .foot{border:0;background:transparent;padding:8px 4px 2px;gap:8px}
+.syncbox{border-radius:14px;padding:10px 12px;background:rgba(255,255,255,.035);border:1px solid var(--line);font-size:12px;color:var(--muted)}
+:root[data-theme="light"] .syncbox,:root[data-theme="light"] .me{background:var(--surface-2)}
+.syncbox b,.me .mn{color:var(--ink);font-weight:600}
+.me{display:flex;align-items:center;gap:10px;border-radius:14px;padding:8px 10px;background:rgba(255,255,255,.035);border:1px solid var(--line)}
+.me .av{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-family:var(--f-deco);font-weight:600;color:var(--gold);border:1px solid var(--gold-line);background:linear-gradient(135deg,#2B3354,#151A2C)}
+:root[data-theme="light"] .me .av{background:#fff}
+.me .mr{font-size:11.5px;color:var(--muted)}
+.dot{background:var(--good);box-shadow:0 0 0 3px rgba(86,211,154,.16),0 0 10px rgba(86,211,154,.55)}
+.topbar{background:transparent;border-bottom:0;padding:16px 28px 8px 22px;gap:10px}
+.monthdial{height:38px;border-radius:12px;background:var(--glass);border:1px solid var(--line-2);backdrop-filter:blur(12px)}
+.topbar .ago{color:var(--muted)}
+.btn{height:38px;border-radius:12px;background:rgba(255,255,255,.05);border-color:var(--line-2);font-weight:600}
+.btn:hover{background:rgba(255,255,255,.09)}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--ink-2)}
+.btn.ghost:hover{background:rgba(255,255,255,.05);color:var(--ink)}
+.btn.primary,.btn.amber{background:linear-gradient(180deg,#FFC65A 0%,#F5A623 55%,#DA8A0E 100%);color:var(--accent-ink);border-color:transparent;font-weight:700;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(0,0,0,.18),0 10px 22px -10px rgba(245,166,35,.8)}
+.btn.primary:hover,.btn.amber:hover{background:linear-gradient(180deg,#FFD27A,#F5A623 50%,#C47A10);border-color:transparent}
+.btn.sm{height:30px;border-radius:9px}
+.btn.danger{border-color:rgba(255,122,107,.5);color:#FFB0A6;background:rgba(255,122,107,.06)}
+:root[data-theme="light"] .btn:not(.primary):not(.amber):not(.brand):not(.danger):not(.ghost){background:#fff}
+.chip.period{margin-left:auto;height:28px;padding:0 12px;border-radius:20px;border:1px solid var(--gold-line);background:var(--gold-bg);color:#F1DDB0;font-size:12.5px;align-self:center}
+:root[data-theme="light"] .chip.period{color:var(--gold)}
+main{padding:6px 28px 64px 22px}
+.pagehead{margin:6px 0 18px;align-items:flex-end}
+.pagehead h1{font-family:var(--f-display);font-weight:400;font-size:38px;letter-spacing:.01em;line-height:1.05;
+  background:linear-gradient(180deg,#fff 20%,#C9CDD9);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-theme="light"] .pagehead h1{background:none;color:var(--ink);-webkit-text-fill-color:var(--ink)}
+.pagehead p{color:var(--muted);font-size:14px}
+.eyebrow{font-family:var(--f-deco);font-weight:600;letter-spacing:.22em;font-size:11px;color:var(--gold);text-transform:uppercase}
+.pagehead .eyebrow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.pagehead .eyebrow::before{content:"";width:6px;height:6px;border:1px solid var(--gold-2);transform:rotate(45deg);flex:none}
+.sech{margin:26px 0 12px}
+.sech h2{font-family:var(--f-display);font-weight:400;font-size:22px;display:flex;align-items:center;gap:14px;flex:1}
+.sech h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--gold-line),transparent 80%)}
+.panel,.mp,.today,.mcard,.dcard,.kpis,.shipcard,.stage,.ocard{border-radius:20px;
+  background:linear-gradient(180deg,rgba(22,27,43,.78),rgba(14,17,28,.82));
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 24px 50px -32px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.04);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+:root[data-theme="light"] .panel,:root[data-theme="light"] .mp,:root[data-theme="light"] .today,:root[data-theme="light"] .mcard,:root[data-theme="light"] .dcard,:root[data-theme="light"] .kpis,:root[data-theme="light"] .shipcard,:root[data-theme="light"] .stage,:root[data-theme="light"] .ocard{background:#fff;border-color:var(--line);box-shadow:var(--shadow)}
+.panel{padding:18px 20px}
+.panel h2{font-family:var(--f-ui);font-weight:600;font-size:15px;border-bottom:0;padding-bottom:0;margin-bottom:4px}
+.panel .sub,.hint,.muted{color:var(--muted)}
+.input,select.input,textarea.input{border-radius:12px;background:rgba(5,7,13,.45);border-color:var(--line-2);min-height:38px}
+:root[data-theme="light"] .input,:root[data-theme="light"] select.input,:root[data-theme="light"] textarea.input{background:#fff}
+.seg{border-radius:12px;background:var(--glass);overflow:hidden}
+.seg button[aria-pressed="true"]{background:rgba(255,255,255,.1);color:var(--ink)}
+:root[data-theme="light"] .seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.tabs{border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line);padding:4px}
+.tabs button{border-radius:10px}
+.tabs button[aria-selected="true"]{background:rgba(255,255,255,.1);color:var(--ink);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+:root[data-theme="light"] .tabs{background:var(--surface-2)}
+:root[data-theme="light"] .tabs button[aria-selected="true"]{background:#fff}
+.chart text,#paceSvg text{font-size:12px;fill:var(--muted);font-family:var(--f-num)}
+.catbtn small{display:none}
+/* hero */
+.hero-wrap{position:relative;border-radius:22px;overflow:hidden;margin-bottom:16px;
+  background:linear-gradient(180deg,rgba(22,27,43,.82),rgba(12,15,24,.88));
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 30px 60px -34px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.05)}
+:root[data-theme="light"] .hero-wrap{background:#fff;border-color:var(--line)}
+.hero-wrap::before{content:"";position:absolute;left:-8%;right:-8%;top:-190px;height:260px;border-radius:50%;background:radial-gradient(closest-side,rgba(226,195,132,.2),transparent 72%);pointer-events:none}
+.hero-wrap::after{content:"";position:absolute;left:14px;top:14px;width:16px;height:16px;border-top:1px solid var(--gold-line);border-left:1px solid var(--gold-line);border-radius:6px 0 0 0;pointer-events:none}
+.hero-wrap .mp,.hero-wrap .panel{background:transparent;border:0;box-shadow:none;backdrop-filter:none;margin:0;border-radius:0}
+.hero-wrap .panel{border-top:1px solid var(--line);padding-top:14px}
+.hero-top{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
+.hero-kicker{font-family:var(--f-ui);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.hero-num{font-family:var(--f-num);font-weight:300;font-size:64px;line-height:.95;letter-spacing:-.03em;margin-top:6px}
+.hero-num small{font-size:.4em;color:var(--muted);margin-left:6px;font-weight:400}
+.hero-top .delta{margin-top:8px;color:var(--ink-2);font-size:13px}
+.gauge{width:148px;height:128px;flex:none}
+.gauge .gp{font-family:var(--f-num);font-size:26px;font-weight:500;fill:var(--ink)}
+.gauge .gs{font-family:var(--f-ui);font-size:11px;fill:var(--muted)}
+.gauge .gf{font-family:var(--f-ui);font-size:10.5px;fill:var(--gold)}
+.hero-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:16px;border-top:1px solid var(--line)}
+.hero-stats>div{padding:14px 16px 6px;min-width:0;border-right:1px solid var(--line)}
+.hero-stats>div:last-child{border-right:0}
+.hero-stats .lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.hero-stats .val{font-family:var(--f-num);font-weight:500;font-size:28px;margin-top:4px;letter-spacing:-.02em}
+.hero-stats .val small{font-size:14px;color:var(--muted);margin-left:3px}
+.hero-stats .spark{display:block;width:100%;height:36px;margin-top:6px;color:var(--brand)}
+.hero-stats .net .spark,.hero-stats .net .val{color:var(--gold)}
+.hero-stats .delta{font-size:12px;color:var(--muted);min-height:1.2em}
+.ov-row{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.15fr);gap:14px;margin-bottom:14px;align-items:stretch}
+.ov-row .today{margin:0;height:100%}
+.today .th h2{font-family:var(--f-display);font-weight:400;font-size:22px}
+.tbig .val{font-family:var(--f-num);font-weight:300;font-size:52px;letter-spacing:-.03em}
+.cmpbars{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.cmpb{display:grid;grid-template-columns:92px minmax(0,1fr) auto;gap:8px;align-items:center;font-size:12.5px;color:var(--ink-2)}
+.cmpb .trk{height:8px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden}
+:root[data-theme="light"] .cmpb .trk{background:var(--surface-3)}
+.cmpb .trk i{display:block;height:100%;background:linear-gradient(90deg,#8C9BFF,#C9D2FF);border-radius:inherit;min-width:2px}
+.cmpb b{font-weight:600}
+.days14 .sub{margin-bottom:8px}
+.days14 .strip{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:6px;margin:0}
+.days14 .sd{background:transparent;border:0;padding:0;gap:4px;min-width:0}
+.days14 .sd .sa{font-size:11px;color:var(--ink-2);min-height:14px}
+.days14 .sd .sb{height:108px;width:100%;max-width:28px;margin:0 auto;background:transparent;position:relative;display:flex;align-items:flex-end}
+.days14 .sd .sb i.bar{width:100%;border-radius:7px 7px 3px 3px;background:linear-gradient(180deg,#9AA6FF,#5C6AD4);display:block;min-height:0}
+.days14 .sd.hit .sb i.bar{background:linear-gradient(180deg,#FFE7A3,#F5A623 42%,#C47A10);box-shadow:0 0 16px rgba(245,166,35,.45)}
+.days14 .sd.on .sb{outline:1px solid var(--gold-line);outline-offset:3px;border-radius:8px}
+.days14 .sd .tgt{position:absolute;left:-3px;right:-3px;border-top:1px dashed rgba(226,195,132,.55);height:0;width:auto;background:transparent;pointer-events:none;min-height:0}
+.days14 .h7{display:none}
+.alerts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.alert{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:12px;border-radius:14px;background:rgba(255,255,255,.03);min-width:0}
+.alert .ic{width:28px;height:28px}
+.attn-n{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:var(--warn-bg);color:var(--warn);font-family:var(--f-num);font-size:12px;margin-left:6px;vertical-align:2px}
+.mcard{overflow:hidden}
+.mcard::after{content:"";position:absolute;inset:auto -20% -40% 20%;height:80px;background:radial-gradient(closest-side,color-mix(in srgb,var(--c) 45%,transparent),transparent);pointer-events:none}
+.mcard .val{font-family:var(--f-num);font-weight:500;font-size:26px}
+.mcard.loan{background-image:repeating-linear-gradient(-45deg,transparent,transparent 7px,rgba(255,255,255,.025) 7px,rgba(255,255,255,.025) 8px)}
+.dcard{border-radius:16px}
+.dcard .dic{border-radius:10px;color:var(--gold);background:rgba(226,195,132,.08);border:1px solid var(--gold-line)}
+/* products */
+.stockhero{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(260px,.7fr);gap:14px;margin-bottom:14px}
+.stockhero .big{font-family:var(--f-num);font-weight:300;font-size:56px;letter-spacing:-.03em;line-height:1}
+.stockhero .big small{font-size:.4em;color:var(--muted);margin-left:4px}
+.stockhero .worth{background:linear-gradient(180deg,rgba(36,32,24,.88),rgba(16,16,22,.9));border:1px solid var(--gold-line)}
+:root[data-theme="light"] .stockhero .worth{background:linear-gradient(180deg,#fffaf0,#fff);border-color:var(--gold-line)}
+.stockhero .worth .big{color:var(--gold)}
+.splitbar{display:flex;height:10px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.06);margin:12px 0}
+.splitbar i{display:block;height:100%}
+.stock3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:8px}
+.stock3 span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.stock3 b{font-family:var(--f-num);font-size:18px;font-weight:600}
+.stock3 i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.prodlayout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:start}
+.prodlayout>.stack{position:sticky;top:18px}
+.pgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.pcard{padding:10px 10px 12px;border-radius:18px;background:linear-gradient(180deg,rgba(22,27,43,.78),rgba(14,17,28,.82));border:1px solid rgba(255,255,255,.08)}
+:root[data-theme="light"] .pcard{background:#fff}
+.pcard .pi{border-radius:14px;background:#f6f3ec;height:0}
+.pcard .pcat{font-family:var(--f-deco);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:600}
+.pcard .pmg.hi{color:var(--good);background:var(--good-bg)}
+.pcard .pmg.mid{color:var(--warn);background:var(--warn-bg)}
+.pcard .pmg.low{color:var(--bad);background:var(--bad-bg)}
+.pcard .pst span{border-radius:8px}
+.inway{position:relative;padding-left:14px}
+.inway::before{content:"";position:absolute;left:4px;top:8px;bottom:8px;width:1px;background:linear-gradient(var(--gold-line),transparent)}
+.inwg{position:relative}
+.inwg::before{content:"";position:absolute;left:-13px;top:14px;width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px rgba(226,195,132,.15)}
+/* imports */
+.imp-top{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(260px,.7fr);gap:14px;margin-bottom:14px;align-items:stretch}
+.imp-top .pipe{margin:0}
+.pipe{position:relative;gap:0;background:linear-gradient(180deg,rgba(22,27,43,.78),rgba(14,17,28,.82));border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:8px}
+:root[data-theme="light"] .pipe{background:#fff;border-color:var(--line)}
+.pipe .stage{background:transparent;border:0;box-shadow:none;text-align:center;padding:14px 8px}
+.pipe .stage::after{display:none}
+.pipe .stage .n{font-family:var(--f-num);font-weight:500}
+.pipe .stage.hot .n{color:var(--gold);text-shadow:0 0 18px rgba(245,166,35,.35)}
+.coming-card{border:1px solid var(--gold-line);background:linear-gradient(180deg,rgba(36,32,24,.9),rgba(14,15,22,.92))}
+:root[data-theme="light"] .coming-card{background:linear-gradient(180deg,#fffaf0,#fff)}
+.coming-card .sell{font-family:var(--f-num);font-weight:300;font-size:40px;color:var(--gold);letter-spacing:-.03em;line-height:1}
+.route{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;font-size:11.5px;color:var(--muted)}
+.rline{position:relative;height:2px;background:linear-gradient(90deg,rgba(140,155,255,.3),var(--gold-line));border-radius:2px}
+.rline i{position:absolute;top:50%;width:14px;height:8px;margin:-4px 0 0 -7px;border-radius:2px 3px 3px 2px;background:var(--gold);box-shadow:0 0 10px rgba(226,195,132,.7)}
+.rline i::after{content:"";position:absolute;right:-3px;top:1px;border:4px solid transparent;border-left:5px solid var(--gold)}
+.shipcard{min-height:100%}
+.nums3 b.bad{color:var(--bad)}
+/* settings */
+.setwrap{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;align-items:start}
+.settoc{position:sticky;top:16px;display:flex;flex-direction:column;gap:2px;padding:12px;border-radius:18px;background:rgba(17,21,34,.6);border:1px solid var(--line)}
+:root[data-theme="light"] .settoc{background:#fff}
+.settoc button{text-align:left;background:transparent;border:0;color:var(--ink-2);padding:7px 10px;border-radius:9px;cursor:pointer;font:inherit;font-size:13px}
+.settoc button:hover{background:rgba(255,255,255,.05);color:var(--ink)}
+.secret{display:flex;gap:8px;align-items:center}
+.secret .input{flex:1}
+.dangerzone{border-color:rgba(255,122,107,.45);background:linear-gradient(180deg,rgba(70,24,24,.35),rgba(16,14,20,.8))}
+:root[data-theme="light"] .dangerzone{background:#fff5f4}
+input.dirty,select.dirty{box-shadow:inset 3px 0 0 var(--accent)}
+.rules{display:flex;flex-wrap:wrap;gap:6px}
+.rules .ln{border:1px solid var(--line);border-radius:999px;padding:4px 8px 4px 12px;background:rgba(255,255,255,.03);gap:8px}
+/* mobile */
+@media (max-width:1100px){
+  .pgrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .prodlayout,.stockhero,.imp-top,.setwrap,.ov-row,.alerts{grid-template-columns:minmax(0,1fr)}
+  .prodlayout>.stack{position:static}
+  .hero-stats{grid-template-columns:1fr}
+  .hero-stats>div{border-right:0;border-bottom:1px solid var(--line)}
+}
+@media (max-width:860px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .railwrap{display:none}
+  .topbar{padding:calc(8px + env(safe-area-inset-top,0px)) 12px 8px;background:color-mix(in srgb,var(--bg) 88%,transparent)}
+  .topbar .theme,#topRecap,#topAdd,#topSync{display:none}
+  main{padding:8px 14px calc(108px + env(safe-area-inset-bottom,0px))}
+  .pagehead h1{font-size:26px}
+  .hero-num{font-size:46px}
+  .stockhero .big{font-size:40px}
+  .pgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .days14 .h14{display:none}
+  .days14 .h7{display:inline}
+  .days14 .strip{grid-template-columns:repeat(7,minmax(0,1fr))}
+  .days14 .sd:nth-child(-n+7){display:none}
+  .days14 .sd .sb{height:84px}
+  .money{display:flex;overflow-x:auto;gap:10px;scroll-snap-type:x mandatory;padding-bottom:4px}
+  .money .mcard{min-width:78%;scroll-snap-align:start;flex:none}
+  .tabbar{left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));width:auto;
+    border-radius:22px;border:1px solid rgba(255,255,255,.12);
+    background:rgba(16,19,32,.78);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    box-shadow:0 16px 40px -18px rgba(0,0,0,.8);padding:8px 8px 8px}
+  :root[data-theme="light"] .tabbar{background:rgba(255,255,255,.9);border-color:var(--line)}
+  .tabbar .plus{width:48px;height:48px;border-radius:16px;margin:-16px auto 0;border:0;
+    background:linear-gradient(180deg,#FFC65A,#F5A623 55%,#DA8A0E);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 10px 18px -8px rgba(245,166,35,.9);font-size:26px}
+  .moresheet .sheet{border-radius:22px 22px 0 0}
+}
+@media (max-width:520px){.pgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.hero-num{font-size:40px}}
+
 </style>
 
+<div class="sky" aria-hidden="true"></div>
+<canvas id="stars" class="stars" aria-hidden="true"></canvas>
 <div class="app">
+  <div class="railwrap">
   <aside class="rail">
-    <div class="brand"><img class="lt" src="brand/logo-full-light-240.png" alt="Astroman"><img class="dk" src="brand/logo-full-black-240.png" alt="Astroman"><small>Mars · control center</small></div>
+    <div class="brand"><img class="lt" src="brand/logo-full-light-240.png" alt="Astroman"><img class="dk" src="brand/logo-full-black-240.png" alt="Astroman"><small>Mars · control center</small><span class="decorule" aria-hidden="true"><i></i></span></div>
     <nav class="menu" id="menu" aria-label="Sections"></nav>
     <div class="foot">
-      <div><span class="dot off" id="syncDot"></span><span id="syncTxt">Connecting…</span></div>
-      <div id="fxTxt">1 USD = 2.70 ₾</div>
-      <div>ალ. ყაზბეგის 17, თბილისი</div>
+      <div class="syncbox"><div><span class="dot off" id="syncDot"></span><span id="syncTxt">Connecting…</span></div><div id="fxTxt">1 USD = 2.70 ₾</div></div>
+      <div class="me"><div class="av" id="meAv">A</div><div><div class="mn" id="meName">Owner</div><div class="mr">Astroman</div></div></div>
     </div>
   </aside>
+  </div>
   <div class="content">
     <div class="topbar">
       <img class="tbrand" src="brand/mark-light-160.png" alt="">
@@ -888,8 +1143,9 @@ body:has(.wcs) .toast{bottom:auto;top:calc(14px + env(safe-area-inset-top,0px));
       </div>
       <span class="spacer"></span>
       <span class="ago" id="topAgo"></span>
+      <div class="seg theme" role="group" aria-label="Appearance"><button data-theme-set="dark" aria-pressed="true">Dark</button><button data-theme-set="light" aria-pressed="false">Light</button></div>
       <button class="btn" id="topSync" data-act="syncSheet" data-label="↻ Sync sales">↻ Sync sales</button>
-      <button class="btn" id="topRecap" data-act="recap">Recap</button>
+      <button class="btn ghost" id="topRecap" data-act="recap">Recap</button>
       <button class="btn primary" id="topAdd" data-go="add">+ Add expense</button>
     </div>
     <main id="main" tabindex="-1"></main>
@@ -935,7 +1191,7 @@ const CATS=[
 ];
 const CAT=Object.fromEntries(CATS.map(c=>[c.id,c]));
 const GROUPS={goods:'Stock & freight',opex:'Running costs',tax:'Taxes',below:'Money out of the business',income:'Other income',inflow:'Money into the business',ignore:'Not counted'};
-const ACCOUNTS=[{id:'bog',en:'BOG'},{id:'tbc',en:'TBC'},{id:'cash',en:'Cash · სალარო'},{id:'personal',en:'Rezi personal'},{id:'unknown',en:'Not set'}];
+const ACCOUNTS=[{id:'bog',en:'BOG'},{id:'tbc',en:'TBC'},{id:'cash',en:'Cash'},{id:'personal',en:'Rezi personal'},{id:'unknown',en:'Not set'}];
 const ACC=Object.fromEntries(ACCOUNTS.map(a=>[a.id,a]));
 const PAYS={pos:'Card terminal',bog:'BOG transfer',tbc:'TBC transfer',wolt:'Wolt',glovo:'Glovo',cash:'Cash',personal:'Rezi personal account',extra:'Extra.ge',cod:'Cash on delivery',pending:'Awaiting transfer',installment:'Installments',other:'Other',unknown:'Not recorded'};
 const KA_MONTHS=['იანვარი','თებერვალი','მარტი','აპრილი','მაისი','ივნისი','ივლისი','აგვისტო','სექტემბერი','ოქტომბერი','ნოემბერი','დეკემბერი'];
@@ -997,7 +1253,7 @@ function toast(msg,ms){const r=$('#toastRoot');r.innerHTML=`<div class="toast" r
 function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)}
 function catLabel(id){const c=CAT[id];return c?c.en:'Uncategorized'}
 function catChip(id){const c=CAT[id];const cls=c?(c.g==='goods'?'goods':c.g==='tax'?'tax':c.g==='below'?'below':''):'warn';return `<span class="chip ${cls}">${esc(c?c.en:'Uncategorized')}</span>`}
-function catOptions(sel,withEmpty){let h=withEmpty?`<option value="">— choose —</option>`:'';for(const g of Object.keys(GROUPS)){h+=`<optgroup label="${esc(GROUPS[g])}">`+CATS.filter(c=>c.g===g).map(c=>`<option value="${c.id}" ${c.id===sel?'selected':''}>${esc(c.en)} · ${esc(c.ka)}</option>`).join('')+'</optgroup>'}return h}
+function catOptions(sel,withEmpty){let h=withEmpty?`<option value="">— choose —</option>`:'';for(const g of Object.keys(GROUPS)){h+=`<optgroup label="${esc(GROUPS[g])}">`+CATS.filter(c=>c.g===g).map(c=>`<option value="${c.id}" ${c.id===sel?'selected':''}>${esc(c.en)}</option>`).join('')+'</optgroup>'}return h}
 function acctOptions(sel){return ACCOUNTS.map(a=>`<option value="${a.id}" ${a.id===sel?'selected':''}>${esc(a.en)}</option>`).join('')}
 function parseNum(v){if(typeof v==='number')return v;let s=String(v??'').replace(/[\s ₾$%]/g,'');if(!s)return 0;const neg=/^\(.*\)$/.test(s)||/^[−-]/.test(s);s=s.replace(/[()−-]/g,'');
   if(s.includes(',')&&s.includes('.')){if(s.lastIndexOf(',')>s.lastIndexOf('.'))s=s.replace(/\./g,'').replace(',','.');else s=s.replace(/,/g,'')}
@@ -1255,7 +1511,7 @@ async function autoSyncSales(){
     const res=await applySheet(P,false);const msg=syncSummary(res,false);if(msg)toast(msg,6000);
   }catch(e){}finally{autoSyncSales.busy=false}
 }
-function xlsxReady(){return window.XLSX?Promise.resolve():new Promise(r=>addEventListener('load',r,{once:true}))}
+function xlsxReady(){if(window.XLSX)return Promise.resolve();if(xlsxReady.p)return xlsxReady.p;xlsxReady.p=new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=()=>window.XLSX?res():rej(new Error('library'));s.onerror=()=>{xlsxReady.p=null;rej(new Error('library'))};document.head.appendChild(s)});return xlsxReady.p}
 const sheetId=()=>S.cfg.sheetId||'1MXZq3Li7W6hfoDGVo9KMYPodS7haezf6TG1CwFmCtdk';
 function wbFromSheets(sheets){const wb=XLSX.utils.book_new();const used=new Set();(sheets||[]).forEach(x=>{let n=String(x.name).slice(0,31)||'Sheet';while(used.has(n))n=n.slice(0,28)+'_'+used.size;used.add(n);XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(x.values||[[]]),n)});return wb}
 // a month uploaded from a file is locked: syncing from the Google Sheet never replaces it
@@ -1327,7 +1583,7 @@ function errMsg(e){if(!e)return 'Something went wrong';if(e.code==='quota_exceed
 /* ============================== shell & routing ============================== */
 const svg=(d,s=16)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 function renderShell(){
-  $('#menu').innerHTML=PAGES.map((p,i)=>(p.id==='pl'?'<div class="sep"></div><div class="grp">Finance</div>':p.id==='optimo'?'<div class="sep"></div><div class="grp">Store</div>':'')+`<button data-go="${p.id}">${svg(IC[p.id])}${p.t}</button>`).join('');
+  $('#menu').innerHTML=PAGES.map((p,i)=>(p.id==='pl'?'<div class="sep"></div><div class="grp">Finance</div>':p.id==='optimo'?'<div class="sep"></div><div class="grp">Store</div>':'')+`<button data-go="${p.id}"><span class="ico">${svg(IC[p.id])}</span><span class="nl">${p.t}</span></button>`).join('');
   $('#tabbar').innerHTML=[['overview','Overview'],['expenses','Expenses'],['add',''],['optimo','Optimo'],['more','More']].map(([id,t])=>id==='add'?`<button data-go="add" aria-label="Add expense"><span class="plus">+</span></button>`:`<button data-go="${id}">${svg(IC[id],22)}<span>${t}</span></button>`).join('');
   $('#moreInner').innerHTML='<div class="grab"></div>'+[['recap','Recap'],['sales','Sales'],['products','Products'],['store','Store sales'],['count','Stock count'],['tools','Tools'],['bank','Bank import'],['pl','Profit & loss'],['imports','Imports'],['loan','Loan'],['settings','Settings']].map(([id,t])=>`<button data-go="${id}">${svg(IC[id],20)}${t}</button>`).join('');
   document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){e.preventDefault();if(g.dataset.go==='more'){$('#moreSheet').classList.add('open');return}$('#moreSheet').classList.remove('open');go(g.dataset.go)}});
@@ -1336,7 +1592,7 @@ function renderShell(){
   $('#mPrev').onclick=()=>setMonth(addMonth(S.month,-1));
   $('#mNext').onclick=()=>setMonth(addMonth(S.month,1));
   window.addEventListener('hashchange',route);
-  S.month=lsGet('af.month')||thisMonth();fillMonthSel();
+  S.month=lsGet('af.month')||thisMonth();fillMonthSel();skyfield();
 }
 function setMonth(m){S.month=m;lsSet('af.month',m);fillMonthSel();S.animate=true;render()}
 function fillMonthSel(){
@@ -1355,7 +1611,23 @@ function render(){
   const anim=S.animate&&!reduced();main.classList.toggle('anim',anim);
   if(anim){[...main.children].forEach((c,i)=>{c.classList.add('rise');c.style.setProperty('--i',i)});main.querySelectorAll('.fill').forEach((f,j)=>f.style.setProperty('--j',j%14));main.querySelectorAll('.gy,.bub').forEach((f,j)=>f.style.setProperty('--j',j%40));countUp(main)}
   else window.scrollTo({top:y});
-  S.animate=false;bindView();
+  S.animate=false;syncChrome();bindView();
+}
+function periodText(){
+  const m=S.month;if(!m)return '';
+  const dim=daysIn(m),live=m===thisMonth(),end=live?new Date().getDate():dim;
+  const span='1 '+mShort(m)+' – '+end+' '+mShort(m)+' '+m.slice(0,4);
+  if(S.view==='products'&&(S.prod.view||'stock')!=='sales'){const M=typeof opModel==='function'?opModel():null;if(M&&M.sel&&M.sel.from)return 'Sold & profit · '+dLabel(M.sel.from)+' – '+dLabel(M.sel.to);return 'Stock · '+span}
+  const labels={overview:'Period',sales:'Sales',products:'Sold & profit',expenses:'Expenses',imports:'Imports',pl:'Profit & loss',loan:'Loan',optimo:'Optimo',store:'Store sales',bank:'Bank import',count:'Stock count',tools:'Tools',settings:'Settings',add:'New record'};
+  return (labels[S.view]||'Period')+' · '+span;
+}
+function syncChrome(){
+  const ov=S.view==='overview';
+  ['#topSync','#topRecap','#topAdd'].forEach(s=>{const el=$(s);if(el)el.hidden=!ov});
+  const head=document.querySelector('#main .pagehead');
+  if(head&&S.view!=='connect'){let c=head.querySelector('.chip.period');if(!c){c=document.createElement('span');c.className='chip period';const act=head.querySelector('.actions');act?head.insertBefore(c,act):head.appendChild(c)}c.textContent=periodText()}
+  const nm=$('#meName'),av=$('#meAv');
+  if(nm){const u=S.user||{};const n=u.name||u.displayName||'';nm.textContent=n||'Owner';if(av)av.textContent=(n||'A').trim().charAt(0).toUpperCase()}
 }
 function countUp(root){
   const els=root.querySelectorAll('.cu');if(!els.length)return;const t0=performance.now(),D=900;
@@ -1382,31 +1654,30 @@ function starfield(cv){
   const loop=t=>{if(!document.body.contains(cv))return;if(!document.hidden)draw(t);starRAF=requestAnimationFrame(loop)};starRAF=requestAnimationFrame(loop);
 }
 
-function skyfield(){}
-function applyTheme(t){document.documentElement.dataset.theme=t==='light'?'light':'dark';document.querySelector('meta[name=theme-color]').content=t==='light'?'#FFFFFF':'#0B0D12'}
+function skyfield(){const cv=$('#stars');if(!cv)return;if(document.documentElement.dataset.theme==='light'){cv.hidden=true;cancelAnimationFrame(starRAF);return}cv.hidden=false;starfield(cv)}
+function applyTheme(t){const light=t==='light';document.documentElement.dataset.theme=light?'light':'dark';const meta=document.querySelector('meta[name=theme-color]');if(meta)meta.content=light?'#F4F1EA':'#05070D';document.querySelectorAll('[data-theme-set]').forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.themeSet==='light')===light)));skyfield()}
 function topAgo(){const a=$('#todayAgo');if(a)a.textContent=agoTxt(lastCheck());const b=$('#topAgo');if(b)b.textContent=(S.mcp||S.backend)&&lastCheck()?'Sheet checked '+agoTxt(lastCheck()):''}
 setInterval(topAgo,30000);
 {let rt=0;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(skyfield,200)})}
 
 /* ============================== overview ============================== */
+function monthSeries(key){const out=[];let x=addMonth(S.month,-5);for(let i=0;i<6;i++){out.push(+metrics(x)[key]||0);x=addMonth(x,1)}return out}
+function gaugeSvg(done,fc,ofLbl,fcLbl){
+  const r=46,cx=70,cy=58,a0=150*Math.PI/180,sweep=240*Math.PI/180;
+  const pt=t=>{const a=a0+sweep*Math.max(0,Math.min(1,t));return [cx+r*Math.cos(a),cy+r*Math.sin(a)]};
+  const arc=(t0,t1)=>{if(t1-t0<0.004)return '';const A=pt(t0),B=pt(t1);return `M${A[0].toFixed(1)},${A[1].toFixed(1)} A${r},${r} 0 ${t1-t0>.5?1:0} 1 ${B[0].toFixed(1)},${B[1].toFixed(1)}`};
+  const d=Math.max(0,Math.min(1,done)),f=Math.max(d,Math.min(1,fc));
+  return `<svg class="gauge" viewBox="0 0 140 112" role="img" aria-label="${Math.round(d*100)} percent of the month target"><path d="${arc(0,1)}" fill="none" stroke="var(--line-2)" stroke-width="7" stroke-linecap="round"/>${f>d+0.01?`<path d="${arc(d,f)}" fill="none" stroke="rgba(226,195,132,.4)" stroke-width="7" stroke-linecap="round"/>`:''}${d>0.005?`<path d="${arc(0,d)}" fill="none" stroke="#E2C384" stroke-width="7" stroke-linecap="round"/>`:''}<text class="gp" x="70" y="60" text-anchor="middle">${Math.round(d*100)}%</text><text class="gs" x="70" y="76" text-anchor="middle">of ${esc(ofLbl)}</text><text class="gf" x="70" y="92" text-anchor="middle">${esc(fcLbl)}</text></svg>`;
+}
 function monthPanel(m,M,P){
   const live=m===thisMonth(),dim=daysIn(m),day=live?new Date().getDate():dim;
   const prevSales=live?P.rows.filter(r=>+String(r.d).slice(8,10)<=day).reduce((a,r)=>a+(+r.a||0),0):P.sales;
   const d=(a,b,inv,lbl)=>{if(!b)return '';const ch=Math.round((a-b)/Math.abs(b)*100);const good=inv?ch<=0:ch>=0;return `<span class="${good?'up':'down'}">${ch>=0?'▲':'▼'} ${Math.abs(ch)}%</span> vs ${lbl||mShort(addMonth(m,-1))}`};
   const fc=live&&day?M.sales/day*dim:M.sales,tgt=DAY_TARGET*dim,margin=M.sales?M.gross/M.sales:0;
   const be=live&&M.net<0&&margin>0?M.sales+(-M.net)/margin:0;const beDay=be&&M.sales?Math.ceil(be/(M.sales/day)):0;
-  const max=Math.max(tgt,fc,M.sales,1),W=v=>Math.min(100,v/max*100);
-  const kpis=`<div class="kpis">
-   <div class="kpi"><div class="lbl">Sales</div><div class="val num">${cu(M.sales)}<small>₾</small></div><div class="delta">${d(M.sales,prevSales,false,live?'1–'+day+' '+mShort(addMonth(m,-1)):'')||(live?'so far this month':'')}${M.orders?' · '+M.orders+' orders':''}</div></div>
-   <div class="kpi"><div class="lbl">Gross profit</div><div class="val num">${cu(M.gross)}<small>₾</small></div><div class="delta">${M.sales?pct(M.gross,M.sales)+'% margin':'—'}${M.est&&M.sales?' · <em>cost estimated</em>':''}</div></div>
-   <div class="kpi"><div class="lbl">Running costs</div><div class="val num">${cu(M.opex)}<small>₾</small></div><div class="delta">${live&&M.fixed?(M.fixed>=M.opex-1?'All fixed, booked for the full month':gel(M.fixed)+' fixed, booked for the full month'):live?'so far this month':(d(M.opex,P.opex,true)||'—')}</div></div>
-   <div class="kpi"><div class="lbl">Net profit</div><div class="val num ${M.net<0?'neg':''}">${cu(M.net)}<small>₾</small></div><div class="delta">${be?'Positive after ≈ '+gel(be)+' in sales':live?'so far this month':(d(M.net,P.net)||'—')}</div></div>
-  </div>`;
-  const pace=live?`<div class="pace"><div class="ph"><b>Month pace</b><span>At <span class="num">${gel(M.sales/Math.max(1,day))}</span> a day, ${mShort(m)} ends near <span class="num">${gel(fc)}</span> · target <span class="num">${gel(tgt)}</span></span></div>
-   <div class="ptrack"><i class="fc" style="width:${W(fc)}%"></i><i style="width:${W(M.sales)}%"></i>${be&&be<max?`<em style="left:${W(be)}%"></em>`:''}</div>
-   <div class="plg"><span><i style="background:var(--brand)"></i>So far ${gel(M.sales)}</span>${be?`<span><i style="background:var(--good)"></i>Break-even ≈ ${gel(be)}${beDay&&beDay<=dim?' · around '+beDay+' '+mShort(m):''}</span>`:''}<span><i style="background:color-mix(in srgb,var(--brand) 40%,transparent)"></i>Forecast ${gel(fc)}</span><span>Bar ends at the ${gel(max)} ${fc>tgt?'forecast':'target'}</span></div></div>`
-   :`<div class="pace"><div class="ph"><b>${mLabel(m)}</b><span>${M.orders} orders · ${pct(M.sales,tgt)}% of the ${gel(tgt)} target${P.sales?' · '+(d(M.sales,P.sales)||''):''}</span></div><div class="ptrack"><i style="width:${W(M.sales)}%"></i></div></div>`;
-  return `<section class="mp">${kpis}${pace}</section>`;
+  const ofLbl=tgt>=1000&&tgt%1000===0?fmt(tgt/1000)+'k':gel(tgt);
+  const stat=(lbl,val,sub,key,cls)=>`<div class="${cls||''}"><div class="lbl">${lbl}</div><div class="val num">${cu(val)}<small>₾</small></div>${sparkline(monthSeries(key))}<div class="delta">${sub}</div></div>`;
+  return `<section class="mp"><div class="hero-top"><div><div class="hero-kicker">Sales this month</div><div class="hero-num num">${cu(M.sales)}<small>₾</small></div><div class="delta">${d(M.sales,prevSales,false,live?'1–'+day+' '+mShort(addMonth(m,-1)):'')||(live?'so far this month':'')}${M.orders?' · '+M.orders+' orders':''}${live?` · ${gel(M.sales/Math.max(1,day))} a day`:''}</div>${be?`<div class="delta">Break-even ≈ ${gel(be)}${beDay&&beDay<=dim?' · around '+beDay+' '+mShort(m):''}</div>`:''}</div>${gaugeSvg(tgt?M.sales/tgt:0,tgt?fc/tgt:0,ofLbl,'Forecast '+gel(fc))}</div><div class="hero-stats">${stat('Gross profit',M.gross,(M.sales?pct(M.gross,M.sales)+'% margin':'—')+(M.est&&M.sales?' · cost estimated':''),'gross')}${stat('Running costs',M.opex,live&&M.fixed?(M.fixed>=M.opex-1?'Fixed · booked for the full month':gel(M.fixed)+' fixed, booked for the full month'):live?'so far this month':(d(M.opex,P.opex,true)||'—'),'opex')}${stat('Net profit',M.net,be?'Positive after ≈ '+gel(be)+' in sales':live?'so far this month':(d(M.net,P.net)||'—'),'net','net')}</div></section>`;
 }
 function deeper(){
   const C=[['pay','Payment methods','Match sales to each bank account',IC.bank],['items','Best sellers','Items and profit from Optimo',IC.products],['cats','Spending by category','Where the money went this month',IC.expenses],['cal','Sales calendar','Every selling day, weekday averages',IC.sales],['year',thisMonth().slice(0,4)+' so far','Revenue, costs and margin by month',IC.pl]];
@@ -1416,17 +1687,19 @@ function vOverview(){
   const m=S.month,M=metrics(m),P=metrics(addMonth(m,-1));
   const has=M.hasSales||M.list.length;
   const t=today();
-  const head=`<div class="pagehead"><div><h1>Overview</h1><p>${dLong(t)} · day ${new Date().getDate()} of ${daysIn(thisMonth())}${m!==thisMonth()?' · showing '+mLabel(m):''}</p></div></div>`;
-  if(!has&&(!S.db||S.loaded.tx)&&!S.tx.size&&!S.sales.size)return head+monthPanel(m,M,P)+`<div class="panel empty"><b>No records yet</b>Start by syncing sales from your order sheet, then import a BOG or TBC statement.</div>`;
+  const head=`<div class="pagehead"><div><div class="eyebrow">Astroman · Mars</div><h1>Overview</h1><p>${dLong(t)} · day ${new Date().getDate()} of ${daysIn(thisMonth())}${m!==thisMonth()?' · showing '+mLabel(m):''}</p></div></div>`;
+  if(!has&&(!S.db||S.loaded.tx)&&!S.tx.size&&!S.sales.size)return head+`<div class="hero-wrap">${monthPanel(m,M,P)}</div>`+`<div class="panel empty"><b>No records yet</b>Start by syncing sales from your order sheet, then import a BOG or TBC statement.</div>`;
   const B=liveBalances();const tot=Object.values(B).reduce((x,o)=>x+o.now,0);
-  return loadingOr(head+monthPanel(m,M,P)+todayPanel()+rcPanel()+`<div class="sech"><h2>Money now</h2><span>${Object.keys(B).length?`All accounts <b class="num">${gel(tot)}</b> · moves with every sale and expense`:'Set balances in Settings or import a statement'}</span></div>`+moneyNow(m,M)+`<div class="grid g3b" style="margin-bottom:12px">${pacePanel(m,M)}${attention(m,M)}</div>`+deeper());
+  return loadingOr(head+`<div class="hero-wrap">${monthPanel(m,M,P)}${pacePanel(m,M)}</div>`+todayPanel()+attention(m,M)+rcPanel()+`<div class="sech"><h2>Money now</h2><span>${Object.keys(B).length?`All accounts <b class="num">${gel(tot)}</b> · moves with every sale and expense`:'Set balances in Settings or import a statement'}</span></div>`+moneyNow(m,M)+deeper());
 }
 /* ---------- today, pace, calendar ---------- */
 const DAY_TARGET=1000;
 const KA_DAYS=['კვირა','ორშაბათი','სამშაბათი','ოთხშაბათი','ხუთშაბათი','პარასკევი','შაბათი'];
 const addDay=(d,k)=>{const x=new Date(d+'T12:00');x.setDate(x.getDate()+k);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
-const dLong=d=>new Date(d+'T12:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+const EN_DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const dLong=d=>new Date(d+'T12:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
 const dShort=d=>new Date(d+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+const showD=d=>{const m=String(d||'').match(/^(\d{4}-\d{2}-\d{2})/);return m?dShort(m[1]):(d?esc(d):'—')};
 function dayIndex(){let ix=S.mc.get('#days');if(ix)return ix;ix=new Map();
   for(const s of S.sales.values())for(const r of s.rows||[]){if(!r.d)continue;let o=ix.get(r.d);if(!o)ix.set(r.d,o={a:0,n:0,rows:[]});o.a+=+r.a||0;o.n++;o.rows.push(r)}
   S.mc.set('#days',ix);return ix}
@@ -1447,16 +1720,18 @@ function todayPanel(){
     :`<div class="oempty"><b>${isT?'No orders in the sheet yet today':'No orders on this day'}</b>${last?`<span>Last orders: ${dShort(last.d)} · ${last.n} order${last.n>1?'s':''} · ${gel(last.a)}</span>`:''}${isT?'<span>New rows show up here within 5 minutes of being typed in the sheet, or press Refresh.</span>':''}</div>`;
   const end=d>=addDay(t,-13)?t:addDay(d,6);const strip=[];for(let i=13;i>=0;i--)strip.push(addDay(end,-i));
   const smax=Math.max(DAY_TARGET,...strip.map(x=>dayOf(x).a));
-  return `<section class="today" id="today"><div class="th"><div><div class="eyebrow"><span class="dot"></span>${isT?'Today':'Day view'} · ${KA_DAYS[wd]}</div><h2>${dLong(d)}</h2></div><span class="spacer"></span>
-   <div class="actions"><span class="ago">Sheet checked <b id="todayAgo">${agoTxt(lastCheck())}</b></span><button class="btn sm" data-day="${addDay(d,-1)}" aria-label="Previous day">‹</button>${isT?'':`<button class="btn sm" data-day="${t}">Today</button>`}<button class="btn sm" data-day="${addDay(d,1)}" aria-label="Next day" ${isT?'disabled':''}>›</button>${S.mcp||S.backend?`<button class="btn sm" data-act="syncSheet" data-label="↻ Refresh">↻ Refresh</button>`:''}</div></div>
-   <div class="tgrid"><div class="tmain">
-    <div class="tbig"><div><div class="lbl">Sales${isT?' so far':''}</div><div class="val num">${cu(D.a)}<small>₾</small></div><div class="tsub"><b class="num">${D.n}</b> order${D.n===1?'':'s'}${D.n?` · avg <b class="num">${gel(D.a/D.n)}</b>`:''}</div></div>
-     <div class="tring">${ring(D.a,DAY_TARGET)}<span class="num">${pct(D.a,DAY_TARGET)}%</span><small>of ${fmt(DAY_TARGET)} ₾</small></div></div>
-    <div class="cmps"><div class="cmp"><span>Yesterday</span><b class="num">${gel(Y.a)}</b>${pc(D.a,Y.a)}</div><div class="cmp"><span>Last ${new Date(d+'T12:00').toLocaleDateString('en-GB',{weekday:'short'})}</span><b class="num">${gel(W.a)}</b>${pc(D.a,W.a)}</div><div class="cmp"><span>30-day average</span><b class="num">${gel(avg)}</b>${pc(D.a,avg)}</div><div class="cmp"><span>Store register</span><b class="num">${gel(regDay(d).a)}</b>${(()=>{const R=recon(d);return R.sheet.length||R.reg.length?(R.ok?'<em class="flat">= sheet</em>':`<span class="chip warn">sheet ${gel(R.sa)}</span>`):''})()}<a href="#store" data-go="store" class="small">${regDay(d).n} sale${regDay(d).n===1?'':'s'} →</a></div></div>
-    ${Object.keys(pays).length?`<div class="tpays">${Object.entries(pays).sort((a,b)=>b[1].a-a[1].a).map(([k,o])=>`<span><i style="width:${o.a/Math.max(1,D.a)*100}%"></i>${esc(PAYS[k]||k)} <b class="num">${gel(o.a)}</b></span>`).join('')}</div>`:''}
-   </div><div class="tlist"><div class="tlh"><span>Orders</span><b>${D.n?'newest first':''}</b></div>${list}</div></div>
-   <div class="strip" role="list">${strip.map(x=>{const o=dayOf(x);const dd=new Date(x+'T12:00');return `<button role="listitem" class="sd ${x===d?'on':''} ${o.a>=DAY_TARGET?'hit':''}" data-day="${x}" title="${dLong(x)} · ${gel(o.a)}"><span class="sb"><i style="height:${Math.max(o.a?6:0,o.a/smax*100)}%"></i></span><span class="sl">${dd.toLocaleDateString('en-GB',{weekday:'narrow'})}<b>${dd.getDate()}</b></span><span class="sa num">${!o.a?'—':o.a>=1000?fmt(o.a/1000,1)+'k':fmt(o.a)}</span></button>`}).join('')}</div>
-  </section>`;
+  const bars=[['Yesterday',Y.a],['Last '+EN_DAYS[wd],W.a],['30-day avg',avg],['Register',regDay(d).a]];
+  const bmax=Math.max(1,...bars.map(x=>x[1]),D.a);
+  const regNote=(()=>{const R=recon(d);return R.sheet.length||R.reg.length?(R.ok?' = sheet':''):''})();
+  return `<div class="ov-row"><section class="today" id="today"><div class="th"><div><div class="eyebrow"><span class="dot"></span>${isT?'Live':'Day view'} · ${EN_DAYS[wd]}, ${dShort(d)}</div><h2>${dLong(d)}</h2></div><span class="spacer"></span>
+   <div class="actions"><span class="ago">Sheet checked <b id="todayAgo">${agoTxt(lastCheck())}</b></span><button class="btn sm ghost" data-day="${addDay(d,-1)}" aria-label="Previous day">‹</button>${isT?'':`<button class="btn sm ghost" data-day="${t}">Today</button>`}<button class="btn sm ghost" data-day="${addDay(d,1)}" aria-label="Next day" ${isT?'disabled':''}>›</button>${S.mcp||S.backend?`<button class="btn sm ghost" data-act="syncSheet" data-label="↻ Refresh">↻ Refresh</button>`:''}</div></div>
+   <div class="tbig"><div><div class="lbl">${D.n} order${D.n===1?'':'s'}${D.n?` · daily target ${fmt(DAY_TARGET)} ₾`:''}</div><div class="val num">${cu(D.a)}<small>₾</small></div><div class="tsub">${D.n?`avg <b class="num">${gel(D.a/D.n)}</b>`:(isT?'No orders in the sheet yet today':'No orders on this day')}${last?` · last ${dShort(last.d)} · ${gel(last.a)}`:''}</div></div></div>
+   <div class="cmpbars">${bars.map(([l,v],i)=>`<div class="cmpb"><span>${l}</span><span class="trk"><i style="width:${Math.max(v?4:0,v/bmax*100)}%"></i></span><b class="num">${gel(v)}${i===3?regNote:''}</b></div>`).join('')}<a href="#store" data-go="store" class="small">${regDay(d).n} register sale${regDay(d).n===1?'':'s'} →</a><div class="delta" style="margin-top:6px">Vs yesterday ${pc(D.a,Y.a)} · vs last ${EN_DAYS[wd]} ${pc(D.a,W.a)} · vs 30-day ${pc(D.a,avg)}</div></div>
+   ${Object.keys(pays).length?`<div class="tpays">${Object.entries(pays).sort((a,b)=>b[1].a-a[1].a).map(([k,o])=>`<span><i style="width:${o.a/Math.max(1,D.a)*100}%"></i>${esc(PAYS[k]||k)} <b class="num">${gel(o.a)}</b></span>`).join('')}</div>`:''}
+   <div class="tlist"><div class="tlh"><span>Orders</span><b>${D.n?'newest first':''}</b></div>${list}</div>
+  </section><section class="panel days14"><h2><span class="h14">Last 14 days</span><span class="h7">Last 7 days</span></h2><p class="sub">Daily sales · gold = ${fmt(DAY_TARGET)} ₾ target reached · dashed line = target</p>
+   <div class="strip" role="list">${strip.map(x=>{const o=dayOf(x);const dd=new Date(x+'T12:00');const h=Math.max(o.a?8:0,o.a/smax*100);return `<button role="listitem" class="sd ${x===d?'on':''} ${o.a>=DAY_TARGET?'hit':''}" data-day="${x}" title="${dLong(x)} · ${gel(o.a)}"><span class="sa num">${!o.a?'':o.a>=1000?fmt(o.a/1000,1)+'k':fmt(o.a)}</span><span class="sb"><i class="tgt" style="bottom:${Math.min(100,DAY_TARGET/smax*100)}%"></i><i class="bar" style="height:${h}%"></i></span><span class="sl">${dd.toLocaleDateString('en-GB',{weekday:'narrow'})}<b>${dd.getDate()}</b></span></button>`}).join('')}</div>
+  </section></div>`;
 }
 function sparkline(vals,cls){
   if(vals.length<2)return '';const W=120,H=30;const mn=Math.min(0,...vals),mx=Math.max(1,...vals);const sx=i=>i/(vals.length-1)*W,sy=v=>H-2-(v-mn)/(mx-mn||1)*(H-4);
@@ -1473,7 +1748,7 @@ function pacePanel(m,M){
   const sx=i=>pl+i/(Math.max(dim,pdim)-1)*iw,sy=v=>pt+ih-v/top*ih;
   let g='';for(let v=0;v<=top;v+=step)g+=`<line x1="${pl}" x2="${W-pr}" y1="${sy(v)}" y2="${sy(v)}" stroke="var(--grid)"/><text x="${pl-6}" y="${sy(v)+4}" text-anchor="end">${v?fmt(v/1000,v%1000?1:0)+'k':'0'}</text>`;
   [1,8,15,22,29].filter(x=>x<=dim).forEach(x=>g+=`<text x="${sx(x-1)}" y="${H-6}" text-anchor="middle">${x}</text>`);
-  const line=v=>v.map((y,i)=>`${i?'L':'M'}${sx(i).toFixed(1)},${sy(y).toFixed(1)}`).join('');
+  const line=v=>{if(v.length<2)return v.length?`M${sx(0).toFixed(1)},${sy(v[0]).toFixed(1)}`:'';const pts=v.map((y,i)=>[sx(i),sy(y)]);let d=`M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;for(let i=0;i<pts.length-1;i++){const p0=pts[Math.max(0,i-1)],p1=pts[i],p2=pts[i+1],p3=pts[Math.min(pts.length-1,i+2)];const c1x=p1[0]+(p2[0]-p0[0])/6,c1y=p1[1]+(p2[1]-p0[1])/6,c2x=p2[0]-(p3[0]-p1[0])/6,c2y=p2[1]-(p3[1]-p1[1])/6;d+=`C${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`}return d};
   const curV=cur.slice(0,upto);const area=curV.length?`${line(curV)}L${sx(upto-1)},${sy(0)}L${sx(0)},${sy(0)}Z`:'';
   let hits='';for(let i=0;i<dim;i++)hits+=`<rect class="phit" data-i="${i}" x="${sx(i)-iw/dim/2}" y="${pt}" width="${iw/dim}" height="${ih}" fill="transparent"/>`;
   pacePanel.data={m,pm,cur,prev,upto,live};
@@ -1482,7 +1757,9 @@ function pacePanel(m,M){
    <path d="${line(prev)}" fill="none" stroke="var(--muted)" stroke-width="1.6" opacity=".75"/>
    ${area?`<path d="${area}" fill="url(#paceG)"/><path d="${line(curV)}" fill="none" stroke="var(--s1)" stroke-width="2.4" stroke-linejoin="round"/>`:''}
    ${live&&upto<dim&&upto?`<line x1="${sx(upto-1)}" y1="${sy(cur[upto-1])}" x2="${sx(dim-1)}" y2="${sy(fc)}" stroke="var(--s1)" stroke-width="1.8" stroke-dasharray="3 4"/><circle cx="${sx(dim-1)}" cy="${sy(fc)}" r="3.5" fill="none" stroke="var(--s1)" stroke-width="1.6"/>`:''}
-   ${upto?`<circle cx="${sx(upto-1)}" cy="${sy(cur[upto-1])}" r="4.5" fill="var(--s1)" stroke="var(--bg)" stroke-width="2"/>`:''}
+   ${upto?`<circle cx="${sx(upto-1)}" cy="${sy(cur[upto-1])}" r="4.5" fill="#F5C15A" stroke="var(--bg)" stroke-width="2"/>`:''}
+   ${upto?(()=>{const x=sx(upto-1),y=sy(cur[upto-1]);const lab=dShort(m+'-'+String(upto).padStart(2,'0'))+' · '+gel(cur[upto-1]);const w=Math.max(108,lab.length*6.1);const bx=Math.max(pl,Math.min(W-pr-w,x-w/2));const by=Math.max(2,y-32);return '<g><rect x="'+bx.toFixed(1)+'" y="'+by.toFixed(1)+'" width="'+w.toFixed(1)+'" height="22" rx="8" fill="#141824" stroke="rgba(226,195,132,.5)"/><text x="'+(bx+w/2).toFixed(1)+'" y="'+(by+15).toFixed(1)+'" text-anchor="middle" fill="#F1DDB0" font-size="11">'+esc(lab)+'</text></g>'})():''}
+   ${live&&upto<dim&&upto?`<text x="${Math.min(W-8,sx(dim-1)+6)}" y="${Math.max(pt+12,sy(fc)-8)}" text-anchor="end" fill="#E2C384" font-size="12">${gel(fc)}</text>`:''}
    <line id="paceX" x1="0" x2="0" y1="${pt}" y2="${pt+ih}" stroke="var(--ink-2)" stroke-width="1" opacity="0"/>${hits}</svg>`;
   const same=prev[Math.min(upto,pdim)-1]||0;
   return `<div class="panel lift"><div class="row" style="align-items:flex-start;gap:10px;flex-wrap:wrap"><div><h2>${live?mLabel(m).split(' ')[0]+', day by day':'Month vs '+mShort(pm)}</h2><p class="sub">Sales added up through the month${live?', with where this pace lands':''}.</p></div></div>
@@ -1525,7 +1802,7 @@ function ytdOf(m){const ms=yearMonths(m.slice(0,4)).filter(x=>x<=m);const D=ms.m
 /* ---------- live balances ---------- */
 // Each account starts from its last known amount (a statement's closing balance or a number typed in
 // Settings) and moves with everything dated after it: sales paid into it, expenses paid from it, money put in.
-const BAL_ACC=[['bog','BOG','#F05A28'],['tbc','TBC','#00A3E0'],['cash','Cash · სალარო','#1D8051'],['personal','Rezi personal','#E8A33B']];
+const BAL_ACC=[['bog','BOG','#F05A28'],['tbc','TBC','#00A3E0'],['cash','Cash','#1D8051'],['personal','Rezi personal','#E8A33B']];
 const DEFAULT_PAYACC={pos:'bog',bog:'bog',tbc:'tbc',cash:'cash',personal:'personal',cod:'cash',wolt:'bog',glovo:'bog',extra:'bog',installment:'bog',pending:'',other:'',unknown:''};
 const payAcct=p=>({...DEFAULT_PAYACC,...(S.cfg.payAcct||{})})[p]||'';
 function liveBalances(){
@@ -1548,11 +1825,11 @@ function moneyNow(m,M){
   const day=d=>new Date(d+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
   const tot=Object.values(B).reduce((x,o)=>x+Math.max(0,o.now),0);
   const card=([a,t,c])=>{const o=B[a];
-    return `<div class="mcard" style="--c:${c}"><div class="lbl"><span>${t}</span><span class="hint">${o?'now':'not set'}</span></div><div class="val num ${o&&o.now<0?'neg':''}">${o?cu(o.now)+'<small>₾</small>':'—'}</div>
+    return `<div class="mcard" style="--c:${c}"><div class="lbl"><span>${t}</span><span class="hint">${o&&tot>0&&o.now>0?pct(o.now,tot)+'% of cash':o?'now':'not set'}</span></div><div class="val num ${o&&o.now<0?'neg':''}">${o?cu(o.now)+'<small>₾</small>':'—'}</div>
      ${o&&tot>0&&o.now>0?`<div class="bar2"><i style="width:${Math.min(100,o.now/tot*100)}%"></i></div>`:''}<div class="parts">${o?`${o.now>0&&tot>0?pct(o.now,tot)+'% of cash on hand · ':''}${gel(o.base)} on ${day(o.asOf)}${o.sales?' · <span class="up">+'+fmt(o.sales)+' sales</span>':''}${o.inn?' · <span class="up">+'+fmt(o.inn)+' in</span>':''}${o.spent?' · <span class="down">−'+fmt(o.spent)+' spent</span>':''}${o.loan?' · <span class="'+(o.loan>0?'up">+':'down">−')+fmt(Math.abs(o.loan))+' loan</span>':''}`:(a==='bog'||a==='tbc'?'Import a statement or type it in Settings.':'Type what is there now in Settings.')}</div></div>`};
   const fold=!B.cash&&payAcct('cash')==='personal';
   return `<div class="money">${BAL_ACC.filter(x=>!(fold&&x[0]==='cash')).map(x=>fold&&x[0]==='personal'?[x[0],'Rezi personal + cash',x[2]]:x).map(card).join('')}
-   <div class="mcard" data-go="loan" style="--c:#9B7BFF;cursor:pointer;border-style:dashed"><div class="lbl"><span>${esc(loanLabel())}</span><span class="tag">kept separate</span></div>${L?`<div class="val num">${cu(L.left)}<small>₾ left</small></div><div class="bar2"><i style="width:${Math.min(100,L.out/Math.max(1,L.received)*100)}%"></i></div><div class="parts">Not counted in profit or cash · of ${gel(L.received)}: developers ${fmt(L.dev)} · other ${fmt(L.other)}</div>`:`<div class="val">—</div><div class="parts">Open the Loan page to add it.</div>`}</div>
+   <div class="mcard loan" data-go="loan" style="--c:#9B7BFF;cursor:pointer"><div class="lbl"><span>${esc(loanLabel())}</span><span class="tag">kept separate</span></div>${L?`<div class="val num">${cu(L.left)}<small>₾ left</small></div><div class="bar2"><i style="width:${Math.min(100,L.out/Math.max(1,L.received)*100)}%"></i></div><div class="parts">Not counted in profit or cash · of ${gel(L.received)}: developers ${fmt(L.dev)} · other ${fmt(L.other)}</div>`:`<div class="val">—</div><div class="parts">Open the Loan page to add it.</div>`}</div>
   </div>`;
 }
 function trendChart(ms,cur){
@@ -1588,7 +1865,7 @@ function attention(m,M){
   if(pers.length)items.push(['info','₾',`<b>${gel(pers.reduce((a,r)=>a+r.a,0))} of sales went to your personal account</b><div class="muted">${pers.length} orders paid in cash, to პირადი or on delivery. Counted as sales, but not in Astroman's bank.</div>`,'']);
   if(M.by.personal)items.push(['info','↗',`<b>${gel(M.by.personal)} spent on non-Astroman things</b><div class="muted">Kept out of profit.</div>`,`<button class="btn sm" data-act="filterCat" data-cat="personal">See</button>`]);
   if(!items.length)items.push(['good','✓',`<b>${mLabel(m)} looks complete</b><div class="muted">Sales loaded, Optimo report in, nothing uncategorized.</div>`,'']);
-  return `<div class="panel lift"><h2>Needs attention</h2><p class="sub">Checks that keep the month accurate.</p><div class="alerts">${items.map(([c,i,t,a])=>`<div class="alert ${c}"><span class="ic">${i}</span><div>${t}</div><div>${a}</div></div>`).join('')}</div></div>`;
+  return `<div class="panel lift attn"><h2>Needs attention <span class="attn-n">${items.length}</span></h2><p class="sub">Checks that keep the month accurate.</p><div class="alerts">${items.map(([c,i,t,a])=>`<div class="alert ${c}"><span class="ic">${i}</span><div>${t}</div><div>${a}</div></div>`).join('')}</div></div>`;
 }
 function breakdown(M,P){
   const rows=CATS.filter(c=>['goods','opex','tax'].includes(c.g)&&(M.by[c.id]||0)>0).map(c=>({c,v:M.by[c.id],p:P.by[c.id]||0})).sort((a,b)=>b.v-a.v);
@@ -1652,8 +1929,8 @@ function stockRows(M){
   return {rows:rows.concat(fresh),inc};
 }
 function vStock(){
-  const M=opModel();const up=S.canWrite?`<button class="btn" data-act="opPick">${svg('M12 16V4M7 9l5-5 5 5M4 20h16')} Upload Optimo files</button><input type="file" id="opFile" accept=".xlsx,.xls,.csv" multiple hidden>`:'';
-  const head=(sub)=>`<div class="pagehead"><div><div class="eyebrow">Products · პროდუქცია</div><h1>Products</h1><p>${sub}</p></div><div class="actions"><button class="btn" data-act="newOrder">+ Import order</button>${up}</div></div>${prodTabs()}`;
+  const M=opModel();  const up=S.canWrite?`<button class="btn ghost" data-act="opPick">${svg('M12 16V4M7 9l5-5 5 5M4 20h16')} Upload Optimo files</button><input type="file" id="opFile" accept=".xlsx,.xls,.csv" multiple hidden>`:'';
+  const head=(sub)=>`<div class="pagehead"><div><div class="eyebrow">Store</div><h1>Products</h1><p>${sub}</p></div><div class="actions"><button class="btn" data-act="newOrder">+ Import order</button>${up}</div></div>${prodTabs()}`;
   if(!M||!M.D.stock)return loadingOr(head('Every product with its picture, stock, price and profit. The register sells exactly what is here.')+`<div class="drop" data-act="opPick" role="button" tabindex="0">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',28)}<b>Upload the Optimo stock list and sale history</b><span>StockItems.xlsx and SaleHistory….xlsx</span></div>`);
   const {rows,inc}=stockRows(M);const P=S.prod;const sf=P.sf||'all';const st=M.D.stock;
   const incLand=inc.reduce((a,s)=>a+s.land,0),incQty=inc.reduce((a,s)=>a+(+s.qty||0),0);
@@ -1666,7 +1943,7 @@ function vStock(){
      return `<div class="inway mt">${[...groups.values()].map(g=>`<div class="inwg"><div class="inwh" ${g.ship?`data-ship="${g.ship}"`:`data-order="${g.order}"`}><span class="chip ${g.status==='arrived'?'good':g.status==='order'?'':'warn'}">${g.status==='arrived'?'arrived '+esc(g.arrivedAt):g.status==='order'?'ordered':esc(stLabel(g.status))}</span><span class="muted small">${esc(g.date||'')}</span><span class="spacer"></span><b class="num">${fmt(g.rows.reduce((a,s)=>a+(+s.qty||0),0))} pcs</b></div>
       ${g.rows.map(s=>{const it=s.sku&&S.catalog.get(String(s.sku));return `<div class="inwr"><span class="nm" title="${esc(s.item)}">${it?esc(it.n):esc(s.item)}</span>${it?'':'<span class="chip warn">new</span>'}<b class="num">+${fmt(s.qty||0)}</b><span class="num muted">${s.qty?gel(s.land/s.qty,2):gel(s.land)}</span></div>`}).join('')}</div>`).join('')}</div>`})():''}</div>`;
   const un=unlistedImports();
-  const unP=un.length?`<div class="panel"><h2>Imports paid, items not listed</h2><p class="sub">${gel(un.reduce((a,t)=>a+t.gel,0))} paid in the last 45 days with no item list. Tap Add items and write what was in the order.</p><div class="flow">${un.map(t=>`<div class="ln"><span class="k"><b>${esc(t.vendor||'Import')}</b><div class="small muted">${esc(t.date)}${usdOfTx(t)?' · $'+fmt(usdOfTx(t),2):''}</div></span><span class="v"><span class="num">${gel(t.gel)}</span> <button class="btn sm" data-act="shipFromTx" data-id="${esc(t.id)}">Add items</button></span></div>`).join('')}</div></div>`:'';
+  const unP=un.length?`<div class="panel"><h2>Imports paid, items not listed</h2><p class="sub">${gel(un.reduce((a,t)=>a+t.gel,0))} paid in the last 45 days with no item list. Tap Add items and write what was in the order.</p><div class="flow">${un.map(t=>`<div class="ln"><span class="k"><b>${esc(t.vendor||'Import')}</b><div class="small muted">${showD(t.date)}${usdOfTx(t)?' · $'+fmt(usdOfTx(t),2):''}</div></span><span class="v"><span class="num">${gel(t.gel)}</span> <button class="btn sm" data-act="shipFromTx" data-id="${esc(t.id)}">Add items</button></span></div>`).join('')}</div></div>`:'';
   // the product list is the shared catalog: what the register sells, with Optimo's sold/profit figures joined by barcode
   const byInc=new Map([...incBy()].map(([b,o])=>[b,o.q]));
   const mgOf=(x,m)=>m&&m.unit!=null&&x.price?m.unit/(x.vat==='ჩვეულებრივი'?x.price/1.18:x.price):null;
@@ -1677,11 +1954,8 @@ function vStock(){
   const shelf=vis.reduce((a,x)=>a+Math.max(0,x.lq+whQ(x))*(x.sale>0&&x.sale<x.price?+x.sale:+x.price||0),0);
   const noCost=vis.filter(x=>(Math.max(0,x.lq)+whQ(x))>0&&!(+x.cost)).length;
   const incSell=sellTotals(incoming().map(r=>({...lineSell({sku:r.sku,unit:r.qty?r.land/r.qty:0}),q:+r.qty||0,land:+r.land||0}))).v;
-  const kpis=`<div class="kpis stock4">
-   <div class="kpi"><div class="lbl">In the store</div><div class="val num">${cu(valStore)}<small>₾</small></div><div class="delta"><b class="num">${fmt(totStore)}</b> pieces · ${vis.filter(x=>x.lq>0).length} products · at cost</div></div>
-   <div class="kpi"><div class="lbl">In the warehouse</div><div class="val num">${cu(valWh)}<small>₾</small></div><div class="delta"><b class="num">${fmt(totWh)}</b> pieces · ${vis.filter(x=>whQ(x)>0).length} products · at cost</div></div>
-   <div class="kpi"><div class="lbl">On the way</div><div class="val num">${cu(incLand)}<small>₾</small></div><div class="delta"><b class="num">${fmt(incQty)}</b> pieces · ${inc.length} line${inc.length===1?'':'s'} · landed cost · sells for <b class="num" style="color:var(--accent)">${gel(incSell)}</b></div></div>
-   <div class="kpi sum"><div class="lbl">Total stock</div><div class="val num">${cu(valStore+valWh+incLand)}<small>₾</small></div><div class="delta"><b class="num">${fmt(totStore+totWh+incQty)}</b> pieces · worth <b class="num">${gel(shelf+incSell)}</b> at selling prices, ${gel(incSell)} of it on the way${noCost?` · <span style="color:var(--warn)">${noCost} without cost</span>`:''}</div></div></div>`;
+  const costTot=valStore+valWh+incLand,worth=shelf+incSell,mult=costTot>0?worth/costTot:0;
+  const kpis=`<div class="stockhero"><div class="panel"><div class="hero-kicker">Total stock at cost</div><div class="big num">${cu(costTot)}<small>₾</small></div><div class="delta">${fmt(totStore+totWh+incQty)} pieces${noCost?` · <span style="color:var(--warn)">${noCost} without a cost</span>`:''}</div><div class="splitbar"><i style="width:${costTot?valStore/costTot*100:0}%;background:#8C9BFF"></i><i style="width:${costTot?valWh/costTot*100:0}%;background:#56D39A"></i><i style="width:${costTot?incLand/costTot*100:0}%;background:#E2C384"></i></div><div class="stock3"><div><span><i style="background:#8C9BFF"></i>In the store</span><b>${gel(valStore)}</b><div class="small muted">${fmt(totStore)} pcs · ${vis.filter(x=>x.lq>0).length} products</div></div><div><span><i style="background:#56D39A"></i>Warehouse</span><b>${gel(valWh)}</b><div class="small muted">${fmt(totWh)} pcs · ${vis.filter(x=>whQ(x)>0).length} products</div></div><div><span><i style="background:#E2C384"></i>On the way</span><b>${gel(incLand)}</b><div class="small muted">${fmt(incQty)} pcs · ${inc.length} lines · sells for ${gel(incSell)}</div></div></div></div><div class="panel worth"><div class="hero-kicker">Worth at sale prices</div><div class="big num">${cu(worth)}<small>₾</small></div><div class="delta">What these pieces sell for at today's prices${mult?` · <b class="num">${(Math.round(mult*10)/10).toFixed(1)}×</b> price ÷ cost`:''}.</div></div></div>`;
   const q=(P.sq||'').toLowerCase();
   const cats=[...new Set(all.map(x=>x.cat||'სხვადასხვა'))].sort();
   const test=(x,k)=>k==='all'?!x.hidden:k==='in'?x.lq>0&&!x.hidden:k==='way'?x.inc>0:k==='out'?x.lq===0&&!x.inc&&!x.hidden:k==='neg'?x.lq<0:k==='noimg'?!x.img&&!x.hidden:k==='sale'?x.sale>0&&x.sale<x.price:k==='noprice'?!(+x.price>0)&&!x.hidden:k==='new'?!!x.fromOrder:k==='hidden'?!!x.hidden:true;
@@ -1691,25 +1965,26 @@ function vStock(){
   fl.sort((a,b)=>{const x=val(a),y=val(b);return typeof x==='string'?x.localeCompare(y):y-x});
   const shown=P.sfull||q?fl:fl.slice(0,120);
   const noImg=cnt('noimg');
-  const card=x=>{const onSale=x.sale>0&&x.sale<x.price;const wh=whQ(x);const noPrice=!(+x.price>0);
+  const card=x=>{const onSale=x.sale>0&&x.sale<x.price;const wh=whQ(x);const noPrice=!(+x.price>0);const mgCls=x.mg==null?'':x.mg>=.5?'hi':x.mg>=.35?'mid':'low';
     return `<button class="pcard ${x.hidden?'dim':''}" data-act="st_edit" data-b="${esc(x.b)}" title="${esc(x.n)}"><span class="pi">${x.img?`<img src="${esc(x.img)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=\\'ph\\'>${esc(posInitials(x.n))}</span>'">`:`<span class="ph">${esc(posInitials(x.n))}</span>`}<span class="pq ${x.lq<0?'neg':x.lq===0?'zero':''}" title="In the store">${x.lq}</span>${x.inc?`<span class="pinc" title="On the way">+${fmt(x.inc)}</span>`:''}${!x.img?'<span class="pnoimg">no picture</span>':''}${x.fromOrder&&noPrice?'<span class="pnew">new</span>':''}</span>
-    <span class="pt"><b class="pn">${esc(x.n)}</b><span class="prow"><span class="pp num">${noPrice?'<em class="np">no price</em>':onSale?`<s>${gel(x.price)}</s> <em>${gel(x.sale)}</em>`:gel(x.price)}</span>${x.mg!=null&&!noPrice?`<span class="pmg num ${x.mg<0.25?'low':''}" title="Margin after VAT">${Math.round(x.mg*100)}%</span>`:''}</span>
-    <span class="pst"><span class="${x.lq<0?'neg':x.lq===0?'zero':''}"><i>store</i><b>${x.lq}</b></span><span class="${wh?'':'zero'}"><i>wh</i><b>${wh}</b></span>${x.inc?`<span class="inc"><i>way</i><b>+${fmt(x.inc)}</b></span>`:''}</span>
+    <span class="pt">${x.cat?`<span class="pcat">${esc(x.cat)}</span>`:''}<b class="pn">${esc(x.n)}</b><span class="prow"><span class="pp num">${noPrice?'<em class="np">no price</em>':onSale?`<s>${gel(x.price)}</s> <em>${gel(x.sale)}</em>`:gel(x.price)}</span>${x.mg!=null&&!noPrice?`<span class="pmg num ${mgCls}" title="Margin after VAT">${Math.round(x.mg*100)}%</span>`:''}</span>
+    <span class="pst"><span class="${x.lq<0?'neg':x.lq===0?'zero':''}"><i>Store</i><b>${x.lq}</b></span><span class="${wh?'':'zero'}"><i>WH</i><b>${wh||'—'}</b></span><span class="${x.inc?'inc':'zero'}"><i>Coming</i><b>${x.inc?'+'+fmt(x.inc):'—'}</b></span></span>
     <span class="pcode num">${esc(x.b)}${x.cost?` · cost ${gel(x.cost,x.cost<20?2:0)}`:''}</span></span></button>`};
   const main=`<div class="panel pprod"><div class="ptop"><div><h2>All products</h2><p class="sub">Tap a product to change price, sale price, stock, picture or code. The register follows within a minute. Sold and profit are for ${esc(per)}.</p></div><div class="actions"><button class="btn sm primary" data-act="st_add">+ Add product</button></div></div>
    <div class="ptools"><input class="input grow" id="psQ" placeholder="Search product or barcode…" value="${esc(P.sq||'')}">
     <select class="input" id="psCat" aria-label="Category"><option value="">All categories</option>${cats.map(c=>`<option ${P.scat===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
     <select class="input" id="psSort" aria-label="Sort"><option value="sold" ${sort==='sold'?'selected':''}>Best selling</option><option value="n" ${sort==='n'?'selected':''}>Name</option><option value="sv" ${sort==='sv'?'selected':''}>Stock value</option><option value="q" ${sort==='q'?'selected':''}>Total stock</option><option value="price" ${sort==='price'?'selected':''}>Price</option><option value="mg" ${sort==='mg'?'selected':''}>Margin</option><option value="profit" ${sort==='profit'?'selected':''}>Profit</option></select></div>
    <div class="pfilters"><div class="pills" role="group" aria-label="Show">${[['all','All',cnt('all')],['in','In stock',cnt('in')],['out','Out',cnt('out')],['neg','Below zero',cnt('neg')],['way','On the way',cnt('way')],['new','New arrivals',cnt('new')],['noprice','No price',cnt('noprice')],['sale','On sale',cnt('sale')],['noimg','No picture',noImg],['hidden','Hidden',cnt('hidden')]].map(([k,t,n])=>`<button data-act="psFilter" data-v="${k}" aria-pressed="${sf===k}" class="${(k==='neg'&&n)||(k==='noprice'&&n)?'warn':''}">${t}<b>${n}</b></button>`).join('')}</div>
-    <div class="ptoolsb">${noImg?`<button class="btn sm amber" data-act="st_pickNext">Pick pictures · ${noImg}</button>`:''}<button class="btn sm ghost" data-act="st_dups">Find duplicates</button><button class="btn sm ghost" data-act="st_sync" title="Stock, prices, costs and new items from the Optimo stock list">↻ Update from Optimo</button></div></div>
+    <div class="ptoolsb"><button class="btn sm ghost" data-act="st_dups">Find duplicates</button><button class="btn sm ghost" data-act="st_sync" title="Stock, prices, costs and new items from the Optimo stock list">↻ Update from Optimo</button></div></div>
    ${all.length?(shown.length?`<div class="pgrid">${shown.map(card).join('')}</div>${fl.length>shown.length?`<div class="row mt"><button class="btn" data-act="psFull">Show all ${fl.length}</button></div>`:''}`:'<div class="empty"><b>Nothing matches</b></div>')
    :`<div class="empty"><b>No catalog yet</b><span>Press “Update from Optimo list” to build it from the stock list you uploaded.</span></div>`}</div>`;
-  return loadingOr(head(`${fmt(totStore)} pieces in the store, ${fmt(totWh)} in the warehouse · ${vis.length} products on the register${noImg?' · '+noImg+' without picture':''}. Values follow every change you make here.`)+kpis+`<div class="grid g3"><div>${main}</div><div class="stack">${incP}${negPanel(all)}${unP}</div></div>`);
+  const pickCard=noImg?`<div class="panel"><h2>${noImg} product${noImg===1?'':'s'} need a picture</h2><p class="sub">They show as blank on the register.</p><button class="btn sm" data-act="st_pickNext">Pick pictures</button></div>`:'';
+  return loadingOr(head(`${fmt(totStore)} pieces in the store, ${fmt(totWh)} in the warehouse · ${vis.length} products on the register${noImg?' · '+noImg+' without a picture':''}. Values follow every change you make here.`)+kpis+`<div class="prodlayout"><div>${main}</div><div class="stack">${pickCard}${incP}${negPanel(all)}${unP}</div></div>`);
 }
 function prodTabs(){const v=S.prod.view||'stock';return `<div class="tabs" role="tablist" style="margin-bottom:16px"><button role="tab" aria-selected="${v==='stock'}" data-act="prodView" data-v="stock">Stock, prices &amp; costs</button><button role="tab" aria-selected="${v==='sales'}" data-act="prodView" data-v="sales">Sales by month</button></div>`}
 function vProdSales(){
   const m=S.month,P=S.prod,ms=P.all?rangeMonths():[m],D=prodData(ms);const M=metrics(m);const OD=P.all?null:(S.items.get(m)?D:null);
-  const head=`<div class="pagehead"><div><div class="eyebrow">${P.all?esc(rangeLabel()):kaM(m)+' · '+m.slice(0,4)}</div><h1>Products</h1><p>Which items sell, which make money and which don't. Uses your Optimo report by item; months without one use the product names in the order sheet${D&&D.srcs.includes('sheet')&&D.hasCost?' and the cost written next to each order':''}.</p></div>
+  const head=`<div class="pagehead"><div><div class="eyebrow">${P.all?esc(rangeLabel()):mShort(m)+' '+m.slice(0,4)}</div><h1>Products</h1><p>Which items sell, which make money and which don't. Uses your Optimo report by item; months without one use the product names in the order sheet${D&&D.srcs.includes('sheet')&&D.hasCost?' and the cost written next to each order':''}.</p></div>
    <div class="actions"><div class="seg" role="group" aria-label="Period"><button data-act="prodAll" data-v="0" aria-pressed="${!P.all}">${mShort(m)} ${m.slice(0,4)}</button><button data-act="prodAll" data-v="1" aria-pressed="${P.all}">Period</button></div><button class="btn amber" data-act="optStart">Upload Optimo report</button></div></div>${prodTabs()}${P.all?periodBar({noMonth:true}):''}`;
   if(!D)return loadingOr(head+`<div class="grid g2"><div class="panel stack"><div><h2>No Optimo report for ${mLabel(m)} yet</h2><p class="sub">In Optimo, open the sales report by item (პროდუქციის მიხედვით), pick ${mLabel(m)}, and export it to Excel. Include the cost price column (თვითღირებულება) so profit can be calculated.</p></div><div class="drop" data-act="optStart" role="button" tabindex="0">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',28)}<b>Upload the Optimo report</b><span>.xlsx, .xls or .csv</span></div></div>${reconPanel(m,M,null)}</div>`);
   const rows=D.rows.filter(r=>!P.q||r.n.toLowerCase().includes(P.q.toLowerCase())||(r.c||'').toLowerCase().includes(P.q.toLowerCase()));
@@ -1896,15 +2171,15 @@ function vExpenses(){
   const gTot=g=>CATS.filter(c=>c.g===g).reduce((s,c)=>s+sumOf(byCat[c.id]||[]),0);
   const max=Math.max(1,...Object.entries(byCat).filter(([c])=>spendG.includes(CAT[c]?.g)).map(([,a])=>sumOf(a)));
   const titles={opex:'Running costs',goods:'Stock & freight',tax:'Taxes',below:'Taken out of the business',income:'Other income',inflow:'Money you put in'};
-  const row=t=>`<button class="erow" data-edit="${t.id}" data-m="${t.month}"><span><span class="et">${esc(t.vendor||t.employee||catLabel(t.cat))}${t.virtual?' <span class="chip fixed">fixed</span>':''}</span><small>${t.virtual?mShort(t.month)+' · added automatically':esc(t.date)+(t.note?' · '+esc(t.note.slice(0,60)):'')}</small></span><b class="num">${t.skipped?'skipped':gel(t.gel)}</b></button>`;
+  const row=t=>`<button class="erow" data-edit="${t.id}" data-m="${t.month}"><span><span class="et">${esc(t.vendor||t.employee||catLabel(t.cat))}${t.virtual?' <span class="chip fixed">fixed</span>':''}</span><small>${t.virtual?mShort(t.month)+' · added automatically':showD(t.date)+(t.note?' · '+esc(t.note.slice(0,60)):'')}</small></span><b class="num">${t.skipped?'skipped':gel(t.gel)}</b></button>`;
   const groups=order.map(g=>{const cats=CATS.filter(c=>c.g===g&&byCat[c.id]?.length).map(c=>({c,items:byCat[c.id].sort((a,b)=>(b.date||'').localeCompare(a.date||'')),v:sumOf(byCat[c.id])})).sort((a,b)=>b.v-a.v);
     if(!cats.length)return '';
     return `<section class="eg"><div class="eg-h"><span>${titles[g]}</span><b class="num">${gel(gTot(g))}</b></div>${cats.map(({c,items,v})=>`<details class="ecat" ${f.q?'open':''}><summary><span class="nm">${esc(c.en)}<small>${esc(c.ka)}</small></span><span class="cnt">${items.length}</span><span class="eb">${spendG.includes(g)?`<i class="fill" style="width:${v/max*100}%"></i>`:''}</span><b class="num">${gel(v)}</b></summary><div class="elist">${items.map(row).join('')}</div></details>`).join('')}</section>`}).join('');
   // the last entries you touched, newest first, so a mistake is one tap away from being fixed or deleted
   const stamp=t=>t.updatedAt||t.createdAt||t.date||'';
   const recent=list.filter(t=>!t.virtual).sort((a,b)=>stamp(b).localeCompare(stamp(a))).slice(0,8);
-  const latest=recent.length?`<section class="eg"><div class="eg-h"><span>Latest entries</span><b>newest first · tap to edit</b></div><div class="recent">${recent.map(t=>`<div class="rrow"><button class="erow" data-edit="${t.id}" data-m="${t.month}"><span><span class="et">${esc(t.vendor||t.employee||catLabel(t.cat))}</span><small>${esc(t.date)} · ${esc(catLabel(t.cat))}${t.note?' · '+esc(t.note.slice(0,40)):''}</small></span><b class="num">${t.skipped?'skipped':gel(t.gel)}</b></button><button class="rdel" data-del="${t.id}" aria-label="Delete this entry">Delete</button></div>`).join('')}</div></section>`:'';
-  return loadingOr(`<div class="pagehead"><div><div class="eyebrow">${f.all?esc(rangeLabel()):kaM(S.month)+' · '+y}</div><h1>Expenses</h1></div><div class="actions"><button class="btn" data-go="bank">Import bank statement</button><button class="btn" data-go="add">+ Expense</button></div></div>
+  const latest=recent.length?`<section class="eg"><div class="eg-h"><span>Latest entries</span><b>newest first · tap to edit</b></div><div class="recent">${recent.map(t=>`<div class="rrow"><button class="erow" data-edit="${t.id}" data-m="${t.month}"><span><span class="et">${esc(t.vendor||t.employee||catLabel(t.cat))}</span><small>${showD(t.date)} · ${esc(catLabel(t.cat))}${t.note?' · '+esc(t.note.slice(0,40)):''}</small></span><b class="num">${t.skipped?'skipped':gel(t.gel)}</b></button><button class="rdel" data-del="${t.id}" aria-label="Delete this entry">Delete</button></div>`).join('')}</div></section>`:'';
+  return loadingOr(`<div class="pagehead"><div><div class="eyebrow">${f.all?esc(rangeLabel()):mShort(S.month)+' '+y}</div><h1>Expenses</h1></div><div class="actions"><button class="btn ghost" data-go="bank">Import bank statement</button><button class="btn primary" data-go="add">+ Expense</button></div></div>
    <div class="toolbar"><div class="seg" role="group" aria-label="Period"><button data-act="expMode" data-v="0" aria-pressed="${!f.all}">${mShort(S.month)}</button><button data-act="expMode" data-v="1" aria-pressed="${f.all}">Period</button></div><input class="input grow" id="xQ" placeholder="Search…" value="${esc(f.q)}"></div>
    ${f.all?periodBar({noMonth:true}):''}
    <div class="esum"><div><span>Total spending</span><b class="num">${cu(total)}<small> ₾</small></b></div><div class="esplit">${spendG.map(g=>`<span><i style="background:${g==='goods'?'var(--s2)':g==='tax'?'var(--bad)':'var(--s1)'}"></i>${titles[g]} <b class="num">${fmt(gTot(g))}</b></span>`).join('')}</div></div>
@@ -1916,15 +2191,15 @@ function vSales(){
   const m=S.month,M=metrics(m),doc=S.sales.get(m);
   const q=S.salesQ.toLowerCase();const rows=(doc?.rows||[]).filter(r=>!q||[r.c,r.p,PAYS[r.pay]].join(' ').toLowerCase().includes(q));
   const sid=sheetId();const days=m===thisMonth()?new Date().getDate():daysIn(m);
-  return loadingOr(`<div class="pagehead"><div><div class="eyebrow">${kaM(m)} · ${m.slice(0,4)}</div><h1>Sales</h1><p>From your order sheet <a href="https://docs.google.com/spreadsheets/d/${esc(sid)}/edit" target="_blank" rel="noopener">ასტრომანის შეკვეთები</a>. Each month is its tab in the sheet; one sync makes every month match the sheet.</p></div>
+  return loadingOr(`<div class="pagehead"><div><div class="eyebrow">${mShort(m)} ${m.slice(0,4)}</div><h1>Sales</h1><p>From your <a href="https://docs.google.com/spreadsheets/d/${esc(sid)}/edit" target="_blank" rel="noopener">order sheet</a>. Each month is its tab in the sheet; one sync makes every month match the sheet.</p></div>
   <div class="actions">${S.mcp||S.backend?`<button class="btn" data-act="syncSheet" data-label="↻ Sync now">↻ Sync now</button>`:''}<button class="btn" data-act="pickOrders">Upload orders file</button><input type="file" id="ordersFile" accept=".xlsx,.xls,.csv,.ods,.txt,text/plain" hidden></div></div>
-  <div class="kpis"><div class="kpi"><div class="lbl">Sales</div><div class="val num">${cu(M.sales)}<small>₾</small></div><div class="delta">${doc?('Updated '+new Date(doc.syncedAt).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})):'Not loaded yet'}</div></div>
+  <div class="kpis"><div class="kpi"><div class="lbl">Sales</div><div class="val num">${cu(M.sales)}<small>₾</small></div><div class="delta">${doc?(doc.syncedAt?'Updated '+dtShort(doc.syncedAt):'In the books'):'Not loaded yet'}</div></div>
   <div class="kpi"><div class="lbl">Orders</div><div class="val num">${cu(M.orders)}</div><div class="delta">${(M.orders/Math.max(1,days)).toFixed(1)} per day</div></div>
   <div class="kpi"><div class="lbl">Average order</div><div class="val num">${cu(M.aov)}<small>₾</small></div><div class="delta">${esc(doc?.source||'')}${doc?.locked?' · kept, sheet sync never replaces it':''}</div></div>
   <div class="kpi"><div class="lbl">Per day</div><div class="val num">${cu(M.sales/Math.max(1,days))}<small>₾</small></div><div class="delta">target 1,000 ₾ · ${pct(M.sales/Math.max(1,days),1000)}%</div></div></div>
   <div class="grid g3"><div class="panel chart"><h2>Sales by day</h2><p class="sub">Hover or tap a bar for the day's total. Dashed line is the 1,000 ₾/day target.</p>${dailyChart(M)}</div>${channels(M)}</div>
   <div class="toolbar mt"><input class="input grow" id="sQ" placeholder="Search customer, product, payment…" value="${esc(S.salesQ)}"><span class="muted small">${rows.length} of ${M.orders} orders</span></div>
-  ${rows.length?`<div class="tablewrap"><table><thead><tr><th>Date</th><th>Customer</th><th>Product</th><th>Payment</th><th class="r">Amount</th></tr></thead><tbody>${rows.slice().reverse().map((r,i,A)=>(i===0||A[i-1].d!==r.d?dayHead(r.d,A):'')+`<tr><td class="num">${esc(r.d||'—')}</td><td>${esc(r.c)}</td><td style="min-width:200px">${esc(r.p)}${r.no?' <span class="chip warn">not in Optimo</span>':''}</td><td>${r.pay==='unknown'?'<span class="chip warn">Not recorded</span>':r.pay==='personal'?'<span class="chip">Rezi personal</span>':esc(PAYS[r.pay]||r.pay)}</td><td class="r num">${gel(r.a)}</td></tr>`).join('')}</tbody></table></div>`:`<div class="panel empty"><b>No sales for ${mLabel(m)}</b>${S.mcp||S.backend?'Press “Sync now” to pull them in.':'Download your order sheet and upload it here.'}</div>`}`);
+  ${rows.length?`<div class="tablewrap"><table><thead><tr><th>Date</th><th>Customer</th><th>Product</th><th>Payment</th><th class="r">Amount</th></tr></thead><tbody>${rows.slice().reverse().map((r,i,A)=>(i===0||A[i-1].d!==r.d?dayHead(r.d,A):'')+`<tr><td class="num">${showD(r.d)}</td><td>${esc(r.c)}</td><td style="min-width:200px">${esc(r.p)}${r.no?' <span class="chip warn">not in Optimo</span>':''}</td><td>${r.pay==='unknown'?'<span class="chip warn">Not recorded</span>':r.pay==='personal'?'<span class="chip">Rezi personal</span>':esc(PAYS[r.pay]||r.pay)}</td><td class="r num">${gel(r.a)}</td></tr>`).join('')}</tbody></table></div>`:`<div class="panel empty"><b>No sales for ${mLabel(m)}</b>${S.mcp||S.backend?'Press “Sync now” to pull them in.':'Download your order sheet and upload it here.'}</div>`}`);
 }
 function dayHead(d,A){const R=A.filter(x=>x.d===d);return `<tr class="dayrow"><td colspan="5">${d?esc(new Date(d+'T12:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})):'No date'}${d===today()?' · <b>today</b>':''} · ${R.length} order${R.length>1?'s':''}<b class="num r">${gel(R.reduce((a,x)=>a+x.a,0))}</b></td></tr>`}
 function dailyChart(M){
@@ -2020,7 +2295,7 @@ function wbFromText(text){
   return wb;
 }
 function wbFromBytes(u8){if(u8[0]===0x50&&u8[1]===0x4B)return XLSX.read(u8,{type:'array',cellDates:true});if(u8[0]===0xD0&&u8[1]===0xCF)return XLSX.read(u8,{type:'array',cellDates:true});const t=new TextDecoder('utf-8').decode(u8);return wbFromText(t)}
-function readFile(file,cb){const r=new FileReader();r.onload=()=>{try{cb(wbFromBytes(new Uint8Array(r.result)))}catch(e){toast('Couldn’t read that file. Save it as .xlsx or .csv and try again.')}};r.readAsArrayBuffer(file)}
+function readFile(file,cb){const r=new FileReader();r.onload=async()=>{try{await xlsxReady();cb(wbFromBytes(new Uint8Array(r.result)))}catch(e){toast(/library/.test(String(e&&e.message||e))?'Could not load the spreadsheet library. Check the connection and try again.':'Couldn’t read that file. Save it as .xlsx or .csv and try again.')}};r.readAsArrayBuffer(file)}
 async function syncSheet(btn){
   const sid=sheetId();
   btn.disabled=true;btn.textContent='Reading sheet…';
@@ -2214,7 +2489,7 @@ function netChart(ms){
 function vPL(){
   let mode=S.plMode||'month';if(mode==='ytd')mode='range';
   const ms=rangeMonths();const many=ms.length>15;
-  const head=`<div class="pagehead"><div><div class="eyebrow">${mode==='month'?kaM(S.month)+' · '+S.month.slice(0,4):esc(rangeLabel())}</div><h1>Profit &amp; loss</h1></div><div class="actions"><button class="btn" data-act="report">▶ Recap</button>${S.downloads?'<button class="btn" data-act="exportXlsx">Download Excel</button>':''}</div></div>
+  const head=`<div class="pagehead"><div><div class="eyebrow">${mode==='month'?mShort(S.month)+' '+S.month.slice(0,4):esc(rangeLabel())}</div><h1>Profit &amp; loss</h1></div><div class="actions"><button class="btn" data-act="report">▶ Recap</button>${S.downloads?'<button class="btn" data-act="exportXlsx">Download Excel</button>':''}</div></div>
    <div class="toolbar"><div class="seg" role="group" aria-label="View"><button data-act="plMode" data-v="month" aria-pressed="${mode==='month'}">${mShort(S.month)} ${S.month.slice(0,4)}</button><button data-act="plMode" data-v="range" aria-pressed="${mode==='range'}">Period</button><button data-act="plMode" data-v="table" aria-pressed="${mode==='table'}">${many?'Year by year':'Month by month'}</button></div></div>
    ${mode==='month'?'':periodBar({noMonth:true})}`;
   if(mode==='table')return loadingOr(head+plTable(ms));
@@ -2231,6 +2506,7 @@ function plTable(range){
   </tbody></table></div><p class="hint" style="margin-top:10px">All amounts in ₾. <span class="odot"></span> uses real item costs (Optimo, or cost per order in the old sheets); other months use the cost ratio of the nearest product report.${cols.some(c=>c.part)?' * part of the year only.':''}</p>`;
 }
 async function exportXlsx(){
+  await xlsxReady();
   const range=(S.view==='pl'&&(S.plMode||'month')==='month')?rangeMonths({p:'ytd'}):rangeMonths();const inR=m=>!!m&&m>=range[0]&&m<=range[range.length-1];
   const {cols,rows}=plModel(range);const wb=XLSX.utils.book_new();const y=range[0]===range[range.length-1]?range[0]:range[0]+'_'+range[range.length-1];
   const pl=[['Astroman P&L '+y,...cols.map(c=>c.isYear?c.label:mShort(c.key)+' '+c.key.slice(0,4)),'Total']];rows.forEach(r=>{if(r.sec)pl.push([r.sec]);else pl.push([r.label,...r.vals.map(v=>Math.round(v*100)/100),r.cls.includes('pctrow')?'':Math.round(r.vals.reduce((a,b)=>a+b,0)*100)/100])});
@@ -2505,25 +2781,25 @@ function vImports(){
   const sS=a=>DG(a.reduce((x,s)=>{const C=shipCalc(s);return x+C.landed/C.usdRate},0),a.reduce((x,s)=>x+shipCalc(s).landed,0));
   const rem=o=>{const c=orderCalc(o);return Math.max(0,c.total-c.paid)};
   const payV=DG(toPay.reduce((x,o)=>{const c=orderCalc(o);return x+(c.cur==='USD'?rem(o):rem(o)*c.rate/fx())},0),toPay.reduce((x,o)=>x+rem(o)*orderCalc(o).rate,0));
-  const stg=(k,lbl,col,n,v,sub)=>`<button class="stage" data-act="impStage" data-v="${k}"><div class="lbl"><i class="sdot" style="background:${col}"></i>${lbl}</div><div class="n">${cu(n)}</div><div class="v">${v}</div><div class="hint">${sub}</div></button>`;
+  const stg=(k,lbl,col,n,v,sub)=>`<button class="stage ${k==='way'&&n?'hot':''}" data-act="impStage" data-v="${k}"><div class="lbl"><i class="sdot" style="background:${col}"></i>${lbl}</div><div class="n">${cu(n)}</div><div class="v">${v}</div><div class="hint">${sub}</div></button>`;
   const pipe=`<div class="pipe">
    ${stg('pay','Orders to pay','var(--bad)',toPay.length,payV,'not fully paid')}
    ${stg('wait','Waiting for a truck','var(--s1)',waiting.length,sO(waiting),'orders not in a shipment')}
    ${stg('way','Trucks coming','var(--accent)',trucks.length,sS(trucks),trucks.length?loading+' loading · '+(trucks.length-loading)+' on the road':'none on the way')}
    ${stg('done','Arrived '+yNow,'var(--good)',done.length,sS(done),'trucks in the store')}</div>`;
   const inc=incoming().map(r=>{const L=lineSell({sku:r.sku,unit:r.qty?r.land/r.qty:0});return {...L,q:+r.qty||0,land:+r.land||0}});const IT=sellTotals(inc);
-  const coming=inc.length?`<div class="panel row" style="gap:10px;flex-wrap:wrap;margin-bottom:16px"><div><div class="eyebrow">Coming in · not in stock yet</div><div style="font-size:24px;font-weight:600;margin-top:2px" class="num"><span style="color:var(--accent)">${gel(IT.v)}</span> <small class="muted" style="font-size:13px;font-weight:400">selling value</small></div><div class="small muted">${fmt(IT.q)} pcs · ${gel(IT.land)} landed cost · ${gel(IT.v-IT.land)} profit · 300% of cost would be ${gel(IT.v3)}${IT.np?' · '+IT.np+(IT.np===1?' line':' lines')+' without a price':''}</div></div><span class="spacer"></span><span class="small muted" style="max-width:340px">Costs follow the freight, customs and transport you enter. Selling prices are the store prices you set; tap a product in a shipment to change one.</span></div>`:'';
+  const coming=inc.length?`<div class="panel coming-card"><div class="eyebrow">Coming in · not in stock yet</div><div class="sell num">${gel(IT.v)} <small>selling value</small></div><div class="small muted" style="margin-top:8px">${fmt(IT.q)} pcs · ${gel(IT.land)} landed · ${gel(IT.v-IT.land)} profit${IT.np?' · '+IT.np+(IT.np===1?' line':' lines')+' without a price':''}</div><p class="hint" style="margin-top:8px">Costs follow the freight, customs and transport you enter. Selling prices are the store prices.</p></div>`:`<div class="panel coming-card"><div class="eyebrow">Coming in · not in stock yet</div><div class="sell num">—</div><p class="hint">Nothing is on the way.</p></div>`;
   const nAct=trucks.length;
   const tabs=`<div class="tabs" role="tablist">${[['ships','Shipments',nAct?nAct+' coming':''],['orders','Orders',orders.length||''],['products','Product costs','']].map(([k,t,n])=>`<button role="tab" aria-selected="${I.tab===k}" data-act="impTab" data-v="${k}">${t}${n?` <span class="muted">${n}</span>`:''}</button>`).join('')}</div>`;
   const fws=[...new Set(ships.map(s=>s.forwarder).filter(Boolean))].sort();
   const fwSel=`<select class="input" id="impFw" aria-label="Forwarder"><option value="">All forwarders</option>${fws.map(f=>`<option ${I.fw===f?'selected':''}>${esc(f)}</option>`).join('')}</select>`;
   const vatNote=`<p class="hint mt">Dollars at the rate each shipment was paid at, lari in brackets. Product cost ${vatInCost()?'includes':'leaves out'} import VAT. <button class="linkbtn" data-act="impVat">${vatInCost()?'VAT is reclaimed? Leave it out':'Count VAT in the cost'}</button> · <button class="linkbtn" data-act="impPack">Load an imports file</button></p>`;
-  const head=`<div class="pagehead"><div><div class="eyebrow">Supplier → forwarder → Tbilisi</div><h1>Imports</h1><p class="mhide">Every supplier order, and the truck that brings it. Combine orders into a shipment, add its freight, customs, VAT and transport, and see what each product really cost on the shelf.</p></div><div class="actions"><button class="btn" data-act="newShip">${svg(TRUCK,15)} Shipment</button><button class="btn" data-act="newOrder">+ Order</button><button class="btn amber" data-act="invOrder">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',14)} Upload invoice</button></div></div>`;
+  const head=`<div class="pagehead"><div><div class="eyebrow">Supplier · forwarder · Tbilisi</div><h1>Imports</h1><p class="mhide">Combine orders into a shipment, add freight, customs, VAT and transport, and see what each product really costs on the shelf.</p></div><div class="actions"><button class="btn ghost" data-act="newShip">${svg(TRUCK,15)} Shipment</button><button class="btn" data-act="newOrder">+ Order</button><button class="btn amber" data-act="invOrder">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',14)} Upload invoice</button></div></div>`;
   let body='';
   if(I.tab==='orders')body=impOrders(orders,fwSel);
   else if(I.tab==='products')body=impProducts(ships,fwSel);
   else body=impShips(ships,fwSel);
-  return loadingOr(head+pipe+coming+tabs+body+vatNote);
+  return loadingOr(head+`<div class="imp-top">${pipe}${coming}</div>`+tabs+body+vatNote);
 }
 function impShips(ships,fwSel){
   const I=impState();const q=(I.q||'').toLowerCase();const st0=I.st||(ships.some(s=>shipSt(s)!=='arrived')?'active':'all');
@@ -2541,6 +2817,7 @@ function impShips(ships,fwSel){
   return bar+`<div class="shipgrid">${fl.map(shipCard).join('')}</div>`;
 }
 function stepsBar(st){const i=stIdx(st);return `<div class="trackbar" aria-label="${stLabel(st)}">${SHIP_ST.map((x,j)=>`<i class="${j<i||st==='arrived'?'done':j===i?'on':''}"></i>`).join('')}</div>`}
+function routeBar(s,st){const i=Math.max(0,stIdx(st));const pos=[18,48,72,96][i]??18;return `<div class="route" title="Stage on the route, not a live position"><span>${esc(s.origin||'Origin')}</span><div class="rline"><i style="left:${pos}%"></i></div><span>Tbilisi</span></div>`}
 function shipCard(s){
   const C=shipCalc(s);const st=C.st;const R=C.usdRate;
   const meta=[modeLabel(s.mode),s.origin,C.units?fmt(C.units)+' pcs':'',C.kg?fmt(C.kg,C.kg<10?1:0)+' kg':''].filter(Boolean).join(' · ');
@@ -2548,9 +2825,10 @@ function shipCard(s){
     ||(+s.usd>0?`<div class="sco"><span>${esc(s.item||'Goods')}</span><b class="num">$${fmt(s.usd)}</b></div>`:'<div class="small muted">No orders yet</div>');
   return `<div class="shipcard click" data-shipview="${s.id}" role="button" tabindex="0">
    <div class="top"><div style="min-width:0"><h3><span class="tk">${svg(TRUCK,17)}</span>${esc(s.forwarder||'Forwarder not set')}${s.personal?' <span class="chip below">not Astroman</span>':''}</h3><div class="small muted">${esc(meta)||'Empty'}</div></div>${stChip(st)}</div>
+   ${routeBar(s,st)}
    ${stepsBar(st)}
    <div class="scorders"><div class="lbl">${C.orders.length?C.orders.length+' order'+(C.orders.length>1?'s':'')+' inside':'Inside'}</div>${ords}</div>
-   <div class="nums3"><div><span>Goods</span><b>${D$(C.goods,R)}</b><em>(${fmt(C.goods)} ₾)</em></div><div><span>Landed</span><b>${D$(C.landed,R)}</b><em>(${fmt(C.landed)} ₾)</em></div><div><span>On top</span><b>${C.addPct==null?'—':'+'+Math.round(C.addPct*100)+'%'}</b><em>${C.goods?D$(C.extra,R):''}</em></div></div>
+   <div class="nums3"><div><span>Goods</span><b>${D$(C.goods,R)}</b><em>(${fmt(C.goods)} ₾)</em></div><div><span>Landed</span><b>${D$(C.landed,R)}</b><em>(${fmt(C.landed)} ₾)</em></div><div><span>On top</span><b class="${C.addPct!=null&&C.addPct>=.3?'bad':''}">${C.addPct==null?'—':'+'+Math.round(C.addPct*100)+'%'}</b><em>${C.goods?D$(C.extra,R):''}</em></div></div>
    <div class="row small muted" style="gap:6px">${esc(shipWhen(s,C))}${C.miss.map(m=>`<span class="chip warn">${esc(m)}</span>`).join('')}</div></div>`;
 }
 function shipRow(s){const C=shipCalc(s),R=C.usdRate;
@@ -2870,7 +3148,7 @@ function vShipView(s){
     <div class="ln total"><span class="k">Landed cost</span><span class="v">${UG(C.landed,R)}</span></div></div>
    <div class="row mt"><button class="btn sm" data-act="shipEdit">Edit costs</button><span class="spacer"></span><span class="small muted">${C.goods?'Costs add '+Math.round(C.addPct*100)+'% on top of the goods':''}</span></div></div>`;
   const pays=`<div class="panel"><div class="row"><div><h2 style="margin:0">Payments</h2><p class="sub" style="margin:2px 0 0">Freight, customs and transport receipts. Each one is also an expense.</p></div></div>
-   <div class="flow mt">${C.pays.map(t=>`<div class="ln"><span class="k"><b>${esc(t.role?costLabel(t.role):catLabel(t.cat))}</b> <span class="small muted">${esc(t.date)} · ${esc((ACC[t.account]||ACC.unknown).en)}${t.receipt?' · '+esc(t.receipt):''}</span></span><span class="v num">${t.cur&&t.cur!=='GEL'&&t.orig?money(t.orig,t.cur)+' · ':''}${gel(t.gel,2)} <button class="btn sm ghost" data-unlink="${t.id}" title="Keeps the expense, removes the link">Unlink</button></span></div>`).join('')||'<div class="muted small">No payments attached yet.</div>'}</div>
+   <div class="flow mt">${C.pays.map(t=>`<div class="ln"><span class="k"><b>${esc(t.role?costLabel(t.role):catLabel(t.cat))}</b> <span class="small muted">${showD(t.date)} · ${esc((ACC[t.account]||ACC.unknown).en)}${t.receipt?' · '+esc(t.receipt):''}</span></span><span class="v num">${t.cur&&t.cur!=='GEL'&&t.orig?money(t.orig,t.cur)+' · ':''}${gel(t.gel,2)} <button class="btn sm ghost" data-unlink="${t.id}" title="Keeps the expense, removes the link">Unlink</button></span></div>`).join('')||'<div class="muted small">No payments attached yet.</div>'}</div>
    <div class="row mt"><button class="btn sm amber" data-act="payShip">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',14)} Add receipt</button><button class="btn sm" data-act="linkShip">Link a bank payment</button></div></div>`;
   const basisSeg=`<div class="seg" role="group" aria-label="Split freight by">${BASES.map(([k,t])=>`<button data-act="shipBasis" data-v="${k}" aria-pressed="${(s.basis||'auto')===k}">${t}</button>`).join('')}</div>`;
   const prods=`<div class="panel" style="padding-bottom:6px"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">Cost per product</h2><p class="sub" style="margin:2px 0 0">Freight and transport split by <b>${C.basis==='weight'?'weight':C.basis==='qty'?'pieces':'value'}</b>${C.weightGap?' (some products have no weight, so by value)':''}; customs${C.vIn?' and VAT':''} by customs value. Tap a product to link it to the store and set its selling price.</p></div><span class="spacer"></span>${basisSeg}</div>
@@ -2935,7 +3213,7 @@ function orderModal(id,pre){
     <p class="hint">Use it when the declaration shows exactly what this order's goods were charged. The rest of the shipment's customs is then split among the other orders.</p></details>
    <div class="flow mt" id="oTot"></div>
    <div class="panel mt" style="padding:14px"><div class="row"><b>Payments</b><span class="spacer"></span><button class="btn sm amber" id="oPay">${svg('M12 16V4M7 9l5-5 5 5M4 20h16',14)} Add receipt</button><button class="btn sm" id="oLink">Link a bank payment</button></div>
-    <div class="flow" style="margin-top:6px">${pays.map(t=>`<div class="ln"><span class="k">${esc(t.date)} <span class="small muted">· ${esc((ACC[t.account]||ACC.unknown).en)}${t.receipt?' · '+esc(t.receipt):''}</span></span><span class="v num">${t.cur&&t.cur!=='GEL'&&t.orig?money(t.orig,t.cur)+' · ':''}${gel(t.gel,2)} <button class="btn sm ghost" data-unlink="${t.id}">Unlink</button></span></div>`).join('')||'<div class="muted small" style="padding:6px 0">No payment yet. Add the receipt and it is also saved as an expense.</div>'}</div></div>
+    <div class="flow" style="margin-top:6px">${pays.map(t=>`<div class="ln"><span class="k">${showD(t.date)} <span class="small muted">· ${esc((ACC[t.account]||ACC.unknown).en)}${t.receipt?' · '+esc(t.receipt):''}</span></span><span class="v num">${t.cur&&t.cur!=='GEL'&&t.orig?money(t.orig,t.cur)+' · ':''}${gel(t.gel,2)} <button class="btn sm ghost" data-unlink="${t.id}">Unlink</button></span></div>`).join('')||'<div class="muted small" style="padding:6px 0">No payment yet. Add the receipt and it is also saved as an expense.</div>'}</div></div>
    <label class="row small" style="margin-top:12px"><input type="checkbox" id="oPaid" ${o.paid?'checked':''}> Paid in full (even without a payment linked here)</label>
    <label class="row small" style="margin-top:6px"><input type="checkbox" id="oPers" ${o.personal?'checked':''}> Not for Astroman (personal or other business)</label>
    <label class="field mt"><span>Note</span><input class="input" id="oNote" value="${esc(o.note||'')}"></label>
@@ -3192,7 +3470,7 @@ function linkModal(T){
     .sort((a,b)=>o&&goal?Math.abs(a.gel-goal)-Math.abs(b.gel-goal):Math.abs(Date.parse(a.date)-ref)-Math.abs(Date.parse(b.date)-ref)).slice(0,30);
   modal(`<h3>Link a bank payment</h3><p class="muted small">Payments already in Expenses${o?' (Imported goods)':' (freight, VAT, taxes)'} from around ${shortD(new Date(ref).toISOString().slice(0,10))}. Linking does not add a new expense.</p>
    ${s?`<div class="formgrid mt"><label class="field"><span>It pays</span><select class="input" id="lRole">${COSTS.map(([k,t])=>`<option value="${k}">${t}</option>`).join('')}</select></label><label class="field"><span>The shipment's cost</span><select class="input" id="lSet"></select></label></div>`:''}
-   <div class="flow mt">${list.map(t=>{const need=o&&cur!=='GEL'&&t.cur!==cur;return `<div class="ln"><span class="k"><b>${esc(t.vendor||catLabel(t.cat))}</b> <span class="small muted">${esc(t.date)} · ${esc(catLabel(t.cat))} · ${esc((ACC[t.account]||ACC.unknown).en)}</span><div class="small muted">${esc((t.note||'').slice(0,90))}</div>
+   <div class="flow mt">${list.map(t=>{const need=o&&cur!=='GEL'&&t.cur!==cur;return `<div class="ln"><span class="k"><b>${esc(t.vendor||catLabel(t.cat))}</b> <span class="small muted">${showD(t.date)} · ${esc(catLabel(t.cat))} · ${esc((ACC[t.account]||ACC.unknown).en)}</span><div class="small muted">${esc((t.note||'').slice(0,90))}</div>
      ${need?`<label class="row small" style="margin-top:6px">It paid <input class="input num" data-lamt="${t.id}" inputmode="decimal" style="width:110px" value="${left?r2(left):r2(t.gel/(oc.rate||lastRate(cur)||fx()))}"> ${cur}</label>`:''}</span>
      <span class="v num">${t.cur&&t.cur!=='GEL'&&t.orig?money(t.orig,t.cur)+' · ':''}${gel(t.gel,2)} <button class="btn sm" data-link="${t.id}">Link</button></span></div>`}).join('')||'<div class="muted small">No unlinked payments around that date. Import the bank statement first, or add the receipt instead.</div>'}</div>
    <div class="foot"><button class="btn ghost" id="lBack">Back</button><span></span></div>`);
@@ -3252,28 +3530,29 @@ function vSettings(){
   const fixed=fixedList();const rules=[...S.rules.values()].sort((a,b)=>a.match.localeCompare(b.match));const ft=fixed.reduce((a,f)=>a+(+f.gel||0),0);
   const theme=lsGet('af.theme2')||'dark';
   return `<div class="pagehead"><div><div class="eyebrow">Setup</div><h1>Settings</h1><p>The defaults the rest of the app uses.</p></div><div class="actions"><div class="seg" role="group" aria-label="Appearance"><button data-theme-set="dark" aria-pressed="${theme!=='light'}">Dark</button><button data-theme-set="light" aria-pressed="${theme==='light'}">Light</button></div></div></div>
-  <div class="grid g2"><div class="panel" style="grid-column:1/-1"><div class="row"><div><h2>Fixed monthly costs</h2><p class="sub" style="margin:0">Added to every month automatically, from the start month on. A real entry for the same cost (from the bank or added by hand) replaces the automatic one for that month. Total ${gel(ft)} a month.</p></div></div>
+  <div class="setwrap"><nav class="settoc" aria-label="On this page"><button type="button" data-jump="set-fixed">Fixed monthly costs</button><button type="button" data-jump="set-bal">Balances</button><button type="button" data-jump="set-pay">Where payments land</button><button type="button" data-jump="set-gen">General</button><button type="button" data-jump="set-site">Website stock</button><button type="button" data-jump="set-backup">Backup &amp; devices</button><button type="button" data-jump="set-rules">Bank sorting rules</button><button type="button" data-jump="set-danger">Danger zone</button></nav><div class="stack" id="setMain"><div class="panel" id="set-fixed"><div class="row"><div><h2>Fixed monthly costs</h2><p class="sub" style="margin:0">Added to every month automatically, from the start month on. A real entry for the same cost (from the bank or added by hand) replaces the automatic one for that month. Total ${gel(ft)} a month.</p></div></div>
    <div class="tablewrap mt"><table><thead><tr><th>Name</th><th>Category</th><th>Matches payments containing</th><th>From month</th><th class="r">Amount ₾</th><th></th></tr></thead><tbody>
    ${fixed.map((f,i)=>`<tr><td><input class="input" data-fx="${i}" data-k="label" value="${esc(f.label)}"></td><td><select class="input" data-fx="${i}" data-k="cat">${catOptions(f.cat)}</select></td><td><input class="input" data-fx="${i}" data-k="match" value="${esc(f.match||'')}" placeholder="any ${esc(catLabel(f.cat).toLowerCase())}"></td><td><input class="input" type="month" data-fx="${i}" data-k="from" value="${esc(f.from||'')}"></td><td><input class="input num" data-fx="${i}" data-k="gel" inputmode="decimal" value="${esc(f.gel)}" style="text-align:right;max-width:110px;margin-left:auto"></td><td class="r"><button class="btn sm ghost" data-rmfx="${i}" aria-label="Remove">✕</button></td></tr>`).join('')}
    </tbody></table></div>
-   <div class="row mt"><button class="btn" data-act="addFixed" ${S.canWrite?'':'disabled'}>+ Add fixed cost</button><span class="spacer"></span><button class="btn primary" data-act="saveFixed" ${S.canWrite?'':'disabled'}>Save fixed costs</button></div></div>
-  <div class="panel stack"><h2>Balances</h2><p class="sub" style="margin:0">Type what is really in an account right now to correct it. From then on it moves by itself with every sale and expense. Importing a bank statement also sets BOG or TBC.</p>
-   <div class="tablewrap"><table><thead><tr><th>Account</th><th class="r">Now, ₾</th><th>Counted from</th></tr></thead><tbody>${BAL_ACC.map(([k,t])=>{const o=liveBalances()[k];return `<tr><td>${t}</td><td class="r"><input class="input num" data-bal="${k}" inputmode="decimal" value="${o?Math.round(o.now*100)/100:''}" placeholder="—" style="text-align:right;max-width:130px;margin-left:auto"></td><td class="small muted">${o?esc(o.asOf):'not set'}</td></tr>`}).join('')}</tbody></table></div>
+   <div class="row mt"><button class="btn" data-act="addFixed" ${S.canWrite?'':'disabled'}>+ Add fixed cost</button><span class="spacer"></span><button class="btn" data-act="saveFixed" ${S.canWrite?'':'disabled'}>Save fixed costs</button></div></div>
+  <div class="panel stack" id="set-bal"><h2>Balances</h2><p class="sub" style="margin:0">Type what is really in an account right now to correct it. From then on it moves by itself with every sale and expense. Importing a bank statement also sets BOG or TBC.</p>
+   <div class="tablewrap"><table><thead><tr><th>Account</th><th class="r">Now, ₾</th><th>Counted from</th></tr></thead><tbody>${BAL_ACC.map(([k,t])=>{const o=liveBalances()[k];return `<tr><td>${t}</td><td class="r"><input class="input num" data-bal="${k}" inputmode="decimal" value="${o?Math.round(o.now*100)/100:''}" placeholder="—" style="text-align:right;max-width:130px;margin-left:auto"></td><td class="small muted">${o&&o.asOf?esc(dLabel(o.asOf)):'not set'}</td></tr>`}).join('')}</tbody></table></div>
    <p class="hint" style="margin:0">The bank loan is tracked on its own <a href="#loan" data-go="loan">Loan page</a>, apart from these books.</p>
-   <div><button class="btn primary" data-act="saveBal" ${S.canWrite?'':'disabled'}>Save balances</button></div></div>
-  <div class="panel stack"><h2>Where each payment lands</h2><p class="sub" style="margin:0">Sales from the order sheet are added to this account's balance.</p>
+   <div><button class="btn" data-act="saveBal" ${S.canWrite?'':'disabled'}>Save balances</button></div></div>
+  <div class="panel stack" id="set-pay"><h2>Where payments land</h2><p class="sub" style="margin:0">Sales from the order sheet are added to this account's balance.</p>
    <div class="flow">${Object.keys(DEFAULT_PAYACC).filter(p=>p!=='unknown').map(p=>`<div class="ln"><span class="k">${esc(PAYS[p]||p)}</span><span class="v"><select class="input" data-payacc="${p}">${[['','Not counted']].concat(BAL_ACC.map(x=>[x[0],x[1]])).map(([v,t])=>`<option value="${v}" ${payAcct(p)===v?'selected':''}>${t}</option>`).join('')}</select></span></div>`).join('')}</div></div>
-  <div class="panel stack"><h2>General</h2>
+  <div class="panel stack" id="set-gen"><h2>General</h2>
    <label class="field"><span>Default exchange rate (₾ per $)</span><input class="input num" id="cFx" inputmode="decimal" value="${esc(S.cfg.fx||'2.70')}"></label>
    <label class="field"><span>How to calculate profit</span><select class="input" id="cMethod"><option value="auto" ${(S.cfg.method||'auto')==='auto'?'selected':''}>Cost of items sold: product reports, else the nearest report's cost ratio (recommended)</option><option value="cash" ${S.cfg.method==='cash'?'selected':''}>Always count stock when it's paid for</option></select></label>
-   <label class="field"><span>Order sheet ID (Google Sheets)</span><input class="input num small" id="cSheet" value="${esc(sheetId())}"></label>
-   <div><button class="btn primary" data-act="saveGeneral" ${S.canWrite?'':'disabled'}>Save</button></div></div>
+   <label class="field"><span>Order sheet ID</span><span class="secret"><input class="input num small" id="cSheet" type="password" autocomplete="off" value="${esc(sheetId())}"><button type="button" class="btn sm ghost" data-act="reveal" data-for="cSheet">Reveal</button></span></label>
+   <div><button class="btn" data-act="saveGeneral" ${S.canWrite?'':'disabled'}>Save</button></div></div>
   ${S.hosted?sitePanel():''}
-  <div class="panel stack"><h2>Backup &amp; devices</h2><p class="sub" style="margin:0">${S.hosted?'Your data is stored in your Google account (Apps Script). Every change waits on this device until Google confirms it, every change is also written to a permanent log, and a full copy of the data goes to the “Astroman Finance backups” folder in your Drive every night (kept 90 days).':'Your data is stored in your Claude account.'} A backup file moves everything between the Claude version and the hosted version.</p>
+  <div class="panel stack" id="set-backup"><h2>Backup &amp; devices</h2><p class="sub" style="margin:0">${S.hosted?'Your data is stored in your Google account (Apps Script). Every change waits on this device until Google confirms it, every change is also written to a permanent log, and a full copy of the data goes to the “Astroman Finance backups” folder in your Drive every night (kept 90 days).':'Your data is stored in your Claude account.'} A backup file moves everything between the Claude version and the hosted version.</p>
    <div class="row"><button class="btn" data-act="exportBackup">Download backup</button>${S.canWrite?'<button class="btn" data-act="pickBackup">Import backup</button><input type="file" id="backupFile" accept=".json,application/json" hidden>':''}<span class="muted small" id="impMsg" aria-live="polite"></span></div>
-   ${S.hosted&&readCreds()?`<label class="field"><span>Phone link: open it once on your phone to connect it (it contains your key, keep it private)</span><input class="input small" id="phLink" readonly value="${esc(phoneLink())}"></label><div class="qrbox"><div id="phQr" class="qr" aria-label="QR code of the phone link"></div><div class="small"><b>Connect a phone</b><div class="muted">Point the phone's camera at the code and open the link. On an iPhone open it in Safari, then Share → Add to Home Screen: that icon stays connected. It holds your key, so don't share a photo of it.</div></div></div><div class="row"><button class="btn" data-act="copyPhone">Copy phone link</button><button class="btn ghost" data-act="disconnect">Disconnect this device</button></div>`:''}</div>
-  <div class="panel"><h2>Your bank sorting rules</h2><p class="sub">Created when you correct a category during bank import.</p>
-   ${rules.length?`<div class="flow">${rules.map(r=>`<div class="ln"><span class="k">“${esc(r.match)}” → ${catChip(r.cat)}</span><span class="v"><button class="btn sm ghost" data-rmrule="${r.id}">Remove</button></span></div>`).join('')}</div>`:'<div class="muted">No custom rules yet. Built-in rules cover Wolt, Glovo, Facebook, Optimo, forwarders, Bresser, utilities, the accountant and bank fees.</div>'}</div></div>`;
+   ${S.hosted&&readCreds()?`<label class="field"><span>Phone link</span><span class="hint">Open it once on a phone to connect that device. It contains the key, so it stays hidden until you reveal it.</span><span class="secret"><input class="input small" id="phLink" type="password" readonly value="${esc(phoneLink())}"><button type="button" class="btn sm ghost" data-act="reveal" data-for="phLink">Reveal</button></span></label><div class="row"><button class="btn sm ghost" data-act="showQr">Show QR</button><button class="btn sm" data-act="copyPhone">Copy phone link</button></div><div id="phQrSlot" hidden></div><p class="hint">The QR holds the key. On an iPhone open the link in Safari, then Share → Add to Home Screen.</p>`:''}</div>
+  <div class="panel" id="set-rules"><h2>Bank sorting rules</h2><p class="sub">Created when you correct a category during bank import.</p>
+   ${rules.length?`<div class="flow rules">${rules.map(r=>`<div class="ln"><span class="k">“${esc(r.match)}” → ${catChip(r.cat)}</span><span class="v"><button class="btn sm ghost" data-rmrule="${r.id}">Remove</button></span></div>`).join('')}</div>`:'<div class="muted">No custom rules yet. Built-in rules cover Wolt, Glovo, Facebook, Optimo, forwarders, Bresser, utilities, the accountant and bank fees.</div>'}</div>
+  <div class="panel dangerzone" id="set-danger"><h2>Danger zone</h2><p class="sub">Disconnect asks you to confirm. There is no separate “rotate key” action in this app — the key lives in the backend script.</p><div class="row"><button class="btn danger" data-act="disconnect">Disconnect this device…</button></div></div></div></div>`;
 }
 
 /* ============================== loan ============================== */
@@ -3323,7 +3602,7 @@ const loanCash=()=>{const c=S.cfg.loan?.cash;return c&&c.gel!=null?c:null};
 function vLoan(){
   const L=loanInfo();const day=d=>d?new Date(d+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
   const w=S.canWrite?'':'disabled';
-  const head=`<div class="pagehead"><div><div class="eyebrow">სესხი · kept apart from the shop's books</div><h1>${esc(loanLabel())}</h1><p>${L?`${gel(L.received)} received${L.start?' on '+day(L.start):''}. Developers on their own, everything else together, and what is left.`:'What came in, what was paid with it, and what is left.'}</p></div><div class="actions"><button class="btn amber" data-act="loanNew" ${w}>+ Loan entry</button></div></div>`;
+  const head=`<div class="pagehead"><div><div class="eyebrow">Kept apart from the shop's books</div><h1>${esc(loanLabel())}</h1><p>${L?`${gel(L.received)} received${L.start?' on '+day(L.start):''}. Developers on their own, everything else together, and what is left.`:'What came in, what was paid with it, and what is left.'}</p></div><div class="actions"><button class="btn amber" data-act="loanNew" ${w}>+ Loan entry</button></div></div>`;
   if(!L)return loadingOr(head+`<div class="panel empty"><b>No loan recorded yet</b>Start with the money you received.<div class="mt"><button class="btn primary" data-act="loanNew" data-kind="in" ${w}>Add loan received</button></div></div>`);
   const C=loanCash();const P=v=>Math.max(0,v)/Math.max(1,L.received)*100;
   const kpis=`<div class="kpis">
@@ -3566,6 +3845,7 @@ function opPreview(docs,errs){
     closeModal();toast('Optimo data saved');const stock=docs.find(d=>d.kind==='stock');if(stock){try{await storeSyncOptimo(stock)}catch(e){toast(errMsg(e))}}S.op.tab='overview';S.animate=true;render()};
 }
 async function opExport(){
+  await xlsxReady();
   const M=opModel();const list=M.reorder.concat(M.soon);
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Barcode','Item','Category','In stock','Sells a month','Order','Unit cost','Order cost']].concat(list.map(x=>[x.b,x.n,x.cat,x.q,+x.rate.toFixed(2),x.order,x.cost,+x.orderCost.toFixed(2)]))),'Order');
   const data=XLSX.write(wb,{type:'array',bookType:'xlsx'});
@@ -3594,7 +3874,7 @@ function catLive(x){let q=storeQ(x);const c=String(x.countedAt||'');S.pos.forEac
 function vStore(){
   const T=S.store.tab;
   const tabs=[['live','Live'],['history','History'],['setup','Register setup']];
-  const head=`<div class="pagehead"><div><div class="eyebrow">Store · სალარო</div><h1>Store sales</h1><p>What the consultants ring up on the register, as it happens. Kept apart from the books, like the Optimo pages.</p></div><div class="actions"><a class="btn" href="${esc(storeDir())}" target="_blank" rel="noopener">Open the register ↗</a></div></div>
+  const head=`<div class="pagehead"><div><div class="eyebrow">Register</div><h1>Store sales</h1><p>What the consultants ring up on the register, as it happens. Kept apart from the books, like the Optimo pages.</p></div><div class="actions"><a class="btn" href="${esc(storeDir())}" target="_blank" rel="noopener">Open the register ↗</a></div></div>
   <div class="tabs" role="tablist">${tabs.map(([k,t])=>`<button role="tab" aria-selected="${T===k}" data-act="st_tab" data-v="${k}">${t}</button>`).join('')}</div>`;
   const body=T==='history'?storeHistory():T==='setup'?storeSetup():storeLive();
   return loadingOr(head+body);
@@ -3610,7 +3890,7 @@ function storeLive(){
   const top=[...items.values()].sort((a,b)=>b.a-a.a).slice(0,8);
   const setup=!(S.cfg.pos&&S.cfg.pos.key);
   return `${setup?`<div class="banner">The register is not set up yet: paste the register key and add the consultants under <a href="#store" data-act="st_tab" data-v="setup">Register setup</a>, then open the device link on the shop computer.</div>`:''}
-  <div class="row" style="flex-wrap:wrap;gap:8px;margin-bottom:14px"><div><div class="eyebrow"><span class="dot"></span>${isT?'Today':'Day view'} · ${KA_DAYS[new Date(d+'T12:00').getDay()]}</div><h2 style="margin:0;font-family:var(--f-display);font-size:22px">${dLong(d)}</h2></div><span class="spacer"></span>
+  <div class="row" style="flex-wrap:wrap;gap:8px;margin-bottom:14px"><div><div class="eyebrow"><span class="dot"></span>${isT?'Live':'Day view'} · ${EN_DAYS[new Date(d+'T12:00').getDay()]}</div><h2 style="margin:0;font-family:var(--f-display);font-size:22px">${dLong(d)}</h2></div><span class="spacer"></span>
    <div class="actions"><span class="ago small muted">Checks the register every 30 s while this page is open</span><button class="btn sm" data-act="st_day" data-d="${addDay(d,-1)}">‹</button>${isT?'':`<button class="btn sm" data-act="st_day" data-d="${t}">Today</button>`}<button class="btn sm" data-act="st_day" data-d="${addDay(d,1)}" ${isT?'disabled':''}>›</button><button class="btn sm" data-act="st_refresh">↻ Refresh</button></div></div>
   <div class="kpis"><div class="kpi"><div class="lbl">Register sales${isT?' so far':''}</div><div class="val num">${cu(R.a)}<small>₾</small></div><div class="delta">${R.n} sale${R.n===1?'':'s'}${R.n?' · avg '+gel(R.a/R.n):''}</div></div>
    <div class="kpi"><div class="lbl">Cash taken</div><div class="val num">${cu(by.cash||0)}<small>₾</small></div><div class="delta">${Object.entries(by).filter(([k])=>k!=='cash').map(([k,v])=>(POSPAY[k]||k)+' '+gel(v)).join(' · ')||'no card payments'}</div></div>
@@ -3622,7 +3902,7 @@ function storeLive(){
    <div class="panel mt"><h2>Shifts</h2><p class="sub">Opened with the cash in the drawer; closed with the counted cash.</p>${shifts.length?`<div class="flow">${shifts.map(s=>{const E=shiftExpected(s);const diff=s.closedAt?r2(s.closeCash-E):null;return `<div class="ln"><span class="k"><b>${esc(s.user?s.user.name:'?')}</b> ${s.closedAt?'<span class="chip">closed</span>':'<span class="chip good">open</span>'}<div class="small muted">${dtShort(s.openedAt)} → ${s.closedAt?dtShort(s.closedAt):'…'} · opened with ${gel(s.openCash)}${(s.moves||[]).length?' · '+s.moves.length+' cash move'+(s.moves.length>1?'s':''):''}</div></span><span class="v num">${s.closedAt?`${gel(s.closeCash)}<div class="small ${Math.abs(diff)<0.01?'muted':diff<0?'neg':''}">${Math.abs(diff)<0.01?'matches':(diff>0?'+':'−')+gel(Math.abs(diff))+' vs expected'}</div>`:`${gel(E)}<div class="small muted">expected</div>`}</span></div>`}).join('')}</div>`:'<div class="muted">No shift on this day.</div>'}</div>
    ${top.length?`<div class="panel mt"><h2>Sold today</h2><div class="flow">${top.map(it=>`<div class="ln"><span class="k row" style="gap:8px">${thumb(it,30)}<span><b>${esc(it.n)}</b><div class="small muted">×${fmt(it.q)}</div></span></span><span class="v num">${gel(it.a)}</span></div>`).join('')}</div></div>`:''}</div></div>`;
 }
-function dtShort(iso){if(!iso)return '—';const d=new Date(iso);return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function dtShort(iso){if(!iso)return '—';const d=new Date(iso);if(isNaN(+d))return '—';return d.getDate()+' '+EN_MONTHS[d.getMonth()].slice(0,3)+', '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
 function tOf(iso){const d=new Date(iso);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
 function shiftExpected(s){let cash=0;S.pos.forEach(o=>{if(o.shift===s.id&&o.status!=='void'&&o.pay==='cash')cash+=+o.total||0});const mv=(s.moves||[]).reduce((a,m)=>a+(m.kind==='in'?1:-1)*(+m.gel||0),0);return r2((+s.openCash||0)+cash+mv)}
 function storeOrderRow(o){return `<div class="orow click ${o.status==='void'?'void':''}" data-act="st_order" data-id="${esc(o.id)}" style="cursor:pointer"><span class="ob"><span class="op">${esc(o.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '))}</span><small>${tOf(o.at)} · №${o.no||''} · ${esc(o.user?o.user.name:'?')}${o.status==='void'?' · <b style="color:var(--bad)">voided</b>':''}${o.note?' · '+esc(o.note):''}</small></span><span class="chip">${esc(POSPAY[o.pay]||o.pay)}</span><b class="num">${gel(o.total,o.total%1?2:0)}</b></div>`}
@@ -3883,10 +4163,11 @@ function negPanel(all){
 /* ---------- website stock ---------- */
 function sitePanel(){
   const last=S.site.get('last');const st=S.cfg.site||{};
-  return `<div class="panel stack"><h2>Website stock (astroman.ge)</h2><p class="sub" style="margin:0">Twice a day the backend marks every product in the register catalog as <b>in stock</b> or <b>out of stock</b> on astroman.ge, from the store and warehouse counts together. Needs a WordPress application password (wp-admin → Users → Profile → Application Passwords); it is kept in the backend script, never on this page.</p>
-   <div class="grid g2"><label class="field"><span>WordPress user</span><input class="input" id="siUser" autocomplete="off" placeholder="LTDastroman"></label><label class="field"><span>Application password</span><input class="input" id="siPass" type="password" autocomplete="off" placeholder="xxxx xxxx xxxx xxxx"></label></div>
+  return `<div class="panel stack" id="set-site"><h2>Website stock</h2><p class="sub" style="margin:0">Twice a day the backend marks every product in the register catalog as <b>in stock</b> or <b>out of stock</b> on astroman.ge, from the store and warehouse counts together. Needs a WordPress application password (wp-admin → Users → Profile → Application Passwords); it is kept in the backend script, never on this page.</p>
+   <div class="grid g2"><label class="field"><span>WordPress user</span><span class="secret"><input class="input" id="siUser" type="password" autocomplete="off" placeholder="WordPress user"><button type="button" class="btn sm ghost" data-act="reveal" data-for="siUser">Reveal</button></span></label><label class="field"><span>Application password</span><input class="input" id="siPass" type="password" autocomplete="off" placeholder="Stored in the backend only"></label></div>
+   <p class="hint" style="margin:0">The password is kept in the backend script, never on this page. Leave it blank to keep the one already stored.</p>
    <label class="row"><input type="checkbox" id="siOn" ${st.enabled?'checked':''}> Sync automatically twice a day</label>
-   <div class="row" style="flex-wrap:wrap"><button class="btn primary" data-act="si_save">Save</button><button class="btn" data-act="si_test">Test connection</button><button class="btn" data-act="si_sync">Sync now</button><span class="muted small" id="siMsg" aria-live="polite"></span></div>
+   <div class="row" style="flex-wrap:wrap"><button class="btn" data-act="si_save">Save</button><button class="btn ghost" data-act="si_test">Test connection</button><button class="btn ghost" data-act="si_sync">Sync now</button><span class="muted small" id="siMsg" aria-live="polite"></span></div>
    <div class="small muted">${last?`Last sync ${dtShort(last.at)}${last.manual?' (manual)':''}: ${last.error?'<span style="color:var(--bad)">'+esc(last.error)+'</span>':fmt(last.updated)+' products updated, '+fmt(last.outofstock||0)+' marked out of stock'}`:'Not synced yet.'}</div></div>`;
 }
 async function siteAct(a,b){
@@ -3929,9 +4210,9 @@ function rcBody(c,lim){const T=rcStats(c);const live=!c.finishedAt;const K=8;
 }
 function rcPanel(){
   const c=regCounts()[0];
-  if(!c)return `<div class="panel rcp rcnone"><div class="eyebrow">Store check · აღწერა</div><span class="muted small">No check yet. On the register: ☰ → აღწერა, choose products and count them; right and wrong show up here.</span></div>`;
+  if(!c)return `<div class="panel rcp rcnone"><div class="eyebrow">Store check</div><span class="muted small">No check yet. On the register, open the menu and choose Store check (აღწერა). Right and wrong counts show up here.</span></div>`;
   const live=!c.finishedAt;
-  return `<section class="panel rcp"><div class="rchd"><div><div class="eyebrow ${live?'live':''}">${live?'<span class="dot"></span>Store check in progress':'Store check · აღწერა'}</div><h2>${esc(dLong(c.day||String(c.startedAt).slice(0,10)))} · ${esc(c.user?c.user.name:'')}</h2><p class="sub">${live?'Being counted on the register now — this updates every 30 seconds. ':'Finished '+esc(dtShort(c.finishedAt))+'. '}Correct = the count matched what the register expected at that moment.</p></div><span class="spacer"></span><div class="actions"><button class="btn sm" data-act="rc_open" data-id="${esc(c.id)}">Full list</button><button class="btn sm" data-act="rc_all">All checks${regCounts().length>1?' · '+regCounts().length:''} →</button></div></div>${rcBody(c,true)}</section>`;
+  return `<section class="panel rcp"><div class="rchd"><div><div class="eyebrow ${live?'live':''}">${live?'<span class="dot"></span>Store check in progress':'Store check'}</div><h2>${esc(dLong(c.day||String(c.startedAt).slice(0,10)))} · ${esc(c.user?c.user.name:'')}</h2><p class="sub">${live?'Being counted on the register now — this updates every 30 seconds. ':'Finished '+esc(dtShort(c.finishedAt))+'. '}Correct = the count matched what the register expected at that moment.</p></div><span class="spacer"></span><div class="actions"><button class="btn sm" data-act="rc_open" data-id="${esc(c.id)}">Full list</button><button class="btn sm" data-act="rc_all">All checks${regCounts().length>1?' · '+regCounts().length:''} →</button></div></div>${rcBody(c,true)}</section>`;
 }
 function rcModal(id){const c=S.shift.get(id);if(!c)return;
   modal(`<h3>Store check · ${esc(dShort(c.day||String(c.startedAt).slice(0,10)))} · ${esc(c.user?c.user.name:'')}</h3><p class="sub">${esc(dtShort(c.startedAt))}${c.finishedAt?' → '+esc(dtShort(c.finishedAt))+(c.finishedBy?' · finished by '+esc(c.finishedBy):''):' · still counting'}. “System” is what the register expected when the product was counted: the store count minus register sales.</p>${rcBody(c,false)}
@@ -4329,6 +4610,8 @@ function bindView(){
   document.querySelectorAll('th[data-psort]').forEach(th=>th.onclick=()=>{const k=th.dataset.psort;if(S.prod.ssort===k)S.prod.sdir*=-1;else{S.prod.ssort=k;S.prod.sdir=k==='n'?1:-1}render()});
   on('#xCat','change',e=>{S.filters.cat=e.target.value;render()});on('#xAcct','change',e=>{S.filters.acct=e.target.value;render()});on('#xAll','change',e=>{S.filters.all=e.target.checked;render()});
   document.querySelectorAll('[data-theme-set]').forEach(b=>b.onclick=()=>{lsSet('af.theme2',b.dataset.themeSet);applyTheme(b.dataset.themeSet);render()});
+  document.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>{const el=document.getElementById(b.dataset.jump);if(el)el.scrollIntoView({behavior:reduced()?'auto':'smooth',block:'start'})});
+  document.querySelectorAll('#main input,#main select').forEach(el=>{if(!el.dataset.fx&&el.id!=='cFx'&&el.id!=='cSheet'&&el.id!=='cMethod')return;el.addEventListener('input',()=>{el.classList.toggle('dirty',el.value!==el.defaultValue)});el.addEventListener('change',()=>{el.classList.toggle('dirty',el.value!==el.defaultValue)})});
   document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Tap again';setTimeout(()=>{delete b.dataset.sure;b.textContent='Delete'},4000);return}try{await delDoc('tx/'+b.dataset.del);toast('Deleted')}catch(e){toast(errMsg(e))}});
   document.querySelectorAll('[data-edit]').forEach(r=>r.onclick=()=>{
     const id=r.dataset.edit;let t=S.tx.get(id);
@@ -4438,7 +4721,9 @@ async function act(a,b){
   if(a==='exportBackup')return exportBackup();
   if(a==='pickBackup')return $('#backupFile').click();
   if(a==='copyPhone'){const v=$('#phLink').value;try{await navigator.clipboard.writeText(v);toast('Phone link copied')}catch(e){$('#phLink').select();toast('Select and copy the link')}return}
-  if(a==='disconnect'){if(S.backend&&S.backend.pending()){toast('Some changes are still saving. Wait until it says “Saved to Google”.');return}lsSet('af.backend','');lsSet(CACHE,'');location.reload();return}
+  if(a==='reveal'){const el=document.getElementById(b.dataset.for);if(!el)return;const show=el.type==='password';el.type=show?'text':'password';b.textContent=show?'Hide':'Reveal';return}
+  if(a==='showQr'){const slot=$('#phQrSlot');if(!slot)return;if(!slot.hidden){slot.hidden=true;slot.innerHTML='';b.textContent='Show QR';return}slot.hidden=false;slot.innerHTML='<div class="qrbox"><div id="phQr" class="qr" aria-label="QR code of the phone link"></div></div>';b.textContent='Hide QR';drawPhoneQr();return}
+  if(a==='disconnect'){if(!b.dataset.sure){b.dataset.sure='1';b.textContent='Tap again to disconnect';return}if(S.backend&&S.backend.pending()){toast('Some changes are still saving. Wait until it says “Saved to Google”.');return}lsSet('af.backend','');lsSet(CACHE,'');location.reload();return}
   if(a==='connect'){return}
   if(a==='addFixed'){const f=readFixedForm();f.push({id:uid('f'),label:'New fixed cost',cat:'misc',gel:0,account:'bog',match:'',from:thisMonth()});S.cfg={...S.cfg,fixed:f};return render()}
   if(a==='saveFixed'){const f=readFixedForm().filter(x=>x.label);await saveCfg({fixed:f});return toast('Fixed costs saved · '+gel(f.reduce((s,x)=>s+(+x.gel||0),0))+' a month')}
