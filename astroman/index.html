@@ -1672,10 +1672,10 @@ function vStock(){
   const mgOf=(x,m)=>m&&m.unit!=null&&x.price?m.unit/(x.vat==='ჩვეულებრივი'?x.price/1.18:x.price):null;
   const all=[...S.catalog.values()].filter(x=>x&&x.b&&!catGone(x.b)).map(x=>{const m=items.get(String(x.b));return {...x,lq:catLive(x),inc:byInc.get(String(x.b))||0,sq:m?m.sq:0,profit:m?m.profit:0,mg:mgOf(x,m),sv:(Math.max(catLive(x)+whQ(x),0)+(byInc.get(String(x.b))||0))*(+x.cost||0)}});
   const vis=all.filter(x=>!x.hidden);
-  const totStore=vis.reduce((a,x)=>a+Math.max(0,x.lq),0),totWh=vis.reduce((a,x)=>a+whQ(x),0);
-  const valStore=vis.reduce((a,x)=>a+Math.max(0,x.lq)*(+x.cost||0),0),valWh=vis.reduce((a,x)=>a+whQ(x)*(+x.cost||0),0);
+  const totStore=vis.reduce((a,x)=>a+Math.max(0,x.lq),0),totWh=vis.reduce((a,x)=>a+whPos(x),0);
+  const valStore=vis.reduce((a,x)=>a+Math.max(0,x.lq)*(+x.cost||0),0),valWh=vis.reduce((a,x)=>a+whPos(x)*(+x.cost||0),0);
   const shelf=vis.reduce((a,x)=>a+Math.max(0,x.lq+whQ(x))*(x.sale>0&&x.sale<x.price?+x.sale:+x.price||0),0);
-  const noCost=vis.filter(x=>(Math.max(0,x.lq)+whQ(x))>0&&!(+x.cost)).length;
+  const noCost=vis.filter(x=>(Math.max(0,x.lq)+whPos(x))>0&&!(+x.cost)).length;
   const incSell=sellTotals(incoming().map(r=>({...lineSell({sku:r.sku,unit:r.qty?r.land/r.qty:0}),q:+r.qty||0,land:+r.land||0}))).v;
   const kpis=`<div class="kpis stock4">
    <div class="kpi"><div class="lbl">In the store</div><div class="val num">${cu(valStore)}<small>₾</small></div><div class="delta"><b class="num">${fmt(totStore)}</b> pieces · ${vis.filter(x=>x.lq>0).length} products · at cost</div></div>
@@ -3589,8 +3589,19 @@ function regDay(d){const L=posOrders(d).filter(o=>o.status!=='void');return {n:L
 function storeDir(){return location.origin+location.pathname.replace(/[^/]*$/,'')+'store/'}
 function storeLink(){const c=readCreds();const k=S.cfg.pos&&S.cfg.pos.key;if(!c||!k)return '';const b=btoa(unescape(encodeURIComponent(JSON.stringify({u:c.u,k})))).replace(/\+/g,'-').replace(/\//g,'_');return storeDir()+'#connect='+b}
 const storeQ=x=>x.qs!=null?+x.qs||0:(+x.q||0);
-const whQ=x=>+x.qw||0;
-function catLive(x){let q=storeQ(x);const c=String(x.countedAt||'');S.pos.forEach(o=>{if(o.status==='void'||!o.lines)return;if(c&&(c.length>10?String(o.at||'')<c:(o.day||'')<c))return;o.lines.forEach(l=>{if(l.b===x.b)q-=+l.q||0})});return q}
+// Receipts (მიღება) are made on the register: `shift` records with kind 'receive' {from:'wh'|'other', at, user, lines[{b,n,q}],
+// status 'ok'|'void'}. Each line adds pieces to the store; from the warehouse they also leave the warehouse. Like register
+// sales, a receipt counts only after the number it changes was last set: the store count after countedAt, the warehouse
+// number after qwT (typed or added here) / qwAt (counted). So every write of qw from a live number must also set qwT.
+const isRecv=s=>!!(s&&s.kind==='receive');
+const dayOfIso=iso=>{const d=new Date(iso);return isNaN(d)?'':d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+function recvQ(x,wh){const b=String(x.b);const c=wh?[String(x.qwT||''),String(x.qwAt||'')].sort().pop():String(x.countedAt||'');let n=0;
+  S.shift.forEach(r=>{if(!isRecv(r)||r.status==='void'||!Array.isArray(r.lines)||(wh&&r.from!=='wh'))return;const at=String(r.at||'');if(c&&(c.length>10?at<c:dayOfIso(at)<c))return;r.lines.forEach(l=>{if(String(l.b)===b)n+=Math.max(0,+l.q||0)})});return n}
+// the warehouse now: the warehouse number minus what the store received from the warehouse since it was set
+const whQ=x=>(+x.qw||0)-recvQ(x,true);
+// in totals a warehouse below zero (more received than it showed) counts as empty, like the store
+const whPos=x=>Math.max(0,whQ(x));
+function catLive(x){let q=storeQ(x);const c=String(x.countedAt||'');S.pos.forEach(o=>{if(o.status==='void'||!o.lines)return;if(c&&(c.length>10?String(o.at||'')<c:(o.day||'')<c))return;o.lines.forEach(l=>{if(l.b===x.b)q-=+l.q||0})});return q+recvQ(x,false)}
 function vStore(){
   const T=S.store.tab;
   const tabs=[['live','Live'],['history','History'],['setup','Register setup']];
@@ -3603,7 +3614,7 @@ function storeLive(){
   const t=today();const d=S.store.day&&S.store.day<=t?S.store.day:t;const isT=d===t;const R=regDay(d);const all=posOrders(d);
   const by={};R.L.forEach(o=>{by[o.pay]=(by[o.pay]||0)+o.total});
   const byU={};R.L.forEach(o=>{const k=o.user?o.user.name:'?';const u=byU[k]||(byU[k]={n:0,a:0});u.n++;u.a+=o.total});
-  const shifts=[...S.shift.values()].filter(s=>s&&!isCount(s)&&(s.day===d||(!s.closedAt&&isT))).sort((a,b)=>String(b.openedAt).localeCompare(String(a.openedAt)));
+  const shifts=[...S.shift.values()].filter(s=>s&&!s.kind&&(s.day===d||(!s.closedAt&&isT))).sort((a,b)=>String(b.openedAt).localeCompare(String(a.openedAt)));
   const drawer=shifts.filter(s=>!s.closedAt).reduce((a,s)=>a+shiftExpected(s),0);
   const voids=all.filter(o=>o.status==='void');
   const items=new Map();R.L.forEach(o=>o.lines.forEach(l=>{const it=items.get(l.b)||{b:l.b,n:l.n,q:0,a:0,img:l.img};it.q+=l.q;it.a+=Math.max(0,l.q*l.p-(+l.d||0));items.set(l.b,it)}));
@@ -3640,7 +3651,7 @@ function storeHistory(){
   const items=new Map();L.forEach(o=>{if(o.status==='void')return;o.lines.forEach(l=>{const it=items.get(l.b)||{b:l.b,n:l.n,q:0,a:0,img:l.img};it.q+=l.q;it.a+=Math.max(0,l.q*l.p-(+l.d||0));items.set(l.b,it)})});
   const top=[...items.values()].sort((a,b)=>b.a-a.a).slice(0,15);const max=Math.max(1,...top.map(x=>x.a));
   const byU={};L.forEach(o=>{if(o.status==='void')return;const k=o.user?o.user.name:'?';const u=byU[k]||(byU[k]={n:0,a:0});u.n++;u.a+=o.total});
-  const sh=[...S.shift.values()].filter(x=>x&&!isCount(x)&&String(x.openedAt||'').slice(0,7)===m).sort((a,b)=>String(b.openedAt).localeCompare(String(a.openedAt)));
+  const sh=[...S.shift.values()].filter(x=>x&&!x.kind&&String(x.openedAt||'').slice(0,7)===m).sort((a,b)=>String(b.openedAt).localeCompare(String(a.openedAt)));
   const hrs=x=>Math.max(0,((x.closedAt?Date.parse(x.closedAt):Date.now())-Date.parse(x.openedAt))/36e5);
   const byC={};sh.forEach(x=>{const k=x.user?x.user.name:'?';const c=byC[k]||(byC[k]={shifts:0,h:0,n:0,a:0,open:0});c.shifts++;c.h+=hrs(x);if(!x.closedAt)c.open++});
   L.forEach(o=>{if(o.status==='void')return;const k=o.user?o.user.name:'?';const c=byC[k]||(byC[k]={shifts:0,h:0,n:0,a:0,open:0});c.n++;c.a+=o.total});
@@ -3761,12 +3772,13 @@ async function storeAct(a,b){
     const patch={n,cat:$('#ceC').value.trim()||'სხვადასხვა',price,sale:sale>0&&sale<price?sale:null,cost:parseNum($('#ceK').value),vat:$('#ceV').value,min:parseNum($('#ceMin').value),img:$('#ceImg').value.trim()||null};
     if(saleV&&!(sale>0&&sale<price)){toast('The sale price must be lower than the price');return}
     if(cur&&patch.cat!==cur.cat)patch.catEdited=true;
-    patch.qw=parseNum($('#ceW').value);patch.storeNote=$('#ceNote').value.trim();
-    if(cur&&WC()&&patch.qw!==whQ(cur)){patch.qwAt=new Date().toISOString();patch.qwPrev=wcDone(cur)?wcPrev(cur):whQ(cur)}
+    const wq=parseNum($('#ceW').value);patch.storeNote=$('#ceNote').value.trim();
+    if(!cur||wq!==whQ(cur)){patch.qw=wq;patch.qwT=new Date().toISOString();if(cur&&WC()){patch.qwAt=patch.qwT;patch.qwPrev=wcDone(cur)?wcPrev(cur):whQ(cur)}}
     if((S.cfg.catalogDeleted||[]).includes(bc))await saveCfg({catalogDeleted:S.cfg.catalogDeleted.filter(c=>c!==bc)});
     if(cur){const live=catLive(cur);const typed=parseNum($('#ceQ').value);if(typed!==live){patch.qs=typed;patch.countedAt=new Date().toISOString()}patch.hidden=$('#ceH').checked;patch.nameEdited=n!==cur.n||!!cur.nameEdited;patch.priceEdited=price!==+cur.price||!!cur.priceEdited;patch.costEdited=patch.cost!==+(cur.cost||0)||!!cur.costEdited;
       if(!patch.img){patch.big=null;patch.wooId=null}else if(patch.img!==cur.img){patch.big=patch.img;patch.wooId=null}
-      if(bc!==orig){const {id,...rest}=cur;await S.db.doc('catalog/'+bc).set({...rest,...patch,b:bc,updatedAt:new Date().toISOString()});await S.db.doc('catalog/'+orig).delete();closeModal();toast('Saved under the new code');return}}
+      if(bc!==orig){const {id,...rest}=cur;const now=new Date().toISOString();const base={qw:whQ(cur),qwT:now};if(cur.qs!=null||recvQ(cur,false)){base.qs=catLive(cur);base.countedAt=now}
+        await S.db.doc('catalog/'+bc).set({...rest,...base,...patch,b:bc,updatedAt:now});await S.db.doc('catalog/'+orig).delete();closeModal();toast('Saved under the new code');return}}
     else Object.assign(patch,{b:bc,q:0,qs:parseNum($('#ceQ').value),sold:0,hidden:false,big:patch.img,wooId:null,countedAt:today(),nameEdited:true,priceEdited:true});
     await saveCat(bc,patch);closeModal();toast('Saved — the register updates within a minute');return}
   if(a==='st_del'){if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Tap again to delete';return}await delProduct(b.dataset.b);closeModal();toast('Product removed from the register');return}
@@ -3832,7 +3844,7 @@ async function stockShipGo(id){
   for(let i=0;i<L.length;i++){const l=L[i];const q=parseNum($(`[data-skq="${i}"]`).value);if(!(q>0))continue;const to=$(`[data-skw="${i}"]`).value;const v=$(`[data-sk="${i}"]`).value.trim();
     let b=null;const m=v.match(/ · ([^·]+)$/);if(m&&S.catalog.has(m[1].trim()))b=m[1].trim();else if(v){const f=[...S.catalog.values()].find(x=>x.n===v||nrm(x.n)===nrm(v));if(f)b=f.b;else{toast('Product not found: '+v);return}}
     const unit=l.q?l.landed/l.q:0;
-    if(b){const cur=S.catalog.get(b);const patch={[to]:(to==='qs'?storeQ(cur):whQ(cur))+q};if(writeCost&&unit>0){patch.cost=r2(unit);patch.costEdited=true}await saveCat(b,patch)}
+    if(b){const cur=S.catalog.get(b);const patch={[to]:(to==='qs'?storeQ(cur):whQ(cur))+q};if(to==='qw')patch.qwT=new Date().toISOString();if(writeCost&&unit>0){patch.cost=r2(unit);patch.costEdited=true}await saveCat(b,patch)}
     else{b=l.sku&&!S.catalog.has(String(l.sku))?String(l.sku):'I'+uid('').slice(0,8);await saveCat(b,{b,n:l.n,cat:'სხვადასხვა',price:unit>0?Math.round(unit*MARKUP):0,sale:null,cost:writeCost?r2(unit):0,vat:'',q:0,qs:to==='qs'?q:0,qw:to==='qw'?q:0,min:0,sold:0,img:null,big:null,wooId:null,hidden:false,countedAt:new Date().toISOString(),nameEdited:true,priceEdited:true,costEdited:writeCost,storeNote:'from shipment '+(s.arrivedAt||'')})}
     done.push({b,q,to,n:l.n})}
   if(!done.length){toast('Nothing to add');return}
@@ -3865,11 +3877,12 @@ async function mergeGroup(gi,codes){
   const el=document.querySelector(`input[name="dup${gi}"]:checked`);if(!el)return;const keepB=el.value;
   const docs=codes.map(b=>S.catalog.get(b)).filter(Boolean);const keep=docs.find(x=>x.b===keepB);if(!keep)return;
   const others=docs.filter(x=>x!==keep);const sum=k=>docs.reduce((a,x)=>a+(+x[k]||0),0);const first=k=>keep[k]||others.map(x=>x[k]).find(Boolean)||null;
-  const patch={qw:sum('qw'),q:sum('q'),sold:sum('sold'),img:first('img'),big:first('big'),wooId:first('wooId'),price:keep.price||first('price')||0,cost:keep.cost||first('cost')||0,
+  const now=new Date().toISOString();
+  const patch={qw:docs.reduce((a,x)=>a+whQ(x),0),qwT:now,q:sum('q'),sold:sum('sold'),img:first('img'),big:first('big'),wooId:first('wooId'),price:keep.price||first('price')||0,cost:keep.cost||first('cost')||0,
     storeNote:[keep.storeNote,...others.map(x=>x.storeNote)].filter(Boolean).join(' · '),merged:(keep.merged||[]).concat(others.map(x=>x.b))};
   // only counted store quantities add up; an Optimo count on an uncounted record would double the stock
   const wc=docs.filter(wcDone);if(wc.length){patch.qwAt=wc.map(x=>x.qwAt).sort().pop();patch.qwPrev=docs.reduce((a,x)=>a+(wcDone(x)?wcPrev(x):whQ(x)),0);patch.whNote=docs.map(x=>x.whNote).filter(Boolean).join(' · ')||null}
-  const counted=docs.filter(x=>x.qs!=null);if(counted.length){patch.qs=counted.reduce((a,x)=>a+(+x.qs||0),0);patch.countedAt=counted.map(x=>String(x.countedAt||'')).sort().pop()}
+  const counted=docs.filter(x=>x.qs!=null);if(counted.length){patch.qs=counted.reduce((a,x)=>a+catLive(x),0);patch.countedAt=now}
   await saveCat(keep.b,patch);for(const x of others)await S.db.doc('catalog/'+x.b).delete();
   toast('Merged into '+keep.n);S.mc=new Map();dupModal();
 }
@@ -3961,6 +3974,36 @@ async function rcAct(a,b){
 // while a check is running on the register, the overview picks up each counted product within 30 seconds
 setInterval(()=>{if(S.backend&&S.view==='overview'&&!document.hidden&&!S.backend.pending()&&regCounts().some(c=>!c.finishedAt))S.backend.load().catch(()=>{})},30000);
 
+/* ============================== receipts (მიღება on the register) ============================== */
+// Read here, written on the register. The stock math is in recvQ / whQ / catLive; voiding a receipt undoes it.
+function recvList(){return [...S.shift.values()].filter(r=>isRecv(r)&&Array.isArray(r.lines)).sort((a,b)=>String(b.at).localeCompare(String(a.at)))}
+const recvPcs=r=>r.lines.reduce((a,l)=>a+(+l.q||0),0);
+const recvFrom=r=>r.from==='wh'?'From the warehouse':'Other'+(r.fromNote?' · '+r.fromNote:'');
+function recvRow(r){const v=r.status==='void';
+  return `<div class="orow click ${v?'void':''}" data-act="rv_open" data-id="${esc(r.id)}" style="cursor:pointer"><span class="ob"><span class="op">${esc(r.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '))}</span><small>${esc(dtShort(r.at))} · ${esc(r.user?r.user.name:'?')} · ${esc(recvFrom(r))}${v?' · <b style="color:var(--bad)">voided</b>':''}</small></span><span class="chip ${r.from==='wh'?'':'good'}">${r.from==='wh'?'Warehouse → store':'Other → store'}</span><b class="num">+${fmt(recvPcs(r))} pcs</b></div>`}
+function countRecv(){
+  const L=recvList();
+  if(!L.length)return `<div class="panel empty"><b>Nothing received yet</b><span>On the register: ☰ → მიღება. The consultant picks “from the warehouse” or “other” and the products that arrived. From the warehouse: added to the store and taken off the warehouse. Other: added to the store only.</span></div>`;
+  const ok=L.filter(r=>r.status!=='void');const since=addDay(today(),-29);const m=ok.filter(r=>dayOfIso(r.at)>=since);
+  const wh=m.filter(r=>r.from==='wh').reduce((a,r)=>a+recvPcs(r),0),ot=m.filter(r=>r.from!=='wh').reduce((a,r)=>a+recvPcs(r),0);
+  return `<div class="kpis"><div class="kpi"><div class="lbl">Received · last 30 days</div><div class="val num">${fmt(wh+ot)}<small> pcs</small></div><div class="delta">${m.length} receipt${m.length===1?'':'s'}</div></div>
+   <div class="kpi"><div class="lbl">From the warehouse</div><div class="val num">${fmt(wh)}<small> pcs</small></div><div class="delta">taken off the warehouse</div></div>
+   <div class="kpi"><div class="lbl">From elsewhere</div><div class="val num">${fmt(ot)}<small> pcs</small></div><div class="delta">warehouse not touched</div></div></div>
+  <div class="panel mt"><h2>Received in the store · მიღება</h2><p class="sub">What the consultants wrote down on the register, newest first. Tap one for the list. A voided receipt changes nothing.</p><div class="olist">${L.slice(0,300).map(recvRow).join('')}</div></div>`;
+}
+function rvModal(id){
+  const r=S.shift.get(id);if(!isRecv(r))return;const v=r.status==='void';const wh=r.from==='wh';
+  modal(`<h3>Receipt · ${esc(dtShort(r.at))} · ${fmt(recvPcs(r))} pcs</h3><p class="sub">${esc(r.user?r.user.name:'?')} · ${esc(recvFrom(r))}. ${wh?'Added to the store and taken off the warehouse.':'Added to the store; the warehouse is not touched.'}</p>
+   <div class="flow">${r.lines.map(l=>{const x=S.catalog.get(String(l.b));return `<div class="ln"><span class="k row" style="gap:8px">${thumb(x||{n:l.n},34)}<span><b>${esc(l.n)}</b><div class="small muted">${esc(l.b)}${l.s!=null?' · store before '+fmt(l.s):''}${wh&&l.w!=null?' · warehouse before '+fmt(l.w):''}${x?'':' · product no longer in the catalog'}</div></span></span><span class="v num">+${fmt(l.q)}</span></div>`}).join('')}</div>
+   ${v?`<p class="hint">Voided ${esc(dtShort(r.voidAt))} by ${esc(r.voidBy?r.voidBy.name:'?')}: ${esc(r.voidWhy||'')}</p>`:''}
+   <div class="row mt">${v?'':`<button class="btn danger" data-act="rv_void" data-id="${esc(r.id)}" title="Takes these pieces back off the store${wh?' and returns them to the warehouse':''}">Void this receipt</button>`}<span class="spacer"></span><button class="btn" data-close>Close</button></div>`);
+}
+async function rvAct(a,b){
+  if(a==='rv_open')return rvModal(b.dataset.id);
+  if(a==='rv_void'){if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Tap again to void';return}const r=S.shift.get(b.dataset.id);if(!isRecv(r)||r.status==='void')return;b.disabled=true;
+    const {id,...rest}=r;await S.db.doc('shift/'+r.id).set({...rest,status:'void',voidAt:new Date().toISOString(),voidBy:{id:'owner',name:'Owner'},voidWhy:'Voided from Mars'});closeModal();toast('Receipt voided');return}
+}
+
 /* ============================== stock count (აღწერა) ============================== */
 // Stock = store + warehouse + on the way.
 // Store: the store count (collection `counts`, kind 'store') entered into qs, minus register sales since.
@@ -3981,7 +4024,7 @@ function wcFilter(){const f=S.cnt.f||'todo';return !WC()&&f!=='noimg'?'all':f}
 function wcList(){const C=S.cnt,q=(C.q||'').toLowerCase().trim(),f=wcFilter();
   return wcItems().filter(x=>(!q||x.n.toLowerCase().includes(q)||String(x.b).toLowerCase().includes(q))&&(!C.cat||(x.cat||'სხვადასხვა')===C.cat)&&wcTest(x,f))
     .sort((a,b)=>(a.cat||'სხვადასხვა').localeCompare(b.cat||'სხვადასხვა','ka')||a.n.localeCompare(b.n,'ka'))}
-function wcStats(){const all=wcItems(),done=all.filter(wcDone);return {all,done,pcs:done.reduce((a,x)=>a+whQ(x),0),val:done.reduce((a,x)=>a+whQ(x)*(+x.cost||0),0),diff:done.filter(x=>whQ(x)!==wcPrev(x))}}
+function wcStats(){const all=wcItems(),done=all.filter(wcDone);return {all,done,pcs:done.reduce((a,x)=>a+whPos(x),0),val:done.reduce((a,x)=>a+whPos(x)*(+x.cost||0),0),diff:done.filter(x=>whQ(x)!==wcPrev(x))}}
 const storeCount=()=>[...S.counts.values()].filter(x=>x&&x.kind==='store').sort((a,b)=>String(b.enteredAt).localeCompare(String(a.enteredAt)))[0]||null;
 const wayLines=incoming;
 // the product an on-the-way line belongs to: its code, or the product that code was merged into; '' = not linked
@@ -4018,7 +4061,7 @@ function wayLinkModal(key){const W=typeof key==='string'?S.wayRows&&S.wayRows.ge
 }
 function stockTotals(){const all=wcItems();const way=wayLines();
   const st=all.reduce((a,x)=>{const q=Math.max(0,catLive(x));a.q+=q;a.v+=q*(+x.cost||0);if(q)a.n++;return a},{q:0,v:0,n:0});
-  const wh=all.reduce((a,x)=>{const q=whQ(x);a.q+=q;a.v+=q*(+x.cost||0);if(q)a.n++;return a},{q:0,v:0,n:0});
+  const wh=all.reduce((a,x)=>{const q=whPos(x);a.q+=q;a.v+=q*(+x.cost||0);if(q)a.n++;return a},{q:0,v:0,n:0});
   const wy={q:way.reduce((a,s)=>a+(+s.qty||0),0),v:way.reduce((a,s)=>a+(+s.land||0),0),n:way.length};
   return {st,wh,wy}}
 function vCount(){
@@ -4026,8 +4069,8 @@ function vCount(){
   const tile=(k,lbl,o,sub)=>`<button class="kpi wctile" data-act="wc_tab" data-v="${k}" aria-pressed="${T===k}"><div class="lbl">${lbl}</div><div class="val num">${fmt(o.q)}<small> pcs</small></div><div class="delta">${gel(o.v)} ${sub}</div></button>`;
   const head=`<div class="pagehead"><div><div class="eyebrow">აღწერა · მაღაზია · საწყობი · გზაში</div><h1>Stock count</h1><p>All stock in three places: the store (from the store count), the warehouse (counted here) and what is on the way. Deleting or merging a product anywhere shows here at once.</p></div><div class="actions"><button class="btn" data-act="wc_export">Download Excel</button><button class="btn ${nd?'amber':''}" data-act="st_dups">Duplicates${nd?' · '+nd:''}</button><button class="btn" data-act="st_add">+ Product</button></div></div>
    <div class="kpis wckpis">${tile('store','In the store · მაღაზია',st,'at cost')}${tile('wh','In the warehouse · საწყობი',wh,'at cost')}${tile('way','On the way · გზაში',wy,'cost · '+gel(wy.v*MARKUP)+' to sell')}<div class="kpi sum"><div class="lbl">Total stock</div><div class="val num">${fmt(st.q+wh.q+wy.q)}<small> pcs</small></div><div class="delta">${gel(st.v+wh.v+wy.v)}</div></div></div>
-   <div class="tabs" role="tablist" style="margin-bottom:14px">${[['store','Store'],['wh','Warehouse count'],['way','On the way'],['checks','Store checks'+(regCounts().length?' · '+regCounts().length:'')]].map(([k,t])=>`<button role="tab" aria-selected="${T===k}" data-act="wc_tab" data-v="${k}">${t}</button>`).join('')}</div>`;
-  return loadingOr(head+(T==='store'?countStore():T==='way'?countWay():T==='checks'?countChecks():countWh()));
+   <div class="tabs" role="tablist" style="margin-bottom:14px">${[['store','Store'],['wh','Warehouse count'],['way','On the way'],['checks','Store checks'+(regCounts().length?' · '+regCounts().length:'')],['recv','Received'+(recvList().length?' · '+recvList().length:'')]].map(([k,t])=>`<button role="tab" aria-selected="${T===k}" data-act="wc_tab" data-v="${k}">${t}</button>`).join('')}</div>`;
+  return loadingOr(head+(T==='store'?countStore():T==='way'?countWay():T==='checks'?countChecks():T==='recv'?countRecv():countWh()));
 }
 /* ---- store: the store count with its own names, linked to the products ---- */
 // what is in the store right now: store stock (count minus register sales since) above 0, by name
@@ -4058,12 +4101,12 @@ function countStore(){
   const off=wcItems().filter(x=>!linked.has(String(x.b)));const offIn=off.filter(x=>catLive(x)>0);
   const counted=new Map();R.rows.forEach(r=>(r.map||[]).forEach(m=>counted.set(String(m.b),(counted.get(String(m.b))||0)+(+m.q||0))));
   const now=storeNow().filter(x=>!q||x.n.toLowerCase().includes(q)||String(x.b).includes(q));
-  const nowRow=x=>{const c=counted.get(String(x.b));const sl=storeSoldSince(x);
+  const nowRow=x=>{const c=counted.get(String(x.b));const sl=storeSoldSince(x);const rv=recvQ(x,false);
     return `<div class="scrow"><span class="scpic">${x.img?`<img src="${esc(x.img)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=\\'ph\\'>${esc(posInitials(x.n))}</span>'">`:`<span class="ph">${esc(posInitials(x.n))}</span>`}</span>
-     <span class="scb"><button class="sclink" data-act="st_edit" data-b="${esc(x.b)}" style="padding:0"><b>${esc(x.n)}</b></button><span class="small muted">${esc(x.b)}${+x.price?' · '+gel(+x.price,x.price%1?2:0):''}${c!=null?' · counted '+c:''}${sl?' · '+sl+' sold since':''}</span>${x.storeNote?`<span class="scnote">${esc(x.storeNote)}</span>`:''}</span>
+     <span class="scb"><button class="sclink" data-act="st_edit" data-b="${esc(x.b)}" style="padding:0"><b>${esc(x.n)}</b></button><span class="small muted">${esc(x.b)}${+x.price?' · '+gel(+x.price,x.price%1?2:0):''}${c!=null?' · counted '+c:''}${sl?' · '+sl+' sold since':''}${rv?' · '+rv+' received since':''}</span>${x.storeNote?`<span class="scnote">${esc(x.storeNote)}</span>`:''}</span>
      <span class="scq num">${x.lq}</span></div>`};
   const nowPcs=now.reduce((a,x)=>a+x.lq,0);
-  if(f==='now')return `<div class="panel"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">In the store now · ${fmt(nowPcs)} pieces</h2><p class="sub" style="margin:3px 0 0">${now.length} products with stock in the store: the count minus everything sold on the register since. Products at 0 are hidden. The warehouse is not included.</p></div><span class="spacer"></span><button class="btn" data-act="wc_print">Download PDF</button></div>
+  if(f==='now')return `<div class="panel"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">In the store now · ${fmt(nowPcs)} pieces</h2><p class="sub" style="margin:3px 0 0">${now.length} products with stock in the store: the count minus everything sold on the register since, plus what was received (მიღება). Products at 0 are hidden. The warehouse is not included.</p></div><span class="spacer"></span><button class="btn" data-act="wc_print">Download PDF</button></div>
    <div class="wctools mt"><input class="input" id="scQ" type="search" autocomplete="off" placeholder="Search the store…" value="${esc(C.sq||'')}"></div>
    <div class="pills" role="group" aria-label="Show">${pills}</div>
    <div class="sclist mt">${now.map(nowRow).join('')||'<div class="empty"><b>Nothing here</b></div>'}</div></div>`;
@@ -4235,7 +4278,7 @@ function vTools(){
 
 /* ---- sale prices ---- */
 function saleRows(){const pct=Math.min(90,Math.max(1,+S.tools.pct||0));
-  return wcItems().map(x=>{const st=Math.max(0,catLive(x))+whQ(x);const r=rateOf(x);const price=+x.price||0,cost=+x.cost||0;
+  return wcItems().map(x=>{const st=Math.max(0,catLive(x))+whPos(x);const r=rateOf(x);const price=+x.price||0,cost=+x.cost||0;
     const np=price?Math.round(price*(1-pct/100)):0;const on=+x.sale>0&&+x.sale<price;
     const cover=r.rate>0?st/r.rate:null;const slow=st>0&&r.known&&(cover==null||cover>12);
     return {x,st,rate:r.rate,sold:r.sold,price,cost,np,on,cover,slow,low:cost>0&&np<cost}}).filter(o=>o.price>0)}
@@ -4265,7 +4308,7 @@ async function saleApply(end){const T=S.tools;const rows=saleRows().filter(o=>T.
 
 /* ---- next order ---- */
 function orderRows(){const T=S.tools;const lead=Math.max(0.25,+T.lead||2),cover=Math.max(0.5,+T.cover||3);const inc=incBy();const buy=lastBuys();
-  return wcItems().map(x=>{const r=rateOf(x);const st=Math.max(0,catLive(x)),wh=whQ(x),co=(inc.get(x.b)||{}).q||0;const have=st+wh+co;
+  return wcItems().map(x=>{const r=rateOf(x);const st=Math.max(0,catLive(x)),wh=whPos(x),co=(inc.get(x.b)||{}).q||0;const have=st+wh+co;
     const fast=r.rate>=0.3;const lasts=r.rate>0?have/r.rate:null;
     const status=!fast?'slow':have<r.rate*lead?'now':have<r.rate*(lead+1)?'soon':'ok';
     const qty=status==='now'||status==='soon'?Math.max(1,Math.ceil(r.rate*(lead+cover)-have)):0;
@@ -4387,6 +4430,7 @@ async function act(a,b){
   if(a.startsWith('wc_'))return wcAct(a,b);
   if(a.startsWith('tl_'))return toolsAct(a,b);
   if(a.startsWith('rc_'))return rcAct(a,b);
+  if(a.startsWith('rv_'))return rvAct(a,b);
   if(a.startsWith('st_')||a.startsWith('si_')){const r=await storeAct(a,b);if(r!==false)return}
   if(a==='pickOrders')return $('#ordersFile').click();
   if(a==='opPick')return $('#opFile')?$('#opFile').click():null;

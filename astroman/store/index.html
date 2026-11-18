@@ -286,6 +286,25 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 .ctiles .r{border-color:color-mix(in srgb,var(--bad) 40%,var(--line))}.ctiles .r b{color:var(--bad)}
 .csec{margin:14px 0 8px;font-size:14px;color:var(--ink-2)}
 .chist{display:grid;gap:6px}
+/* ---------- receiving (მიღება) ---------- */
+.rsrc{flex:1;display:grid;place-items:center;padding:20px;overflow:auto}
+.rsrc .opts{width:min(760px,100%);display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.rsrc .opt{border:2px solid var(--line);background:var(--surface);border-radius:18px;padding:24px 18px;display:grid;gap:8px;justify-items:center;align-content:start;text-align:center;box-shadow:var(--shadow);min-height:190px;transition:border-color .15s,transform .12s}
+.rsrc .opt:hover{border-color:var(--brand)}.rsrc .opt:active{transform:scale(.98)}
+.rsrc .opt svg{color:var(--brand)}.rsrc .opt b{font-size:19px}.rsrc .opt span{color:var(--ink-2);font-size:13px}
+.rseg{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.rseg button{border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:8px;font-weight:700;min-height:44px;color:var(--ink-2)}
+.rseg button[aria-pressed="true"]{border-color:var(--brand);background:#EEF3FF;color:var(--brand)}
+.rseg .hint{grid-column:1/-1;font-size:12.5px;color:var(--ink-2)}.rseg .input{grid-column:1/-1}
+.line .warn{color:var(--warn);font-weight:700}
+.line .qty button.qn{width:auto;min-width:40px;background:var(--surface);font-family:var(--f-num)}
+.rgo{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line);background:var(--surface)}
+.rgo .amber{flex:1}
+.card .rq{position:absolute;top:8px;left:8px;min-width:30px;height:28px;border-radius:999px;display:grid;place-items:center;background:var(--brand);color:#fff;font-weight:800;font-size:13px;padding:0 8px;font-family:var(--f-num)}
+.grid.list .card .rq{position:static;order:0}
+.rdone{flex:1;overflow:auto;min-height:0;padding:16px clamp(14px,3vw,36px);display:grid;gap:6px;align-content:start}
+.rdone .chip.big{font-family:var(--f-num)}
+@media (max-width:900px){.rsrc .opts{grid-template-columns:1fr}}
 @media (max-width:900px){.backbar{flex-wrap:wrap}.ctiles{grid-template-columns:repeat(2,1fr)}.cm{grid-template-columns:84px minmax(0,1fr)}.cm img,.cm .ph{width:84px;height:84px}}
 
 /* ---------- print ---------- */
@@ -340,7 +359,7 @@ const tShort=iso=>{const d=new Date(iso);return pad2(d.getHours())+':'+pad2(d.ge
 const dtShort=iso=>{const d=new Date(iso);return pad2(d.getDate())+'.'+pad2(d.getMonth()+1)+' '+pad2(d.getHours())+':'+pad2(d.getMinutes())};
 function toast(msg,ms){const r=$('#toastRoot');r.innerHTML=`<div class="toast" role="status">${esc(msg)}</div>`;clearTimeout(toast.t);toast.t=setTimeout(()=>r.innerHTML='',ms||3200)}
 const svg=(d,s=22)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
-const I={cart:'M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H7M9 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm8 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z',search:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-3.5-3.5',menu:'M4 7h16M4 12h16M4 17h16',grid:'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',list:'M4 6h16M4 12h16M4 18h16',cloud:'M7 18a4 4 0 0 1-.6-7.95A6 6 0 0 1 18 9a4.5 4.5 0 0 1 0 9H7z',back:'M15 5l-7 7 7 7',check:'M5 13l4 4L19 7',print:'M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z',clock:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 7v5l3 2',key:'M21 2l-2 2m-7.6 7.6a5 5 0 1 1-7.1 7.1 5 5 0 0 1 7.1-7.1zm0 0L19 3m-3 3l2 2',sales:'M3 17l6-6 4 4 8-8M15 7h6v6',cashIn:'M12 5v14m-6-6l6 6 6-6',cashOut:'M12 19V5m-6 6l6-6 6 6',history:'M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l3 2',sync:'M21 12a9 9 0 0 1-15.5 6.2M3 12a9 9 0 0 1 15.5-6.2M21 4v5h-5M3 20v-5h5',wifi:'M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h.01',refresh:'M4 4v6h6M20 20v-6h-6M20 9A8 8 0 0 0 5.6 6.6L4 10m0 4l1.6 3.4A8 8 0 0 0 20 15',msg:'M4 5h16v11H8l-4 4z',logout:'M10 17l5-5-5-5M15 12H3M21 3v18',power:'M12 3v9M6.3 7a8 8 0 1 0 11.4 0',install:'M12 3v12m-5-5l5 5 5-5M4 21h16',user:'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-8 9a8 8 0 0 1 16 0',day:'M4 5h16v15H4zM4 10h16M8 3v4m8-4v4',pct:'M19 5L5 19M7.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm9 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z',box:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',trash:'M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3',count:'M9 3h6v4H9zM8 5H5v16h14V5h-3M8.5 13.5l2.5 2.5 4.5-5',gear:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm7.4-3a7.4 7.4 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a7.5 7.5 0 0 0-1.7-1L14.8 3h-3.6l-.4 2.6a7.5 7.5 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.4 7.4 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.5 7.5 0 0 0 1.7 1l.4 2.6h3.6l.4-2.6a7.5 7.5 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6c.1-.3.1-.7.1-1z'};
+const I={cart:'M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H7M9 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm8 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z',search:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-3.5-3.5',menu:'M4 7h16M4 12h16M4 17h16',grid:'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',list:'M4 6h16M4 12h16M4 18h16',cloud:'M7 18a4 4 0 0 1-.6-7.95A6 6 0 0 1 18 9a4.5 4.5 0 0 1 0 9H7z',back:'M15 5l-7 7 7 7',check:'M5 13l4 4L19 7',print:'M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z',clock:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 7v5l3 2',key:'M21 2l-2 2m-7.6 7.6a5 5 0 1 1-7.1 7.1 5 5 0 0 1 7.1-7.1zm0 0L19 3m-3 3l2 2',sales:'M3 17l6-6 4 4 8-8M15 7h6v6',cashIn:'M12 5v14m-6-6l6 6 6-6',cashOut:'M12 19V5m-6 6l6-6 6 6',history:'M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l3 2',sync:'M21 12a9 9 0 0 1-15.5 6.2M3 12a9 9 0 0 1 15.5-6.2M21 4v5h-5M3 20v-5h5',wifi:'M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h.01',refresh:'M4 4v6h6M20 20v-6h-6M20 9A8 8 0 0 0 5.6 6.6L4 10m0 4l1.6 3.4A8 8 0 0 0 20 15',msg:'M4 5h16v11H8l-4 4z',logout:'M10 17l5-5-5-5M15 12H3M21 3v18',power:'M12 3v9M6.3 7a8 8 0 1 0 11.4 0',install:'M12 3v12m-5-5l5 5 5-5M4 21h16',user:'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-8 9a8 8 0 0 1 16 0',day:'M4 5h16v15H4zM4 10h16M8 3v4m8-4v4',pct:'M19 5L5 19M7.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm9 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z',box:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',trash:'M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3',count:'M9 3h6v4H9zM8 5H5v16h14V5h-3M8.5 13.5l2.5 2.5 4.5-5',truck:'M2 6h12v10H2zM14 9h4l3 3v4h-7M6.5 19.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm11 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z',gear:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm7.4-3a7.4 7.4 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a7.5 7.5 0 0 0-1.7-1L14.8 3h-3.6l-.4 2.6a7.5 7.5 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.4 7.4 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.5 7.5 0 0 0 1.7 1l.4 2.6h3.6l.4-2.6a7.5 7.5 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6c.1-.3.1-.7.1-1z'};
 // the same payment options as the order sheet
 const PAY=[['cash','ნაღდი','₾','cash'],['pos','ტერმინალი','POS',''],['bog','BOG გადარიცხვა','BOG','bog'],['tbc','TBC გადარიცხვა','TBC','tbc'],['wolt','Wolt','W',''],['glovo','Glovo','G',''],['extra','Extra.ge','E',''],['cod','კურიერი · ნაღდი','🛵',''],['personal','რეზის პირადი','R',''],['pending','გადარიცხვა მოლოდინში','⏳',''],['installment','განვადება','0%',''],['other','სხვა','…','']];
 const PAY_CASH=new Set(['cash','cod']);
@@ -351,9 +370,11 @@ const PAYN={...PAYN_OLD,...Object.fromEntries(PAY.map(p=>[p[0],p[1]]))};
 const P={u:null,k:null,cat:new Map(),pos:new Map(),shift:new Map(),cfg:{users:[],receipt:{}},loaded:false,
   user:null,view:'sale',tab:'all',q:'',grid:lsGet('pos.grid')!=='list',cart:{lines:[],disc:0,note:''},sel:-1,mode:'qty',buf:'',
   pay:{method:'cash',cash:'',receipt:false,note:''},last:null,conn:{ok:false,txt:'კავშირი…'},install:null,
-  cnt:{sel:new Set(),q:'',tab:'all',f:'todo',only:false,adding:false,done:null}};
+  cnt:{sel:new Set(),q:'',tab:'all',f:'todo',only:false,adding:false,done:null},
+  rcv:{from:null,note:'',lines:[],only:true,q:'',tab:'all',done:null}};
 try{const c=JSON.parse(lsGet('pos.cart')||'null');if(c&&Array.isArray(c.lines))P.cart=c}catch(e){}
 try{P.user=JSON.parse(lsGet('pos.user')||'null')}catch(e){}
+try{const r=JSON.parse(lsGet('pos.recv')||'null');if(r&&Array.isArray(r.lines))Object.assign(P.rcv,{from:r.from||null,note:r.note||'',lines:r.lines,only:r.only!==false})}catch(e){}
 const DEVICE=lsGet('pos.device')||(()=>{const d=uid('d');lsSet('pos.device',d);return d})();
 function saveCart(){lsSet('pos.cart',JSON.stringify(P.cart))}
 
@@ -422,7 +443,17 @@ addEventListener('beforeunload',e=>{if(outbox.length){e.preventDefault();e.retur
 // a product without a price is not for sale yet (new arrivals until the owner prices them)
 function items(){return [...P.cat.values()].filter(x=>x&&!x.hidden&&+x.price>0)}
 // what is on the shelf now: the Optimo count minus what this register sold since that count
-function liveQ(x){let q=x.qs!=null?+x.qs||0:(+x.q||0);const c=String(x.countedAt||'');P.pos.forEach(o=>{if(o.status==='void'||!o.lines)return;if(c&&(c.length>10?String(o.at||'')<c:(o.day||'')<c))return;o.lines.forEach(l=>{if(l.b===x.b)q-=+l.q||0})});return q}
+// plus what was received into the store (მიღება) since that count
+function liveQ(x){let q=x.qs!=null?+x.qs||0:(+x.q||0);const c=String(x.countedAt||'');P.pos.forEach(o=>{if(o.status==='void'||!o.lines)return;if(c&&(c.length>10?String(o.at||'')<c:(o.day||'')<c))return;o.lines.forEach(l=>{if(l.b===x.b)q-=+l.q||0})});return q+recvQ(x,false)}
+// Receipts (მიღება) are `shift` records with kind 'receive'. Each line adds pieces to the store; a receipt from the
+// warehouse (from 'wh') also takes them off the warehouse. Like sales, a receipt counts only after the number it changes
+// was last set: the store count after countedAt, the warehouse after qwT (typed or added) / qwAt (counted).
+const isRecv=s=>!!(s&&s.kind==='receive');
+const dayOf=iso=>{const d=new Date(iso);return isNaN(d)?'':d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())};
+function recvQ(x,wh){const b=String(x.b);const c=wh?[String(x.qwT||''),String(x.qwAt||'')].sort().pop():String(x.countedAt||'');let n=0;
+  P.shift.forEach(r=>{if(!isRecv(r)||r.status==='void'||!Array.isArray(r.lines)||(wh&&r.from!=='wh'))return;const at=String(r.at||'');if(c&&(c.length>10?at<c:dayOf(at)<c))return;r.lines.forEach(l=>{if(String(l.b)===b)n+=Math.max(0,+l.q||0)})});return n}
+// the warehouse now: the owner's warehouse number minus what the store received from the warehouse since
+const whLive=x=>(+x.qw||0)-recvQ(x,true);
 function cats(){const s=new Set();items().forEach(x=>s.add(x.cat||'სხვადასხვა'));return [...s].sort((a,b)=>a.localeCompare(b,'ka'))}
 function norm(s){return String(s||'').toLowerCase().replace(/\s+/g,' ').trim()}
 function lastSale(b){let t='';P.pos.forEach(o=>{if(o.status==='void'||!o.lines)return;if(o.lines.some(l=>l.b===b)&&o.at>t)t=o.at});return t}
@@ -437,7 +468,7 @@ function filtered(){
   return L;
 }
 function cardHtml(x,q){const sug=P.tab==='sug'&&!P.q;const adm=P.user&&P.user.admin;
-  return `<div class="card" role="button" tabindex="0" data-add="${esc(x.b)}"><div class="img">${pic(x)}${sug?'<span class="sg">შესთავაზე</span>':''}${(+x.qw||0)>0?'<span class="whb" title="საწყობშია">საწყობში</span>':''}<span class="q ${q<0?'neg':q===0?'zero':''}">${q}</span><span class="price num">${x.sale>0&&x.sale<x.price?`<s>${gel(x.price)}</s> ${gel(x.sale)}`:gel(x.price)}</span>${adm?`<button class="ed" data-edit="${esc(x.b)}" title="რედაქტირება">✎</button>`:''}</div><div class="t"><div class="n">${esc(x.n)}</div><div class="bc">${esc(x.b)}</div>${sug?`<div class="why">შესთავაზე მომხმარებელს</div>`:''}</div></div>`}
+  return `<div class="card" role="button" tabindex="0" data-add="${esc(x.b)}"><div class="img">${pic(x)}${sug?'<span class="sg">შესთავაზე</span>':''}${whLive(x)>0?'<span class="whb" title="საწყობშია">საწყობში</span>':''}<span class="q ${q<0?'neg':q===0?'zero':''}">${q}</span><span class="price num">${x.sale>0&&x.sale<x.price?`<s>${gel(x.price)}</s> ${gel(x.sale)}`:gel(x.price)}</span>${adm?`<button class="ed" data-edit="${esc(x.b)}" title="რედაქტირება">✎</button>`:''}</div><div class="t"><div class="n">${esc(x.n)}</div><div class="bc">${esc(x.b)}</div>${sug?`<div class="why">შესთავაზე მომხმარებელს</div>`:''}</div></div>`}
 function ph(n,cls){return `<div class="ph ${cls||''}">${esc(initials2(n))}</div>`}
 function pic(x,cls){return x.img?`<img src="${esc(x.img)}" alt="" loading="lazy" data-ph="${esc(initials2(x.n))}" data-cls="${esc(cls||'')}" onerror="phFail(this)">`:ph(x.n,cls)}
 const initials2=n=>String(n||'').replace(/[^\p{L}\p{N}]/gu,'').slice(0,2).toUpperCase()||'·';
@@ -479,6 +510,7 @@ function render(){
   else if(P.view==='pay')app.innerHTML=vPay();
   else if(P.view==='done')app.innerHTML=vDone();
   else if(P.view==='count')app.innerHTML=vCount();
+  else if(P.view==='recv')app.innerHTML=vRecv();
   else app.innerHTML=vSale();
   bind();
 }
@@ -588,6 +620,7 @@ function bind(){
   const cash=$('#cash');if(cash){cash.oninput=()=>{P.pay.cash=cash.value.replace(/[^\d.]/g,'');updatePayHdr()};cash.onkeydown=e=>{if(e.key==='Enter')act('confirm')}}
   const pn=$('#payNote');if(pn)pn.oninput=()=>P.pay.note=pn.value;
   if(P.view==='count')bindCount();
+  if(P.view==='recv')bindRecv();
   document.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>act(b.dataset.act,b));
 }
 function renderGridOnly(){const g=$('#grid');if(!g)return;const L=filtered();g.innerHTML=L.length?L.slice(0,200).map(x=>{const q=liveQ(x);return cardHtml(x,q)}).join(''):`<div class="nores">ვერაფერი მოიძებნა</div>`;
@@ -609,8 +642,9 @@ async function act(a,b){
   if(a==='sync'){toast('სინქრონიზაცია…');flush();await load(true);toast(outbox.length?'ზოგი ჩანაწერი ჯერ ინახება':'განახლებულია');return}
   if(a==='menu')return funcMenu();
   if(a[0]==='c'&&a[1]>='A'&&a[1]<='Z')return countAct(a,b);
+  if(a[0]==='r'&&a[1]>='A'&&a[1]<='Z')return rcvAct(a,b);
 }
-function openShift(){let best=null;P.shift.forEach(s=>{if(!isCount(s)&&!s.closedAt&&s.device===DEVICE&&(!best||s.openedAt>best.openedAt))best=s});return best}
+function openShift(){let best=null;P.shift.forEach(s=>{if(s&&!s.kind&&!s.closedAt&&s.device===DEVICE&&(!best||s.openedAt>best.openedAt))best=s});return best}
 function confirmSale(){
   const T=totals();if(!T.total)return;const m=P.pay.method;const isCash=PAY_CASH.has(m);const cash=isCash?parseFloat(P.pay.cash)||0:T.total;
   if(isCash&&cash<T.total){toast('ნაღდი თანხა ნაკლებია');return}
@@ -645,7 +679,7 @@ function funcMenu(){
   const sh=openShift();
   const F=[['shiftClose','ცვლის დასრულება',I.clock,'top',!sh],['shiftOpen','ცვლის დაწყება',I.clock,'top dark',!!sh],
    ['shiftReport','ცვლის ნავაჭრი',I.sales,'',!sh],['cashOut','თანხის გაცემა',I.cashOut,'',!sh],['cashIn','თანხის მიღება',I.cashIn,'',!sh],['history','გაყიდვების ისტორია',I.history],
-   ['count',openCount()?'აღწერის გაგრძელება':'აღწერა',I.count],['sync','სინქრონიზაცია',I.sync],['install','დაინსტალირება',I.install,'',!P.install],['refresh','განახლება',I.refresh],
+   ['count',openCount()?'აღწერის გაგრძელება':'აღწერა',I.count],['recv','მიღება',I.box],['sync','სინქრონიზაცია',I.sync],['install','დაინსტალირება',I.install,'',!P.install],['refresh','განახლება',I.refresh],
    ['logout','გასვლა',I.logout],['disconnect','გათიშვა',I.power]];
   modal('ფუნქციები',`<div class="fn">${F.map(([a,t,ic,cls,dis])=>`<button data-fn="${a}" class="${cls||''}" ${dis?'disabled':''}>${svg(ic,24)}${t}</button>`).join('')}</div>
    <div class="muted small" style="text-align:center">${esc(P.user.name)} · მოწყობილობა ${esc(DEVICE.slice(-5))} · ${P.cat.size} პროდუქტი კატალოგში</div>`);
@@ -664,6 +698,7 @@ async function fn(a){
   if(a==='cashIn'||a==='cashOut')return cashMove(a==='cashIn'?'in':'out');
   if(a==='history')return history();
   if(a==='count')return countOpen();
+  if(a==='recv')return rcvOpen();
 }
 function shiftStats(sh){
   const S={n:0,total:0,by:{},cashIn:0,cashOut:0,voids:0,items:0};
@@ -671,7 +706,7 @@ function shiftStats(sh){
   (sh.moves||[]).forEach(m=>{if(m.kind==='in')S.cashIn+=m.gel;else S.cashOut+=m.gel});
   S.cashExpected=r2((+sh.openCash||0)+(S.by.cash||0)+S.cashIn-S.cashOut);return S;
 }
-function lastClose(){let v=null;P.shift.forEach(s=>{if(!isCount(s)&&s.closedAt&&s.device===DEVICE&&(!v||s.closedAt>v.closedAt))v=s});return v?v.closeCash:0}
+function lastClose(){let v=null;P.shift.forEach(s=>{if(s&&!s.kind&&s.closedAt&&s.device===DEVICE&&(!v||s.closedAt>v.closedAt))v=s});return v?v.closeCash:0}
 function greeting(){const h=new Date().getHours();return h<12?'დილა მშვიდობისა':h<18?'გამარჯობა':'საღამო მშვიდობისა'}
 function shiftOpenModal(){
   modal('ცვლის დაწყება',`<div class="bye"><div class="big">☀️</div><h2>${esc(greeting())}, ${esc(P.user.name)}!</h2><div class="muted">კარგი დღე გქონდეს. რამდენი ნაღდი ფულია სალაროში? (ხურდის თანხა)</div></div><div class="cashrow"><input id="oc" inputmode="decimal" value="${lastClose()||''}" placeholder="0.00"><button disabled>₾</button></div>
@@ -919,14 +954,147 @@ document.addEventListener('keydown',e=>{
   if(e.key.length===1){if(now-cScanT>50){cScan='';cScanPrev=t&&t.id==='cmQ'?t.value:''}cScan+=e.key;cScanT=now}
 },true);
 
+/* ============================== receiving (მიღება) ============================== */
+// The consultant writes down what arrived in the store. Saved as a `shift` record with kind 'receive' (the register's key
+// may write sales and shifts only): {from:'wh'|'other', fromNote, at, user, lines:[{b,n,q,s,w}], status 'ok'|'void'}.
+// s / w = store and warehouse numbers just before. No `day` field, so the register keeps receiving every receipt (the
+// backend sends only 45 days of records that have a day) and the store and warehouse numbers stay right.
+// From the warehouse: the store gets the pieces and the warehouse loses them. Other: only the store gets them.
+function saveRcv(){const R=P.rcv;lsSet('pos.recv',JSON.stringify({from:R.from,note:R.note,lines:R.lines,only:R.only}))}
+function rcvOpen(){P.view='recv';P.rcv.done=null;P.rcv.q='';render();const q=$('#rq');if(q)q.focus()}
+function rcvItems(){const R=P.rcv,q=norm(R.q);let L=countable();
+  if(q)L=L.filter(x=>norm(x.n).includes(q)||String(x.b).includes(q));else if(R.tab!=='all')L=L.filter(x=>(x.cat||'სხვადასხვა')===R.tab);
+  if(!q&&R.from==='wh'&&R.only)L=L.filter(x=>whLive(x)>0);
+  return L.sort((a,b)=>String(a.n||'').localeCompare(String(b.n||''),'ka'))}
+const rcvTot=()=>({n:P.rcv.lines.length,q:P.rcv.lines.reduce((a,l)=>a+l.q,0)});
+const rcvQtyOf=b=>{const l=P.rcv.lines.find(y=>y.b===b);return l?l.q:0};
+function rcvAdd(x){const R=P.rcv;const i=R.lines.findIndex(l=>l.b===x.b);if(i>=0)R.lines[i].q=Math.min(9999,R.lines[i].q+1);else R.lines.push({b:x.b,n:x.n,q:1});saveRcv();
+  const g=$('#rgrid'),y=g?g.scrollTop:0,f=document.activeElement&&document.activeElement.id;render();const g2=$('#rgrid');if(g2)g2.scrollTop=y;if(f==='rq')$('#rq').focus();
+  const ls=document.querySelectorAll('.lines .line'),k=R.lines.findIndex(l=>l.b===x.b);if(ls[k])ls[k].scrollIntoView({block:'nearest'})}
+function rcvSet(i,q){const R=P.rcv;if(!R.lines[i])return;if(q<=0)R.lines.splice(i,1);else R.lines[i].q=Math.min(9999,q);saveRcv();render()}
+function rCard(x){const n=rcvQtyOf(x.b),w=whLive(x),q=liveQ(x);
+  return `<div class="card ${n?'csel':''}" role="button" tabindex="0" data-radd="${esc(x.b)}"><div class="img">${pic(x)}${n?`<span class="rq">+${n}</span>`:''}${w!==0||P.rcv.from==='wh'?`<span class="whb" title="საწყობში">საწყობი ${w}</span>`:''}<span class="q ${q<0?'neg':q===0?'zero':''}" title="მაღაზიაში">${q}</span></div><div class="t"><div class="n">${esc(x.n)}</div><div class="bc">${esc(x.b)}${+x.price>0?'':' · ფასი არ აქვს'}</div></div></div>`}
+function rGrid(){const L=rcvItems();const R=P.rcv;
+  return L.length?L.slice(0,500).map(rCard).join(''):`<div class="nores">${!P.loaded?'კატალოგი იტვირთება…':R.from==='wh'&&R.only&&!R.q?'საწყობში სისტემით ამ სიაში არაფერი ჩანს — მოხსენი „მხოლოდ საწყობში მყოფი“':'ვერაფერი მოიძებნა'}</div>`}
+function rLine(l,i){const x=P.cat.get(l.b)||{b:l.b,n:l.n};const wh=P.rcv.from==='wh';const s=liveQ(x),w=whLive(x);
+  return `<div class="line">${pic(x)}<div><div class="nm">${esc(x.n)}</div><div class="sub">მაღაზიაში <b class="num">${s} → ${s+l.q}</b>${wh?` · საწყობში <b class="num">${w} → ${w-l.q}</b>${l.q>w?' <span class="warn">· საწყობში სისტემით ნაკლებია</span>':''}`:''}</div>
+   <span class="qty"><button data-rqty="${i}" data-v="-1" aria-label="ერთით ნაკლები">−</button><button class="qn" data-rqe="${i}" aria-label="რაოდენობის აკრეფა">${l.q}</button><button data-rqty="${i}" data-v="1" aria-label="ერთით მეტი">+</button></span></div>
+   <div class="amt"><button class="rm" data-rrm="${i}" aria-label="წაშლა">✕</button></div></div>`}
+function vRecv(){
+  const R=P.rcv;
+  if(R.done){const d=P.shift.get(R.done);if(d)return vRecvDone(d);R.done=null}
+  const hist=`<button class="btn ghost" data-act="rHist">${svg(I.history,18)} წინა მიღებები</button>`;
+  if(!R.from)return header()+`<div class="backbar"><button class="ibtn" data-act="rBack" aria-label="გაყიდვებზე დაბრუნება">${svg(I.back,20)}</button><div class="ttl"><h2>მიღება</h2><small>საიდან შემოვიდა პროდუქცია მაღაზიაში?</small></div><span class="spacer"></span><div class="acts">${hist}</div></div>
+   <div class="rsrc"><div class="opts">
+    <button class="opt" data-rfrom="wh">${svg(I.box,44)}<b>საწყობიდან</b><span>ჩვენი საწყობიდან ჩამოტანილი. რასაც ჩაწერ, მაღაზიას დაემატება და საწყობს დააკლდება.</span></button>
+    <button class="opt" data-rfrom="other">${svg(I.truck,44)}<b>სხვა</b><span>მომწოდებლისგან, დაბრუნებული ან სხვა ადგილიდან. მაღაზიას დაემატება, საწყობის მარაგს არ შეეხება.</span></button></div></div>`;
+  const T=rcvTot(),wh=R.from==='wh';
+  return header()+`<div class="backbar"><button class="ibtn" data-act="rBack" aria-label="გაყიდვებზე დაბრუნება" title="გაყიდვებზე დაბრუნება (სია შენახული რჩება)">${svg(I.back,20)}</button><div class="ttl"><h2>მიღება · ${wh?'საწყობიდან':'სხვა'}</h2><small>შეეხე პროდუქტს ან დაასკანერე შტრიხკოდი — ყოველი შეხება +1 ცალი</small></div><span class="spacer"></span><div class="acts">${hist}</div></div>
+  <div class="sale">
+   <section class="cart" aria-label="მიღებული პროდუქცია">
+    <div class="rseg"><button data-rfrom="wh" aria-pressed="${wh}">საწყობიდან</button><button data-rfrom="other" aria-pressed="${!wh}">სხვა</button>
+     <div class="hint">${wh?'მაღაზიას დაემატება, საწყობს დააკლდება.':'მაღაზიას დაემატება. საწყობის მარაგი არ შეიცვლება.'}</div>
+     ${wh?'':`<input class="input" id="rNote" placeholder="საიდან? მაგ. მომწოდებლის სახელი, დაბრუნება…" value="${esc(R.note)}" autocomplete="off">`}</div>
+    <div class="lines">${R.lines.length?R.lines.map(rLine).join(''):`<div class="empty"><div>${svg(I.box,40)}სია ცარიელია<div class="small">შეეხე პროდუქტს მარჯვნივ ან დაასკანერე შტრიხკოდი</div></div></div>`}</div>
+    <div class="ctot"><div class="r"><span>პროდუქტი</span><span class="num">${T.n}</span></div><div class="r big"><span>სულ ცალი</span><span class="num">${T.q}</span></div></div>
+    <div class="rgo"><button class="btn" data-act="rClear" ${T.n?'':'disabled'}>გასუფთავება</button><button class="btn amber big" data-act="rConfirm" ${T.q?'':'disabled'}>${svg(I.check,22)} მიღების დადასტურება</button></div>
+   </section>
+   <section class="catalog" aria-label="პროდუქტები">
+    <div class="search">${svg(I.search,20)}<input class="input" id="rq" placeholder="პროდუქტის ძიება ან შტრიხკოდი" value="${esc(R.q)}" autocomplete="off">${R.q?`<button class="x" data-act="rClearQ">✕</button>`:''}</div>
+    <div class="ctabs"><button data-rtab="all" aria-pressed="${R.tab==='all'&&!R.q}">ყველა</button>${cCats().map(k=>`<button data-rtab="${esc(k)}" aria-pressed="${R.tab===k&&!R.q}">${esc(k)}</button>`).join('')}
+     ${wh?`<button data-act="rOnly" class="${R.only?'sug':''}" aria-pressed="${R.only}">მხოლოდ საწყობში მყოფი</button>`:''}
+     <span class="vw"><button data-act="grid" aria-pressed="${P.grid}" title="ბადე">${svg(I.grid,18)}</button><button data-act="listv" aria-pressed="${!P.grid}" title="სია">${svg(I.list,18)}</button></span></div>
+    <div class="grid ${P.grid?'':'list'}" id="rgrid">${rGrid()}</div>
+   </section></div>`;
+}
+function rDoneRow(l){const x=P.cat.get(l.b)||{b:l.b,n:l.n};
+  return `<div class="crow" style="cursor:default">${pic(x)}<span class="cn"><b>${esc(l.n||x.n)}</b><small>${esc(l.b)}</small></span><span class="cres"><span class="chip big good">+${l.q} ც</span></span></div>`}
+const rFrom=r=>r.from==='wh'?'საწყობიდან':'სხვა'+(r.fromNote?' · '+r.fromNote:'');
+const rPcs=r=>(r.lines||[]).reduce((a,l)=>a+(+l.q||0),0);
+function vRecvDone(r){
+  return header()+`<div class="backbar"><div class="ttl"><h2>მიღება შენახულია</h2><small>${esc(dtShort(r.at))} · ${esc(r.user?r.user.name:'')} · ${esc(rFrom(r))} · ${rPcs(r)} ცალი — მფლობელი Mars-ზე ხედავს</small></div><span class="spacer"></span>
+   <div class="acts"><button class="btn" data-act="rPrint">${svg(I.print,18)} ბეჭდვა</button><button class="btn" data-act="rNew">ახალი მიღება</button><button class="btn primary" data-act="rHome">გაყიდვებზე დაბრუნება</button></div></div>
+  <div class="rdone">${(r.lines||[]).map(rDoneRow).join('')}</div>`;
+}
+function bindRecv(){
+  document.querySelectorAll('[data-rfrom]').forEach(e=>e.onclick=()=>{const R=P.rcv;const v=e.dataset.rfrom;if(R.from!==v){R.from=v;if(v==='wh')R.only=true}saveRcv();render();const q=$('#rq');if(q)q.focus()});
+  document.querySelectorAll('[data-radd]').forEach(e=>{e.onclick=()=>{const x=P.cat.get(e.dataset.radd);if(x)rcvAdd(x)};e.onkeydown=k=>{if(k.key===' '||k.key==='Enter'){k.preventDefault();e.click()}}});
+  document.querySelectorAll('[data-rqty]').forEach(e=>e.onclick=()=>{const i=+e.dataset.rqty;const l=P.rcv.lines[i];if(l)rcvSet(i,l.q+ +e.dataset.v)});
+  document.querySelectorAll('[data-rrm]').forEach(e=>e.onclick=()=>rcvSet(+e.dataset.rrm,0));
+  document.querySelectorAll('[data-rqe]').forEach(e=>e.onclick=()=>rcvQtyModal(+e.dataset.rqe));
+  document.querySelectorAll('[data-rtab]').forEach(e=>e.onclick=()=>{P.rcv.tab=e.dataset.rtab;P.rcv.q='';render()});
+  const n=$('#rNote');if(n)n.oninput=()=>{P.rcv.note=n.value;saveRcv()};
+  const q=$('#rq');if(!q)return;
+  q.oninput=()=>{P.rcv.q=q.value;const g=$('#rgrid');if(g){g.innerHTML=rGrid();g.querySelectorAll('[data-radd]').forEach(e=>e.onclick=()=>{const x=P.cat.get(e.dataset.radd);if(x)rcvAdd(x)})}
+    document.querySelectorAll('[data-rtab]').forEach(b=>b.setAttribute('aria-pressed',String(!P.rcv.q&&b.dataset.rtab===P.rcv.tab)))};
+  // Enter here is handled here only (a scanner types into this box too), so the product is added once
+  q.onkeydown=e=>{if(e.key!=='Enter')return;e.preventDefault();e.stopPropagation();scanBuf='';const v=q.value.trim();if(!v)return;
+    const x=[...P.cat.values()].find(y=>y&&String(y.b)===v&&!y.hidden)||(()=>{const L=rcvItems();return L.length===1?L[0]:null})();
+    if(!x){toast('ვერ მოიძებნა: '+v);return}P.rcv.q='';rcvAdd(x);toast(x.n+' · +1');const q2=$('#rq');if(q2)q2.focus()};
+}
+function rcvQtyModal(i){
+  const l=P.rcv.lines[i];if(!l)return;const x=P.cat.get(l.b)||{b:l.b,n:l.n};
+  modal('რამდენი ცალი მოვიდა?',`<div class="cm">${pic(x)}<div><div class="cmn">${esc(x.n)}</div><div class="bc">${esc(x.b)}</div></div></div>
+   <div class="cq"><button data-cs="-1" aria-label="ერთით ნაკლები">−</button><input id="rqQ" inputmode="numeric" autocomplete="off" value="${l.q}" aria-label="რაოდენობა"><button data-cs="1" aria-label="ერთით მეტი">+</button></div>
+   <div class="ckeys">${['1','2','3','4','5','6','7','8','9','C','0','⌫'].map(k=>`<button data-ck="${k}">${k}</button>`).join('')}</div>
+   <button class="btn primary big" id="rqGo" style="width:100%">${svg(I.check,20)} შენახვა</button>`);
+  const inp=$('#rqQ');const set=s=>{inp.value=String(s).replace(/\D/g,'').slice(0,4)};let fresh=true;
+  inp.oninput=()=>{fresh=false;set(inp.value)};inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();go()}};
+  document.querySelectorAll('[data-cs]').forEach(k=>k.onclick=()=>{fresh=false;set(Math.max(0,(parseInt(inp.value,10)||0)+ +k.dataset.cs));inp.focus()});
+  document.querySelectorAll('[data-ck]').forEach(k=>k.onclick=()=>{const t=k.dataset.ck;set(t==='C'?'':t==='⌫'?inp.value.slice(0,-1):(fresh?'':inp.value)+t);fresh=false;inp.focus()});
+  const go=()=>{const q=parseInt(inp.value,10);if(!(q>=0)){inp.focus();return}closeModal();rcvSet(i,q)};
+  $('#rqGo').onclick=go;inp.focus();inp.select();
+}
+function rcvConfirm(){
+  const R=P.rcv;const T=rcvTot();if(!T.q||!R.from)return;const wh=R.from==='wh';const note=String(R.note||'').trim();
+  const over=wh?R.lines.map(l=>({l,x:P.cat.get(l.b)})).filter(o=>o.x&&o.l.q>whLive(o.x)):[];
+  modal('მიღების დადასტურება',`<div class="kv"><div><span>საიდან</span><b>${esc(wh?'საწყობიდან':'სხვა'+(note?' · '+note:''))}</b></div><div><span>პროდუქტი</span><span class="num">${T.n}</span></div><div class="sum"><span>სულ ცალი</span><span class="num">${T.q}</span></div></div>
+   <p style="margin:0">${wh?`მაღაზიას დაემატება <b>${T.q}</b> ცალი და საწყობს დააკლდება <b>${T.q}</b> ცალი.`:`მაღაზიას დაემატება <b>${T.q}</b> ცალი. საწყობის მარაგი არ შეიცვლება.`}</p>
+   ${over.length?`<div class="kv">${over.map(o=>`<div><span>${esc(o.x.n)}</span><span class="small" style="color:var(--warn);font-weight:700;text-align:right">ჩაწერე ${o.l.q}, საწყობში სისტემით ${whLive(o.x)}</span></div>`).join('')}</div><p class="small" style="margin:0;color:var(--warn)">საწყობში სისტემით ნაკლებია, ვიდრე ჩაწერე. თუ ნამდვილად ამდენი ჩამოიტანე — დაადასტურე, მფლობელი Mars-ზე დაინახავს.</p>`:''}
+   <div class="row"><button class="btn amber big" id="rcGo" style="flex:1">${svg(I.check,20)} დადასტურება</button><button class="btn big" data-close>უკან</button></div>`);
+  $('#rcGo').onclick=e=>{e.currentTarget.disabled=true;
+    const r={id:uid('r'),kind:'receive',from:R.from,fromNote:wh?'':note,at:new Date().toISOString(),user:P.user,device:DEVICE,
+      lines:R.lines.filter(l=>l.q>0).map(l=>{const x=P.cat.get(l.b);return {b:l.b,n:x?x.n:l.n,q:l.q,s:x?liveQ(x):null,w:x?whLive(x):null}}),status:'ok'};
+    push('shift',r.id,r);Object.assign(R,{lines:[],note:'',q:'',done:r.id});saveRcv();closeModal();render();toast('მიღება შენახულია · '+rPcs(r)+' ცალი')};
+}
+function rcvReceipt(r){
+  return reportHtml('მიღება'+(r.status==='void'?' · გაუქმებულია':''),dtShort(r.at)+' · '+(r.user?r.user.name:''),[['საიდან',rFrom(r)],['პროდუქტი',String((r.lines||[]).length)],['სულ ცალი',String(rPcs(r)),'tot']],
+   `<hr><table>${(r.lines||[]).map(l=>`<tr><td>${esc(l.n)}</td><td class="r">${l.q}</td></tr>`).join('')}</table>`)}
+function rcvHistory(){
+  const L=[...P.shift.values()].filter(isRecv).sort((a,b)=>String(b.at).localeCompare(String(a.at))).slice(0,40);
+  modal('წინა მიღებები',L.length?`<div class="olist">${L.map(r=>`<div class="orow ${r.status==='void'?'void':''}" data-rh="${esc(r.id)}"><span class="t">${esc(dtShort(r.at))}</span><span><div>${esc(rFrom(r))}</div><div class="d">${esc(r.user?r.user.name:'')} · ${(r.lines||[]).length} პროდუქტი${r.status==='void'?' · გაუქმებული':''}</div></span><b class="num">${rPcs(r)} ც</b></div>`).join('')}</div>`:'<div class="muted" style="text-align:center;padding:20px">მიღება ჯერ არ ჩაწერილა</div>',true);
+  document.querySelectorAll('[data-rh]').forEach(e=>e.onclick=()=>rcvView(e.dataset.rh));
+}
+function rcvView(id){
+  const r=P.shift.get(id);if(!r)return;
+  modal('მიღება · '+dtShort(r.at),`<div class="kv">${(r.lines||[]).map(l=>`<div><span>${esc(l.n)} <span class="muted small">${esc(l.b)}</span></span><span class="num">+${l.q}</span></div>`).join('')}<div class="sum"><span>${esc(rFrom(r))}</span><span class="num">${rPcs(r)} ც</span></div></div>
+   <div class="muted small">${esc(dtShort(r.at))} · ${esc(r.user?r.user.name:'')}${r.status==='void'?' · <b style="color:var(--bad)">გაუქმებულია</b> '+esc(r.voidWhy||''):''}</div>
+   <div class="row"><button class="btn" id="rvPrint">${svg(I.print,18)} ბეჭდვა</button><span class="spacer"></span>${r.status!=='void'?`<button class="btn danger" id="rvVoid">გაუქმება</button>`:''}<button class="btn" data-close>დახურვა</button></div>`);
+  $('#rvPrint').onclick=()=>printHtml(rcvReceipt(r));
+  const v=$('#rvVoid');if(v)v.onclick=()=>{modal('მიღების გაუქმება',`<p>ეს მიღება (${rPcs(r)} ცალი, ${esc(rFrom(r))}) გაუქმდება: ${r.from==='wh'?'ეს ცალები მაღაზიას მოაკლდება და საწყობში დაბრუნდება':'ეს ცალები მაღაზიას მოაკლდება'}. მფლობელი ამას დაინახავს.</p><label class="field"><span>მიზეზი</span><input class="input" id="rvw" placeholder="მაგ. შეცდომით ჩაიწერა, ორჯერ ჩაიწერა…"></label><div class="row"><button class="btn danger" id="rvwGo">გაუქმება</button><button class="btn" data-close>უკან</button></div>`);$('#rvw').focus();
+    $('#rvwGo').onclick=()=>{const w=$('#rvw').value.trim();if(!w){$('#rvw').focus();return}push('shift',r.id,{...r,status:'void',voidAt:new Date().toISOString(),voidBy:P.user,voidWhy:w});closeModal();render();toast('მიღება გაუქმდა')}};
+}
+function rcvAct(a,b){
+  const R=P.rcv;
+  if(a==='rBack'){R.q='';P.view='sale';render();return}
+  if(a==='rHome'){R.done=null;P.view='sale';render();return}
+  if(a==='rNew'){R.done=null;R.from=null;saveRcv();render();return}
+  if(a==='rHist')return rcvHistory();
+  if(a==='rClearQ'){R.q='';render();$('#rq').focus();return}
+  if(a==='rOnly'){R.only=!R.only;saveRcv();render();return}
+  if(a==='rClear'){if(!b.dataset.sure){b.dataset.sure=1;b.textContent='ნამდვილად?';setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent='გასუფთავება'}},3000);return}R.lines=[];saveRcv();render();return}
+  if(a==='rConfirm')return rcvConfirm();
+  if(a==='rPrint'){const d=P.shift.get(R.done);if(d)printHtml(rcvReceipt(d));return}
+}
+
 /* ============================== barcode scanner (keyboard wedge) ============================== */
 let scanBuf='',scanT=0;
 document.addEventListener('keydown',e=>{
-  if(!P.user||P.view!=='sale'||$('#scrim'))return;
-  const t=e.target;const inInput=t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA');
-  if(inInput&&t.id!=='q')return;
-  if(e.key==='Enter'){if(scanBuf.length>=3){const x=[...P.cat.values()].find(y=>String(y.b)===scanBuf&&!y.hidden);if(x){e.preventDefault();addItem(x);if(inInput){t.value='';P.q=''}toast(x.n)}else if(!inInput)toast('უცნობი შტრიხკოდი: '+scanBuf)}scanBuf='';return}
-  if(e.key.length===1&&/[\w\-$]/.test(e.key)){const now=Date.now();if(now-scanT>120)scanBuf='';scanBuf+=e.key;scanT=now;if(!inInput&&!e.ctrlKey&&!e.metaKey){const q=$('#q');if(q&&/[^\d]/.test(e.key)){q.focus()}}}
+  const rv=P.view==='recv';if(!P.user||(P.view!=='sale'&&!rv)||$('#scrim'))return;
+  const t=e.target;const inInput=t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA');const qid=rv?'rq':'q';
+  if(inInput&&t.id!==qid)return;
+  if(e.key==='Enter'){if(scanBuf.length>=3){const x=[...P.cat.values()].find(y=>String(y.b)===scanBuf&&!y.hidden);if(x){e.preventDefault();if(rv)rcvAdd(x);else addItem(x);if(inInput){t.value='';P.q=''}toast(x.n)}else if(!inInput)toast('უცნობი შტრიხკოდი: '+scanBuf)}scanBuf='';return}
+  if(e.key.length===1&&/[\w\-$]/.test(e.key)){const now=Date.now();if(now-scanT>120)scanBuf='';scanBuf+=e.key;scanT=now;if(!inInput&&!e.ctrlKey&&!e.metaKey){const q=$('#'+qid);if(q&&/[^\d]/.test(e.key)){q.focus()}}}
 });
 
 /* ============================== boot ============================== */
