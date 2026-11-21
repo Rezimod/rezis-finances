@@ -21,5 +21,23 @@
       "sizes": "180x180",
       "type": "image/png"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Search",
+      "url": "./#search"
+    },
+    {
+      "name": "Add expense",
+      "url": "./#add"
+    },
+    {
+      "name": "Products",
+      "url": "./#products"
+    },
+    {
+      "name": "Stock count",
+      "url": "./#count"
+    }
   ]
 }

@@ -977,6 +977,37 @@ body:has(.wcs) .toast{bottom:auto;top:calc(14px + env(safe-area-inset-top,0px));
   .actions>.ago.small{display:none}
 }
 @media (prefers-reduced-motion:reduce){main.nav-push,main.nav-back,main.nav-fade{animation:none}}
+/* ---------- search, quick actions, connection ---------- */
+#topSearch{gap:8px;color:var(--ink-2)}
+#topSearch kbd{font:600 11px var(--f-num);border:1px solid var(--line-2);border-radius:4px;padding:1px 5px;color:var(--muted)}
+.modal.srm{display:flex;flex-direction:column;height:min(640px,calc(100vh - 32px));overflow:hidden;padding-bottom:0}
+.srbar{display:flex;align-items:center;gap:10px;border:1px solid var(--line-2);background:var(--surface-2);border-radius:12px;padding:0 12px;height:46px;flex:none;color:var(--muted)}
+.srbar:focus-within{border-color:var(--brand)}
+.srbar input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--ink);font:inherit;font-size:16px;height:100%;-webkit-appearance:none;appearance:none}
+.srres{flex:1;min-height:0;overflow:auto;margin:8px -22px 0;padding:0 22px 20px;overscroll-behavior:contain}
+.srgrp{margin-top:12px}
+.srh{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:0 6px 6px}
+.sri{display:grid;grid-template-columns:40px minmax(0,1fr) 12px;gap:12px;align-items:center;width:100%;text-align:left;background:transparent;border:0;border-radius:10px;padding:7px 6px;color:var(--ink);cursor:pointer;font:inherit}
+.sri:hover,.sri:active{background:var(--surface-2)}
+.srpic{width:40px;height:40px;border-radius:9px;background:var(--surface-2);display:grid;place-items:center;overflow:hidden;color:var(--brand)}
+.srpic img{width:100%;height:100%;object-fit:cover;background:#fff}
+.srt{min-width:0}.srt b{display:block;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srt small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srgo{color:var(--muted);font-size:18px}
+.srmore{background:transparent;border:0;color:var(--brand);font:inherit;font-weight:600;font-size:13px;padding:8px 6px;cursor:pointer}
+.srchips{display:flex;flex-wrap:wrap;gap:6px}.srchips .chip{cursor:pointer;border:1px solid var(--line-2);font:inherit;font-size:13px;padding:6px 12px;color:var(--ink)}
+.srtip{margin:16px 6px 0}.srnone{margin-top:16px}
+.qagrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.qa{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:84px;border:0;border-radius:14px;background:var(--surface-2);color:var(--ink);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;text-align:center;padding:10px 4px;transition:transform .12s var(--ease)}
+.qa svg{color:var(--brand)}.qa:active{transform:scale(.95)}
+#netPill{display:none}
+@media (max-width:860px){
+  #topSearch{width:36px;height:36px;padding:0;border-radius:50%;flex:none}#topSearch span,#topSearch kbd{display:none}
+  .modal.srm{height:calc(100dvh - 44px - env(safe-area-inset-top,0px));max-height:none}
+  .srres{margin-inline:-16px;padding:0 16px calc(20px + env(safe-area-inset-bottom,0px))}
+  .modal.qam{padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+  body.netoff #netPill:not(:empty){display:block;position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 60px);z-index:16;background:var(--warn-bg);color:var(--warn);border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px;white-space:nowrap;max-width:calc(100vw - 32px);overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+}
 </style>
 
 <div class="app">
@@ -1004,6 +1035,7 @@ body:has(.wcs) .toast{bottom:auto;top:calc(14px + env(safe-area-inset-top,0px));
       </div>
       <span class="spacer"></span>
       <span class="ago" id="topAgo"></span>
+      <button class="btn" id="topSearch" aria-label="Search everything"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M11 4a7 7 0 1 0 0 14a7 7 0 0 0 0-14zM21 21l-4.6-4.6"/></svg><span>Search</span><kbd>/</kbd></button>
       <button class="btn" id="topSync" data-act="syncSheet" data-label="↻ Sync sales">↻ Sync sales</button>
       <button class="btn" id="topRecap" data-act="recap">Recap</button>
       <button class="btn primary" id="topAdd" data-go="add">+ Add expense</button>
@@ -1016,6 +1048,7 @@ body:has(.wcs) .toast{bottom:auto;top:calc(14px + env(safe-area-inset-top,0px));
 <div id="modalRoot"></div>
 <div id="printRoot"></div>
 <div id="toastRoot"></div>
+<div id="netPill" role="status"></div>
 <div class="tip" id="tip" hidden></div>
 
 <script>
@@ -1262,7 +1295,7 @@ function backendDB(u,k){
   const fire=l=>{if(l.kind==='c')l.cb({docs:[...col(l.path)].map(([id,d])=>({id,exists:true,data:()=>d})),size:col(l.path).size,empty:!col(l.path).size});else{const [c,id]=l.path.split('/');const d=col(c).get(id);l.cb({id,exists:!!d,data:()=>d})}};
   const emit=()=>L.forEach(fire);
   const saveOutbox=()=>{try{localStorage.setItem(OUTBOX,JSON.stringify(outbox))}catch(e){toast('This device is out of storage space. Keep the page open until it says “Saved to Google”.')}};
-  let cacheT=0;const saveCache=()=>{clearTimeout(cacheT);cacheT=setTimeout(()=>{const docs=[];cols.forEach((m,c)=>m.forEach((d,id)=>docs.push([c,id,d])));try{localStorage.setItem(CACHE,JSON.stringify({u,at:since,docs}))}catch(e){try{localStorage.removeItem(CACHE)}catch(e2){}}},800)};
+  let cacheT=0;const saveCache=()=>{clearTimeout(cacheT);cacheT=setTimeout(()=>{const docs=[];cols.forEach((m,c)=>m.forEach((d,id)=>docs.push([c,id,d])));IDB.set(CACHE,{u,at:since,docs}).then(()=>{try{localStorage.removeItem(CACHE)}catch(e){}}).catch(()=>{})},800)};
   const apply=op=>{if(op.op==='delete')col(op.c).delete(op.id);else col(op.c).set(op.id,op.d)};
   const docId=x=>{let id=String(x.id);if((x.c==='sales'||x.c==='items')&&x.d&&/^\d{4}-\d{2}$/.test(x.d.month||''))id=x.d.month;return id};
   function status(){
@@ -1287,9 +1320,10 @@ function backendDB(u,k){
     outbox.push(op);saveOutbox();apply(op);emit();saveCache();status();
     clearTimeout(timer);timer=setTimeout(flush,300);
   }
-  function fromCache(){
-    let c;try{c=JSON.parse(lsGet(CACHE)||'null')}catch(e){}
-    if(!c||c.u!==u||!Array.isArray(c.docs))return false;
+  async function fromCache(){
+    let c=null;try{c=await IDB.get(CACHE)}catch(e){}
+    if(!c)try{c=JSON.parse(lsGet(CACHE)||'null')}catch(e){}
+    if(loaded||!c||c.u!==u||!Array.isArray(c.docs))return false;
     c.docs.forEach(([cc,id,d])=>col(cc).set(id,d));outbox.forEach(apply);since=c.at||0;loaded=true;emit();setConn(true,'Updating…');return true;
   }
   // A quick check only adds or updates records, it never removes any: a read that lands while Google is
@@ -1392,7 +1426,7 @@ async function connectBackend(c){
   const sub=(path,key)=>S.db.collection(path).onSnapshot(snap=>{const m=new Map();snap.docs.forEach(d=>m.set(d.id,{id:d.id,...d.data()}));S[key]=m;S.loaded[key]=true;schedule()});
   sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');sub('catalog','catalog');sub('counts','counts');sub('pos','pos');sub('shift','shift');sub('site','site');
   S.db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()});
-  S.backend.fromCache();
+  await S.backend.fromCache();
   try{await S.backend.load(true);S.backend.flush();autoSyncSales()}catch(e){if(e.code==='bad_key'){toast('Wrong secret key. Connect again.');S.view='connect';render();return}toast(errMsg(e));setConn(false,'Offline — showing saved copy')}
 }
 function backupDocs(){
@@ -1427,7 +1461,7 @@ async function boot(){
   sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');sub('catalog','catalog');sub('counts','counts');sub('pos','pos');sub('shift','shift');sub('site','site');
   db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()},()=>{});
 }
-function setConn(ok,txt){$('#syncDot').className='dot'+(ok?'':' off');$('#syncTxt').textContent=txt||(ok?'Saved to cloud':'Offline')}
+function setConn(ok,txt){if(ok&&navigator.onLine===false){ok=false;txt='Offline · changes wait on this device'}$('#syncDot').className='dot'+(ok?'':' off');$('#syncTxt').textContent=txt||(ok?'Saved to cloud':'Offline');document.body.classList.toggle('netoff',!ok);$('#netPill').textContent=ok?'':txt||'Offline'}
 let rq=0;function schedule(){S.mc=new Map();if(rq)return;rq=requestAnimationFrame(()=>{rq=0;S.mc=new Map();fillMonthSel();if(S.view==='count'&&document.activeElement&&(document.activeElement.id==='wcQ'||document.activeElement.id==='scQ')){S.wcLate=true;return}if(S.view!=='add'||!S.renderedOnce)render()})}
 async function saveTx(t){
   if(!S.db)throw {message:'Not connected — open this page in Claude while signed in'};
@@ -1444,14 +1478,14 @@ function errMsg(e){if(!e)return 'Something went wrong';if(e.code==='quota_exceed
 const svg=(d,s=16)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 function renderShell(){
   $('#menu').innerHTML=PAGES.map((p,i)=>(p.id==='pl'?'<div class="sep"></div><div class="grp">Finance</div>':p.id==='optimo'?'<div class="sep"></div><div class="grp">Store</div>':'')+`<button data-go="${p.id}">${svg(IC[p.id])}${p.t}</button>`).join('');
-  $('#tabbar').innerHTML=[['overview','Overview'],['expenses','Expenses'],['add',''],['optimo','Optimo'],['more','More']].map(([id,t])=>id==='add'?`<button data-go="add" aria-label="Add expense"><span class="plus">+</span></button>`:`<button data-go="${id}">${svg(IC[id],22)}<span>${t}</span></button>`).join('');
+  $('#tabbar').innerHTML=[['overview','Overview'],['expenses','Expenses'],['add',''],['optimo','Optimo'],['more','More']].map(([id,t])=>id==='add'?`<button data-go="add" aria-label="New"><span class="plus">+</span></button>`:`<button data-go="${id}">${svg(IC[id],22)}<span>${t}</span></button>`).join('');
   $('#moreInner').innerHTML='<div class="grab"></div>'+[['recap','Recap'],['sales','Sales'],['products','Products'],['store','Store sales'],['count','Stock count'],['tools','Tools'],['bank','Bank import'],['pl','Profit & loss'],['imports','Imports'],['loan','Loan'],['settings','Settings']].map(([id,t])=>`<button data-go="${id}">${svg(IC[id],20)}${t}</button>`).join('');
   document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');
     if(!g){const ph=e.target.closest('.pagehead p');if(ph&&!e.target.closest('a,button')&&PHONE())ph.classList.toggle('open');return}
-    e.preventDefault();const tab=!!g.closest('#tabbar'),top=(tab&&g.dataset.go!=='add')||!!g.closest('#moreInner,#menu');if(tab)buzz();if(g.dataset.go==='more')return openMore();
+    e.preventDefault();const tab=!!g.closest('#tabbar'),top=(tab&&g.dataset.go!=='add')||!!g.closest('#moreInner,#menu');if(tab)buzz();if(g.dataset.go==='more')return openMore();if(tab&&g.dataset.go==='add')return openActions();
     if(tab&&g.dataset.go===S.view&&S.view!=='add')return window.scrollTo({top:0,behavior:'smooth'});
     closeMore(true);go(g.dataset.go,top?'tab':undefined)});
-  $('#topBack').onclick=()=>goBack();$('#topTitle').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+  $('#topBack').onclick=()=>goBack();$('#topSearch').onclick=()=>openSearch();$('#topTitle').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
   edgeBack();
   $('#moreSheet').addEventListener('click',e=>{if(e.target.id==='moreSheet')closeMore(true)});
   sheetDrag($('#moreInner'),()=>closeMore(true));pullToRefresh();
@@ -1469,7 +1503,7 @@ function fillMonthSel(){
   $('#monthSel').innerHTML=ms.slice().reverse().map(m=>`<option value="${m}" ${m===S.month?'selected':''}>${mShort(m)} ${m.slice(0,4)}</option>`).join('');
   $('#topRecap').textContent=mShort(addMonth(thisMonth(),-1))+' recap';topAgo();
 }
-function route(){const h=(location.hash||'').slice(1);if(PAGES.some(p=>p.id===h)||h==='add'){S.view=h}S.animate=true;render()}
+function route(){const h=(location.hash||'').slice(1);if(PAGES.some(p=>p.id===h)||h==='add'){S.view=h}S.animate=true;render();if(h==='search'&&S.view!=='connect')setTimeout(()=>openSearch(),300)}
 // how: 'tab' (tab bar, More, sidebar: starts fresh), 'back', or nothing (a link inside a page: Back returns here).
 function go(v,how){if(REP)closeRecap();if(v==='recap'){closeMore();return openRecap('month')}fillMonthSel();(S.scrollMem||(S.scrollMem={}))[S.view]=scrollY;
   const st=S.stack||(S.stack=[]),at=st.indexOf(v);
@@ -4533,6 +4567,10 @@ function bindTools(){if(S.view!=='tools')return;const T=S.tools;
   const num=(id,k,ls)=>{const e=$(id);if(e)e.onchange=()=>{const v=parseNum(e.value);if(v>0){T[k]=v;if(ls)lsSet(ls,String(v))}render()}};
   num('#tlPct','pct');num('#tlLead','lead','af.lead');num('#tlCover','cover','af.cover');
 }
+function editTx(id,m){let t=S.tx.get(id);
+    if(!t){t=txOf(m).find(x=>x.id===id);if(!t)return;S.draft={date:t.date,cur:'GEL',amount:String(t.gel),fx:fx(),cat:t.cat,account:t.account,vendor:t.vendor,note:'',employee:t.employee||'',recId:t.recId,source:'fixed'}}
+    else S.draft={...t,amount:String(t.cur==='USD'?t.orig:t.gel),fx:t.fx||fx(),employee:t.employee||'',vendor:t.vendor||'',note:t.note||'',account:t.account||'unknown'};
+    (S.scrollMem||(S.scrollMem={}))[S.view]=scrollY;if(S.view!=='add')(S.stack||(S.stack=[])).push(S.view);S.navAnim='push';S.view='add';S.animate=true;render();window.scrollTo({top:0})}
 function bindView(){
   if(S.view==='add')bindAdd();
   bindStore();bindCount();bindTools();
@@ -4553,11 +4591,7 @@ function bindView(){
   on('#xCat','change',e=>{S.filters.cat=e.target.value;render()});on('#xAcct','change',e=>{S.filters.acct=e.target.value;render()});on('#xAll','change',e=>{S.filters.all=e.target.checked;render()});
   document.querySelectorAll('[data-theme-set]').forEach(b=>b.onclick=()=>{lsSet('af.theme2',b.dataset.themeSet);applyTheme(b.dataset.themeSet);render()});
   document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Tap again';setTimeout(()=>{delete b.dataset.sure;b.textContent='Delete'},4000);return}try{await delDoc('tx/'+b.dataset.del);toast('Deleted')}catch(e){toast(errMsg(e))}});
-  document.querySelectorAll('[data-edit]').forEach(r=>r.onclick=()=>{
-    const id=r.dataset.edit;let t=S.tx.get(id);
-    if(!t){t=txOf(r.dataset.m).find(x=>x.id===id);if(!t)return;S.draft={date:t.date,cur:'GEL',amount:String(t.gel),fx:fx(),cat:t.cat,account:t.account,vendor:t.vendor,note:'',employee:t.employee||'',recId:t.recId,source:'fixed'}}
-    else S.draft={...t,amount:String(t.cur==='USD'?t.orig:t.gel),fx:t.fx||fx(),employee:t.employee||'',vendor:t.vendor||'',note:t.note||'',account:t.account||'unknown'};
-    S.view='add';S.animate=true;render();window.scrollTo({top:0})});
+  document.querySelectorAll('[data-edit]').forEach(r=>r.onclick=()=>editTx(r.dataset.edit,r.dataset.m));
   document.querySelectorAll('[data-loan]').forEach(b=>b.onclick=()=>loanModal(b.dataset.loan));
   document.querySelectorAll('[data-payacc]').forEach(el=>el.onchange=async()=>{try{await saveCfg({payAcct:{...(S.cfg.payAcct||{}),[el.dataset.payacc]:el.value}});toast(PAYS[el.dataset.payacc]+' → '+(el.value?BAL_ACC.find(x=>x[0]===el.value)[1]:'not counted'))}catch(e){toast(errMsg(e))}});
   on('#opFile','change',e=>{if(e.target.files.length)opUpload(e.target.files)});
@@ -4662,12 +4696,83 @@ async function act(a,b){
   if(a==='exportBackup')return exportBackup();
   if(a==='pickBackup')return $('#backupFile').click();
   if(a==='copyPhone'){const v=$('#phLink').value;try{await navigator.clipboard.writeText(v);toast('Phone link copied')}catch(e){$('#phLink').select();toast('Select and copy the link')}return}
-  if(a==='disconnect'){if(S.backend&&S.backend.pending()){toast('Some changes are still saving. Wait until it says “Saved to Google”.');return}lsSet('af.backend','');lsSet(CACHE,'');location.reload();return}
+  if(a==='disconnect'){if(S.backend&&S.backend.pending()){toast('Some changes are still saving. Wait until it says “Saved to Google”.');return}lsSet('af.backend','');lsSet(CACHE,'');IDB.del(CACHE).catch(()=>{});location.reload();return}
   if(a==='connect'){return}
   if(a==='addFixed'){const f=readFixedForm();f.push({id:uid('f'),label:'New fixed cost',cat:'misc',gel:0,account:'bog',match:'',from:thisMonth()});S.cfg={...S.cfg,fixed:f};return render()}
   if(a==='saveFixed'){const f=readFixedForm().filter(x=>x.label);await saveCfg({fixed:f});return toast('Fixed costs saved · '+gel(f.reduce((s,x)=>s+(+x.gel||0),0))+' a month')}
   }catch(e){toast(errMsg(e))}
 }
+/* ============================== search everything ============================== */
+const IC_SEARCH='M11 4a7 7 0 1 0 0 14a7 7 0 0 0 0-14zM21 21l-4.6-4.6';
+const norm=s=>String(s==null?'':s).toLowerCase();
+const SR_GROUPS=['Pages','Products','Register sales','Sheet orders','Supplier orders','Shipments','Expenses'];
+function searchItems(){
+  const out=[],gone=goneSet(),j=a=>a.filter(x=>x!=null&&x!=='').join(' · ');
+  PAGES.forEach(p=>out.push({g:'Pages',k:'page',id:p.id,t:p.t,s:'Open page',ic:IC[p.id],h:norm(p.t+' '+p.id)}));
+  S.catalog.forEach(x=>{if(!x||!x.b||gone.has(String(x.b)))return;out.push({g:'Products',k:'prod',id:x.b,t:x.n||x.b,img:x.img,ic:IC.products,
+    s:j([x.b,x.cat,x.price?gel(x.price):'no price','store '+fmt(catLive(x)),'wh '+fmt(Math.max(0,whQ(x))),x.hidden?'hidden':'']),h:norm([x.n,x.b,x.cat,(x.merged||[]).join(' ')].join(' ')),code:norm(x.b)})});
+  S.pos.forEach((o,id)=>{if(!o||!o.lines||o.kind)return;out.push({g:'Register sales',k:'pos',id,t:'Receipt №'+(o.no||'')+' · '+gel(o.total),ic:IC.store,d:o.at,
+    s:j([dtShort(o.at),o.user&&o.user.name,POSPAY[o.pay]||o.pay,o.lines.map(l=>l.n).join(', '),o.status==='void'?'voided':'']),h:norm([o.no,o.total,o.user&&o.user.name,o.note,o.lines.map(l=>l.n+' '+l.b).join(' ')].join(' '))})});
+  S.sales.forEach((m,mk)=>(m.rows||[]).forEach((r,i)=>out.push({g:'Sheet orders',k:'sale',id:mk+':'+i,t:(r.c||'—')+' · '+gel(r.a),ic:IC.sales,d:r.d,
+    s:j([r.d,r.p,PAYS[r.pay]||r.pay]),h:norm([r.c,r.p,r.a,r.d].join(' '))})));
+  S.ships.forEach((x,id)=>{if(!x)return;if(isOrder(x))out.push({g:'Supplier orders',k:'order',id,t:x.supplier||'Order',ic:IC.imports,d:x.date,
+      s:j([x.date,x.platform,x.ref,(x.lines||[]).length+' lines']),h:norm([x.supplier,x.platform,x.ref,x.note,(x.lines||[]).map(l=>l.n+' '+(l.sku||'')).join(' ')].join(' '))});
+    else out.push({g:'Shipments',k:'ship',id,t:x.forwarder||x.item||'Shipment',ic:IC.imports,d:x.date,s:j([x.date,x.status,x.mode,x.origin,x.track]),h:norm([x.forwarder,x.item,x.track,x.note,x.origin,x.status].join(' '))})});
+  S.tx.forEach((t,id)=>{if(!t)return;out.push({g:'Expenses',k:'tx',id,m:t.month,t:(t.vendor||t.employee||catLabel(t.cat))+' · '+gel(t.gel),ic:IC.expenses,d:t.date,
+    s:j([t.date,catLabel(t.cat),t.note]),h:norm([t.vendor,t.employee,catLabel(t.cat),t.note,t.gel,t.date].join(' '))})});
+  return out}
+function searchHTML(q){
+  const terms=norm(q).trim().split(/\s+/).filter(Boolean);
+  if(!terms.length)return `<div class="srgrp"><div class="srh">Jump to</div><div class="srchips">${PAGES.map(p=>`<button class="chip" data-sr="page|${p.id}">${p.t}</button>`).join('')}</div></div><p class="hint srtip">Search products by name or barcode, receipts by number or consultant, orders by customer, supplier or product, expenses by shop or note.${PHONE()?'':' Press / anywhere to search.'}</p>`;
+  const hit=S.srIdx.filter(x=>terms.every(t=>x.h.includes(t)));
+  if(!hit.length)return `<div class="empty srnone"><b>Nothing found for “${esc(q)}”</b>Try fewer letters or another word.</div>`;
+  const t0=terms.join(' '),rank=x=>x.code===t0?0:norm(x.t).startsWith(t0)?1:norm(x.t).includes(t0)?2:3;
+  const exact=hit.filter(x=>x.code===t0);
+  return (exact.length&&hit.length>1?`<div class="srgrp"><div class="srh">Barcode match</div>${exact.map(srRow).join('')}</div>`:'')+SR_GROUPS.map(g=>{
+    const L=hit.filter(x=>x.g===g).sort((a,b)=>rank(a)-rank(b)||String(b.d||'').localeCompare(String(a.d||'')));if(!L.length)return '';
+    const all=S.srAll===g,n=g==='Products'?8:5;
+    return `<div class="srgrp"><div class="srh">${g}<span>${L.length}</span></div>${L.slice(0,all?200:n).map(srRow).join('')}${L.length>n&&!all?`<button class="srmore" data-srall="${esc(g)}">Show all ${L.length}</button>`:''}</div>`}).join('')}
+function srRow(x){return `<button class="sri" data-sr="${x.k}|${esc(x.id)}|${esc(x.m||'')}"><span class="srpic">${x.img?`<img src="${esc(x.img)}" alt="" loading="lazy">`:svg(x.ic||IC_SEARCH,18)}</span><span class="srt"><b>${esc(x.t)}</b><small>${esc(x.s)}</small></span><span class="srgo">›</span></button>`}
+function openSearch(q){closeMore();S.srIdx=searchItems();S.srAll=null;
+  modal(`<div class="srbar">${svg(IC_SEARCH,18)}<input id="srQ" type="search" placeholder="Search everything" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search" aria-label="Search everything" value="${esc(q||'')}"></div><div id="srRes" class="srres">${searchHTML(q||'')}</div>`,false);
+  $('#scrim .modal').classList.add('srm');
+  const inp=$('#srQ'),res=$('#srRes');let t=0;
+  inp.oninput=()=>{clearTimeout(t);t=setTimeout(()=>{S.srAll=null;res.innerHTML=searchHTML(inp.value);res.scrollTop=0},70)};
+  inp.onkeydown=e=>{if(e.key==='Enter'){const f=res.querySelector('[data-sr]');if(f)f.click()}};
+  res.onclick=e=>{const a=e.target.closest('[data-srall]');if(a){S.srAll=a.dataset.srall;res.innerHTML=searchHTML(inp.value);return}
+    const b=e.target.closest('[data-sr]');if(!b)return;const [k,id,m]=b.dataset.sr.split('|');srOpen(k,id,m)};
+  setTimeout(()=>inp.focus(),PHONE()?260:0)}
+function srOpen(k,id,m){closeModal();
+  if(k==='page')return go(id,'tab');
+  if(k==='prod')return catEditModal(id);
+  if(k==='pos')return storeOrderModal(id);
+  if(k==='order')return orderModal(id);
+  if(k==='ship')return openShip(id);
+  if(k==='tx')return editTx(id,m);
+  if(k==='sale')return saleModal(id)}
+function saleModal(key){const [mk,i]=key.split(':');const r=((S.sales.get(mk)||{}).rows||[])[+i];if(!r)return;
+  modal(`<h3>${esc(r.c||'Order')}</h3><p class="sub">${r.d?dLong(r.d):'No date'} · from the order sheet</p>
+   <div class="flow"><div class="ln"><span class="k">Product</span><span class="v">${esc(r.p||'—')}</span></div><div class="ln"><span class="k">Payment</span><span class="v">${esc(PAYS[r.pay]||r.pay||'—')}</span></div><div class="ln"><span class="k">Amount</span><span class="v num">${gel(r.a)}</span></div>${r.no?'<div class="ln"><span class="k">Optimo</span><span class="v">not in Optimo</span></div>':''}</div>
+   <div class="foot"><button class="btn" data-close>Close</button><button class="btn primary" id="saleGo">Open ${mShort(mk)} in Sales</button></div>`);
+  $('#saleGo').onclick=()=>{closeModal();S.month=mk;lsSet('af.month',mk);go('sales')}}
+/* ============================== + : quick actions ============================== */
+const QA=[['add','Expense',IC.expenses],['product','Product',IC.products],['order','Supplier order',IC.imports],['ship','Shipment','M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-.01M17 19a2 2 0 1 0 0-.01'],['bank','Bank statement',IC.bank],['sync','Sync sales','M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5'],['count','Stock count',IC.count],['search','Search',IC_SEARCH],['recap','Last month',IC.recap]];
+function openActions(){closeMore();
+  modal(`<h3>New</h3><div class="qagrid">${QA.map(([k,t,ic])=>`<button class="qa" data-qa="${k}">${svg(ic,22)}<span>${t}</span></button>`).join('')}</div>`);
+  $('#scrim .modal').classList.add('qam');
+  document.querySelectorAll('[data-qa]').forEach(b=>b.onclick=()=>{buzz();const k=b.dataset.qa;
+    if(k==='product')return catEditModal(null);if(k==='order')return orderModal(null);if(k==='ship')return shipModal();if(k==='search')return openSearch();
+    closeModal();if(k==='sync')return act('syncSheet',$('#topSync'));if(k==='recap')return openRecap('month');go(k)})}
+document.addEventListener('keydown',e=>{const tag=(e.target.tagName||'');if(((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k')||(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(tag)&&!e.target.isContentEditable)){if($('#srQ'))return;e.preventDefault();openSearch()}});
+/* ============================== fast start + offline ============================== */
+// The saved copy of the data lives in IndexedDB: it is ~3 MB, too big for localStorage on an iPhone.
+const IDB={p:null,db(){return this.p||(this.p=new Promise((ok,no)=>{const r=indexedDB.open('mars',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}))},
+  async get(k){const d=await this.db();return new Promise((ok,no)=>{const q=d.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>ok(q.result);q.onerror=()=>no(q.error)})},
+  async set(k,v){const d=await this.db();return new Promise((ok,no)=>{const t=d.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=()=>ok();t.onerror=()=>no(t.error)})},
+  async del(k){const d=await this.db();return new Promise(ok=>{const t=d.transaction('kv','readwrite');t.objectStore('kv').delete(k);t.oncomplete=()=>ok();t.onerror=()=>ok()})}};
+addEventListener('offline',()=>setConn(false,'Offline · changes wait on this device'));
+addEventListener('online',()=>{if(S.backend)S.backend.load().catch(()=>{})});
+if('serviceWorker' in navigator&&window.isSecureContext&&location.protocol!=='file:')addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 boot();
 </script>
 
