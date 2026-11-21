@@ -949,6 +949,34 @@ body:has(.wcs) .toast{bottom:auto;top:calc(14px + env(safe-area-inset-top,0px));
   table.fxt .input{width:100%;max-width:none!important}
 }
 @media (prefers-reduced-motion:reduce){.scrim.out,.scrim.out .modal,.moresheet.closing,.moresheet.closing .sheet{animation:none}}
+
+@media (max-width:860px){
+  /* top bar: back · title that appears on scroll · round sync */
+  .topbar{position:sticky}
+  #topBack{width:36px;height:36px;font-size:26px;line-height:1;padding:0 0 3px;flex:none;border-radius:50%}
+  body.hasback .topbar .tbrand{display:none}
+  .toptitle{position:absolute;left:64px;right:64px;bottom:6px;height:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:transparent;border:0;color:var(--ink);opacity:0;transform:translateY(6px);transition:opacity .18s,transform .18s;pointer-events:none;font:inherit;cursor:pointer}
+  .toptitle b{font-size:16px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .toptitle small{font-size:11px;color:var(--muted);line-height:1.1}
+  .topbar .monthdial{transition:opacity .18s,transform .18s}
+  body.titled .toptitle{opacity:1;transform:none;pointer-events:auto}
+  body.titled .topbar .monthdial{opacity:0;transform:translateY(-6px);pointer-events:none}
+  #topSync{width:36px;height:36px;padding:0!important;font-size:0;border-radius:50%;flex:none}
+  #topSync::before{content:"";width:18px;height:18px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5'/%3E%3C/svg%3E") center/contain no-repeat}
+  #topSync:disabled{opacity:1}#topSync:disabled::before{animation:ptrspin .8s linear infinite}
+  /* page changes: forward slides in from the right, back from the left, tabs fade */
+  main.anim>.rise{animation:none}
+  main.nav-push{animation:navpush .26s var(--ease) both}
+  main.nav-back{animation:navback .26s var(--ease) both}
+  main.nav-fade{animation:navfade .2s ease both}
+  @keyframes navpush{from{opacity:0;transform:translateX(36px)}}
+  @keyframes navback{from{opacity:0;transform:translateX(-36px)}}
+  @keyframes navfade{from{opacity:0;transform:translateY(5px)}}
+  /* form buttons stay in reach above the tab bar */
+  .formbar{position:sticky;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:6;background:color-mix(in srgb,var(--surface) 94%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);margin-inline:-14px;padding:10px 14px;border-top:1px solid var(--line);border-radius:0 0 12px 12px}
+  .actions>.ago.small{display:none}
+}
+@media (prefers-reduced-motion:reduce){main.nav-push,main.nav-back,main.nav-fade{animation:none}}
 </style>
 
 <div class="app">
@@ -963,7 +991,9 @@ body:has(.wcs) .toast{bottom:auto;top:calc(14px + env(safe-area-inset-top,0px));
   </aside>
   <div class="content">
     <div class="topbar">
+      <button class="iconbtn" id="topBack" aria-label="Back" hidden>‹</button>
       <img class="tbrand" src="brand/mark-light-160.png" alt="">
+      <button class="toptitle" id="topTitle" tabindex="-1" aria-hidden="true"><b></b><small></small></button>
       <div class="monthdial">
         <label for="monthSel">Month</label>
         <div class="row">
@@ -1418,12 +1448,14 @@ function renderShell(){
   $('#moreInner').innerHTML='<div class="grab"></div>'+[['recap','Recap'],['sales','Sales'],['products','Products'],['store','Store sales'],['count','Stock count'],['tools','Tools'],['bank','Bank import'],['pl','Profit & loss'],['imports','Imports'],['loan','Loan'],['settings','Settings']].map(([id,t])=>`<button data-go="${id}">${svg(IC[id],20)}${t}</button>`).join('');
   document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');
     if(!g){const ph=e.target.closest('.pagehead p');if(ph&&!e.target.closest('a,button')&&PHONE())ph.classList.toggle('open');return}
-    e.preventDefault();const tab=!!g.closest('#tabbar');if(g.dataset.go==='more')return openMore();
+    e.preventDefault();const tab=!!g.closest('#tabbar'),top=(tab&&g.dataset.go!=='add')||!!g.closest('#moreInner,#menu');if(tab)buzz();if(g.dataset.go==='more')return openMore();
     if(tab&&g.dataset.go===S.view&&S.view!=='add')return window.scrollTo({top:0,behavior:'smooth'});
-    closeMore(true);go(g.dataset.go,tab)});
+    closeMore(true);go(g.dataset.go,top?'tab':undefined)});
+  $('#topBack').onclick=()=>goBack();$('#topTitle').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+  edgeBack();
   $('#moreSheet').addEventListener('click',e=>{if(e.target.id==='moreSheet')closeMore(true)});
   sheetDrag($('#moreInner'),()=>closeMore(true));pullToRefresh();
-  addEventListener('scroll',()=>document.body.classList.toggle('scrolled',scrollY>4),{passive:true});
+  addEventListener('scroll',topState,{passive:true});
   new MutationObserver(()=>document.documentElement.classList.toggle('mlock',!!$('#modalRoot').firstElementChild)).observe($('#modalRoot'),{childList:true});
   $('#monthSel').addEventListener('change',e=>setMonth(e.target.value));
   $('#mPrev').onclick=()=>setMonth(addMonth(S.month,-1));
@@ -1438,7 +1470,27 @@ function fillMonthSel(){
   $('#topRecap').textContent=mShort(addMonth(thisMonth(),-1))+' recap';topAgo();
 }
 function route(){const h=(location.hash||'').slice(1);if(PAGES.some(p=>p.id===h)||h==='add'){S.view=h}S.animate=true;render()}
-function go(v,keep){if(REP)closeRecap();if(v==='recap'){closeMore();return openRecap('month')}fillMonthSel();(S.scrollMem||(S.scrollMem={}))[S.view]=scrollY;S.view=v;if(!KEEP_LINK)try{history.replaceState(null,'','#'+v)}catch(e){}if(v==='add')S.draft=null;S.animate=true;render();$('#main').focus({preventScroll:true});window.scrollTo({top:keep&&S.scrollMem[v]||0})}
+// how: 'tab' (tab bar, More, sidebar: starts fresh), 'back', or nothing (a link inside a page: Back returns here).
+function go(v,how){if(REP)closeRecap();if(v==='recap'){closeMore();return openRecap('month')}fillMonthSel();(S.scrollMem||(S.scrollMem={}))[S.view]=scrollY;
+  const st=S.stack||(S.stack=[]),at=st.indexOf(v);
+  if(how==='tab')st.length=0;else if(at>=0){st.length=at;how='back'}else if(v!==S.view&&S.view!=='add'&&S.view!=='connect')st.push(S.view);
+  S.navAnim=how==='back'?'back':how==='tab'?'fade':'push';const keep=how==='tab'||how==='back';S.view=v;if(!KEEP_LINK)try{history.replaceState(null,'','#'+v)}catch(e){}if(v==='add')S.draft=null;S.animate=true;render();$('#main').focus({preventScroll:true});window.scrollTo({top:keep&&S.scrollMem[v]||0});topState()}
+function goBack(){const st=S.stack||[];if(st.length)go(st[st.length-1],'back')}
+const buzz=()=>{try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}};
+// Phone top bar: Back when a page was opened from another page; the page title slides in once the big title scrolls away.
+function topState(){const b=document.body;b.classList.toggle('scrolled',scrollY>4);const back=!!(S.stack&&S.stack.length);$('#topBack').hidden=!back;b.classList.toggle('hasback',back);
+  const h=$('#main .pagehead h1'),tb=$('.topbar');const t=$('#topTitle');
+  if(h){t.firstChild.textContent=h.textContent;t.lastChild.textContent=$('#monthSel').selectedOptions[0]?$('#monthSel').selectedOptions[0].textContent:''}
+  b.classList.toggle('titled',!!h&&h.getBoundingClientRect().bottom<tb.getBoundingClientRect().bottom)}
+// Swipe right from the left edge = Back.
+function edgeBack(){let x0=null,y0=0,dx=0,on=false;const m=$('#main');
+  addEventListener('touchstart',e=>{x0=null;const t=e.touches[0];if(!PHONE()||!(S.stack&&S.stack.length)||t.clientX>22||e.touches.length>1||$('#modalRoot').firstElementChild)return;x0=t.clientX;y0=t.clientY;dx=0;on=false},{passive:true});
+  addEventListener('touchmove',e=>{if(x0==null)return;const t=e.touches[0];dx=t.clientX-x0;const dy=t.clientY-y0;
+    if(!on){if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>8){x0=null;return}if(dx<10)return;on=true;m.style.transition='none'}
+    e.preventDefault();m.style.transform=`translateX(${Math.max(0,dx)}px)`;m.style.opacity=1-Math.min(.5,dx/innerWidth)},{passive:false});
+  addEventListener('touchend',()=>{if(x0==null||!on){x0=null;return}x0=null;
+    if(dx>innerWidth*.28){buzz();m.style.transition='transform .18s var(--ease),opacity .18s';m.style.transform=`translateX(${innerWidth}px)`;m.style.opacity=0;setTimeout(()=>{m.style.cssText='';goBack()},170)}
+    else{m.style.transition='transform .22s var(--ease),opacity .22s';m.style.transform='';m.style.opacity='';setTimeout(()=>m.style.cssText='',230)}},{passive:true})}
 function render(){
   S.renderedOnce=true;S.mc=new Map();
   document.querySelectorAll('#menu button,#tabbar button,#moreInner button').forEach(b=>b.setAttribute('aria-current',b.dataset.go===S.view?'page':'false'));
@@ -1447,10 +1499,12 @@ function render(){
   const main=$('#main');const y=window.scrollY;
   main.innerHTML=banner()+v();
   const anim=S.animate&&!reduced();main.classList.toggle('anim',anim);
+  main.classList.remove('nav-push','nav-back','nav-fade');if(anim&&PHONE()){void main.offsetWidth;main.classList.add('nav-'+(S.navAnim||'fade'))}S.navAnim=null;
   if(anim){[...main.children].forEach((c,i)=>{c.classList.add('rise');c.style.setProperty('--i',i)});main.querySelectorAll('.fill').forEach((f,j)=>f.style.setProperty('--j',j%14));main.querySelectorAll('.gy,.bub').forEach((f,j)=>f.style.setProperty('--j',j%40));countUp(main)}
   else window.scrollTo({top:y});
   S.animate=false;bindView();
   main.querySelectorAll('.tabs').forEach(t=>{const b=t.querySelector('[aria-selected="true"]');if(b&&t.scrollWidth>t.clientWidth)t.scrollLeft+=b.getBoundingClientRect().left-t.getBoundingClientRect().left-(t.clientWidth-b.offsetWidth)/2});
+  topState();
 }
 function countUp(root){
   const els=root.querySelectorAll('.cu');if(!els.length)return;const t0=performance.now(),D=900;
@@ -1946,7 +2000,7 @@ function vAdd(){
     <label class="field" id="empWrap" ${d.cat==='salaries'?'':'hidden'}><span>Employee</span><input class="input" id="fEmp" list="empList" value="${esc(d.employee)}" placeholder="მარიამი"><datalist id="empList">${[...new Set([...S.tx.values()].map(t=>t.employee).filter(Boolean))].map(n=>`<option value="${esc(n)}">`).join('')}</datalist></label>
     <label class="field"><span>Note</span><textarea class="input" id="fNote" rows="2" placeholder="Optional">${esc(d.note)}</textarea></label>
     <div class="flow" style="border-top:1px solid var(--line);padding-top:8px"><div class="ln"><span class="k">Saved as</span><span class="v num" id="fSum">—</span></div></div>
-    <div class="row"><button class="btn amber" id="fSave" ${S.canWrite?'':'disabled'}>Save</button>${d.id?'<button class="btn danger" id="fDel">Delete</button>':''}${d.recId&&!d.id?'<button class="btn" id="fSkip">Skip this month</button>':''}<span class="spacer"></span><button class="btn ghost" data-go="${d.id||d.recId?'expenses':'overview'}">Cancel</button></div>
+    <div class="row formbar"><button class="btn amber" id="fSave" ${S.canWrite?'':'disabled'}>Save</button>${d.id?'<button class="btn danger" id="fDel">Delete</button>':''}${d.recId&&!d.id?'<button class="btn" id="fSkip">Skip this month</button>':''}<span class="spacer"></span><button class="btn ghost" data-go="${d.id||d.recId?'expenses':'overview'}">Cancel</button></div>
     <p class="hint">${d.id&&d.recId?'Deleting this brings back the automatic fixed amount.':'After saving, the form clears so you can add the next one.'}</p>
   </div></div>`;
 }
@@ -3683,7 +3737,7 @@ function sheetDrag(sheet,close){if(!sheet)return;let y0=0,x0=0,dy=0,t0=0,on=fals
     if(!on){if(Math.abs(dX)>Math.abs(dY)&&Math.abs(dX)>6||dY<-6){can=false;return}if(dY<8)return;on=true;sheet.style.transition='none'}
     e.preventDefault();dy=Math.max(0,dY-8);sheet.style.transform=`translateY(${dy}px)`},{passive:false});
   const end=()=>{if(!on)return;on=false;can=false;const v=dy/Math.max(1,Date.now()-t0);
-    if(dy>110||(v>.5&&dy>40))close();else{sheet.style.transition='transform .25s var(--ease)';sheet.style.transform=''}};
+    if(dy>110||(v>.5&&dy>40)){buzz();close()}else{sheet.style.transition='transform .25s var(--ease)';sheet.style.transform=''}};
   sheet.addEventListener('touchend',end,{passive:true});sheet.addEventListener('touchcancel',end,{passive:true})}
 function openMore(){const m=$('#moreSheet');if(m.classList.contains('open'))return closeMore(true);$('#moreInner').style.cssText='';m.classList.remove('closing');m.classList.add('open')}
 function closeMore(anim){const m=$('#moreSheet');if(!m.classList.contains('open'))return;const done=()=>{m.classList.remove('open','closing');$('#moreInner').style.cssText=''};
@@ -3699,7 +3753,7 @@ function pullToRefresh(){const el=document.createElement('div');el.className='pt
     if(d<0||scrollY>0||(d<12&&Math.abs(t.clientX-x0)>d)){y0=null;hide();return}if(d<6)return;
     e.preventDefault();el.style.transition='none';el.style.opacity=Math.min(1,d/T);el.style.transform=`translateY(${Math.min(d*.5,64)-60}px) rotate(${d*3}deg)`},{passive:false});
   addEventListener('touchend',async()=>{if(y0==null)return;y0=null;if(d<T)return hide();
-    busy=true;el.style.transition='transform .2s var(--ease)';el.style.transform='translateY(4px)';el.classList.add('spin');
+    busy=true;buzz();el.style.transition='transform .2s var(--ease)';el.style.transform='translateY(4px)';el.classList.add('spin');
     try{await S.backend.load();S.backend.flush();render();toast('Up to date')}catch(err){toast(errMsg(err))}
     busy=false;el.classList.remove('spin');hide()},{passive:true})}
 
