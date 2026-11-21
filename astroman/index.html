@@ -863,6 +863,92 @@ body:has(.wcs) .toast{bottom:auto;top:calc(14px + env(safe-area-inset-top,0px));
 .rcl.st-bad{box-shadow:inset 3px 0 0 var(--bad);padding-left:8px}
 .rcrow{grid-template-columns:minmax(0,1fr) auto auto auto;cursor:pointer}
 @media (max-width:560px){.rcl{grid-template-columns:34px minmax(0,1fr) auto}.rcl .rcf{grid-column:2/-1;justify-self:end}.rcrow{grid-template-columns:minmax(0,1fr) auto auto}.rcrow>b{display:none}}
+/* ---------- app feel on phones ---------- */
+.mtop{display:none}
+.ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 58px);z-index:14;width:38px;height:38px;margin-left:-19px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line-2);box-shadow:0 8px 22px rgba(0,0,0,.3);display:grid;place-items:center;color:var(--brand);opacity:0;transform:translateY(-60px);pointer-events:none}
+.ptr svg{width:20px;height:20px}
+.ptr.spin svg{animation:ptrspin .8s linear infinite}
+@keyframes ptrspin{to{transform:rotate(360deg)}}
+@media (max-width:860px){
+  html{overscroll-behavior-y:none}
+  html.mlock,html.mlock body{overflow:hidden}
+  body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  button,.btn,.tabbar,.moresheet,.tabs,.chip,[data-act],[data-go]{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  button,a,input,select,textarea,[data-act],[data-go]{touch-action:manipulation}
+  .btn,.iconbtn,.tabs button,.moresheet button,.tabbar button,.mx{transition:transform .12s var(--ease),background .15s,opacity .15s}
+  .btn:active,.iconbtn:active,.tabs button:active,.mx:active{transform:scale(.96)}
+  .tabbar button:active svg{transform:scale(.88)}
+  .tabbar button svg{transition:transform .12s}
+  .panel[data-act]:active,.panel[data-go]:active,.mcard[data-go]:active,[data-act=st_edit]:active{transform:scale(.985);transition:transform .12s}
+  .topbar{border-bottom-color:transparent;transition:border-color .2s,box-shadow .2s}
+  body.scrolled .topbar{border-bottom-color:var(--line);box-shadow:0 6px 18px -12px rgba(0,0,0,.5)}
+  /* tab bar: pill under the current section */
+  .tabbar button[aria-current="page"] svg{background:color-mix(in srgb,var(--accent) 16%,transparent);border-radius:999px;padding:3px 14px;box-sizing:content-box;margin:-3px 0}
+  .tabbar button span{font-weight:600}
+  /* page header: short text, one row of actions that scrolls sideways */
+  .pagehead{flex-direction:column;align-items:stretch;gap:10px}
+  .pagehead p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .pagehead p.open{display:block}
+  .pagehead .actions{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:-14px;padding:2px 14px;-webkit-overflow-scrolling:touch}
+  .pagehead .actions::-webkit-scrollbar,.tabs::-webkit-scrollbar,.scrollx::-webkit-scrollbar,.strip::-webkit-scrollbar{display:none}
+  .pagehead .actions>*{flex:none}
+  .tabs{scroll-snap-type:x proximity;scroll-padding-inline:8px}.tabs button{scroll-snap-align:start;flex:none}
+  .scrollx,.strip{scrollbar-width:none}
+  /* popups are bottom sheets: grab handle, close button, swipe down to close */
+  .scrim{overscroll-behavior:contain;touch-action:none}
+  .scrim .modal{touch-action:pan-x pan-y}
+  .modal,.modal.wide{max-height:calc(100dvh - 44px - env(safe-area-inset-top,0px));padding-top:26px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;border:0;border-top:1px solid var(--line-2);box-shadow:0 -20px 60px rgba(0,0,0,.45);will-change:transform}
+  .scrim.noanim,.scrim.noanim .modal{animation:none}
+  .mtop{display:block;position:sticky;top:-26px;height:0;margin:-26px 0 26px;z-index:5}
+  .mgrab{position:absolute;left:50%;top:8px;width:38px;height:5px;margin-left:-19px;border-radius:3px;background:var(--line-2);display:block}
+  .mx{position:absolute;right:-6px;top:4px;width:32px;height:32px;border-radius:50%;border:0;background:var(--surface-2);color:var(--ink-2);font-size:14px;display:grid;place-items:center;cursor:pointer}
+  .modal h3{padding-right:34px}
+  .scrim.out{animation:fadeout .22s ease both;pointer-events:none}
+  .scrim.out .modal{animation:slidedown .22s var(--ease) both}
+  @keyframes fadeout{to{opacity:0}}
+  @keyframes slidedown{to{transform:translateY(100%)}}
+  /* More: a grid of tiles */
+  .moresheet{touch-action:none;overscroll-behavior:contain}
+  .moresheet.closing{animation:fadeout .2s ease both}
+  .moresheet.closing .sheet{animation:slidedown .2s var(--ease) both}
+  .moresheet .sheet{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:8px 12px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line-2)}
+  .moresheet .grab{grid-column:1/-1;height:5px;width:38px;margin:2px auto 8px}
+  .moresheet button{flex-direction:column;justify-content:center;gap:7px;padding:14px 4px 12px;background:var(--surface-2);border-radius:14px;font-size:12.5px;font-weight:600;text-align:center;line-height:1.2;min-height:78px}
+  .moresheet button svg{width:22px;height:22px;color:var(--brand)}
+  .moresheet button:active{transform:scale(.95)}
+  .moresheet button[aria-current="page"]{outline:1.5px solid var(--brand);outline-offset:-1.5px}
+  .toast{bottom:calc(86px + env(safe-area-inset-bottom,0px));border-radius:12px}
+}
+@media (max-width:640px){
+  /* sales: one card per order under its day */
+  .tablewrap:has(table.ordl){overflow:visible;background:transparent;border:0;box-shadow:none}
+  table.ordl,table.ordl tbody{display:block}table.ordl thead{display:none}
+  table.ordl tr{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;padding:11px 14px;border:1px solid var(--line);border-top:0;background:var(--surface)}
+  table.ordl td{border:0;padding:0!important;min-width:0!important;white-space:normal}
+  table.ordl td:nth-child(1){display:none}
+  table.ordl td:nth-child(2){grid-column:1;grid-row:1;font-weight:600}
+  table.ordl td:nth-child(5){grid-column:2;grid-row:1/span 2;align-self:center;font-weight:700;font-size:15px}
+  table.ordl td:nth-child(3){grid-column:1;grid-row:2;font-size:13px;color:var(--ink-2)}
+  table.ordl td:nth-child(4){grid-column:1/-1;grid-row:3;font-size:12px;color:var(--muted);margin-top:3px}
+  table.ordl tr.dayrow{display:block;padding:0;border:0;background:transparent;margin-top:14px}
+  table.ordl tr.dayrow td{display:flex!important;align-items:center;gap:6px;padding:9px 14px!important;border:1px solid var(--line);border-radius:12px 12px 0 0;background:var(--surface-2);font-size:12.5px;font-weight:600;color:var(--ink-2)}
+  table.ordl tr.dayrow td b.r{margin-left:auto;color:var(--ink)}
+  table.ordl tbody tr:not(.dayrow):has(+ tr.dayrow),table.ordl tbody tr:not(.dayrow):last-child{border-radius:0 0 12px 12px}
+  /* fixed costs: one card per cost, fields labelled */
+  .tablewrap:has(table.fxt){overflow:visible;background:transparent;border:0;box-shadow:none}
+  table.fxt,table.fxt tbody{display:block}table.fxt thead{display:none}
+  table.fxt tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 36px;gap:10px;padding:12px;margin-bottom:10px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
+  table.fxt td{border:0;padding:0!important;min-width:0}
+  table.fxt td[data-l]::before{content:attr(data-l);display:block;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;font-weight:600}
+  table.fxt td:nth-child(1){grid-column:1/3}
+  table.fxt td:nth-child(6){grid-column:3;grid-row:1;align-self:end}
+  table.fxt td:nth-child(2){grid-row:2;grid-column:1}
+  table.fxt td:nth-child(5){grid-row:2;grid-column:2/-1}
+  table.fxt td:nth-child(3){grid-row:3;grid-column:1/-1}
+  table.fxt td:nth-child(4){grid-row:4;grid-column:1/3}
+  table.fxt .input{width:100%;max-width:none!important}
+}
+@media (prefers-reduced-motion:reduce){.scrim.out,.scrim.out .modal,.moresheet.closing,.moresheet.closing .sheet{animation:none}}
 </style>
 
 <div class="app">
@@ -1330,8 +1416,15 @@ function renderShell(){
   $('#menu').innerHTML=PAGES.map((p,i)=>(p.id==='pl'?'<div class="sep"></div><div class="grp">Finance</div>':p.id==='optimo'?'<div class="sep"></div><div class="grp">Store</div>':'')+`<button data-go="${p.id}">${svg(IC[p.id])}${p.t}</button>`).join('');
   $('#tabbar').innerHTML=[['overview','Overview'],['expenses','Expenses'],['add',''],['optimo','Optimo'],['more','More']].map(([id,t])=>id==='add'?`<button data-go="add" aria-label="Add expense"><span class="plus">+</span></button>`:`<button data-go="${id}">${svg(IC[id],22)}<span>${t}</span></button>`).join('');
   $('#moreInner').innerHTML='<div class="grab"></div>'+[['recap','Recap'],['sales','Sales'],['products','Products'],['store','Store sales'],['count','Stock count'],['tools','Tools'],['bank','Bank import'],['pl','Profit & loss'],['imports','Imports'],['loan','Loan'],['settings','Settings']].map(([id,t])=>`<button data-go="${id}">${svg(IC[id],20)}${t}</button>`).join('');
-  document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){e.preventDefault();if(g.dataset.go==='more'){$('#moreSheet').classList.add('open');return}$('#moreSheet').classList.remove('open');go(g.dataset.go)}});
-  $('#moreSheet').addEventListener('click',e=>{if(e.target.id==='moreSheet')e.currentTarget.classList.remove('open')});
+  document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');
+    if(!g){const ph=e.target.closest('.pagehead p');if(ph&&!e.target.closest('a,button')&&PHONE())ph.classList.toggle('open');return}
+    e.preventDefault();const tab=!!g.closest('#tabbar');if(g.dataset.go==='more')return openMore();
+    if(tab&&g.dataset.go===S.view&&S.view!=='add')return window.scrollTo({top:0,behavior:'smooth'});
+    closeMore(true);go(g.dataset.go,tab)});
+  $('#moreSheet').addEventListener('click',e=>{if(e.target.id==='moreSheet')closeMore(true)});
+  sheetDrag($('#moreInner'),()=>closeMore(true));pullToRefresh();
+  addEventListener('scroll',()=>document.body.classList.toggle('scrolled',scrollY>4),{passive:true});
+  new MutationObserver(()=>document.documentElement.classList.toggle('mlock',!!$('#modalRoot').firstElementChild)).observe($('#modalRoot'),{childList:true});
   $('#monthSel').addEventListener('change',e=>setMonth(e.target.value));
   $('#mPrev').onclick=()=>setMonth(addMonth(S.month,-1));
   $('#mNext').onclick=()=>setMonth(addMonth(S.month,1));
@@ -1345,10 +1438,11 @@ function fillMonthSel(){
   $('#topRecap').textContent=mShort(addMonth(thisMonth(),-1))+' recap';topAgo();
 }
 function route(){const h=(location.hash||'').slice(1);if(PAGES.some(p=>p.id===h)||h==='add'){S.view=h}S.animate=true;render()}
-function go(v){if(REP)closeRecap();if(v==='recap'){$('#moreSheet').classList.remove('open');return openRecap('month')}fillMonthSel();S.view=v;if(!KEEP_LINK)try{history.replaceState(null,'','#'+v)}catch(e){}if(v==='add')S.draft=null;S.animate=true;render();$('#main').focus({preventScroll:true});window.scrollTo({top:0})}
+function go(v,keep){if(REP)closeRecap();if(v==='recap'){closeMore();return openRecap('month')}fillMonthSel();(S.scrollMem||(S.scrollMem={}))[S.view]=scrollY;S.view=v;if(!KEEP_LINK)try{history.replaceState(null,'','#'+v)}catch(e){}if(v==='add')S.draft=null;S.animate=true;render();$('#main').focus({preventScroll:true});window.scrollTo({top:keep&&S.scrollMem[v]||0})}
 function render(){
   S.renderedOnce=true;S.mc=new Map();
-  document.querySelectorAll('#menu button,#tabbar button').forEach(b=>b.setAttribute('aria-current',b.dataset.go===S.view?'page':'false'));
+  document.querySelectorAll('#menu button,#tabbar button,#moreInner button').forEach(b=>b.setAttribute('aria-current',b.dataset.go===S.view?'page':'false'));
+  if(!['overview','expenses','add','optimo'].includes(S.view))$('#tabbar [data-go=more]').setAttribute('aria-current','page');
   const v={connect:vConnect,overview:vOverview,sales:vSales,products:vProducts,expenses:vExpenses,bank:vBank,pl:vPL,imports:vImports,loan:vLoan,optimo:vOptimo,store:vStore,count:vCount,tools:vTools,settings:vSettings,add:vAdd}[S.view]||vOverview;
   const main=$('#main');const y=window.scrollY;
   main.innerHTML=banner()+v();
@@ -1356,6 +1450,7 @@ function render(){
   if(anim){[...main.children].forEach((c,i)=>{c.classList.add('rise');c.style.setProperty('--i',i)});main.querySelectorAll('.fill').forEach((f,j)=>f.style.setProperty('--j',j%14));main.querySelectorAll('.gy,.bub').forEach((f,j)=>f.style.setProperty('--j',j%40));countUp(main)}
   else window.scrollTo({top:y});
   S.animate=false;bindView();
+  main.querySelectorAll('.tabs').forEach(t=>{const b=t.querySelector('[aria-selected="true"]');if(b&&t.scrollWidth>t.clientWidth)t.scrollLeft+=b.getBoundingClientRect().left-t.getBoundingClientRect().left-(t.clientWidth-b.offsetWidth)/2});
 }
 function countUp(root){
   const els=root.querySelectorAll('.cu');if(!els.length)return;const t0=performance.now(),D=900;
@@ -1924,7 +2019,7 @@ function vSales(){
   <div class="kpi"><div class="lbl">Per day</div><div class="val num">${cu(M.sales/Math.max(1,days))}<small>₾</small></div><div class="delta">target 1,000 ₾ · ${pct(M.sales/Math.max(1,days),1000)}%</div></div></div>
   <div class="grid g3"><div class="panel chart"><h2>Sales by day</h2><p class="sub">Hover or tap a bar for the day's total. Dashed line is the 1,000 ₾/day target.</p>${dailyChart(M)}</div>${channels(M)}</div>
   <div class="toolbar mt"><input class="input grow" id="sQ" placeholder="Search customer, product, payment…" value="${esc(S.salesQ)}"><span class="muted small">${rows.length} of ${M.orders} orders</span></div>
-  ${rows.length?`<div class="tablewrap"><table><thead><tr><th>Date</th><th>Customer</th><th>Product</th><th>Payment</th><th class="r">Amount</th></tr></thead><tbody>${rows.slice().reverse().map((r,i,A)=>(i===0||A[i-1].d!==r.d?dayHead(r.d,A):'')+`<tr><td class="num">${esc(r.d||'—')}</td><td>${esc(r.c)}</td><td style="min-width:200px">${esc(r.p)}${r.no?' <span class="chip warn">not in Optimo</span>':''}</td><td>${r.pay==='unknown'?'<span class="chip warn">Not recorded</span>':r.pay==='personal'?'<span class="chip">Rezi personal</span>':esc(PAYS[r.pay]||r.pay)}</td><td class="r num">${gel(r.a)}</td></tr>`).join('')}</tbody></table></div>`:`<div class="panel empty"><b>No sales for ${mLabel(m)}</b>${S.mcp||S.backend?'Press “Sync now” to pull them in.':'Download your order sheet and upload it here.'}</div>`}`);
+  ${rows.length?`<div class="tablewrap"><table class="ordl"><thead><tr><th>Date</th><th>Customer</th><th>Product</th><th>Payment</th><th class="r">Amount</th></tr></thead><tbody>${rows.slice().reverse().map((r,i,A)=>(i===0||A[i-1].d!==r.d?dayHead(r.d,A):'')+`<tr><td class="num">${esc(r.d||'—')}</td><td>${esc(r.c)}</td><td style="min-width:200px">${esc(r.p)}${r.no?' <span class="chip warn">not in Optimo</span>':''}</td><td>${r.pay==='unknown'?'<span class="chip warn">Not recorded</span>':r.pay==='personal'?'<span class="chip">Rezi personal</span>':esc(PAYS[r.pay]||r.pay)}</td><td class="r num">${gel(r.a)}</td></tr>`).join('')}</tbody></table></div>`:`<div class="panel empty"><b>No sales for ${mLabel(m)}</b>${S.mcp||S.backend?'Press “Sync now” to pull them in.':'Download your order sheet and upload it here.'}</div>`}`);
 }
 function dayHead(d,A){const R=A.filter(x=>x.d===d);return `<tr class="dayrow"><td colspan="5">${d?esc(new Date(d+'T12:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})):'No date'}${d===today()?' · <b>today</b>':''} · ${R.length} order${R.length>1?'s':''}<b class="num r">${gel(R.reduce((a,x)=>a+x.a,0))}</b></td></tr>`}
 function dailyChart(M){
@@ -3253,8 +3348,8 @@ function vSettings(){
   const theme=lsGet('af.theme2')||'dark';
   return `<div class="pagehead"><div><div class="eyebrow">Setup</div><h1>Settings</h1><p>The defaults the rest of the app uses.</p></div><div class="actions"><div class="seg" role="group" aria-label="Appearance"><button data-theme-set="dark" aria-pressed="${theme!=='light'}">Dark</button><button data-theme-set="light" aria-pressed="${theme==='light'}">Light</button></div></div></div>
   <div class="grid g2"><div class="panel" style="grid-column:1/-1"><div class="row"><div><h2>Fixed monthly costs</h2><p class="sub" style="margin:0">Added to every month automatically, from the start month on. A real entry for the same cost (from the bank or added by hand) replaces the automatic one for that month. Total ${gel(ft)} a month.</p></div></div>
-   <div class="tablewrap mt"><table><thead><tr><th>Name</th><th>Category</th><th>Matches payments containing</th><th>From month</th><th class="r">Amount ₾</th><th></th></tr></thead><tbody>
-   ${fixed.map((f,i)=>`<tr><td><input class="input" data-fx="${i}" data-k="label" value="${esc(f.label)}"></td><td><select class="input" data-fx="${i}" data-k="cat">${catOptions(f.cat)}</select></td><td><input class="input" data-fx="${i}" data-k="match" value="${esc(f.match||'')}" placeholder="any ${esc(catLabel(f.cat).toLowerCase())}"></td><td><input class="input" type="month" data-fx="${i}" data-k="from" value="${esc(f.from||'')}"></td><td><input class="input num" data-fx="${i}" data-k="gel" inputmode="decimal" value="${esc(f.gel)}" style="text-align:right;max-width:110px;margin-left:auto"></td><td class="r"><button class="btn sm ghost" data-rmfx="${i}" aria-label="Remove">✕</button></td></tr>`).join('')}
+   <div class="tablewrap mt"><table class="fxt"><thead><tr><th>Name</th><th>Category</th><th>Matches payments containing</th><th>From month</th><th class="r">Amount ₾</th><th></th></tr></thead><tbody>
+   ${fixed.map((f,i)=>`<tr><td data-l="Name"><input class="input" data-fx="${i}" data-k="label" value="${esc(f.label)}"></td><td data-l="Category"><select class="input" data-fx="${i}" data-k="cat">${catOptions(f.cat)}</select></td><td data-l="Matches payments containing"><input class="input" data-fx="${i}" data-k="match" value="${esc(f.match||'')}" placeholder="any ${esc(catLabel(f.cat).toLowerCase())}"></td><td data-l="From month"><input class="input" type="month" data-fx="${i}" data-k="from" value="${esc(f.from||'')}"></td><td data-l="Amount ₾"><input class="input num" data-fx="${i}" data-k="gel" inputmode="decimal" value="${esc(f.gel)}" style="text-align:right;max-width:110px;margin-left:auto"></td><td class="r"><button class="btn sm ghost" data-rmfx="${i}" aria-label="Remove">✕</button></td></tr>`).join('')}
    </tbody></table></div>
    <div class="row mt"><button class="btn" data-act="addFixed" ${S.canWrite?'':'disabled'}>+ Add fixed cost</button><span class="spacer"></span><button class="btn primary" data-act="saveFixed" ${S.canWrite?'':'disabled'}>Save fixed costs</button></div></div>
   <div class="panel stack"><h2>Balances</h2><p class="sub" style="margin:0">Type what is really in an account right now to correct it. From then on it moves by itself with every sale and expense. Importing a bank statement also sets BOG or TBC.</p>
@@ -3573,9 +3668,40 @@ async function opExport(){
 }
 
 /* ============================== modal & binding ============================== */
-function modal(html,wide){$('#modalRoot').innerHTML=`<div class="scrim" id="scrim"><div class="modal ${wide?'wide':''}" role="dialog" aria-modal="true">${html}</div></div>`;document.querySelectorAll('#modalRoot [data-act]').forEach(b=>b.onclick=e=>act(b.dataset.act,b,e));{const q1=$('#ceQ'),q2=$('#ceW'),tot=$('#ceTot');if(q1&&q2&&tot){const upd=()=>{tot.value=(parseNum(q1.value)||0)+(parseNum(q2.value)||0)};q1.oninput=upd;q2.oninput=upd}}bindPictureDrop();$('#scrim').addEventListener('click',e=>{if(e.target.id==='scrim'||e.target.closest('[data-close]'))closeModal()});document.addEventListener('keydown',escClose)}
+function modal(html,wide){const was=!!$('#scrim');$('#modalRoot').innerHTML=`<div class="scrim${was?' noanim':''}" id="scrim"><div class="modal ${wide?'wide':''}" role="dialog" aria-modal="true"><div class="mtop"><i class="mgrab"></i><button class="mx" data-close aria-label="Close">✕</button></div>${html}</div></div>`;document.querySelectorAll('#modalRoot [data-act]').forEach(b=>b.onclick=e=>act(b.dataset.act,b,e));{const q1=$('#ceQ'),q2=$('#ceW'),tot=$('#ceTot');if(q1&&q2&&tot){const upd=()=>{tot.value=(parseNum(q1.value)||0)+(parseNum(q2.value)||0)};q1.oninput=upd;q2.oninput=upd}}bindPictureDrop();$('#scrim').addEventListener('click',e=>{if(e.target.id==='scrim'||e.target.closest('[data-close]'))closeModal()});document.addEventListener('keydown',escClose);sheetDrag($('#scrim .modal'),closeModal)}
 function escClose(e){if(e.key==='Escape')closeModal()}
-function closeModal(){$('#modalRoot').innerHTML='';document.removeEventListener('keydown',escClose)}
+function closeModal(){const s=$('#scrim');document.removeEventListener('keydown',escClose);
+  if(s&&PHONE()&&!reduced()){s.removeAttribute('id');s.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));s.classList.add('out');document.body.appendChild(s);setTimeout(()=>s.remove(),230)}
+  $('#modalRoot').innerHTML=''}
+const PHONE=()=>matchMedia('(max-width:860px)').matches;
+// Drag a bottom sheet down to close it: from the handle anywhere, or from the content when it is scrolled to the top.
+function sheetDrag(sheet,close){if(!sheet)return;let y0=0,x0=0,dy=0,t0=0,on=false,can=false;
+  sheet.addEventListener('touchstart',e=>{if(!PHONE()||e.touches.length>1){can=false;return}const t=e.touches[0];y0=t.clientY;x0=t.clientX;dy=0;t0=Date.now();on=false;
+    const grab=t.clientY-sheet.getBoundingClientRect().top<44;can=grab||sheet.scrollTop<=0;
+    for(let n=e.target;n&&n!==sheet&&can&&!grab;n=n.parentElement)if(n.scrollTop>0&&n.scrollHeight>n.clientHeight+2)can=false},{passive:true});
+  sheet.addEventListener('touchmove',e=>{if(!can)return;const t=e.touches[0],dY=t.clientY-y0,dX=t.clientX-x0;
+    if(!on){if(Math.abs(dX)>Math.abs(dY)&&Math.abs(dX)>6||dY<-6){can=false;return}if(dY<8)return;on=true;sheet.style.transition='none'}
+    e.preventDefault();dy=Math.max(0,dY-8);sheet.style.transform=`translateY(${dy}px)`},{passive:false});
+  const end=()=>{if(!on)return;on=false;can=false;const v=dy/Math.max(1,Date.now()-t0);
+    if(dy>110||(v>.5&&dy>40))close();else{sheet.style.transition='transform .25s var(--ease)';sheet.style.transform=''}};
+  sheet.addEventListener('touchend',end,{passive:true});sheet.addEventListener('touchcancel',end,{passive:true})}
+function openMore(){const m=$('#moreSheet');if(m.classList.contains('open'))return closeMore(true);$('#moreInner').style.cssText='';m.classList.remove('closing');m.classList.add('open')}
+function closeMore(anim){const m=$('#moreSheet');if(!m.classList.contains('open'))return;const done=()=>{m.classList.remove('open','closing');$('#moreInner').style.cssText=''};
+  if(anim&&!reduced()){m.classList.add('closing');setTimeout(done,200)}else done()}
+// Pull the page down from the top to fetch the latest data (the home-screen app has no reload button).
+function pullToRefresh(){const el=document.createElement('div');el.className='ptr';el.setAttribute('aria-hidden','true');el.innerHTML=svg('M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5',20);document.body.appendChild(el);
+  let y0=null,x0=0,d=0,busy=false;const T=80;
+  const hide=()=>{el.style.transition='transform .25s var(--ease),opacity .25s';el.style.opacity=0;el.style.transform='translateY(-60px)'};
+  addEventListener('touchstart',e=>{y0=null;if(busy||!PHONE()||!S.backend||scrollY>0||e.touches.length>1||$('#modalRoot').firstElementChild||$('#moreSheet').classList.contains('open'))return;
+    for(let n=e.target;n&&n!==document.body;n=n.parentElement)if(n.scrollTop>0)return;
+    y0=e.touches[0].clientY;x0=e.touches[0].clientX;d=0},{passive:true});
+  addEventListener('touchmove',e=>{if(y0==null)return;const t=e.touches[0];d=t.clientY-y0;
+    if(d<0||scrollY>0||(d<12&&Math.abs(t.clientX-x0)>d)){y0=null;hide();return}if(d<6)return;
+    e.preventDefault();el.style.transition='none';el.style.opacity=Math.min(1,d/T);el.style.transform=`translateY(${Math.min(d*.5,64)-60}px) rotate(${d*3}deg)`},{passive:false});
+  addEventListener('touchend',async()=>{if(y0==null)return;y0=null;if(d<T)return hide();
+    busy=true;el.style.transition='transform .2s var(--ease)';el.style.transform='translateY(4px)';el.classList.add('spin');
+    try{await S.backend.load();S.backend.flush();render();toast('Up to date')}catch(err){toast(errMsg(err))}
+    busy=false;el.classList.remove('spin');hide()},{passive:true})}
 
 /* ============================== store register (POS) ============================== */
 // The register (astroman/store/) writes `pos` (one record per sale) and `shift` records with its own limited
