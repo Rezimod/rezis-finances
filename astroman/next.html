@@ -4410,20 +4410,25 @@ async function importRead(btn){
 function importPlan(m,rows){
   const reg=[...S.pos.values()].filter(o=>o&&o.lines&&String(o.day||'').startsWith(m)&&o.src!=='sheet');
   const done=new Set([...S.pos.values()].filter(o=>o&&o.src==='sheet').map(o=>o.imp));
-  const used=new Set();const dd=(a,b)=>Math.abs(Date.parse(a)-Date.parse(b))/864e5;
-  const find=(a,day,ok)=>{let best=null,bd=9;reg.forEach(o=>{if(used.has(o.id)||!ok(o))return;if(Math.abs((+o.total||0)-a)>=0.01)return;const d=dd(o.day,day);if(d<=1&&d<bd){bd=d;best=o}});return best};
+  const used=new Set();const dd=(a,b)=>Math.abs(Date.parse(a)-Date.parse(b))/864e5;const alive=o=>o.status!=='void';
+  const find=(a,day,maxd,tol=0.01)=>{let best=null,bd=9,ba=1e9;reg.forEach(o=>{if(used.has(o.id)||!alive(o))return;const da=Math.abs((+o.total||0)-a);if(da>=tol)return;const d=dd(o.day,day);if(d<=maxd&&(d<bd||(d===bd&&da<ba))){bd=d;ba=da;best=o}});return best};
   const keyOf=r=>hash(m+'|'+r.tab+'|'+r.i+'|'+r.amt+'|'+r.p);
   const live=rows.filter(r=>!r.cancel),canc=rows.filter(r=>r.cancel);
-  const pairs=[],add=[],conflicts=[],skipped=[];
-  live.forEach(r=>{const o=find(r.amt,r.day,o=>o.status!=='void');if(o){used.add(o.id);pairs.push([r,o])}});
-  // one register sale for several sheet rows of the same customer and day (69 + 49 = 118)
-  const rest=live.filter(r=>!pairs.some(p=>p[0]===r));const grp={};rest.forEach(r=>{const k=r.day+'|'+(r.p||r.c);(grp[k]||(grp[k]=[])).push(r)});
-  Object.values(grp).forEach(g=>{if(g.length<2)return;const o=find(r2(g.reduce((a,r)=>a+r.amt,0)),g[0].day,o=>o.status!=='void');if(o){used.add(o.id);g.forEach(r=>pairs.push([r,o]))}});
-  live.forEach(r=>{if(pairs.some(p=>p[0]===r))return;if(done.has(keyOf(r)))skipped.push(r);else add.push({...r,key:keyOf(r)})});
-  canc.forEach(r=>{const o=find(r.amt,r.day,o=>o.status!=='void');if(o){used.add(o.id);conflicts.push([r,o])}});
-  const attach=[];const seen=new Set();pairs.forEach(([r,o])=>{if(seen.has(o.id))return;seen.add(o.id);if((r.p||r.a&&!/^(გაიტანს)$/i.test(r.a))&&!custOf(o))attach.push([r,o])});
-  const regOnly=reg.filter(o=>o.status!=='void'&&!used.has(o.id)&&o.src!=='mars');
-  return {rows,pairs,add,conflicts,attach,skipped,regOnly};
+  const pairs=[],add=[],conflicts=[],skipped=[],priceDiff=[];const paired=new Set();
+  const pair=(r,o)=>{used.add(o.id);paired.add(r);pairs.push([r,o])};
+  // same day first, then the next day, so a row never takes another day's sale of the same price
+  for(const maxd of [0,1])live.forEach(r=>{if(paired.has(r))return;const o=find(r.amt,r.day,maxd);if(o)pair(r,o)});
+  // several sheet rows of one customer and day rung as one sale (69 + 49 = 118)
+  const grp={};live.filter(r=>!paired.has(r)).forEach(r=>{const k=r.day+'|'+(r.p||r.c);(grp[k]||(grp[k]=[])).push(r)});
+  Object.values(grp).forEach(g=>{if(g.length<2)return;const o=find(r2(g.reduce((a,r)=>a+r.amt,0)),g[0].day,1);if(o)g.forEach(r=>pair(r,o))});
+  // the same sale at a slightly different price (sheet 50, register 55): the register's price stands
+  const sameWay=(a,b)=>a===b||(['pos','bog','tbc'].includes(a)&&['pos','bog','tbc'].includes(b));
+  live.forEach(r=>{if(paired.has(r))return;let best=null,ba=1e9;reg.forEach(o=>{if(used.has(o.id)||!alive(o)||o.day!==r.day||!sameWay(o.pay,r.pay))return;const da=Math.abs((+o.total||0)-r.amt);if(da<=Math.max(5,r.amt*0.1)&&da<ba){ba=da;best=o}});if(best){pair(r,best);priceDiff.push([r,best])}});
+  live.forEach(r=>{if(paired.has(r))return;if(done.has(keyOf(r)))skipped.push(r);else add.push({...r,key:keyOf(r)})});
+  canc.forEach(r=>{const o=find(r.amt,r.day,1);if(o){used.add(o.id);conflicts.push([r,o])}});
+  const attach=[];const seen=new Set();pairs.forEach(([r,o])=>{if(seen.has(o.id))return;seen.add(o.id);if((r.p||(r.a&&!/^(გაიტანს)$/i.test(r.a)))&&!custOf(o))attach.push([r,o])});
+  const regOnly=reg.filter(o=>alive(o)&&!used.has(o.id)&&o.src!=='mars');
+  return {rows,pairs,add,conflicts,attach,skipped,regOnly,priceDiff};
 }
 function sheetCh(r){if(r.pay==='wolt')return 'wolt';if(r.pay==='glovo')return 'glovo';if(r.pay==='extra')return 'extra';return r.p||(r.a&&!/^(ფილიალი)$/i.test(r.a))?'delivery':'shop'}
 function ordImport(){
@@ -4433,6 +4438,7 @@ function ordImport(){
    <div class="row"><button class="btn primary" data-act="or_impread">${I?'↻ Read again':'Read the sheet'}</button>${I?`<span class="muted small">${I.rows.length} rows read</span>`:''}<span class="spacer"></span><span class="small muted">Sales book from the register since <b>${esc(mLabel(rf))}</b></span></div></div>
   ${I?`<div class="kpis"><div class="kpi"><div class="lbl">To add</div><div class="val num">${I.add.length}</div><div class="delta">${gel(sum(I.add))} · not on the register</div></div><div class="kpi"><div class="lbl">Already on the register</div><div class="val num">${I.pairs.length}</div><div class="delta">${I.attach.length} get phone + address</div></div><div class="kpi"><div class="lbl">Cancelled in sheet, sold on register</div><div class="val num ${I.conflicts.length?'neg':''}">${I.conflicts.length}</div><div class="delta">${gel(I.conflicts.reduce((a,[r])=>a+r.amt,0))} · check these</div></div><div class="kpi"><div class="lbl">Only on the register</div><div class="val num">${I.regOnly.length}</div><div class="delta">${gel(I.regOnly.reduce((a,o)=>a+(+o.total||0),0))}</div></div></div>
    <div class="panel"><h2>To add · ${I.add.length}</h2>${I.add.length?`<div class="tablewrap"><table><tbody>${I.add.map(r=>`<tr><td class="num">${esc(dShort(r.day))}</td><td>${chChip(sheetCh(r))}</td><td><b>${esc(r.c||'')}</b><div class="small muted num">${esc(fmtPh(r.p))}</div></td><td class="small">${esc((r.prod||'').slice(0,50))}<div class="muted">${esc((r.a||'').slice(0,60))}</div></td><td class="small">${esc(PAYS[r.pay]||r.pay)}</td><td class="r num">${gel(r.amt)}</td><td class="small muted">${esc(r.st)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="muted">Nothing new.</div>'}</div>
+   ${I.priceDiff.length?`<div class="panel"><h2>Same sale, different price</h2><p class="sub">The sheet and the register disagree on the price; the register's price is kept.</p><div class="flow">${I.priceDiff.map(([r,o])=>`<div class="ln click" data-act="or_open" data-id="${esc(o.id)}" style="cursor:pointer"><span class="k">${esc(dShort(r.day))} · ${esc(r.prod||'')} · sheet ${gel(r.amt)}</span><b class="num">register ${gel(o.total)}</b></div>`).join('')}</div></div>`:''}
    ${I.conflicts.length?`<div class="panel"><h2>Check these</h2><p class="sub">Cancelled in the sheet but still a sale on the register. If they really were cancelled, cancel them on the register (or here under Orders) so the stock comes back.</p><div class="flow">${I.conflicts.map(([r,o])=>`<div class="ln click" data-act="or_open" data-id="${esc(o.id)}" style="cursor:pointer"><span class="k">${esc(dShort(r.day))} · ${esc(r.prod||'')} · ${esc(PAYS[r.pay]||r.pay)}</span><b class="num">${gel(r.amt)}</b></div>`).join('')}</div></div>`:''}
    <div class="row mt"><label class="row small"><input type="checkbox" id="impBook" ${rf<=m?'checked':''}> From ${esc(mLabel(m))} on, take the sales book from the register and these orders (instead of the sheet)</label><span class="spacer"></span><button class="btn primary" data-act="or_impgo" ${I.add.length||I.attach.length?'':'disabled'}>Import ${I.add.length} order${I.add.length===1?'':'s'} + ${I.attach.length} address${I.attach.length===1?'':'es'}</button></div>`:''}`;
 }
