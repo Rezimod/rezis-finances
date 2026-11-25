@@ -3864,7 +3864,7 @@ function catLive(x){let q=storeQ(x);const c=String(x.countedAt||'');S.pos.forEac
 function vStore(){
   const T=S.store.tab;
   const tabs=[['live','Live'],['history','History'],['setup','Register setup']];
-  const head=`<div class="pagehead"><div><div class="eyebrow">Store · სალარო</div><h1>Store sales</h1><p>What the consultants ring up on the register, as it happens. Kept apart from the books, like the Optimo pages.</p></div><div class="actions"><a class="btn" href="${esc(storeDir())}" target="_blank" rel="noopener">Open the register ↗</a></div></div>
+  const head=`<div class="pagehead"><div><div class="eyebrow">Store · სალარო</div><h1>Store sales</h1><p>What the consultants ring up on the register, as it happens. Kept apart from the books, like the Optimo pages.</p></div><div class="actions"><a class="btn" href="${esc(storeLink()||storeDir())}" target="_blank" rel="noopener" title="Opens the register already connected on this device">Open the register ↗</a></div></div>
   <div class="tabs" role="tablist">${tabs.map(([k,t])=>`<button role="tab" aria-selected="${T===k}" data-act="st_tab" data-v="${k}">${t}</button>`).join('')}</div>`;
   const body=T==='history'?storeHistory():T==='setup'?storeSetup():storeLive();
   return loadingOr(head+body);
