@@ -565,7 +565,7 @@ function render(){
 function header(){
   const u=P.user;const open=openShift();const oc=u&&openCount();const ocs=oc&&cStats(oc);
   return `<header class="top">
-   <div class="hleft">${u?`<div class="user"><span class="avatar">${esc(initials(u.name))}</span><span><b>${esc(u.name)}</b>${u.admin?' <span class="adm">ADMIN</span>':''}<div class="small muted">${open?'ცვლა '+tShort(open.openedAt)+'-დან':'ცვლა დახურულია'}</div></span></div>`:''}${oc?`<button class="cpill" data-act="cOpen" title="აღწერის გაგრძელება">${svg(I.count,16)} აღწერა · <span class="num">${ocs.done}/${ocs.n}</span></button>`:''}</div>
+   <div class="hleft">${u?`<div class="user"><span class="avatar">${esc(initials(u.name))}</span><span><b>${esc(u.name)}</b>${u.admin?' <span class="adm">მენეჯერი</span>':''}<div class="small muted">${open?(u.admin&&open.user&&open.user.id!==u.id?esc(open.user.name)+'-ის ცვლა':'ცვლა '+tShort(open.openedAt)+'-დან'):(u.admin?'ცვლის გარეშე':'ცვლა დახურულია')}</div></span></div>`:''}${oc?`<button class="cpill" data-act="cOpen" title="აღწერის გაგრძელება">${svg(I.count,16)} აღწერა · <span class="num">${ocs.done}/${ocs.n}</span></button>`:''}</div>
    <div class="logo"><img src="../brand/mark-black-160.png" alt="" class="mark"><div><b>ASTROMAN</b><small>სალარო · ${esc(dLong(today()).split(',')[0])}</small></div></div>
    <div class="hright"><span class="conn" id="conn">${connHtml()}</span>
     ${P.user?(()=>{const n=openOrders().length;const late=openOrders().filter(isLate).length;return `<button class="ibtn" data-act="orders" title="მიწოდების შეკვეთები" style="width:auto;padding:0 10px;gap:6px;font-weight:700">🛵 შეკვეთები${n?`<span class="n" style="${late?'background:var(--bad);color:#fff':''}">${n}</span>`:''}</button>`})():''}
@@ -587,14 +587,14 @@ function vLogin(){
   const sel=P.loginSel||users[0].id;const u=users.find(x=>x.id===sel)||users[0];
   const needPin=!!u.pin;
   return header()+`<div class="login"><div class="box"><img src="../brand/logo-full-black-240.png" alt="Astroman" style="height:72px;display:block;margin:0 auto 10px"><h1 style="text-align:center">ვინ მუშაობს სალაროზე?</h1><div class="muted">აირჩიეთ სახელი${needPin?' და აკრიფეთ PIN':''}.</div>
-   <div class="users">${users.map(x=>`<button data-login="${esc(x.id)}" aria-pressed="${x.id===u.id}"><span class="avatar">${esc(initials(x.name))}</span>${esc(x.name)}</button>`).join('')}</div>
+   <div class="users">${users.map(x=>`<button data-login="${esc(x.id)}" aria-pressed="${x.id===u.id}"><span class="avatar">${esc(initials(x.name))}</span>${esc(x.name)}${x.admin?'<small style="display:block;font-size:11px;opacity:.7">მენეჯერი</small>':''}</button>`).join('')}</div>
    ${needPin?`<div class="pin">${[0,1,2,3].map(i=>`<i class="${(P.pin||'').length>i?'on':''}"></i>`).join('')}</div>
    <div class="pinpad">${['1','2','3','4','5','6','7','8','9','⌫','0','OK'].map(k=>`<button data-pin="${k}" ${k==='OK'?'class="num" style="background:var(--brand);color:#fff;border-color:var(--brand)"':''}>${k}</button>`).join('')}</div>
    <div class="err" id="pinErr">${esc(P.pinErr||'')}</div>`
    :`<button class="btn primary big" style="width:100%" data-login-go="1">შესვლა</button>`}
    ${!P.loaded?`<p class="muted small" style="text-align:center;margin:12px 0 0">კატალოგი იტვირთება…</p>`:''}</div></div>`;
 }
-function doLogin(u){clearTimeout(P.byeT);P.user={id:u.id,name:u.name,admin:!!u.admin};lsSet('pos.user',JSON.stringify(P.user));P.pin='';P.pinErr='';P.view='sale';render();const os=openShift();if(os&&String(os.day||String(os.openedAt).slice(0,10))<today())staleShiftModal(os);else if(!os)shiftOpenModal()}
+function doLogin(u){clearTimeout(P.byeT);P.user={id:u.id,name:u.name,admin:!!u.admin};lsSet('pos.user',JSON.stringify(P.user));P.pin='';P.pinErr='';P.view='sale';render();const os=openShift();if(os&&String(os.day||String(os.openedAt).slice(0,10))<today())staleShiftModal(os);else if(!os&&!u.admin)shiftOpenModal();else if(u.admin)toast(os?'მენეჯერი · გაყიდვები ჩაიწერება '+(os.user?os.user.name:'')+'-ის ცვლაში':'მენეჯერი · გაყიდვა ცვლის გაუხსნელადაც შეიძლება')}
 
 function vSale(){
   const T=totals();const L=filtered();const sel=P.cart.lines[P.sel];
@@ -631,6 +631,7 @@ function vPay(){
   <div class="pay"><div class="hdr"><div class="box"><div class="lbl">სულ გადასახდელი (₾)${dlFee()?` · მიწოდება ${fmt(dlFee(),2)}`:''}</div><div class="val num" id="payTot">${fmt(T.total,2)}</div></div><div class="box"><div class="lbl">ხურდა (₾)</div><div class="val num ${chg<0?'neg':chg>0?'pos':''}">${chg<0?'−':''}${fmt(Math.abs(chg),2)}</div></div></div>
   <div class="body"><div>
    ${chBar()}${dlBlock()}
+   ${P.user&&P.user.admin&&!openShift()&&P.pay.method==='cash'?'<div class="small" style="margin-top:10px;color:var(--warn);font-weight:600">მენეჯერი · ცვლა არ არის გახსნილი — ეს ნაღდი სალაროს ნაშთში არ ჩაითვლება</div>':''}
    <h3 style="margin-top:16px">ნაღდი ანგარიშსწორება</h3>
    <div class="cashrow"><input id="cash" inputmode="decimal" placeholder="0.00" value="${esc(P.pay.cash)}" ${isCash?'':'disabled'}><button data-act="exact">ზუსტი თანხა</button></div>
    <h3 style="margin-top:16px">გადახდის წესი</h3>
@@ -779,6 +780,7 @@ function confirmSale(){
   const o={id:uid('o'),at:now.toISOString(),day:today(),user:P.user,shift:sh?sh.id:null,device:DEVICE,
     lines:P.cart.lines.map(l=>({b:l.b,n:l.n,q:l.q,p:l.p,d:+l.d||0,img:l.img||null})),sub:T.sub,disc:T.disc,total:T.total,pay:m,
     cash:isCash?r2(cash):T.total,change:isCash?r2(cash-T.total):0,receipt:false,note:(P.pay.note||'').trim(),status:'ok',no:nextNo()};
+  if(P.user.admin)o.mgr=true;
   o.ch=P.pay.ch||'shop';
   if(D&&(o.ch==='delivery'||normPhone(D.phone)||String(D.addr||'').trim())){const ph=normPhone(D.phone);o.ship=dlFee();o.paid=!PAY_LATER.has(m);o.dl={name:String(D.name||'').trim(),phone:ph,addr:String(D.addr||'').trim(),fee:o.ship,st:'new',log:[{st:'new',at:o.at,by:P.user.name}]};}
   else{o.paid=m!=='pending';if(D&&o.ch==='extra')o.ship=0}
@@ -889,11 +891,11 @@ function staleShiftModal(sh){
   const S=shiftStats(sh);
   modal('წინა ცვლა არ დახურულა',`<div class="bye"><div class="big">⚠️</div><h2>${esc(sh.user?sh.user.name:'')} · ${esc(dtShort(sh.openedAt))}</h2><div class="muted">ეს ცვლა ღია დარჩა. დავხურავ ${pad2(SHIFT_END[0])}:${pad2(SHIFT_END[1])}-ზე იმ დღეს, რომ საათები სწორად დაითვალოს. დაითვალე სალაროში ნაღდი ფული:</div></div>
    <div class="cashrow"><input id="sc" inputmode="decimal" placeholder="${fmt(S.cashExpected,2)}"><button disabled>₾</button></div>
-   <div class="row"><button class="btn primary big" id="scGo" style="flex:1">დახურვა და ახალი ცვლა</button></div>`);
+   <div class="row"><button class="btn primary big" id="scGo" style="flex:1">დახურვა${P.user&&P.user.admin?'':' და ახალი ცვლა'}</button>${P.user&&P.user.admin?'<button class="btn big" data-close>მოგვიანებით</button>':''}</div>`);
   $('#sc').focus();
   $('#scGo').onclick=()=>{const v=parseFloat($('#sc').value);if(!isFinite(v)){$('#sc').focus();return}
     push('shift',sh.id,{...sh,closedAt:end.toISOString(),closeCash:r2(v),expected:S.cashExpected,closedBy:P.user,lateClose:new Date().toISOString(),stats:{n:S.n,total:r2(S.total),by:S.by,voids:S.voids}});
-    closeModal();shiftOpenModal()};
+    closeModal();if(!(P.user&&P.user.admin))shiftOpenModal();else render()};
 }
 
 function minutesEarly(){const d=new Date();return SHIFT_END[0]*60+SHIFT_END[1]-(d.getHours()*60+d.getMinutes())}
