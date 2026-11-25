@@ -43,6 +43,22 @@ const sh = [...store.values()].find(x => x.c === 'shift' && !x.d.kind)?.d;
 const s2 = [...store.values()].find(x => x.c === 'pos' && x.d.total === 32)?.d;
 check('manager cash sale counts in that shift\'s drawer', s2 && sh && s2.shift === sh.id && s2.mgr === true, { s2: s2 && s2.shift, sh: sh && sh.id });
 
+// an online order typed in Mars reaches the consultant: sound + pop-up + pulsing button, then status steps
+await page.evaluate(() => logout()); await page.click('[data-login="u1"]'); await page.click('[data-login-go]'); await page.waitForTimeout(500);
+store.set('pos/oM1', { c: 'pos', id: 'oM1', d: { id: 'oM1', src: 'mars', ch: 'delivery', at: new Date().toISOString(), day: new Date().toLocaleDateString('sv'), user: { id: 'mars', name: 'Mars' }, shift: null, device: 'mars', lines: [{ b: '222', n: 'Foreseen 80/600', q: 1, p: 499, d: 0 }], sub: 499, total: 509, pay: 'pending', status: 'ok', no: 50, paid: false, ship: 10, dl: { name: 'ნინო ბერიძე', phone: '599123456', addr: 'ვაკე, ჭავჭავაძის 1', fee: 10, st: 'new', log: [] } } });
+await page.evaluate(() => { window.__beeps = 0; const B = window.beep; window.beep = () => { window.__beeps++ }; return load(false) }); await page.waitForTimeout(600);
+const al = await page.evaluate(() => ({ toast: (document.querySelector('.toast') || {}).textContent || '', pulse: !!document.querySelector('[data-act="orders"].pulse'), beeps: window.__beeps }));
+check('new Mars order: pop-up names it, button pulses, sound plays', al.toast.includes('ახალი ონლაინ შეკვეთა') && al.toast.includes('ნინო') && al.pulse && al.beeps === 1, al);
+await page.evaluate(() => load(false)); await page.waitForTimeout(300);
+check('the alert sounds once, not on every refresh', await page.evaluate(() => window.__beeps === 1));
+await page.click('header [data-act="orders"]'); await page.waitForSelector('.ord');
+check('board tags it ახალი! and the button stops pulsing', (await page.textContent('.ord')).includes('ახალი!') && !(await page.$('[data-act="orders"].pulse')));
+await page.click('.ord [data-act="dlStep"]'); await page.waitForTimeout(200); await page.click('.ord [data-act="dlStep"]'); await page.waitForTimeout(700);
+check('consultant marks it packed → picked up by courier', store.get('pos/oM1').d.dl.st === 'out' && (await page.textContent('.ord')).includes('კურიერმა წაიღო'), store.get('pos/oM1').d.dl);
+await page.screenshot({ path: '/tmp/mars-register-board.png' });
+await page.click('.ord [data-act="dlPaid"]'); await page.waitForTimeout(300); await page.click('.ord [data-act="dlStep"]'); await page.waitForTimeout(700);
+check('paid + delivered: done, off the open list', store.get('pos/oM1').d.paid === true && store.get('pos/oM1').d.dl.st === 'done' && !(await page.$('.ord')));
+
 // Mars: the role survives a save, and can be given to someone
 const mars = 'file://' + path.join(root, 'index.html');
 await page.goto(mars + '#connect=' + link); await page.waitForFunction(() => typeof S !== 'undefined' && S.cfg && S.cfg.pos, null, { timeout: 30000 });

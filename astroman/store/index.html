@@ -380,6 +380,7 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 .cartmode button{margin-left:auto;border:0;background:none;color:inherit;font-size:16px;cursor:pointer}
 .tagch{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap}
 .tagch.ch-shop{background:#EEF4FF;color:#1D4ED8}.tagch.ch-delivery{background:#FFF0D6;color:#B45309}.tagch.ch-wolt{background:#E6FAFD;color:#0E7490}.tagch.ch-glovo{background:#FFF6CC;color:#A16207}.tagch.ch-extra{background:#F3EEFF;color:#6D28D9}
+.ibtn.pulse{background:#F59E0B;color:#fff;border-color:#F59E0B;animation:ordpulse 1.2s ease-in-out infinite}@keyframes ordpulse{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.6)}50%{box-shadow:0 0 0 8px rgba(245,158,11,0)}}
 </style>
 </head>
 <body>
@@ -476,7 +477,7 @@ async function load(full){
     if(full){const keep=new Set(r.keys||[]);if(keep.size||!r.docs.length){[['catalog',P.cat],['pos',P.pos],['shift',P.shift]].forEach(([c,m])=>{if(keep.size)[...m.keys()].forEach(id=>{if(!keep.has(c+'/'+id))m.delete(id)})})}lastFull=Date.now()}
     r.docs.forEach(x=>col(x.c).set(x.id,x.d));
     if(r.pos)P.cfg={users:[],receipt:{},...r.pos};
-    outbox.forEach(apply);since=r.at||Date.now();P.loaded=true;saveCache();status();render();
+    outbox.forEach(apply);since=r.at||Date.now();P.loaded=true;saveCache();status();render();checkNewOrders();
   }catch(e){if(e.code)toast(e.message,6000);setConn(false,P.loaded?'ოფლაინი — ვაჩვენებ შენახულს':'ვერ დავუკავშირდი',true)}
   finally{loading=false}
 }
@@ -568,7 +569,7 @@ function header(){
    <div class="hleft">${u?`<div class="user"><span class="avatar">${esc(initials(u.name))}</span><span><b>${esc(u.name)}</b>${u.admin?' <span class="adm">მენეჯერი</span>':''}<div class="small muted">${open?(u.admin&&open.user&&open.user.id!==u.id?esc(open.user.name)+'-ის ცვლა':'ცვლა '+tShort(open.openedAt)+'-დან'):(u.admin?'ცვლის გარეშე':'ცვლა დახურულია')}</div></span></div>`:''}${oc?`<button class="cpill" data-act="cOpen" title="აღწერის გაგრძელება">${svg(I.count,16)} აღწერა · <span class="num">${ocs.done}/${ocs.n}</span></button>`:''}</div>
    <div class="logo"><img src="../brand/mark-black-160.png" alt="" class="mark"><div><b>ASTROMAN</b><small>სალარო · ${esc(dLong(today()).split(',')[0])}</small></div></div>
    <div class="hright"><span class="conn" id="conn">${connHtml()}</span>
-    ${P.user?(()=>{const n=openOrders().length;const late=openOrders().filter(isLate).length;return `<button class="ibtn" data-act="orders" title="მიწოდების შეკვეთები" style="width:auto;padding:0 10px;gap:6px;font-weight:700">🛵 შეკვეთები${n?`<span class="n" style="${late?'background:var(--bad);color:#fff':''}">${n}</span>`:''}</button>`})():''}
+    ${P.user?(()=>{const n=openOrders().length;const late=openOrders().filter(isLate).length;return `<button class="ibtn ${(P.unseen||[]).length?'pulse':''}" data-act="orders" title="მიწოდების შეკვეთები" style="width:auto;padding:0 10px;gap:6px;font-weight:700">🛵 შეკვეთები${n?`<span class="n" style="${late?'background:var(--bad);color:#fff':''}">${n}</span>`:''}</button>`})():''}
     <button class="ibtn" data-act="sync" title="სინქრონიზაცია">${svg(I.sync,20)}${outbox.length?`<span class="n">${outbox.length}</span>`:''}</button>
     <button class="ibtn menubtn" data-act="menu" aria-label="ფუნქციები">${svg(I.menu,22)}</button></div></header>`;
 }
@@ -706,7 +707,7 @@ async function act(a,b){
    {name, phone, addr, fee, st:'new'|'ready'|'out'|'done', log:[{st,at,by}]} and `paid` (false for courier
    cash and transfers still to come). The delivery fee is part of `total` and kept apart in `ship`.
    Status and payment changes overwrite the same record, like a void does, so no backend change is needed. */
-const DL_ST=[['new','ახალი'],['ready','გამზადებული'],['out','კურიერთან'],['done','ჩაბარებული']];
+const DL_ST=[['new','ახალი'],['ready','გამზადებული'],['out','კურიერმა წაიღო'],['done','ჩაბარებულია']];
 const DL_STN=Object.fromEntries(DL_ST);
 const DL_FEES=[0,7,10,15];
 const PAY_LATER=new Set(['cod','pending']);
@@ -792,6 +793,17 @@ function nextNo(){let n=0;P.pos.forEach(o=>{if(o.no>n)n=o.no});return n+1}
 
 /* ============================== orders board ============================== */
 const isOpenOrder=o=>o&&o.dl&&o.status!=='void'&&(o.dl.st!=='done'||o.paid===false);
+// a new online order typed in Mars (or on another device): sound, pop-up, pulsing button, "ახალი!" on the card
+function seenOrd(){try{return new Set(JSON.parse(lsGet('pos.seenOrd')||'[]'))}catch(e){return new Set()}}
+function markSeen(){const s=seenOrd();openOrders().forEach(o=>s.add(o.id));lsSet('pos.seenOrd',JSON.stringify([...s].slice(-500)));P.unseen=[]}
+function beep(){try{const a=new (window.AudioContext||window.webkitAudioContext)();[0,0.22].forEach(t=>{const o=a.createOscillator(),g=a.createGain();o.frequency.value=t?1046:784;g.gain.setValueAtTime(0.0001,a.currentTime+t);g.gain.exponentialRampToValueAtTime(0.25,a.currentTime+t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,a.currentTime+t+0.2);o.connect(g);g.connect(a.destination);o.start(a.currentTime+t);o.stop(a.currentTime+t+0.22)})}catch(e){}}
+function checkNewOrders(){
+  if(lsGet('pos.seenOrd')==null){markSeen();return}
+  const seen=seenOrd();const fresh=openOrders().filter(o=>o.device!==DEVICE&&!seen.has(o.id)&&!(P.unseen||[]).includes(o.id));
+  if(!fresh.length)return;P.unseen=[...(P.unseen||[]),...fresh.map(o=>o.id)];
+  if(P.user){beep();toast('🛵 ახალი ონლაინ შეკვეთა: '+fresh.map(o=>(o.dl.name||o.lines[0].n)+' · '+gel(o.total)).join(', '),9000)}
+  const busy=document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName);if(!busy&&!$('#scrim'))render();
+}
 function openOrders(){return [...P.pos.values()].filter(isOpenOrder).sort((a,b)=>String(a.at).localeCompare(String(b.at)))}
 // late: not delivered two days after the order, or still unpaid five days after
 function isLate(o){const age=(Date.now()-Date.parse(o.at))/864e5;return (o.dl.st!=='done'&&age>2)||(o.paid===false&&age>5)}
@@ -802,7 +814,7 @@ function vOrders(){
   const L=t==='open'?openOrders():t==='unpaid'?all.filter(o=>o.status!=='void'&&o.paid===false):all.filter(o=>Date.parse(o.at)>=since).sort((a,b)=>String(b.at).localeCompare(String(a.at)));
   const unpaid=all.filter(o=>o.status!=='void'&&o.paid===false);
   const card=o=>{const i=DL_ST.findIndex(s=>s[0]===o.dl.st);const nx=DL_ST[i+1];const v=o.status==='void';
-    return `<div class="ord ${!v&&isOpenOrder(o)&&isLate(o)?'late':''}" style="${v?'opacity:.5':''}"><div><div style="margin-bottom:4px">${chTag(chOf(o))}${o.src==='mars'?' <span class="tagch" style="background:#EEE;color:#444">Mars-იდან</span>':''}</div><div class="who">${esc(o.dl.name||'—')}<a href="tel:${esc(o.dl.phone)}">${esc(fmtPhone(o.dl.phone))}</a></div><div class="addr">📍 ${esc(o.dl.addr)}</div><div class="items">${esc(o.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '))}</div><div class="small muted">№${o.no||''} · ${esc(dtShort(o.at))} · ${esc(o.user?o.user.name:'')} · ${esc(PAYN[o.pay]||o.pay)}${o.ship?' · მიწოდება '+gel(o.ship):''}${v?' · <b>გაუქმებულია</b>':''}</div></div>
+    return `<div class="ord ${!v&&isOpenOrder(o)&&isLate(o)?'late':''}" style="${v?'opacity:.5':''}"><div><div style="margin-bottom:4px">${P.fresh&&P.fresh.has(o.id)?'<span class="tagch" style="background:var(--bad);color:#fff">ახალი!</span> ':''}${chTag(chOf(o))}${o.src==='mars'?' <span class="tagch" style="background:#EEE;color:#444">Mars-იდან</span>':''}</div><div class="who">${esc(o.dl.name||'—')}<a href="tel:${esc(o.dl.phone)}">${esc(fmtPhone(o.dl.phone))}</a></div><div class="addr">📍 ${esc(o.dl.addr)}</div><div class="items">${esc(o.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '))}</div><div class="small muted">№${o.no||''} · ${esc(dtShort(o.at))} · ${esc(o.user?o.user.name:'')} · ${esc(PAYN[o.pay]||o.pay)}${o.ship?' · მიწოდება '+gel(o.ship):''}${v?' · <b>გაუქმებულია</b>':''}</div></div>
      <div class="amt num">${gel(o.total)}<div style="margin-top:4px">${o.paid===false?'<span class="paychip no">გადასახდელია</span>':'<span class="paychip yes">გადახდილია</span>'}</div></div>
      <div class="acts"><div class="stp">${DL_ST.map((s,j)=>`<span class="${j===i?'on':j<i?'past':''}">${s[1]}</span>`).join('')}</div><span class="spacer"></span>
       ${v?'':`${nx?`<button class="btn primary sm" data-act="dlStep" data-id="${esc(o.id)}" data-st="${nx[0]}">→ ${nx[1]}</button>`:''}${o.paid===false?`<button class="btn sm" data-act="dlPaid" data-id="${esc(o.id)}">თანხა მივიღეთ</button>`:''}<button class="btn sm" data-act="dlCopy" data-id="${esc(o.id)}">კოპირება</button>${o.dl.st!=='done'?`<button class="btn sm" data-act="dlVoid" data-id="${esc(o.id)}" style="color:var(--bad)">გაუქმება</button>`:''}`}</div></div>`};
@@ -814,7 +826,7 @@ function bindOrders(){document.querySelectorAll('[data-otab]').forEach(b=>b.oncl
 function dlUpdate(id,ch,msg){const o=P.pos.get(id);if(!o)return;const at=new Date().toISOString();const n={...o,...ch,dl:{...o.dl,...(ch.dl||{}),log:[...(o.dl.log||[]),{st:(ch.dl&&ch.dl.st)||(ch.paid?'paid':'edit'),at,by:P.user.name}]}};if(ch.paid)n.paidAt=at;push('pos',id,n);render();if(msg)toast(msg)}
 async function dlAct(a,b){
   const id=b&&b.dataset.id;const o=id&&P.pos.get(id);
-  if(a==='orders'){P.view='orders';render();return true}
+  if(a==='orders'){P.view='orders';P.fresh=new Set(P.unseen||[]);markSeen();render();return true}
   if(a==='dlNew'){P.view='sale';P.cart.dl={};render();toast('აირჩიე პროდუქტები და დააჭირე „გადახდას“ — მიწოდება უკვე ჩართულია');return true}
   if(a==='dlOff'){P.cart.dl=null;P.pay.dl=null;P.pay.ch='shop';render();return true}
   if(a==='dlUseKnown'){const d=P.pay.dl;const c=d&&knownCustomers().get(normPhone(d.phone));if(c){d.addr=c.addr;d.name=d.name||c.name;$('#dlAddr').value=d.addr;$('#dlName').value=d.name;dlRefreshKnown()}return true}
