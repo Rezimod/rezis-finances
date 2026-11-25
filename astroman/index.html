@@ -15,6 +15,57 @@
  #printRoot table{width:100%;border-collapse:collapse}#printRoot thead{display:table-header-group}#printRoot th{text-align:left;font-size:8.5pt;color:#555;border-bottom:1.5px solid #111;padding:5px 6px}
  #printRoot td{border-bottom:1px solid #ddd;padding:4px 6px;vertical-align:middle}#printRoot tr{break-inside:avoid}#printRoot .im img{width:62px;height:62px;object-fit:contain;display:block}
  #printRoot .r{text-align:right;white-space:nowrap}#printRoot .q{font-weight:700}#printRoot .nt{color:#555;font-size:9pt}@page{size:A4;margin:12mm}}
+
+/* ---------- orders ---------- */
+.ofgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 14px;align-items:end}
+.ofgrid .span2{grid-column:span 2}.ofgrid .span3{grid-column:1/-1}
+@media (max-width:760px){.ofgrid{grid-template-columns:minmax(0,1fr)}.ofgrid .span2,.ofgrid .span3{grid-column:auto}}
+.chsel{display:flex;gap:6px;flex-wrap:wrap}
+.chsel button{display:flex;align-items:center;gap:7px;border:1.5px solid var(--line-2);background:var(--surface);color:var(--ink);border-radius:10px;padding:9px 14px;font-weight:700;cursor:pointer;font-size:14px}
+.chsel button b{font-size:15px}
+.chsel button[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,var(--surface));box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent)}
+.ofsearch{position:relative}
+.ofsug{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:20;background:var(--surface);border:1px solid var(--line-2);border-radius:10px;box-shadow:var(--shadow);overflow:hidden}
+.ofsug:empty{display:none}
+.ofsug button{display:flex;width:100%;justify-content:space-between;gap:10px;padding:9px 12px;border:0;background:none;color:var(--ink);text-align:left;cursor:pointer;font-size:13.5px}
+.ofsug button:hover,.ofsug button:first-child{background:var(--surface-2)}
+.oflines{width:100%;font-size:13.5px}.oflines td,.oflines th{padding:6px 6px;border-bottom:1px solid var(--line)}
+.ofknown{font-size:13px;background:var(--good-bg);color:var(--good);border-radius:9px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip.chx{font-weight:700}
+.chip.ch-shop{background:color-mix(in srgb,#3B82F6 16%,transparent);color:#3B82F6}
+.chip.ch-delivery{background:color-mix(in srgb,#F59E0B 20%,transparent);color:#D97706}
+.chip.ch-wolt{background:color-mix(in srgb,#00C2E8 18%,transparent);color:#0891B2}
+.chip.ch-glovo{background:color-mix(in srgb,#FFC244 25%,transparent);color:#A16207}
+.chip.ch-extra{background:color-mix(in srgb,#8B5CF6 18%,transparent);color:#7C3AED}
+table.ordt td{vertical-align:top}
+tr.void td{opacity:.45;text-decoration:line-through}
+
+/* order types: categorical slots 1-5, validated (dark on #13161D, light on #FFF) */
+:root{--ch-shop:#338ced;--ch-delivery:#e76624;--ch-wolt:#00a888;--ch-glovo:#d28e05;--ch-extra:#e24d8b}
+[data-theme="light"]{--ch-shop:#257de0;--ch-delivery:#f47230;--ch-wolt:#00b894;--ch-glovo:#f2a600;--ch-extra:#ee7fac}
+.chip.chx{background:var(--surface-2);color:var(--ink);gap:6px}
+.chip.chx::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--chc,var(--muted));flex:none}
+.chip.ch-shop{--chc:var(--ch-shop)}.chip.ch-delivery{--chc:var(--ch-delivery)}.chip.ch-wolt{--chc:var(--ch-wolt)}.chip.ch-glovo{--chc:var(--ch-glovo)}.chip.ch-extra{--chc:var(--ch-extra)}
+.odash{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
+.odash>.panel{align-self:start}
+@media (max-width:980px){.odash{grid-template-columns:minmax(0,1fr)}}
+.olegend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--ink-2);margin:2px 0 10px}
+.olegend span{display:inline-flex;align-items:center;gap:6px}.olegend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.olegend b{color:var(--ink)}
+#ordSvg text{fill:var(--muted);font-size:11px}
+.obars{display:flex;flex-direction:column;gap:9px}
+.obar{display:grid;grid-template-columns:110px minmax(0,1fr) 92px;gap:10px;align-items:center;font-size:13px}
+.obar .tr{height:12px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.obar .tr i{display:block;height:100%;border-radius:4px}
+.obar .v{text-align:right;color:var(--ink)}.obar .v small{color:var(--muted);display:block;font-size:11px}
+.pipe{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.pipe button{border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink);border-radius:10px;padding:10px 8px;text-align:left;cursor:pointer}
+.pipe button b{display:block;font-size:22px;font-family:var(--f-num,inherit)}
+.pipe button small{color:var(--muted);font-size:11.5px}
+.pipe button[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 35%,transparent)}
+.pipe button.warn b{color:var(--warn)}
+.oline{display:grid;grid-template-columns:minmax(0,1fr) 70px 100px 90px 32px;gap:6px;align-items:center;margin-bottom:6px}
+.oline .sum{text-align:right}
 </style>
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.json">
@@ -1105,8 +1156,8 @@ const DEFAULT_RULES=[
  ['საკომისიო','bank_fees',''],['commission','bank_fees',''],['მომსახურების საფასური','bank_fees',''],
  ['ხაზინ','gezi','Treasury'],['treasury','gezi','Treasury'],
 ];
-const IC={tools:'M3 12V4h8l9 9-8 8zM7.5 7.5h.01',count:'M9 4h6v3H9zM7 5.5H5V21h14V5.5h-2M9 14l2 2 4-4',store:'M3 9l1.2-5h15.6L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6',overview:'M3 13h4v8H3zM10 3h4v18h-4zM17 9h4v12h-4z',recap:'M12 3l2.6 5.5 6 .8-4.4 4.1 1.1 5.9L12 16.4l-5.3 2.9 1.1-5.9L3.4 9.3l6-.8z',sales:'M3 17l6-6 4 4 8-8M15 7h6v6',products:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',expenses:'M4 6h16M4 12h16M4 18h10',bank:'M3 10l9-6 9 6M5 10v9h14v-9M9 19v-5h6v5',pl:'M5 4h14v16H5zM9 9h6M9 13h6M9 17h3',imports:'M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7',settings:'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM4 12h2M18 12h2M12 4v2M12 18v2',more:'M5 12h.01M12 12h.01M19 12h.01',optimo:'M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10M7.5 5l9 4',loan:'M3 6h18v12H3zM12 9.5a2.5 2.5 0 1 1 0 5a2.5 2.5 0 1 1 0-5M6.5 9v6M17.5 9v6'};
-const PAGES=[{id:'overview',t:'Overview'},{id:'recap',t:'Recap'},{id:'sales',t:'Sales'},{id:'products',t:'Products'},{id:'expenses',t:'Expenses'},{id:'bank',t:'Bank import'},{id:'pl',t:'Profit & loss'},{id:'imports',t:'Imports'},{id:'loan',t:'Loan'},{id:'optimo',t:'Optimo'},{id:'store',t:'Store sales'},{id:'count',t:'Stock count'},{id:'tools',t:'Tools'},{id:'settings',t:'Settings'}];
+const IC={orders:'M4 7h16l-1.5 11a2 2 0 0 1-2 1.8H7.5a2 2 0 0 1-2-1.8zM8 7V5a4 4 0 0 1 8 0v2',tools:'M3 12V4h8l9 9-8 8zM7.5 7.5h.01',count:'M9 4h6v3H9zM7 5.5H5V21h14V5.5h-2M9 14l2 2 4-4',store:'M3 9l1.2-5h15.6L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6',overview:'M3 13h4v8H3zM10 3h4v18h-4zM17 9h4v12h-4z',recap:'M12 3l2.6 5.5 6 .8-4.4 4.1 1.1 5.9L12 16.4l-5.3 2.9 1.1-5.9L3.4 9.3l6-.8z',sales:'M3 17l6-6 4 4 8-8M15 7h6v6',products:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',expenses:'M4 6h16M4 12h16M4 18h10',bank:'M3 10l9-6 9 6M5 10v9h14v-9M9 19v-5h6v5',pl:'M5 4h14v16H5zM9 9h6M9 13h6M9 17h3',imports:'M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7',settings:'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM4 12h2M18 12h2M12 4v2M12 18v2',more:'M5 12h.01M12 12h.01M19 12h.01',optimo:'M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10M7.5 5l9 4',loan:'M3 6h18v12H3zM12 9.5a2.5 2.5 0 1 1 0 5a2.5 2.5 0 1 1 0-5M6.5 9v6M17.5 9v6'};
+const PAGES=[{id:'overview',t:'Overview'},{id:'recap',t:'Recap'},{id:'sales',t:'Sales'},{id:'orders',t:'Orders'},{id:'products',t:'Products'},{id:'expenses',t:'Expenses'},{id:'bank',t:'Bank import'},{id:'pl',t:'Profit & loss'},{id:'imports',t:'Imports'},{id:'loan',t:'Loan'},{id:'optimo',t:'Optimo'},{id:'store',t:'Store sales'},{id:'count',t:'Stock count'},{id:'tools',t:'Tools'},{id:'settings',t:'Settings'}];
 const DEFAULT_FIXED=[
  {id:'rent',label:'Rent',cat:'rent',gel:1500,account:'bog',match:'',from:'2026-09'},
  {id:'accountant',label:'Accountant',cat:'accounting',gel:200,account:'bog',match:'',from:'2026-09'},
@@ -1118,7 +1169,7 @@ const DEFAULT_FIXED=[
 
 /* ============================== state ============================== */
 const lsGet0=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
-const S={db:null,user:null,canWrite:true,mcp:null,downloads:null,loaded:{},
+const S={ord:{tab:'list',f:{ch:'all',st:'all',q:''}},of:null,imp:null,bankin:new Map(),db:null,user:null,canWrite:true,mcp:null,downloads:null,loaded:{},
   tx:new Map(),loan:new Map(),catalog:new Map(),pos:new Map(),shift:new Map(),site:new Map(),sales:new Map(),ships:new Map(),rules:new Map(),items:new Map(),itemsYear:new Map(),optimo:new Map(),cfg:{},range:null,mc:new Map(),
   view:'overview',month:null,draft:null,bank:null,opt:null,salesPreview:null,filters:{cat:'',acct:'',q:'',all:false},salesQ:'',
   prod:{tab:'popular',sort:'p',dir:-1,q:'',all:false},op:{tab:'overview',rank:'profit',period:'',q:'',cat:'',status:'',sort:'profit',dir:-1,full:false},store:{tab:'live',day:null},cnt:{tab:lsGet0('af.cntTab')||'store',f:'todo',q:'',cat:'',sf:'all',sq:''},counts:new Map(),tools:{tab:lsGet0('af.toolsTab')==='order'?'order':'sale',pct:20,sf:'slow',sq:'',sel:new Set(),of:'now',lead:+lsGet0('af.lead')||2,cover:+lsGet0('af.cover')||3},animate:true};
@@ -1375,6 +1426,7 @@ async function applySheet(P,manual){
   const months=P.months.filter(m=>m.m.startsWith(y)&&m.tabs.some(t=>tabYM(t,+y)));
   const seen=new Set(months.map(m=>m.m));const done=[],held=[];
   for(const m of months){
+    if(m.m>=regFrom())continue;
     const old=S.sales.get(m.m);
     if(old&&(old.locked||old.hist))continue;
     if(old&&m.oldTotal!=null&&Math.abs(m.total-m.oldTotal)<0.01&&m.count===m.oldCount)continue;
@@ -1424,14 +1476,14 @@ function vConnect(){
 async function connectBackend(c){
   S.backend=backendDB(c.u,c.k);S.db=S.backend;S.canWrite=true;S.mcp=null;
   const sub=(path,key)=>S.db.collection(path).onSnapshot(snap=>{const m=new Map();snap.docs.forEach(d=>m.set(d.id,{id:d.id,...d.data()}));S[key]=m;S.loaded[key]=true;schedule()});
-  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');sub('catalog','catalog');sub('counts','counts');sub('pos','pos');sub('shift','shift');sub('site','site');
+  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');sub('catalog','catalog');sub('counts','counts');sub('pos','pos');sub('shift','shift');sub('site','site');sub('bankin','bankin');
   S.db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()});
   await S.backend.fromCache();
   try{await S.backend.load(true);S.backend.flush();autoSyncSales()}catch(e){if(e.code==='bad_key'){toast('Wrong secret key. Connect again.');S.view='connect';render();return}toast(errMsg(e));setConn(false,'Offline — showing saved copy')}
 }
 function backupDocs(){
   const out=[];const add=(c,m)=>m.forEach((v,id)=>{const d={...v};delete d.id;out.push({c,id,d})});
-  add('tx',S.tx);add('sales',S.sales);add('ships',S.ships);add('rules',S.rules);add('items',S.items);add('itemsYear',S.itemsYear);add('optimo',S.optimo);add('loan',S.loan);add('catalog',S.catalog);add('pos',S.pos);add('shift',S.shift);add('site',S.site);out.push({c:'cfg',id:'main',d:S.cfg});return out;
+  add('tx',S.tx);add('sales',new Map([...S.sales].filter(([k,v])=>!(v&&v.virtual))));add('ships',S.ships);add('rules',S.rules);add('items',S.items);add('itemsYear',S.itemsYear);add('optimo',S.optimo);add('loan',S.loan);add('catalog',S.catalog);add('pos',S.pos);add('shift',S.shift);add('site',S.site);add('bankin',S.bankin);out.push({c:'cfg',id:'main',d:S.cfg});return out;
 }
 async function exportBackup(){
   const data=JSON.stringify({app:'astroman-finance',v:1,at:new Date().toISOString(),docs:backupDocs()});
@@ -1458,11 +1510,27 @@ async function boot(){
   if(user){try{const w=await user.can('data.write');if(w===false)S.canWrite=false}catch(e){}}
   if(!db){setConn(false,'Sign in to load data');S.loaded.none=true;render();return}
   const sub=(path,key)=>db.collection(path).onSnapshot(snap=>{const m=new Map();snap.docs.forEach(d=>m.set(d.id,{id:d.id,...d.data()}));S[key]=m;S.loaded[key]=true;setConn(true);schedule()},err=>{setConn(false,'Sync paused ('+err.code+')')});
-  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');sub('catalog','catalog');sub('counts','counts');sub('pos','pos');sub('shift','shift');sub('site','site');
+  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');sub('catalog','catalog');sub('counts','counts');sub('pos','pos');sub('shift','shift');sub('site','site');sub('bankin','bankin');
   db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()},()=>{});
 }
 function setConn(ok,txt){if(ok&&navigator.onLine===false){ok=false;txt='Offline · changes wait on this device'}$('#syncDot').className='dot'+(ok?'':' off');$('#syncTxt').textContent=txt||(ok?'Saved to cloud':'Offline');document.body.classList.toggle('netoff',!ok);$('#netPill').textContent=ok?'':txt||'Offline'}
-let rq=0;function schedule(){S.mc=new Map();if(rq)return;rq=requestAnimationFrame(()=>{rq=0;S.mc=new Map();fillMonthSel();if(S.view==='count'&&document.activeElement&&(document.activeElement.id==='wcQ'||document.activeElement.id==='scQ')){S.wcLate=true;return}if(S.view!=='add'||!S.renderedOnce)render()})}
+let rq=0;
+// From this month on, sales come from the register (shop, Wolt/Glovo and delivery orders alike) instead of the
+// order sheet. Each such month is rebuilt from the register records on every change; it is never stored, so the
+// sheet sync leaves it alone. Change it with cfg.regFrom ('YYYY-MM').
+const REG_FROM_DEFAULT='2026-12';
+function regFrom(){return (S.cfg&&S.cfg.regFrom)||REG_FROM_DEFAULT}
+function regCust(o){const c=o.dl||o.cust;if(c&&c.name)return c.name;if(o.ch&&o.ch!=='shop'&&o.ch!=='delivery')return o.ch;if(o.dl)return 'ონლაინ';if(o.pay==='wolt')return 'wolt';if(o.pay==='glovo')return 'glovo';return 'ფილიალი'}
+function mergeRegisterSales(){
+  if(!S.pos||!S.sales)return;const from=regFrom();const by=new Map();
+  S.pos.forEach(o=>{if(!o||!o.lines||!o.day||o.status==='void')return;const m=String(o.day).slice(0,7);if(m<from)return;(by.get(m)||by.set(m,[]).get(m)).push(o)});
+  for(const [k,v] of [...S.sales])if(v&&v.virtual&&!by.has(k))S.sales.delete(k);
+  for(const [m,L] of by){
+    const rows=L.sort((a,b)=>String(a.at).localeCompare(String(b.at))).map(o=>({d:o.day,c:regCust(o),p:o.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '),pay:o.pay,a:+o.total||0,reg:o.id,paid:o.paid!==false,ship:+o.ship||0,ch:chOf(o),src:o.src||''}));
+    S.sales.set(m,{id:m,rows,source:'Register',virtual:true,locked:true,syncedAt:Date.now()});
+  }
+}
+function schedule(){try{mergeRegisterSales()}catch(e){console.warn(e)}S.mc=new Map();if(rq)return;rq=requestAnimationFrame(()=>{rq=0;S.mc=new Map();fillMonthSel();if(S.view==='count'&&document.activeElement&&(document.activeElement.id==='wcQ'||document.activeElement.id==='scQ')){S.wcLate=true;return}if(S.view!=='add'||!S.renderedOnce)render()})}
 async function saveTx(t){
   if(!S.db)throw {message:'Not connected — open this page in Claude while signed in'};
   const id=t.id&&!String(t.id).startsWith('fx-')?t.id:uid('t');const body={...t};delete body.id;delete body.virtual;
@@ -1478,8 +1546,8 @@ function errMsg(e){if(!e)return 'Something went wrong';if(e.code==='quota_exceed
 const svg=(d,s=16)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 function renderShell(){
   $('#menu').innerHTML=PAGES.map((p,i)=>(p.id==='pl'?'<div class="sep"></div><div class="grp">Finance</div>':p.id==='optimo'?'<div class="sep"></div><div class="grp">Store</div>':'')+`<button data-go="${p.id}">${svg(IC[p.id])}${p.t}</button>`).join('');
-  $('#tabbar').innerHTML=[['overview','Overview'],['expenses','Expenses'],['add',''],['optimo','Optimo'],['more','More']].map(([id,t])=>id==='add'?`<button data-go="add" aria-label="New"><span class="plus">+</span></button>`:`<button data-go="${id}">${svg(IC[id],22)}<span>${t}</span></button>`).join('');
-  $('#moreInner').innerHTML='<div class="grab"></div>'+[['recap','Recap'],['sales','Sales'],['products','Products'],['store','Store sales'],['count','Stock count'],['tools','Tools'],['bank','Bank import'],['pl','Profit & loss'],['imports','Imports'],['loan','Loan'],['settings','Settings']].map(([id,t])=>`<button data-go="${id}">${svg(IC[id],20)}${t}</button>`).join('');
+  $('#tabbar').innerHTML=[['overview','Overview'],['orders','Orders'],['add',''],['expenses','Expenses'],['more','More']].map(([id,t])=>id==='add'?`<button data-go="add" aria-label="New"><span class="plus">+</span></button>`:`<button data-go="${id}">${svg(IC[id],22)}<span>${t}</span></button>`).join('');
+  $('#moreInner').innerHTML='<div class="grab"></div>'+[['recap','Recap'],['orders','Orders'],['optimo','Optimo'],['sales','Sales'],['products','Products'],['store','Store sales'],['count','Stock count'],['tools','Tools'],['bank','Bank import'],['pl','Profit & loss'],['imports','Imports'],['loan','Loan'],['settings','Settings']].map(([id,t])=>`<button data-go="${id}">${svg(IC[id],20)}${t}</button>`).join('');
   document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');
     if(!g){const ph=e.target.closest('.pagehead p');if(ph&&!e.target.closest('a,button')&&PHONE())ph.classList.toggle('open');return}
     e.preventDefault();const tab=!!g.closest('#tabbar'),top=(tab&&g.dataset.go!=='add')||!!g.closest('#moreInner,#menu');if(tab)buzz();if(g.dataset.go==='more')return openMore();if(tab&&g.dataset.go==='add')return openActions();
@@ -1528,8 +1596,8 @@ function edgeBack(){let x0=null,y0=0,dx=0,on=false;const m=$('#main');
 function render(){
   S.renderedOnce=true;S.mc=new Map();
   document.querySelectorAll('#menu button,#tabbar button,#moreInner button').forEach(b=>b.setAttribute('aria-current',b.dataset.go===S.view?'page':'false'));
-  if(!['overview','expenses','add','optimo'].includes(S.view))$('#tabbar [data-go=more]').setAttribute('aria-current','page');
-  const v={connect:vConnect,overview:vOverview,sales:vSales,products:vProducts,expenses:vExpenses,bank:vBank,pl:vPL,imports:vImports,loan:vLoan,optimo:vOptimo,store:vStore,count:vCount,tools:vTools,settings:vSettings,add:vAdd}[S.view]||vOverview;
+  if(!['overview','expenses','add','orders'].includes(S.view))$('#tabbar [data-go=more]').setAttribute('aria-current','page');
+  const v={connect:vConnect,overview:vOverview,sales:vSales,orders:vOrders,products:vProducts,expenses:vExpenses,bank:vBank,pl:vPL,imports:vImports,loan:vLoan,optimo:vOptimo,store:vStore,count:vCount,tools:vTools,settings:vSettings,add:vAdd}[S.view]||vOverview;
   const main=$('#main');const y=window.scrollY;
   main.innerHTML=banner()+v();
   const anim=S.animate&&!reduced();main.classList.toggle('anim',anim);
@@ -1635,7 +1703,7 @@ function todayPanel(){
    <div class="tgrid"><div class="tmain">
     <div class="tbig"><div><div class="lbl">Sales${isT?' so far':''}</div><div class="val num">${cu(D.a)}<small>₾</small></div><div class="tsub"><b class="num">${D.n}</b> order${D.n===1?'':'s'}${D.n?` · avg <b class="num">${gel(D.a/D.n)}</b>`:''}</div></div>
      <div class="tring">${ring(D.a,DAY_TARGET)}<span class="num">${pct(D.a,DAY_TARGET)}%</span><small>of ${fmt(DAY_TARGET)} ₾</small></div></div>
-    <div class="cmps"><div class="cmp"><span>Yesterday</span><b class="num">${gel(Y.a)}</b>${pc(D.a,Y.a)}</div><div class="cmp"><span>Last ${new Date(d+'T12:00').toLocaleDateString('en-GB',{weekday:'short'})}</span><b class="num">${gel(W.a)}</b>${pc(D.a,W.a)}</div><div class="cmp"><span>30-day average</span><b class="num">${gel(avg)}</b>${pc(D.a,avg)}</div><div class="cmp"><span>Store register</span><b class="num">${gel(regDay(d).a)}</b>${(()=>{const R=recon(d);return R.sheet.length||R.reg.length?(R.ok?'<em class="flat">= sheet</em>':`<span class="chip warn">sheet ${gel(R.sa)}</span>`):''})()}<a href="#store" data-go="store" class="small">${regDay(d).n} sale${regDay(d).n===1?'':'s'} →</a></div></div>
+    <div class="cmps"><div class="cmp"><span>Yesterday</span><b class="num">${gel(Y.a)}</b>${pc(D.a,Y.a)}</div><div class="cmp"><span>Last ${new Date(d+'T12:00').toLocaleDateString('en-GB',{weekday:'short'})}</span><b class="num">${gel(W.a)}</b>${pc(D.a,W.a)}</div><div class="cmp"><span>30-day average</span><b class="num">${gel(avg)}</b>${pc(D.a,avg)}</div><div class="cmp"><span>Store register</span><b class="num">${gel(regDay(d).a)}</b>${(()=>{if(String(d).slice(0,7)>=regFrom())return '';const R=recon(d);return R.sheet.length||R.reg.length?(R.ok?'<em class="flat">= sheet</em>':`<span class="chip warn">sheet ${gel(R.sa)}</span>`):''})()}<a href="#store" data-go="store" class="small">${regDay(d).n} sale${regDay(d).n===1?'':'s'} →</a></div></div>
     ${Object.keys(pays).length?`<div class="tpays">${Object.entries(pays).sort((a,b)=>b[1].a-a[1].a).map(([k,o])=>`<span><i style="width:${o.a/Math.max(1,D.a)*100}%"></i>${esc(PAYS[k]||k)} <b class="num">${gel(o.a)}</b></span>`).join('')}</div>`:''}
    </div><div class="tlist"><div class="tlh"><span>Orders</span><b>${D.n?'newest first':''}</b></div>${list}</div></div>
    <div class="strip" role="list">${strip.map(x=>{const o=dayOf(x);const dd=new Date(x+'T12:00');return `<button role="listitem" class="sd ${x===d?'on':''} ${o.a>=DAY_TARGET?'hit':''}" data-day="${x}" title="${dLong(x)} · ${gel(o.a)}"><span class="sb"><i style="height:${Math.max(o.a?6:0,o.a/smax*100)}%"></i></span><span class="sl">${dd.toLocaleDateString('en-GB',{weekday:'narrow'})}<b>${dd.getDate()}</b></span><span class="sa num">${!o.a?'—':o.a>=1000?fmt(o.a/1000,1)+'k':fmt(o.a)}</span></button>`}).join('')}</div>
@@ -1758,6 +1826,9 @@ function trendChart(ms,cur){
 }
 function attention(m,M){
   const items=[];const list=M.list;
+  {const od=[...S.pos.values()].filter(o=>o&&o.status!=='void'&&(o.paid===false||(o.dl&&o.dl.st&&o.dl.st!=='done')));
+   if(od.length){const un=od.filter(o=>o.paid===false);const late=od.filter(o=>o.dl&&o.dl.st!=='done'&&(Date.now()-Date.parse(o.at))/864e5>2);const STN={new:'new',ready:'packed',out:'with courier',done:'delivered'};
+    items.push([late.length?'bad':'info','🛵',`<b>${od.length} order${od.length>1?'s':''} open${un.length?' · '+gel(un.reduce((a,o)=>a+(+o.total||0),0))+' still to be paid':''}${late.length?' · '+late.length+' late':''}</b><div class="muted">${od.slice(0,5).map(o=>esc((custOf(o)||{}).name||'?')+' '+gel(o.total)+(o.dl?' · '+(STN[o.dl.st]||''):'')+(o.paid===false?' · unpaid':'')).join(' · ')}</div>`,`<button class="btn sm" data-go="orders">Orders</button>`])}}
   if(!M.hasSales)items.push(['bad','!',`<b>No sales loaded for ${mLabel(m)}</b><div class="muted">Sync from your order sheet.</div>`,`<button class="btn sm" data-go="sales">Sync</button>`]);
   const fx=list.filter(t=>t.virtual);
   if(fx.length)items.push(['info','↻',`<b>${gel(fx.reduce((a,t)=>a+t.gel,0))} fixed costs added automatically</b><div class="muted">${fx.map(t=>esc(t.vendor)).join(' · ')}. A real payment from the bank replaces its line.</div>`,`<button class="btn sm" data-act="filterFixed">See</button>`]);
@@ -2099,7 +2170,7 @@ function vSales(){
   const m=S.month,M=metrics(m),doc=S.sales.get(m);
   const q=S.salesQ.toLowerCase();const rows=(doc?.rows||[]).filter(r=>!q||[r.c,r.p,PAYS[r.pay]].join(' ').toLowerCase().includes(q));
   const sid=sheetId();const days=m===thisMonth()?new Date().getDate():daysIn(m);
-  return loadingOr(`<div class="pagehead"><div><div class="eyebrow">${kaM(m)} · ${m.slice(0,4)}</div><h1>Sales</h1><p>From your order sheet <a href="https://docs.google.com/spreadsheets/d/${esc(sid)}/edit" target="_blank" rel="noopener">ასტრომანის შეკვეთები</a>. Each month is its tab in the sheet; one sync makes every month match the sheet.</p></div>
+  return loadingOr(`<div class="pagehead"><div><div class="eyebrow">${kaM(m)} · ${m.slice(0,4)}</div><h1>Sales</h1><p>${doc&&doc.virtual?`From the store register: shop, Wolt/Glovo and delivery orders, live as they are rung up. ${(doc.rows||[]).filter(r=>!r.paid).length?`<b>${gel((doc.rows||[]).filter(r=>!r.paid).reduce((a,r)=>a+r.a,0))} not paid yet.</b>`:''}`:`From your order sheet <a href="https://docs.google.com/spreadsheets/d/${esc(sid)}/edit" target="_blank" rel="noopener">ასტრომანის შეკვეთები</a>. Each month is its tab in the sheet; one sync makes every month match the sheet.`}</p></div>
   <div class="actions">${S.mcp||S.backend?`<button class="btn" data-act="syncSheet" data-label="↻ Sync now">↻ Sync now</button>`:''}<button class="btn" data-act="pickOrders">Upload orders file</button><input type="file" id="ordersFile" accept=".xlsx,.xls,.csv,.ods,.txt,text/plain" hidden></div></div>
   <div class="kpis"><div class="kpi"><div class="lbl">Sales</div><div class="val num">${cu(M.sales)}<small>₾</small></div><div class="delta">${doc?('Updated '+new Date(doc.syncedAt).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})):'Not loaded yet'}</div></div>
   <div class="kpi"><div class="lbl">Orders</div><div class="val num">${cu(M.orders)}</div><div class="delta">${(M.orders/Math.max(1,days)).toFixed(1)} per day</div></div>
@@ -2345,6 +2416,7 @@ async function bankSave(btn){
       await saveTx({date:r.date,cat:r.cat,account:B.acct,vendor:r.vendor,note:(r.desc||'').slice(0,200),cur:'GEL',gel:Math.round(r.gel*100)/100,source:'bank',bankKey:r.key});n++}
     if(B.remember){const seen=new Set();for(const r of rows){if(!r.synthetic&&r.cat!=='toloan'&&r.cat!==r.auto&&r.party&&!seen.has(r.party.toLowerCase())){seen.add(r.party.toLowerCase());const match=r.party.toLowerCase().slice(0,40);await S.db.doc('rules/'+hash(match)).set({match,cat:r.cat,vendor:r.party.slice(0,60),dir:r.dir,createdAt:new Date().toISOString()})}}}
     if(B.saveBal&&B.closing&&B.closing.total!=null){const bal={...(S.cfg.balances||{})};let asOf=B.closing.end&&B.closing.end<=today()?B.closing.end:today();if(B.lastDate&&B.lastDate>asOf)asOf=B.lastDate;bal[B.acct]={gel:B.closing.total,asOf,at:new Date().toISOString(),parts:B.closing.parts,source:B.fileName};await saveCfg({balances:bal})}
+    try{for(const r of B.items){if(r.dir!=='in'||r.synthetic)continue;const fm=String(r.desc||'').match(/საკომისიო:\s*GEL\s*([\d.]+)/i);await S.db.doc('bankin/'+r.key).set({acct:B.acct,date:r.date,gel:Math.round(r.gel*100)/100,fee:fm?+fm[1]:0,party:String(r.party||'').slice(0,80),desc:String(r.desc||'').slice(0,160),cat:r.cat||r.ruleCat||'',dir:'in',at:new Date().toISOString()})}}catch(e){console.warn(e)}
     toast('Saved '+n+' rows from '+ACC[B.acct].en+(B.saveBal&&B.closing.total!=null?' · balance '+gel(B.closing.total,2):''));S.bank=null;go('expenses');
   }catch(e){toast(errMsg(e)+' — saved '+n+' of '+rows.length);btn.disabled=false;btn.textContent='Save'}
 }
@@ -3798,7 +3870,7 @@ const POSPAY={cash:'Cash',pos:'Card terminal',bog:'BOG transfer',tbc:'TBC transf
 const POS_CARD=new Set(['pos','card_bog','card_tbc']);
 const posInitials=n=>String(n||'').replace(/[^\p{L}\p{N}]/gu,'').slice(0,2).toUpperCase()||'·';
 function thumb(x,s){s=s||36;return x&&x.img?`<img class="thumb" src="${esc(x.img)}" alt="" loading="lazy" style="width:${s}px;height:${s}px" onerror="this.outerHTML='<span class=\\'thumb ph\\' style=\\'width:${s}px;height:${s}px\\'>${esc(posInitials(x.n))}</span>'">`:`<span class="thumb ph" style="width:${s}px;height:${s}px">${esc(posInitials(x&&x.n))}</span>`}
-function posOrders(day){return [...S.pos.values()].filter(o=>o&&o.lines&&(!day||o.day===day)).sort((a,b)=>String(b.at).localeCompare(String(a.at)))}
+function posOrders(day){return [...S.pos.values()].filter(o=>o&&o.lines&&!o.src&&(!day||o.day===day)).sort((a,b)=>String(b.at).localeCompare(String(a.at)))}
 function regDay(d){const L=posOrders(d).filter(o=>o.status!=='void');return {n:L.length,a:L.reduce((s,o)=>s+(+o.total||0),0),L}}
 function storeDir(){return location.origin+location.pathname.replace(/[^/]*$/,'')+'store/'}
 function storeLink(){const c=readCreds();const k=S.cfg.pos&&S.cfg.pos.key;if(!c||!k)return '';const b=btoa(unescape(encodeURIComponent(JSON.stringify({u:c.u,k})))).replace(/\+/g,'-').replace(/\//g,'_');return storeDir()+'#connect='+b}
@@ -3819,7 +3891,7 @@ function catLive(x){let q=storeQ(x);const c=String(x.countedAt||'');S.pos.forEac
 function vStore(){
   const T=S.store.tab;
   const tabs=[['live','Live'],['history','History'],['setup','Register setup']];
-  const head=`<div class="pagehead"><div><div class="eyebrow">Store · სალარო</div><h1>Store sales</h1><p>What the consultants ring up on the register, as it happens. Kept apart from the books, like the Optimo pages.</p></div><div class="actions"><a class="btn" href="${esc(storeDir())}" target="_blank" rel="noopener">Open the register ↗</a></div></div>
+  const head=`<div class="pagehead"><div><div class="eyebrow">Store · სალარო</div><h1>Store sales</h1><p>What the consultants ring up on the register, as it happens. Kept apart from the books, like the Optimo pages.</p></div><div class="actions"><a class="btn" href="${esc(storeLink()||storeDir())}" target="_blank" rel="noopener" title="Opens the register already connected on this device">Open the register ↗</a></div></div>
   <div class="tabs" role="tablist">${tabs.map(([k,t])=>`<button role="tab" aria-selected="${T===k}" data-act="st_tab" data-v="${k}">${t}</button>`).join('')}</div>`;
   const body=T==='history'?storeHistory():T==='setup'?storeSetup():storeLive();
   return loadingOr(head+body);
@@ -3866,13 +3938,13 @@ function storeHistory(){
   const top=[...items.values()].sort((a,b)=>b.a-a.a).slice(0,15);const max=Math.max(1,...top.map(x=>x.a));
   const byU={};L.forEach(o=>{if(o.status==='void')return;const k=o.user?o.user.name:'?';const u=byU[k]||(byU[k]={n:0,a:0});u.n++;u.a+=o.total});
   const sh=[...S.shift.values()].filter(x=>x&&!x.kind&&String(x.openedAt||'').slice(0,7)===m).sort((a,b)=>String(b.openedAt).localeCompare(String(a.openedAt)));
-  const hrs=x=>Math.max(0,((x.closedAt?Date.parse(x.closedAt):Date.now())-Date.parse(x.openedAt))/36e5);
+  const hrs=x=>{const o=Date.parse(x.openedAt);let c=x.closedAt?Date.parse(x.closedAt):Date.now();if(overnight(x)){const d=new Date(o);c=Math.max(o,new Date(d.getFullYear(),d.getMonth(),d.getDate(),20,30).getTime())}return Math.max(0,(c-o)/36e5)};
   const byC={};sh.forEach(x=>{const k=x.user?x.user.name:'?';const c=byC[k]||(byC[k]={shifts:0,h:0,n:0,a:0,open:0});c.shifts++;c.h+=hrs(x);if(!x.closedAt)c.open++});
   L.forEach(o=>{if(o.status==='void')return;const k=o.user?o.user.name:'?';const c=byC[k]||(byC[k]={shifts:0,h:0,n:0,a:0,open:0});c.n++;c.a+=o.total});
   const salesOf=x=>L.filter(o=>o.shift===x.id&&o.status!=='void');
   const staff=`<div class="panel"><h2>Consultants in ${esc(mLabel(m))}</h2><p class="sub">Hours come from the shifts they open and close on the register; sales are what they rang up.</p>
-   ${Object.keys(byC).length?`<div class="tablewrap"><table><thead><tr><th>Consultant</th><th class="r">Shifts</th><th class="r">Hours</th><th class="r">Sales</th><th class="r">Revenue</th><th class="r hm">Avg sale</th><th class="r hm">Per hour</th></tr></thead><tbody>${Object.entries(byC).sort((a,b)=>b[1].a-a[1].a).map(([k,c])=>`<tr><td><b>${esc(k)}</b>${c.open?' <span class="chip good">on shift</span>':''}</td><td class="r num">${c.shifts}</td><td class="r num">${fmt(c.h,1)}</td><td class="r num">${c.n}</td><td class="r num"><b>${gel(c.a)}</b></td><td class="r num hm">${c.n?gel(c.a/c.n):'—'}</td><td class="r num hm">${c.h>=0.5?gel(c.a/c.h):'—'}</td></tr>`).join('')}</tbody></table></div>`:'<div class="muted">No shifts this month.</div>'}
-   ${sh.length?`<h3 class="rh3">Shift log</h3><div class="flow">${sh.slice(0,40).map(x=>{const so=salesOf(x);const E=shiftExpected(x);const diff=x.closedAt?r2(x.closeCash-E):null;return `<div class="ln"><span class="k"><b>${esc(x.user?x.user.name:'?')}</b> · ${esc(dShort(String(x.openedAt).slice(0,10)))} ${tOf(x.openedAt)} → ${x.closedAt?tOf(x.closedAt):'…'}<div class="small muted">${fmt(hrs(x),1)} h · ${so.length} sale${so.length===1?'':'s'} · ${gel(so.reduce((a,o)=>a+o.total,0))}${x.closedAt?' · drawer '+(Math.abs(diff)<0.01?'matched':(diff>0?'+':'−')+gel(Math.abs(diff))):' · open'}</div></span></div>`}).join('')}</div>`:''}</div>`;
+   ${Object.keys(byC).length?`<div class="tablewrap"><table><thead><tr><th>Consultant</th><th class="r">Shifts</th><th class="r">Hours</th><th class="r">Sales</th><th class="r">Revenue</th><th class="r hm">Avg sale</th><th class="r hm">Per hour</th></tr></thead><tbody>${Object.entries(byC).sort((a,b)=>b[1].a-a[1].a).map(([k,c])=>`<tr><td><b>${esc(k)}</b>${((S.cfg.pos||{}).users||[]).some(u=>u.admin&&u.name===k)?' <span class="chip">manager</span>':''}${c.open?' <span class="chip good">on shift</span>':''}</td><td class="r num">${c.shifts}</td><td class="r num">${fmt(c.h,1)}</td><td class="r num">${c.n}</td><td class="r num"><b>${gel(c.a)}</b></td><td class="r num hm">${c.n?gel(c.a/c.n):'—'}</td><td class="r num hm">${c.h>=0.5?gel(c.a/c.h):'—'}</td></tr>`).join('')}</tbody></table></div>`:'<div class="muted">No shifts this month.</div>'}
+   ${sh.length?`<h3 class="rh3">Shift log</h3><div class="flow">${sh.slice(0,40).map(x=>{const so=salesOf(x);const E=shiftExpected(x);const diff=x.closedAt?r2(x.closeCash-E):null;return `<div class="ln"><span class="k"><b>${esc(x.user?x.user.name:'?')}</b> · ${esc(dShort(String(x.openedAt).slice(0,10)))} ${tOf(x.openedAt)} → ${x.closedAt?tOf(x.closedAt):'…'}<div class="small muted">${fmt(hrs(x),1)} h${overnight(x)?' <b style="color:var(--warn)">· left open overnight, counted to 20:30</b>':''} · ${so.length} sale${so.length===1?'':'s'} · ${gel(so.reduce((a,o)=>a+o.total,0))}${x.closedAt?' · drawer '+(Math.abs(diff)<0.01?'matched':(diff>0?'+':'−')+gel(Math.abs(diff))):' · open'}</div></span></div>`}).join('')}</div>`:''}</div>`;
   return staff+`<div class="kpis"><div class="kpi"><div class="lbl">${esc(mLabel(m))} on the register</div><div class="val num">${cu(tot.a)}<small>₾</small></div><div class="delta">${tot.n} sales · ${rows.length} selling day${rows.length===1?'':'s'}</div></div><div class="kpi"><div class="lbl">Cash</div><div class="val num">${cu(tot.cash)}<small>₾</small></div><div class="delta">${pct(tot.cash,tot.a)}% of sales</div></div><div class="kpi"><div class="lbl">Card terminals</div><div class="val num">${cu(tot.card)}<small>₾</small></div><div class="delta">${pct(tot.card,tot.a)}%${tot.other?' · other '+gel(tot.other):''}</div></div><div class="kpi"><div class="lbl">Average sale</div><div class="val num">${cu(tot.n?tot.a/tot.n:0)}<small>₾</small></div><div class="delta">${tot.v?tot.v+' voided':'no voids'}</div></div></div>
   <div class="grid g3b"><div class="panel"><h2>By day</h2><p class="sub">Pick the month in the sidebar. Tap a day to see its sales.</p>${rows.length?`<div class="tablewrap"><table><thead><tr><th>Day</th><th class="r">Sales</th><th class="r">Register</th><th class="r">Sheet</th><th class="r hm">Cash</th><th class="r hm">Cards</th><th class="r hm">Other</th></tr></thead><tbody>${rows.map(D=>{const R=recon(D.d);return `<tr class="click" data-act="st_day" data-d="${D.d}" style="cursor:pointer"><td>${esc(dShort(D.d))}${D.v?` <span class="chip bad" style="padding:0 6px">${D.v} void</span>`:''}</td><td class="r num">${D.n}</td><td class="r num"><b>${gel(D.a)}</b></td><td class="r num">${gel(R.sa)} ${R.ok?'<span class="chip good" style="padding:0 6px">=</span>':`<span class="chip bad" style="padding:0 6px">${R.diff>0?'+':'−'}${gel(Math.abs(R.diff))}</span>`}</td><td class="r num hm">${gel(D.cash)}</td><td class="r num hm">${gel(D.card)}</td><td class="r num hm">${gel(D.other)}</td></tr>`}).join('')}</tbody><tfoot><tr><td><b>Total</b></td><td class="r num">${tot.n}</td><td class="r num"><b>${gel(tot.a)}</b></td><td class="r num">${gel(rows.reduce((a,D)=>a+recon(D.d).sa,0))}</td><td class="r num hm">${gel(tot.cash)}</td><td class="r num hm">${gel(tot.card)}</td><td class="r num hm">${gel(tot.other)}</td></tr></tfoot></table></div>`:`<div class="empty"><b>No register sales in ${esc(mLabel(m))}</b></div>`}</div>
   <div class="stack"><div class="panel"><h2>Best sellers on the register</h2>${top.length?`<div class="bars">${top.map(x=>`<div class="bar"><div class="name" title="${esc(x.n)}">${esc(x.n)}<span>×${fmt(x.q)}</span></div><div class="track"><div class="fill" style="width:${x.a/max*100}%;background:var(--s1)"></div></div><div class="amt num">${gel(x.a)}</div></div>`).join('')}</div>`:'<div class="muted">—</div>'}</div>
@@ -3880,9 +3952,9 @@ function storeHistory(){
 }
 function storeSetup(){
   const pos=S.cfg.pos||{};const users=pos.users||[];const R=pos.receipt||{};const link=storeLink();
-  return `<div class="grid g2"><div class="panel stack"><h2>Consultants</h2><p class="sub" style="margin:0">Each consultant picks their name on the register and types a 4-digit PIN. Every sale records who made it.</p>
-   <div class="tablewrap"><table><thead><tr><th>Name</th><th>PIN</th><th></th></tr></thead><tbody id="stUsers">${users.map((u,i)=>`<tr><td><input class="input" data-su="${i}" data-k="name" value="${esc(u.name)}"></td><td><input class="input num" data-su="${i}" data-k="pin" inputmode="numeric" maxlength="4" value="${esc(u.pin||'')}" style="max-width:110px"></td><td class="r"><button class="btn sm ghost" data-act="st_rmUser" data-i="${i}">Remove</button></td></tr>`).join('')||'<tr><td colspan="3" class="muted">No consultants yet — the register will show one “კონსულტანტი” without a PIN.</td></tr>'}</tbody></table></div>
-   <div class="row"><button class="btn" data-act="st_addUser">+ Add consultant</button><span class="spacer"></span><button class="btn primary" data-act="st_saveUsers">Save consultants</button></div></div>
+  return `<div class="grid g2"><div class="panel stack"><h2>People on the register</h2><p class="sub" style="margin:0">Each person picks their name on the register and types a 4-digit PIN. Every sale records who made it. A <b>manager</b> can ring up sales without starting a shift (they join the consultant's shift if one is open, so the cash still counts in the drawer), fix product prices and counts, and close a forgotten shift.</p>
+   <div class="tablewrap"><table><thead><tr><th>Name</th><th>PIN</th><th>Role</th><th></th></tr></thead><tbody id="stUsers">${users.map((u,i)=>`<tr><td><input class="input" data-su="${i}" data-k="name" value="${esc(u.name)}"></td><td><input class="input num" data-su="${i}" data-k="pin" inputmode="numeric" maxlength="4" value="${esc(u.pin||'')}" style="max-width:110px"></td><td><select class="input" data-su="${i}" data-k="role"><option value="">Consultant</option><option value="mgr" ${u.admin?'selected':''}>Manager</option></select></td><td class="r"><button class="btn sm ghost" data-act="st_rmUser" data-i="${i}">Remove</button></td></tr>`).join('')||'<tr><td colspan="4" class="muted">No consultants yet — the register will show one “კონსულტანტი” without a PIN.</td></tr>'}</tbody></table></div>
+   <div class="row"><button class="btn" data-act="st_addUser">+ Add person</button><span class="spacer"></span><button class="btn primary" data-act="st_saveUsers">Save</button></div></div>
   <div class="panel stack"><h2>Register key &amp; device link</h2><p class="sub" style="margin:0">The register uses its own key (POS_KEY in the backend script). It can only read the catalog and save sales; it never sees costs, expenses or the books.</p>
    <label class="field"><span>Register key (POS_KEY from Code.gs)</span><input class="input" id="stKey" type="password" autocomplete="off" value="${esc(pos.key||'')}" placeholder="astro-pos-…"></label>
    <div class="row"><button class="btn primary" data-act="st_saveKey">Save key</button><button class="btn" data-act="st_check">Check the backend</button><span class="muted small" id="stCheckMsg" aria-live="polite"></span></div>
@@ -3970,7 +4042,7 @@ async function storeSyncOptimo(stDoc){
     else{const same=['n','cat','price','cost','vat','q','min','sold','countedAt'].every(k=>JSON.stringify(cur[k]??null)===JSON.stringify(d[k]??null));if(!same){n++;await saveCat(b,d)}}}
   toast(`Catalog updated from Optimo: ${n} changed, ${fresh} new${fresh?' (give them pictures)':''}`);
 }
-function readUsers(){const rows=[...document.querySelectorAll('#stUsers tr')];const users=[];rows.forEach((r,i)=>{const n=r.querySelector('[data-k="name"]'),p=r.querySelector('[data-k="pin"]');if(!n)return;const cur=((S.cfg.pos||{}).users||[])[i]||{};users.push({id:cur.id||uid('u'),name:n.value.trim(),pin:p.value.replace(/\D/g,'').slice(0,4)})});return users}
+function readUsers(){const rows=[...document.querySelectorAll('#stUsers tr')];const users=[];rows.forEach((r,i)=>{const n=r.querySelector('[data-k="name"]'),p=r.querySelector('[data-k="pin"]'),ro=r.querySelector('[data-k="role"]');if(!n)return;const cur=((S.cfg.pos||{}).users||[])[i]||{};const u={id:cur.id||uid('u'),name:n.value.trim(),pin:p.value.replace(/\D/g,'').slice(0,4)};if(ro?ro.value==='mgr':cur.admin)u.admin=true;users.push(u)});return users}
 async function savePos(patch){await saveCfg({pos:{...(S.cfg.pos||{}),...patch}})}
 async function storeAct(a,b){
   if(a==='st_tab'){S.store.tab=b.dataset.v;S.animate=true;render();window.scrollTo({top:0});return}
@@ -4019,7 +4091,484 @@ async function storeAct(a,b){
 }
 /* ---------- sheet vs register: the shop's sales typed in the order sheet against the register ---------- */
 const BRANCH=/ფილიალი/i;
-function sheetStoreRows(d){return dayOf(d).rows.filter(r=>BRANCH.test(String(r.c||'')))}
+function overnight(x){if(!x||!x.openedAt)return false;const a=new Date(x.openedAt),b=x.closedAt?new Date(x.closedAt):new Date();return a.toDateString()!==b.toDateString()&&!x.lateClose}
+
+/* ============================== orders · customers · payment check ==============================
+   Every order is a `pos` record, wherever it was entered: rung on the register, typed here in Mars (src:'mars'),
+   or brought in from the order sheet (src:'sheet'). `ch` says what kind of order it is (shop, delivery, Wolt,
+   Glovo, Extra.ge); delivery and Extra orders carry the customer in `dl` {name, phone, addr, fee, st, log}.
+   The customer base is built from all the order spreadsheets and kept in `shift` records of kind 'custdb'
+   (that collection is the one the register can read), then topped up live from the orders. */
+const CHS=[['shop','🏪','Shop'],['delivery','🛵','Delivery'],['wolt','W','Wolt'],['glovo','G','Glovo'],['extra','E','Extra.ge']];
+const CHN=Object.fromEntries(CHS.map(c=>[c[0],c[2]]));
+const CH_PAYS={shop:['pos','cash','bog','tbc','personal','installment','other'],delivery:['cod','bog','tbc','pending','personal','pos','other'],wolt:['wolt'],glovo:['glovo'],extra:['extra']};
+const ADDR_CH=new Set(['delivery','extra']);
+const OST=[['new','New'],['ready','Packed'],['out','Picked up by courier'],['done','Delivered']];
+const OSTN=Object.fromEntries(OST);
+const LATER_PAYS=new Set(['cod','pending']);
+function chOf(o){if(!o)return 'shop';if(o.ch)return o.ch;if(o.pay==='wolt')return 'wolt';if(o.pay==='glovo')return 'glovo';if(o.pay==='extra')return 'extra';return o.dl?'delivery':'shop'}
+const srcOf=o=>o.src==='mars'?'Mars':o.src==='sheet'?'Sheet':'Register';
+const chChip=c=>`<span class="chip chx ch-${c}">${(CHS.find(x=>x[0]===c)||['','',''])[1]} ${esc(CHN[c]||c)}</span>`;
+const fmtPh=p=>/^\d{9}$/.test(p||'')?p.slice(0,3)+' '+p.slice(3,5)+' '+p.slice(5,7)+' '+p.slice(7):(p||'');
+const custOf=o=>o.dl||o.cust||null;
+const unpaid=o=>o.status!=='void'&&o.paid===false;
+const openDl=o=>o.status!=='void'&&o.dl&&o.dl.st&&o.dl.st!=='done';
+
+/* ---------- customer base ---------- */
+const CX_ADDR=/ქუჩ|ქ\.|გამზ|ჩიხ|შესახვ|კორპ|ბინა|სადარბ|მიკრო|დასახლ|კვარტ|უბანი|რაიონ|სოფ|ქალაქ|№|N\s?\d|თბილის|ბათუმ|ქუთაის|რუსთავ|ზუგდიდ|გორი|თელავ|ფოთ|ქობულეთ|ვაკე|საბურთალ|დიდუბ|გლდან|ვარკეთილ|ისან|სამგორ|ნაძალადევ|დიღომ/i;
+const CX_SKIP=/შეჯამება|პარამეტრ|ჩანაწერ|მიმდინარე|form responses|სკოლ|მარაგ|^sheet\d*$/i;
+const CX_NOTCUST=/^(ფილიალი|ფილალი|ფილიალში|wolt|ვოლტი?|glovo|გლოვო|ონლაინ|online|სპონსორი|რეზი|მაღაზია|საიტი|extra|ექსტრა|-|\.+)$/i;
+const CX_KA=[['იანვ',1],['თებ',2],['მარტ',3],['აპრ',4],['მაის',5],['ივნ',6],['ივლ',7],['აგვ',8],['სექტ',9],['ოქტ',10],['ნოემ',11],['დეკ',12]];
+const cxMonth=t=>{for(const [k,v] of CX_KA)if(String(t).includes(k))return v;return 0};
+function cxPhone(v){let d=String(v??'').replace(/\D/g,'');if(d.startsWith('995')&&d.length>=12)d=d.slice(3);if(d.length===10&&d[0]==='0')d=d.slice(1);return /^5\d{8}$/.test(d)?d:''}
+const CX_PRE=/(?:\+?995[\s\-.]*)?\(?5(?:[\s\-.)]*\d){8}(?!\d)/g;
+function cxPhonesIn(cells){const out=[];for(const c of cells){for(const m of String(c??'').matchAll(CX_PRE)){const p=cxPhone(m[0]);if(p&&!out.includes(p))out.push(p)}}return out}
+const cxNum=v=>{if(typeof v==='number')return v;const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.').replace(/[^\d.\-]/g,''));return isFinite(n)?n:0};
+const cxTxt=v=>String(v??'').replace(/\s+/g,' ').trim();
+function cxCols(hdr){
+  const h=hdr.map(c=>cxTxt(c).toLowerCase());const f=re=>h.findIndex(x=>re.test(x));const fl=re=>{let j=-1;h.forEach((x,i)=>{if(re.test(x))j=i});return j};
+  let amt=h.findIndex(x=>x==='თანხა');if(amt<0)amt=f(/ასაღები|cod|ღირებულება|თანხა/);
+  return {name:f(/დამკვეთ|მომხმარებ|client|კლიენტ|მიმღებ/),phone:f(/ტელ|phone|ნომერ/),addr:f(/მისამართ|address/),city:f(/^ქალა/),prod:f(/პროდუქტ/),amt,qty:f(/^რაოდ/),
+    date:f(/შეკვეთის თარიღი|^თარიღი|^date/),status:fl(/სტატუს|status/),pay:f(/გადახდ/),store:f(/მაღაზი|^store/)};
+}
+function cxGuess(rows){
+  const n=Math.min(20,Math.max(0,...rows.slice(0,80).map(r=>r.length)));const sc=f=>{const s=Array(n).fill(0);rows.slice(0,200).forEach(r=>{for(let c=0;c<n;c++)if(f(r[c]))s[c]++});return s};
+  const best=(s,ex=[])=>{let b=-1,v=0;s.forEach((x,i)=>{if(!ex.includes(i)&&x>v){v=x;b=i}});return b};
+  const phone=best(sc(v=>!!cxPhone(v)));const addr=best(sc(v=>CX_ADDR.test(String(v??''))&&String(v).length>6),[phone]);
+  const name=best(sc(v=>/ფილიალი|wolt|ვოლტ/i.test(String(v??''))),[phone,addr]);
+  const amt=best(sc(v=>{const x=cxNum(v);return typeof v!=='string'||/^\s*\d+([.,]\d+)?\s*$/.test(v)?x>=5&&x<50000&&!cxPhone(v):false}),[phone,addr,name]);
+  return {name,phone,addr,city:-1,prod:name>=0?name+1:-1,amt,qty:-1,date:-1,status:best(sc(v=>/დასრულ|გაუქმ|აღებ|გამზად/.test(String(v??'')))),pay:-1,store:-1};
+}
+function cxTab(sh){const v=sh.values||[];let hi=-1;for(let i=0;i<Math.min(6,v.length);i++){const C=cxCols(v[i]);if([C.name,C.phone,C.addr,C.amt].filter(x=>x>=0).length>=2){hi=i;break}}return {C:hi>=0?cxCols(v[hi]):cxGuess(v),body:v.slice(hi+1)}}
+// one order row of any sheet → {p, alt, n, a, d, amt, prod, st, cancel}; null when it is empty
+function cxRow(r,C,ctx){
+  if(!r||!r.some(c=>cxTxt(c)))return null;
+  if(C.store>=0){const st=cxTxt(r[C.store]);if(st&&!/ასტრო|astro/i.test(st))return null}
+  let ph=C.phone>=0?cxPhonesIn([r[C.phone]]):[];if(!ph.length)ph=cxPhonesIn(r.filter((c,i)=>i!==C.amt));
+  let n=C.name>=0?cxTxt(r[C.name]):'';const nRaw=n;if(CX_NOTCUST.test(n))n='';
+  let a=C.addr>=0?cxTxt(r[C.addr]):'';const city=C.city>=0?cxTxt(r[C.city]):'';if(city&&a&&!a.includes(city))a=city+', '+a;else if(!a)a=city;
+  if(/^(\.|-|,|\.\.)$/.test(a))a='';
+  const st=C.status>=0?cxTxt(r[C.status]):'';const cancel=/გაუქმ|cancel|უარი|დაბრუნ/i.test(st);
+  let amt=cxNum(C.amt>=0?r[C.amt]:0);if(amt>20000||cxPhone(amt))amt=0;
+  let d='';const pd=C.date>=0?parseDateCell(r[C.date]):null;
+  let y=(pd&&pd.y)||ctx.ty||ctx.y,m=(pd&&pd.m)||ctx.tm||ctx.m,dd=(pd&&pd.d)||ctx.td||0;
+  if(ctx.kind==='courier'){y=ctx.y;m=ctx.m;dd=ctx.td||dd}
+  if(ctx.kind==='main'&&ctx.tm&&!ctx.ty)y=ctx.year||2026;
+  if(y&&m)d=y+'-'+String(m).padStart(2,'0')+(dd?'-'+String(dd).padStart(2,'0'):'');
+  return {p:ph[0]||'',alt:ph.slice(1),n,nRaw,a:a.slice(0,160),d,amt,prod:C.prod>=0?cxTxt(r[C.prod]).slice(0,120):'',qty:C.qty>=0?cxNum(r[C.qty]):0,pay:C.pay>=0?cxTxt(r[C.pay]):'',st,cancel};
+}
+function cxRows(wb,src){
+  const out=[];
+  for(const sh of (wb.sheets||[])){
+    const name=cxTxt(sh.name);if(CX_SKIP.test(name)||(sh.values||[]).length<2)continue;
+    const {C,body}=cxTab(sh);const ctx={...src,ty:+(name.match(/20\d\d/)||[])[0]||0,tm:cxMonth(name),td:/^\d{1,2}$/.test(name)?+name:0};
+    for(const r of body){const x=cxRow(r,C,ctx);if(x&&x.p)out.push({...x,k:src.k})}
+  }
+  return out;
+}
+function cxBuild(rows){
+  const M=new Map();rows.sort((a,b)=>String(a.d).localeCompare(String(b.d)));
+  for(const r of rows){
+    const c=M.get(r.p)||{p:r.p,n:'',a:[],alt:[],ds:{},k:[]};
+    if(r.n)c.n=r.n;if(r.a){c.a=c.a.filter(x=>x!==r.a);c.a.unshift(r.a);c.a=c.a.slice(0,3)}
+    r.alt.forEach(x=>{if(x!==c.p&&!c.alt.includes(x))c.alt.push(x)});
+    const kk=String(r.k).replace(/_.*/,'');if(!c.k.includes(kk))c.k.push(kk);
+    if(!r.cancel){const day=r.d||'?';c.ds[day]=Math.max(c.ds[day]||0,r.amt||0);if(r.prod)c.lp=r.prod}
+    M.set(r.p,c);
+  }
+  return [...M.values()].map(c=>{const days=Object.keys(c.ds).sort();return {p:c.p,n:c.n,a:c.a,alt:c.alt.slice(0,2),k:c.k,lp:c.lp||'',ds:days.map(d=>[d,Math.round(c.ds[d])])}});
+}
+// the sheets the customer base is read from (owner's order sheets and the courier's monthly sheets)
+const CUST_SOURCES=[['main','1MXZq3Li7W6hfoDGVo9KMYPodS7haezf6TG1CwFmCtdk'],['old2122','1GRz5GrB6dGQSmJgLAQ3RWPhVhR3QnMCBPTKL8xaeFa4',2022],['xlsx2022','1SbTT-PwJyChvTeBt7uAQP52NGT6BV3Vw',2022],['gl_2025_12','1iEFtmjUFWQGY8pIkkmeLFcqeIbGD8-Om7asr6YLyohY'],
+ ['td_2023_12','1U95uKFSHrfGVPy0AMcBG5Y4mTgyPHs9mYesXYlbpsIo'],['td_2024_01','17gyf7i9RTv-I6hUOsCNSwxEKKNKkj27Wt-_FNZnt1oQ'],['td_2024_02','1YifLLPe4q5ULVCc6D-TYX19B5_YXcdxM_gFKdwaLEdc'],['td_2024_03','11nFiS44Lte2KHZgn2_mM3_lWMkTGiu7Ssb2XWzQYGus'],['td_2024_04','1Z4H_5D1KtS_CBIoWQ6teuQtOjGRVscontB161Hdyiho'],['td_2024_05','1uB0tpcGO5AoDa7SWHN4AnA4CtDJpURXGW-MOIDx8CLM'],['td_2024_06','1U7qTSAWyahKSGXtRQD1OEkXYnj9HOBnfvDJRhLoirEo'],['td_2024_07','1OBt5YL62t2ackCJ93E4RX747e8l5q39kbNJwpImL3kc'],['td_2024_08','1ZCxLA97kNyEfPEwtaUIANWK7zIOoEiiBs7Mt7naWplg'],['td_2024_08','1keGxl0Zdl6Z_j0yYbntHC50qMC6Via9n_NMe4ljMYp8'],['td_2024_12','1fkqPfj0JoIGVgHA5kOcaKAovcl4SQZ07nsOKZKMDsJ0'],
+ ['td_2025_01','1vBKlR9xG23CunROwqH9x5ZcqSRJS9XyGUeNYfHKEeUU'],['td_2025_02','1Y76h7IXBbaafxhkwUC2pGf2ELbgElG0xxghpFhcFo9U'],['td_2025_03','1Pnd9HwwdFOAg3HtDKntOYl3t0TWtXi0YLZtSxsdhjx4'],['td_2025_04','1Yvh1J18liOTxxFyVFsqG_kPzu-nMpx0yjMAhcdeUh_c'],['td_2025_05','10qumQJBMsnwsXW9uiBIpL-qnhnnjSjqx_4EeMiy1qhs'],['td_2025_06','1iDTp_jPBdBfWsVE2qhpPTStmMMQUiaVbR1HB9GsIeqU'],['td_2025_07','1c7c3esp1av_WxwnFI1gtlG3YdyZjnwdP8cNEXQWeHxQ'],['td_2025_08','1zNDz4HJkgxjO7OQ_Y4s_3ev9kGXCmgEzUejZowpfL_k'],['td_2025_09','1u_tt9aTKIFqV7cm8k01mNhZpXxsOZ8q5TR2TVnHAy1c'],['td_2025_10','1jPP0Mgmm6v91Q_Z_ZYNJGSzB4qSCgVwHoofmM5CVsig'],['td_2025_11','1ATAYwMGVl5ukzlOzxwO6X0lkK-jB4bYmJqU5k4ZnG7E'],['td_2025_12','1p3x7b16MxomefA9FHzGmhXFV5BiKFxTB-g1cWMgezJ0'],
+ ['td_2026_01','13l6kkvT0xzfj7fyBXVzvckTE2ExCIlmeGgqMjDMx-0w'],['td_2026_02','1giy_YcMpzjTM1jsg_hPOBe1-ZJ0Rh2wV1MHOgfjOANs'],['td_2026_03','19XOnZdUABJ3OROS2iKdTfdwU8h_Rqbv9KPh59FjAvMw'],['td_2026_04','1ABxYfm4xyMOKbFOHrm89mttWpbNmq0SQ36uydbir0IU'],['td_2026_05','1Pj8pBFpp0J1L85tRmkrpPl_9FCMz5pq5uYvFndre8IE'],['td_2026_06','1NM0aJUlsmxfGDOoTJbRinueNvHRP9J-ipeyxrYhrdSk'],['td_2026_07','18vO34sMI41u_mC-y52caUTvLSyQgfQe8Kys7tI-ekEk'],['td_2026_08','1oloHL9ScgH3q29kvknShr01H9UUSxDqWWGv-6SlRXvw']];
+function custSources(){return [...CUST_SOURCES,...((S.cfg&&S.cfg.custSources)||[])]}
+async function rebuildCustomers(btn){
+  if(!S.backend){toast('Open Mars from its own address (not inside Claude) to read the sheets');return}
+  const src=custSources();let i=0,done=0;const rows=[];const failed=[];const set=t=>{if(btn)btn.textContent=t};
+  set('Reading 0 of '+src.length+' sheets…');
+  const work=async()=>{while(i<src.length){const [k,id,yy]=src[i++];const mm=k.match(/^(?:td|gl)_(\d{4})_(\d{2})/);const kind=k.startsWith('td_')||k.startsWith('gl_')?'courier':k==='main'?'main':'old';
+    try{const wb=await S.backend.orders(id);rows.push(...cxRows(wb,{k,kind,y:mm?+mm[1]:yy||2026,m:mm?+mm[2]:0,year:2026}))}catch(e){failed.push(k)}done++;set('Reading '+done+' of '+src.length+' sheets…')}};
+  await Promise.all([work(),work(),work()]);
+  const list=cxBuild(rows);set('Saving '+list.length+' customers…');
+  const at=new Date().toISOString();const N=Math.ceil(list.length/250);
+  for(let j=0;j<N;j++)await S.db.doc('shift/custdb-'+j).set({kind:'custdb',i:j,n:N,at,list:list.slice(j*250,j*250+250)});
+  for(const d of custDocs())if((d.i??0)>=N)await S.db.doc('shift/'+d.id).delete();
+  toast(list.length+' customers from '+(src.length-failed.length)+' sheets'+(failed.length?' · could not read: '+failed.join(', '):''),8000);
+  if(btn){btn.disabled=false;set('↻ Rebuild from the sheets')}render();
+}
+function custDocs(){return [...S.shift.values()].filter(x=>x&&x.kind==='custdb')}
+// phone → {p,n,a[],alt[],o,s,f,l,k[],lp,orders[]}, from the sheets plus every order that names a customer
+function customers(){
+  const hit=S.mc.get('#cust');if(hit)return hit;
+  const M=new Map(),alias=new Map();
+  custDocs().sort((a,b)=>(a.i||0)-(b.i||0)).forEach(d=>(d.list||[]).forEach(c=>{const ds=new Map(c.ds||[]);M.set(c.p,{p:c.p,n:c.n||'',a:[...(c.a||[])],alt:[...(c.alt||[])],k:[...(c.k||[])],lp:c.lp||'',ds,orders:[]});(c.alt||[]).forEach(x=>alias.set(x,c.p))}));
+  [...S.pos.values()].filter(o=>o&&o.status!=='void'&&custOf(o)&&custOf(o).phone).sort((a,b)=>String(a.at).localeCompare(String(b.at))).forEach(o=>{
+    const cu=custOf(o);const p=alias.get(cu.phone)||cu.phone;const c=M.get(p)||{p,n:'',a:[],alt:[],k:[],lp:'',ds:new Map(),orders:[]};
+    if(cu.name)c.n=cu.name;if(cu.addr&&!/^გაიტანს$/i.test(cu.addr)){c.a=c.a.filter(x=>x!==cu.addr);c.a.unshift(cu.addr);c.a=c.a.slice(0,3)}
+    if(!c.k.includes('orders'))c.k.push('orders');c.orders.push(o);
+    const day=o.day||'?';if(!c.ds.has(day))c.ds.set(day,+o.total||0);c.lp=o.lines.map(l=>l.n).join(', ').slice(0,120);M.set(p,c)});
+  M.forEach(c=>{const days=[...c.ds.keys()].filter(d=>d!=='?').sort();c.o=c.ds.size;c.s=[...c.ds.values()].reduce((a,x)=>a+x,0);c.f=days[0]||'';c.l=days[days.length-1]||''});
+  const out={M,alias,find:ph=>{const p=cxPhone(ph);return p?M.get(alias.get(p)||p)||null:null}};S.mc.set('#cust',out);return out;
+}
+
+/* ---------- the page ---------- */
+function vOrders(){
+  const T=S.ord.tab;const m=S.month;
+  const C=customers();const L=monthOrders(m);
+  const tabs=[['list','Orders'],['new','+ New order'],['customers','Customers · '+fmt(C.M.size)],['pay','Payment check'],['import','Import from sheet']];
+  const head=`<div class="pagehead"><div><div class="eyebrow">${esc(mLabel(m))} · შეკვეთები</div><h1>Orders</h1><p>Every order in one place — shop, delivery, Wolt, Glovo and Extra.ge — with the customer's phone and address. Orders typed here show up on the register for the consultants.</p></div><div class="actions"><button class="btn primary" data-act="or_tab" data-v="new">+ New order</button></div></div>
+  <div class="tabs" role="tablist">${tabs.map(([k,t])=>`<button role="tab" aria-selected="${T===k}" data-act="or_tab" data-v="${k}">${t}</button>`).join('')}</div>`;
+  const body=T==='new'?ordNew():T==='customers'?ordCustomers():T==='pay'?ordPayCheck():T==='import'?ordImport():ordList(L);
+  return loadingOr(head+body);
+}
+function monthOrders(m){return [...S.pos.values()].filter(o=>o&&o.lines&&String(o.day||'').startsWith(m)).sort((a,b)=>String(b.at).localeCompare(String(a.at)))}
+
+function ordDash(L,m){
+  const live=L.filter(o=>o.status!=='void');const tot=live.reduce((a,o)=>a+(+o.total||0),0);
+  const days=daysIn(m);const by=CHS.map(c=>({k:c[0],ic:c[1],t:c[2],a:0,n:0,d:Array(days).fill(0)}));const bk=Object.fromEntries(by.map(x=>[x.k,x]));
+  live.forEach(o=>{const c=bk[chOf(o)]||bk.shop;c.a+=+o.total||0;c.n++;const d=+String(o.day).slice(8);if(d>=1&&d<=days)c.d[d-1]+=+o.total||0});
+  const un=live.filter(unpaid);const dl=live.filter(o=>o.dl&&o.dl.st);
+  const late=dl.filter(o=>o.dl.st!=='done'&&(Date.now()-Date.parse(o.at))/864e5>2);
+  const F=S.ord.f;
+  // orders per day, stacked by type (shop at the bottom)
+  const W=640,H=200,pl=40,pb=22,pt=8,iw=W-pl-6,ih=H-pt-pb;const dayT=Array.from({length:days},(_,i)=>by.reduce((a,c)=>a+c.d[i],0));
+  const mx=Math.max(100,...dayT);const stp=mx>3000?1000:mx>1200?500:mx>500?200:100;const top=Math.ceil(mx/stp)*stp;const sy=v=>pt+ih-(v/top)*ih;const bw=iw/days;
+  let g='';for(let t=0;t<=top;t+=stp)g+=`<line x1="${pl}" x2="${W-6}" y1="${sy(t)}" y2="${sy(t)}" stroke="var(--grid,var(--line))"/><text x="${pl-6}" y="${sy(t)+4}" text-anchor="end">${t>=1000?fmt(t/1000,1)+'k':t}</text>`;
+  let bars='';for(let i=0;i<days;i++){const X=pl+i*bw+1.5,w=Math.max(2,bw-3);let y0=pt+ih;const segs=by.filter(c=>c.d[i]>0);
+    segs.forEach((c,j)=>{const h=ih*(c.d[i]/top);const last=j===segs.length-1;const hh=Math.max(0,h-(last?0:2));const r=last?Math.min(4,hh,w/2):0;
+      bars+=last?`<path d="M${X},${y0} v${-(hh-r)} q0,${-r} ${r},${-r} h${w-2*r} q${r},0 ${r},${r} v${hh-r} z" fill="var(--ch-${c.k})"/>`:`<rect x="${X}" y="${y0-hh}" width="${w}" height="${hh}" fill="var(--ch-${c.k})"/>`;y0-=h});
+    if((i+1)%5===0||i===0)bars+=`<text x="${X+w/2}" y="${H-6}" text-anchor="middle">${i+1}</text>`;
+    const tip=`<div class="t">${i+1} ${esc(mLabel(m))}</div>`+by.filter(c=>c.d[i]>0).map(c=>`<div class="r"><span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--ch-${c.k});margin-right:6px"></i>${esc(c.t)}</span><b class="num">${gel(c.d[i])}</b></div>`).join('')+`<div class="r"><span>Total</span><b class="num">${gel(dayT[i])}</b></div>`;
+    bars+=`<rect class="ohit" data-tip="${esc(tip)}" x="${pl+i*bw}" y="${pt}" width="${bw}" height="${ih}" fill="transparent"/>`}
+  const maxA=Math.max(1,...by.map(c=>c.a));
+  const pipeN=k=>dl.filter(o=>o.dl.st===k).length;
+  const topP=new Map();live.forEach(o=>o.lines.forEach(l=>{const k=l.b||l.n;const x=topP.get(k)||{n:l.n,q:0,a:0};x.q+=+l.q||0;x.a+=Math.max(0,(+l.q||0)*(+l.p||0)-(+l.d||0));topP.set(k,x)}));
+  const tp=[...topP.values()].sort((a,b)=>b.a-a.a).slice(0,6);const tpMax=Math.max(1,...tp.map(x=>x.a));
+  const topC=new Map();live.forEach(o=>{const c=custOf(o);if(!c||!c.phone)return;const x=topC.get(c.phone)||{n:c.name,p:c.phone,a:0,k:0};x.a+=+o.total||0;x.k++;topC.set(c.phone,x)});
+  const tc=[...topC.values()].sort((a,b)=>b.a-a.a).slice(0,6);
+  return `<div class="kpis"><div class="kpi"><div class="lbl">Orders · ${esc(mLabel(m))}</div><div class="val num">${fmt(live.length)}</div><div class="delta">${gel(tot)}</div></div>
+   <div class="kpi"><div class="lbl">Average order</div><div class="val num">${live.length?gel(tot/live.length):'—'}</div><div class="delta">${dl.length} delivery & Extra orders</div></div>
+   <div class="kpi"><div class="lbl">Still to be paid</div><div class="val num ${un.length?'neg':''}">${gel(un.reduce((a,o)=>a+(+o.total||0),0))}</div><div class="delta">${un.length} order${un.length===1?'':'s'}${un.length?' · <button class="btn sm ghost" style="height:auto;padding:0 4px" data-act="or_fst" data-v="unpaid">see them →</button>':''}</div></div>
+   <div class="kpi"><div class="lbl">Deliveries not finished</div><div class="val num ${late.length?'neg':''}">${dl.filter(o=>o.dl.st!=='done').length}</div><div class="delta">${late.length?late.length+' older than 2 days':'none late'}</div></div></div>
+  <div class="odash"><div class="panel"><h2>Orders per day</h2><p class="sub">Money from each day's orders, by type. Hover a day for the split.</p>
+    <div class="olegend">${by.map(c=>`<span><i style="background:var(--ch-${c.k})"></i>${esc(c.t)} <b class="num">${gel(c.a)}</b></span>`).join('')}</div>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Orders per day by type" id="ordSvg">${g}${bars}</svg></div>
+   <div class="stack"><div class="panel"><h2>Where the money comes from</h2><div class="obars">${by.map(c=>`<div class="obar"><span>${c.ic} ${esc(c.t)}</span><div class="tr"><i style="width:${c.a/maxA*100}%;background:var(--ch-${c.k})"></i></div><span class="v num">${gel(c.a)}<small>${c.n} · ${tot?Math.round(c.a/tot*100):0}%</small></span></div>`).join('')}</div></div>
+    <div class="panel"><h2>Deliveries</h2><p class="sub">Where each delivery and Extra order stands. Tap a step to list those orders.</p><div class="pipe">${OST.map(([k,t])=>`<button data-act="or_fst" data-v="st:${k}" aria-pressed="${F.st==='st:'+k}" class="${k!=='done'&&pipeN(k)&&late.some(o=>o.dl.st===k)?'warn':''}"><b>${pipeN(k)}</b><small>${esc(t)}</small></button>`).join('')}</div></div></div></div>
+  <div class="grid g2" style="margin-bottom:16px"><div class="panel"><h2>Best sellers this month</h2>${tp.length?`<div class="obars">${tp.map(x=>`<div class="obar" style="grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 92px"><span title="${esc(x.n)}" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(x.n)}</span><div class="tr"><i style="width:${x.a/tpMax*100}%;background:var(--ch-shop)"></i></div><span class="v num">${gel(x.a)}<small>× ${fmt(x.q)}</small></span></div>`).join('')}</div>`:'<div class="muted small">No orders yet.</div>'}</div>
+   <div class="panel"><h2>Best customers this month</h2>${tc.length?`<div class="flow">${tc.map(x=>`<div class="ln click" data-act="or_cust" data-p="${esc(customers().find(x.p)?customers().find(x.p).p:x.p)}" style="cursor:pointer"><span class="k"><b>${esc(x.n||'—')}</b> <span class="muted small num">${esc(fmtPh(x.p))}</span><div class="small muted">${x.k} order${x.k===1?'':'s'}</div></span><b class="num">${gel(x.a)}</b></div>`).join('')}</div>`:'<div class="muted small">Orders with a phone number show up here.</div>'}</div></div>`;
+}
+function ordList(L){
+  const F=S.ord.f;const q=(F.q||'').toLowerCase();
+  const live=L.filter(o=>o.status!=='void');
+  const by={};live.forEach(o=>{const c=chOf(o);by[c]=(by[c]||0)+(+o.total||0)});
+  const un=live.filter(unpaid),op=live.filter(openDl);
+  const rows=L.filter(o=>(F.ch==='all'||chOf(o)===F.ch)&&(F.st==='all'||(F.st==='unpaid'?unpaid(o):F.st==='open'?openDl(o):F.st==='void'?o.status==='void':F.st.startsWith('st:')?(o.dl&&o.dl.st===F.st.slice(3)):true))&&(F.st==='void'||o.status!=='void'||F.showVoid)&&(!q||[custOf(o)?.name,custOf(o)?.phone,custOf(o)?.addr,o.lines.map(l=>l.n).join(' '),o.note,PAYS[o.pay]].join(' ').toLowerCase().includes(q)));
+  const kp=ordDash(L,S.month);
+  const fl=`<div class="toolbar"><input class="input grow" id="orQ" placeholder="Search name, phone, address, product…" value="${esc(F.q||'')}"><div class="pills">${[['all','All'],...CHS.map(c=>[c[0],c[1]+' '+c[2]])].map(([k,t])=>`<button data-act="or_fch" data-v="${k}" aria-pressed="${F.ch===k}">${esc(t)}</button>`).join('')}</div><div class="pills">${[['all','Any'],['open','Not delivered'],['unpaid','Unpaid'],['void','Cancelled'],...(F.st.startsWith('st:')?[[F.st,OSTN[F.st.slice(3)]]]:[])].map(([k,t])=>`<button data-act="or_fst" data-v="${k}" aria-pressed="${F.st===k}">${t}</button>`).join('')}</div></div>`;
+  const tr=o=>{const c=chOf(o),cu=custOf(o);return `<tr class="click ${o.status==='void'?'void':''}" data-act="or_open" data-id="${esc(o.id)}"><td class="num">${esc(dShort(o.day))}<div class="small muted">${o.src==='sheet'?'':tOf(o.at)}</div></td><td>${chChip(c)}</td>
+   <td>${cu?`<b>${esc(cu.name||'—')}</b><div class="small muted num">${esc(fmtPh(cu.phone))}</div>`:'<span class="muted">—</span>'}</td><td class="small hm">${cu&&cu.addr?esc(cu.addr):''}</td>
+   <td class="small">${esc(o.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '))}</td><td class="small">${esc(PAYS[o.pay]||o.pay)}${unpaid(o)?' <span class="chip bad">unpaid</span>':''}</td>
+   <td class="r num"><b>${gel(o.total)}</b>${o.ship?`<div class="small muted">incl. ${gel(o.ship)} delivery</div>`:''}</td><td>${o.status==='void'?'<span class="chip bad">cancelled</span>':o.dl&&o.dl.st?`<span class="chip ${o.dl.st==='done'?'good':'warn'}">${OSTN[o.dl.st]}</span>${o.dl.seen?`<div class="small muted">✓ ${esc(o.dl.seen.by)}</div>`:o.src==='mars'?'<div class="small muted">not seen yet</div>':''}`:''}</td><td class="small muted hm">${srcOf(o)}${o.no?' №'+o.no:''}</td></tr>`};
+  return kp+fl+(rows.length?`<div class="panel"><div class="tablewrap"><table class="ordt"><thead><tr><th>Day</th><th>Type</th><th>Customer</th><th class="hm">Address</th><th>Products</th><th>Payment</th><th class="r">Amount</th><th>Status</th><th class="hm">From</th></tr></thead><tbody>${rows.slice(0,S.ord.all?2000:200).map(tr).join('')}</tbody></table></div>${rows.length>200&&!S.ord.all?`<div class="row mt"><button class="btn" data-act="or_all">Show all ${rows.length}</button></div>`:''}</div>`
+   :`<div class="panel empty"><b>No orders here</b>${L.length?'Nothing matches the filters.':'Orders rung on the register or typed here appear in this list.'}</div>`);
+}
+/* ---------- new order ---------- */
+function ofNew(keep){const o={ch:'delivery',day:today(),phone:'',name:'',addr:'',lines:[],fee:'10',pay:'cod',st:'new',note:'',q:'',paste:''};return keep?{...o,...keep}:o}
+function ofTotals(){const F=S.of;const sub=F.lines.reduce((a,l)=>a+(+l.q||0)*(+l.p||0),0);const fee=ADDR_CH.has(F.ch)?Math.max(0,parseFloat(F.fee)||0):0;return {sub:r2(sub),fee,total:r2(sub+fee)}}
+function ordNew(){if(!S.of)S.of=ofNew();return `<div class="grid g3b"><div class="panel" id="ofBox">${ofForm()}</div><div class="stack">${ofSide()}</div></div>`}
+function ofForm(){
+  const F=S.of;const T=ofTotals();const addr=ADDR_CH.has(F.ch);const pays=CH_PAYS[F.ch];if(!pays.includes(F.pay))F.pay=pays[0];
+  return `<h2>New order</h2><p class="sub">${addr?'🛵 Goes out to a customer\'s address — the consultants see it on the register under 🛵 შეკვეთები.':F.ch==='shop'?'🏪 Sold in the shop — no address needed.':'Platform order — the platform\'s courier collects it.'}</p>
+  <div class="ofgrid">
+   <div class="field span2"><span>Type of order</span><div class="chsel">${CHS.map(([k,ic,t])=>`<button data-act="or_ch" data-v="${k}" aria-pressed="${F.ch===k}" class="ch-${k}"><b>${ic}</b>${t}</button>`).join('')}</div></div>
+   <label class="field"><span>Date</span><input class="input" type="date" id="ofDay" value="${esc(F.day)}" max="${today()}"></label>
+   ${addr?`<label class="field span3"><span>Paste the customer's message <span class="muted">— phone, name and address fill in by themselves</span></span><textarea class="input" id="ofPaste" rows="2" placeholder="e.g. ნინო ბერიძე, ვაჟა-ფშაველას 71, ბინა 12, 599 12 34 56">${esc(F.paste)}</textarea></label>`:''}
+   <label class="field"><span>Phone${addr?' *':''}</span><input class="input num" id="ofPhone" inputmode="tel" value="${esc(F.phone)}" placeholder="5XX XX XX XX"></label>
+   <label class="field"><span>Name</span><input class="input" id="ofName" value="${esc(F.name)}"></label>
+   ${addr?`<label class="field"><span>Address *</span><input class="input" id="ofAddr" value="${esc(F.addr)}" placeholder="city, street, building, flat"></label>`:'<div></div>'}
+   <div class="span3" id="ofKnown">${ofKnown()}</div>
+   <div class="field span3"><span>Products</span><div class="ofsearch"><input class="input" id="ofQ" placeholder="Search the catalog, or type a name and press Enter" autocomplete="off" value="${esc(F.q)}"><div class="ofsug" id="ofSug"></div></div></div>
+   <div class="span3">${F.lines.length?`<table class="oflines"><thead><tr><th>Product</th><th class="r">Qty</th><th class="r">Price ₾</th><th class="r">Sum</th><th></th></tr></thead><tbody>${F.lines.map((l,i)=>`<tr><td>${esc(l.n)}${l.b?'':' <span class="chip">not in catalog</span>'}</td><td class="r"><input class="input num" data-ofl="${i}" data-k="q" value="${esc(String(l.q))}" inputmode="numeric" style="width:64px;text-align:right"></td><td class="r"><input class="input num" data-ofl="${i}" data-k="p" value="${esc(String(l.p))}" inputmode="decimal" style="width:90px;text-align:right"></td><td class="r num">${gel((+l.q||0)*(+l.p||0))}</td><td class="r"><button class="btn sm ghost" data-act="or_rm" data-i="${i}" aria-label="Remove">✕</button></td></tr>`).join('')}</tbody></table>`:'<div class="muted small">No products yet.</div>'}</div>
+   ${addr?`<label class="field"><span>Delivery fee ₾</span><input class="input num" id="ofFee" inputmode="decimal" value="${esc(F.fee)}"></label>`:''}
+   <label class="field"><span>Payment</span><select class="input" id="ofPay">${pays.map(p=>`<option value="${p}" ${F.pay===p?'selected':''}>${esc(PAYS[p]||p)}${LATER_PAYS.has(p)?' · paid later':''}</option>`).join('')}</select></label>
+   ${addr?`<label class="field"><span>Status</span><select class="input" id="ofSt">${OST.map(([k,t])=>`<option value="${k}" ${F.st===k?'selected':''}>${t}</option>`).join('')}</select></label>`:''}
+   <label class="field span3"><span>Note</span><input class="input" id="ofNote" value="${esc(F.note)}" placeholder="optional"></label>
+  </div>
+  <div class="row mt"><div><div class="small muted">${T.fee?`Products ${gel(T.sub)} + delivery ${gel(T.fee)}`:'Total'}</div><div class="val num" style="font-size:26px;font-weight:800" id="ofTot">${gel(T.total)}</div></div><span class="spacer"></span><button class="btn ghost" data-act="or_clear">Clear</button><button class="btn primary" data-act="or_save">Save order</button></div>
+  <div class="err" id="ofErr" style="color:var(--bad);font-weight:600;margin-top:6px"></div>`;
+}
+function ofKnown(){const F=S.of;const c=F&&customers().find(F.phone);if(!c)return '';
+  return `<div class="ofknown">✓ <b>${esc(c.n||'Known customer')}</b> · ${c.o} order${c.o===1?'':'s'} · ${gel(c.s)} · last ${esc(c.l?dShort(c.l.slice(0,10)):'—')}${c.a.length?` · ${c.a.map((a,i)=>`<button class="btn sm" data-act="or_useaddr" data-i="${i}">${esc(a.slice(0,48))}</button>`).join(' ')}`:''}</div>`}
+function ofSide(){
+  const L=[...S.pos.values()].filter(o=>o&&o.src==='mars').sort((a,b)=>String(b.at).localeCompare(String(a.at))).slice(0,8);
+  return `<div class="panel"><h2>Typed here recently</h2>${L.length?`<div class="flow">${L.map(o=>`<div class="ln click" data-act="or_open" data-id="${esc(o.id)}" style="cursor:pointer"><span class="k">${chChip(chOf(o))} <b>${esc(custOf(o)?.name||o.lines[0]?.n||'')}</b><div class="small muted">${esc(dShort(o.day))} · ${esc(o.lines.map(l=>l.n).join(', ').slice(0,60))}</div></span><b class="num">${gel(o.total)}</b></div>`).join('')}</div>`:'<div class="muted small">Nothing yet.</div>'}</div>
+  <div class="panel"><h2>Tips</h2><div class="small muted" style="line-height:1.6">Type a phone that bought before and the name and last addresses appear. Courier cash and transfers still to come are saved as unpaid and show under <b>Still to be paid</b> until you mark them paid.</div></div>`;
+}
+const wireActs=root=>{if(root)root.querySelectorAll('[data-act]').forEach(x=>x.onclick=e=>act(x.dataset.act,x,e))};
+function ofPaint(focus){const b=$('#ofBox');if(!b)return;b.innerHTML=ofForm();wireActs(b);bindOrders();if(focus){const el=$('#'+focus);if(el){el.focus();if(el.setSelectionRange&&el.value)el.setSelectionRange(el.value.length,el.value.length)}}}
+function ofSug(){const F=S.of;const box=$('#ofSug');if(!box)return;const q=F.q.trim().toLowerCase();if(!q){box.innerHTML='';return}
+  const L=[...S.catalog.values()].filter(x=>!x.hidden&&String(x.n||'').toLowerCase().includes(q)||String(x.b||'')===q).slice(0,8);
+  box.innerHTML=L.map(x=>`<button data-act="or_add" data-b="${esc(x.b)}"><span>${esc(x.n)}</span><b class="num">${gel(x.sale>0&&x.sale<x.price?x.sale:x.price)}</b></button>`).join('')+`<button data-act="or_addfree"><span>+ Add “${esc(F.q.trim())}” as typed</span></button>`;
+  box.querySelectorAll('[data-act]').forEach(b=>b.onmousedown=e=>{e.preventDefault();act(b.dataset.act,b)});
+}
+function bindOrders(){
+  if(S.view!=='orders')return;
+  const tip=$('#tip');document.querySelectorAll('#ordSvg .ohit').forEach(h=>{h.addEventListener('pointermove',e=>{tip.innerHTML=h.dataset.tip;tip.hidden=false;tip.style.left=Math.max(8,Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8))+'px';tip.style.top=Math.max(8,Math.min(e.clientY+14,innerHeight-tip.offsetHeight-8))+'px'});h.addEventListener('pointerleave',()=>tip.hidden=true)});
+  const q=$('#orQ');if(q)q.oninput=()=>{S.ord.f.q=q.value;clearTimeout(q.t);q.t=setTimeout(()=>{render();const n=$('#orQ');if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}},250)};
+  const cq=$('#cuQ');if(cq)cq.oninput=()=>{S.ord.cq=cq.value;clearTimeout(cq.t);cq.t=setTimeout(()=>{render();const n=$('#cuQ');if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}},250)};
+  const F=S.of;if(!F||!$('#ofBox'))return;
+  const bindIn=(id,k,after)=>{const el=$('#'+id);if(el)el.oninput=el.onchange=()=>{F[k]=el.value;if(after)after()}};
+  const tot=()=>{const t=$('#ofTot');if(t)t.textContent=gel(ofTotals().total)};
+  bindIn('ofDay','day');bindIn('ofName','name');bindIn('ofAddr','addr');bindIn('ofNote','note');bindIn('ofPay','pay');bindIn('ofSt','st');bindIn('ofFee','fee',tot);
+  bindIn('ofPhone','phone',()=>{const c=customers().find(F.phone);if(c){if(!F.name){F.name=c.n||'';const n=$('#ofName');if(n)n.value=F.name}if(!F.addr&&c.a[0]){F.addr=c.a[0];const a=$('#ofAddr');if(a)a.value=F.addr}}const k=$('#ofKnown');if(k){k.innerHTML=ofKnown();wireActs(k)}});
+  const pa=$('#ofPaste');if(pa)pa.oninput=()=>{F.paste=pa.value;const r=parseOrderMsg(pa.value);if(r.phone){F.phone=fmtPh(r.phone);$('#ofPhone').value=F.phone}if(r.name){F.name=r.name;$('#ofName').value=F.name}if(r.addr){F.addr=r.addr;$('#ofAddr').value=F.addr}$('#ofPhone').dispatchEvent(new Event('input'))};
+  const oq=$('#ofQ');if(oq){oq.oninput=()=>{F.q=oq.value;ofSug()};oq.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const b=$('#ofSug [data-act="or_add"]');act(b?'or_add':'or_addfree',b||oq)}};oq.onblur=()=>setTimeout(()=>{const s=$('#ofSug');if(s)s.innerHTML=''},150);if(F.q)ofSug()}
+  document.querySelectorAll('[data-ofl]').forEach(el=>el.oninput=()=>{const l=F.lines[+el.dataset.ofl];if(!l)return;l[el.dataset.k]=el.value.replace(',','.');const tr=el.closest('tr');if(tr)tr.children[3].textContent=gel((+l.q||0)*(+l.p||0));tot()});
+}
+// same reading of a pasted customer message as on the register
+const OM_ADDR=/ქუჩ|ქ\.|გამზ|ჩიხ|შესახვ|კორპ|ბინა|სადარბ|მიკრო|დასახლ|კვარტ|უბანი|რაიონ|სოფ|ქალაქ|მაღაზ|№|#\s*\d|N\s?\d|street|str\.|ave|თბილის|ბათუმ|ქუთაის|რუსთავ|ზუგდიდ|გორი|თელავ|ფოთ|ქობულეთ|ხაშურ|სამტრედ|ზესტაფონ|მარნეულ|ახალციხ|ოზურგეთ|ბორჯომ|მცხეთ|საგარეჯ|სიღნაღ|ქარელ|წყალტუბ|ჭიათურ|ტყიბულ|ლაგოდეხ|გურჯაან|კასპ|ახმეტ|დუშეთ|წნორ|მარტვილ|სენაკ|ხობ|ლანჩხუთ|ვანი|ბაღდათ|თერჯოლ|საჩხერ|ხარაგაულ|ბოლნის|თეთრიწყ|წალკ|ახალქალაქ|აბაშ|წალენჯიხ|ჩხოროწყ|მესტია|ვაკე|საბურთალ|დიდუბ|გლდან|ვარკეთილ|ისან|სამგორ|ნაძალადევ|დიღომ|ავლაბარ|ვეძის|მთაწმინდ|ორთაჭალ|ლილო|წყნეთ|ბახტრიონ/i;
+function parseOrderMsg(t){
+  const out={};t=String(t||'').replace(/\r/g,'');
+  const pm=t.match(/(?:\+?995[\s\-.]*)?\(?5(?:[\s\-.)]*\d){8}(?!\d)/);if(pm){const p=cxPhone(pm[0]);if(p){out.phone=p;t=t.replace(pm[0],'\n')}}
+  const lab=re=>{const m=t.match(re);return m?m[1].trim():''};const ln=lab(/(?:სახელი|გვარი|name)\s*[:\-–]\s*([^\n]+)/i),la=lab(/(?:მისამართი|address|adress)\s*[:\-–]\s*([^\n]+)/i);
+  let lines=t.split(/\n|;/).map(x=>x.replace(/^(?:სახელი(?:\s*გვარი)?|გვარი|name|მისამართი|address|adress|ტელ(?:ეფონი)?|ნომერი|phone|tel)\s*[:\-–]\s*/i,'').replace(/^[\s,.\-–:]+|[\s,]+$/g,'')).filter(x=>x&&x.length>1);
+  if(!ln)lines=lines.flatMap(x=>{const parts=x.split(',');const h=parts[0].trim();const w=h.split(/\s+/).length;return parts.length>1&&!/\d/.test(h)&&!OM_ADDR.test(h)&&/^[ა-ჰa-zA-Z.\s-]+$/.test(h)&&w>=2&&w<=3?[h,parts.slice(1).join(',').trim()]:[x]});
+  if(la)out.addr=la;if(ln)out.name=ln;
+  if(!out.addr){const al=lines.filter(x=>OM_ADDR.test(x)||(/\d/.test(x)&&/[ა-ჰa-z]{3}/i.test(x)));if(al.length)out.addr=al.join(', ')}
+  if(!out.name){const nm=lines.find(x=>x!==out.addr&&!(out.addr||'').includes(x)&&!/\d/.test(x)&&!OM_ADDR.test(x)&&x.split(/\s+/).length<=4&&/^[ა-ჰa-zA-Z.\s-]+$/.test(x));if(nm)out.name=nm}
+  return out;
+}
+function nextPosNo(){let n=0;S.pos.forEach(o=>{if(o&&o.no>n)n=o.no});return n+1}
+async function ofSave(btn){
+  const F=S.of;const T=ofTotals();const err=m=>{const e=$('#ofErr');if(e)e.textContent=m;toast(m)};
+  const lines=F.lines.filter(l=>l.n&&(+l.q||0)>0);const addr=ADDR_CH.has(F.ch);const ph=cxPhone(F.phone);
+  if(!lines.length)return err('Add at least one product');
+  if(lines.some(l=>!(+l.p>0)))return err('Every product needs a price');
+  if(F.ch==='delivery'&&!ph)return err('Type the customer\'s phone (5XX XX XX XX)');
+  if(F.ch==='delivery'&&!F.addr.trim())return err('Type the delivery address (or “გაიტანს” if they pick it up)');
+  if(F.phone.trim()&&!ph)return err('That phone number doesn\'t look right');
+  if(!F.day||F.day>today())return err('Pick the order date');
+  btn.disabled=true;
+  const now=new Date();const at=F.day===today()?now.toISOString():new Date(F.day+'T12:00:00').toISOString();
+  const o={id:uid('o'),src:'mars',ch:F.ch,at,day:F.day,user:{id:'mars',name:'Mars'},shift:null,device:'mars',
+    lines:lines.map(l=>{const x=l.b&&S.catalog.get(l.b);return {b:l.b||null,n:l.n,q:Math.max(1,Math.round(+l.q)),p:r2(+l.p),d:0,img:x&&x.img||null}}),
+    sub:T.sub,disc:0,total:T.total,pay:F.pay,cash:T.total,change:0,receipt:false,note:F.note.trim(),status:'ok',no:nextPosNo(),paid:!LATER_PAYS.has(F.pay)};
+  if(addr){o.ship=T.fee;o.dl={name:F.name.trim(),phone:ph,addr:F.addr.trim(),fee:T.fee,st:F.st,log:[{st:F.st,at:now.toISOString(),by:'Mars'}]}}
+  else if(ph||F.name.trim())o.cust={name:F.name.trim(),phone:ph};
+  try{await S.db.doc('pos/'+o.id).set(o);S.of=ofNew({ch:F.ch,day:F.day});toast('Saved · '+CHN[o.ch]+' · '+gel(o.total)+(o.paid?'':' · unpaid'));S.mc=new Map();ofPaint('ofPhone');const sd=document.querySelector('.stack');if(sd){sd.innerHTML=ofSide();wireActs(sd)}}
+  catch(e){toast(errMsg(e));btn.disabled=false}
+}
+/* ---------- one order ---------- */
+function orderModal(id){
+  const o=S.pos.get(id);if(!o)return;const c=chOf(o);const cu=custOf(o)||{};
+  S.oe={id,lines:o.lines.map(l=>({...l})),q:''};
+  const regCash=!o.src&&o.pay==='cash'&&o.shift;
+  modal(`<h3>${chChip(c)} ${esc(cu.name||'Order')} ${o.no?'<span class="muted">№'+o.no+'</span>':''}</h3>
+   <p class="muted small">${esc(srcOf(o))}${o.user&&o.src!=='mars'&&o.src!=='sheet'?' · '+esc(o.user.name):''} · entered ${esc(dtS(o.at))}${o.dl&&o.dl.seen?' · seen by '+esc(o.dl.seen.by)+' '+esc(dtS(o.dl.seen.at)):''}${o.editedAt?' · last edited '+esc(dtS(o.editedAt)):''}${o.status==='void'?' · <b style="color:var(--bad)">cancelled</b> '+esc(o.voidWhy||''):''}</p>
+   <div class="field"><span>Products — name, quantity, price ₾</span><div id="oeLines"></div><div class="ofsearch" style="margin-top:4px"><input class="input" id="oeQ" placeholder="+ add a product: search the catalog or type a name and press Enter" autocomplete="off"><div class="ofsug" id="oeSug"></div></div></div>
+   <div class="ofgrid mt"><label class="field"><span>Type</span><select class="input" id="omCh">${CHS.map(([k,ic,t])=>`<option value="${k}" ${c===k?'selected':''}>${ic} ${t}</option>`).join('')}</select></label>
+    <label class="field"><span>Date</span><input class="input" type="date" id="omDay" value="${esc(o.day)}" max="${today()}"></label>
+    <label class="field"><span>Delivery fee ₾</span><input class="input num" id="omFee" value="${esc(String(o.ship||0))}" inputmode="decimal"></label>
+    <label class="field"><span>Payment</span><select class="input" id="omPay">${Object.entries(PAYS).filter(([k])=>k!=='unknown').map(([k,t])=>`<option value="${k}" ${o.pay===k?'selected':''}>${esc(t)}</option>`).join('')}</select></label>
+    <label class="field"><span>Paid</span><select class="input" id="omPaid"><option value="1" ${o.paid!==false?'selected':''}>Paid</option><option value="0" ${o.paid===false?'selected':''}>Not paid yet</option></select></label>
+    <label class="field"><span>Status</span><select class="input" id="omSt"><option value="">—</option>${OST.map(([k,t])=>`<option value="${k}" ${o.dl&&o.dl.st===k?'selected':''}>${t}</option>`).join('')}</select></label>
+    <label class="field"><span>Name</span><input class="input" id="omName" value="${esc(cu.name||'')}"></label><label class="field"><span>Phone</span><input class="input num" id="omPhone" value="${esc(fmtPh(cu.phone||''))}"></label><label class="field"><span>Discount ₾</span><input class="input num" id="omDisc" value="${esc(String(o.disc||0))}" inputmode="decimal"></label>
+    <label class="field span3"><span>Address</span><input class="input" id="omAddr" value="${esc(cu.addr||'')}"></label>
+    <label class="field span3"><span>Note</span><input class="input" id="omNote" value="${esc(o.note||'')}"></label></div>
+   ${regCash?'<p class="small" style="color:var(--warn);margin:8px 0 0">A cash sale from the register: changing its amount changes what that shift\'s drawer should hold.</p>':''}
+   ${o.dl&&o.dl.log&&o.dl.log.length?`<div class="small muted mt">${o.dl.log.map(x=>esc((OSTN[x.st]||({seen:'Seen',paid:'Paid',edit:'Edited'})[x.st]||x.st)+' · '+dtS(x.at)+(x.by?' · '+x.by:''))).join(' → ')}</div>`:''}
+   <div class="row mt"><div><div class="small muted">Total</div><b class="num" style="font-size:22px" id="omTot"></b></div><span class="spacer"></span>${o.status!=='void'?`<button class="btn danger" data-act="or_void" data-id="${esc(o.id)}">Cancel order…</button>`:`<button class="btn" data-act="or_unvoid" data-id="${esc(o.id)}">Restore order</button>`}<button class="btn" data-close>Close</button>${o.status!=='void'?`<button class="btn primary" data-act="or_upd" data-id="${esc(o.id)}">Save</button>`:''}</div>
+   <div class="err" id="omErr" style="color:var(--bad);font-weight:600"></div>`,true);
+  oeLines();
+  ['omFee','omDisc'].forEach(k=>{const el=$('#'+k);if(el)el.oninput=oeTot});
+  const q=$('#oeQ');q.oninput=()=>{S.oe.q=q.value;oeSug()};q.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const b=$('#oeSug [data-b]');if(b)oeAdd(b.dataset.b);else if(q.value.trim()){S.oe.lines.push({b:null,n:q.value.trim(),q:1,p:0,d:0});q.value='';S.oe.q='';oeSug();oeLines();const ins=document.querySelectorAll('[data-oe][data-k="p"]');if(ins.length)ins[ins.length-1].focus()}}};
+}
+function oeTot(){const E=S.oe;if(!E)return;const sub=E.lines.reduce((a,l)=>a+(+l.q||0)*(+l.p||0),0);const t=sub-(parseFloat(($('#omDisc')||{}).value)||0)+(parseFloat(($('#omFee')||{}).value)||0);const el=$('#omTot');if(el)el.textContent=gel(r2(Math.max(0,t)))}
+function oeLines(){const E=S.oe;const box=$('#oeLines');if(!box)return;
+  box.innerHTML=E.lines.map((l,i)=>`<div class="oline"><input class="input" data-oe="${i}" data-k="n" value="${esc(l.n)}"><input class="input num" data-oe="${i}" data-k="q" value="${esc(String(l.q))}" inputmode="numeric" style="text-align:right"><input class="input num" data-oe="${i}" data-k="p" value="${esc(String(l.p))}" inputmode="decimal" style="text-align:right"><span class="sum num">${gel((+l.q||0)*(+l.p||0))}</span><button class="btn sm ghost" data-oerm="${i}" aria-label="Remove">✕</button></div>`).join('')||'<div class="muted small">No products.</div>';
+  box.querySelectorAll('[data-oe]').forEach(el=>el.oninput=()=>{const l=E.lines[+el.dataset.oe];l[el.dataset.k]=el.dataset.k==='n'?el.value:el.value.replace(',','.');const r=el.closest('.oline');if(r)r.querySelector('.sum').textContent=gel((+l.q||0)*(+l.p||0));oeTot()});
+  box.querySelectorAll('[data-oerm]').forEach(b=>b.onclick=()=>{E.lines.splice(+b.dataset.oerm,1);oeLines()});oeTot()}
+function oeSug(){const E=S.oe;const box=$('#oeSug');if(!box)return;const q=E.q.trim().toLowerCase();if(!q){box.innerHTML='';return}
+  box.innerHTML=[...S.catalog.values()].filter(x=>!x.hidden&&String(x.n||'').toLowerCase().includes(q)).slice(0,6).map(x=>`<button data-b="${esc(x.b)}"><span>${esc(x.n)}</span><b class="num">${gel(x.sale>0&&x.sale<x.price?x.sale:x.price)}</b></button>`).join('');
+  box.querySelectorAll('[data-b]').forEach(b=>b.onmousedown=e=>{e.preventDefault();oeAdd(b.dataset.b)})}
+function oeAdd(bc){const x=S.catalog.get(bc);if(!x)return;S.oe.lines.push({b:x.b,n:x.n,q:1,p:+(x.sale>0&&x.sale<x.price?x.sale:x.price)||0,d:0,img:x.img||null});const q=$('#oeQ');if(q)q.value='';S.oe.q='';oeSug();oeLines()}
+const dtS=iso=>{const d=new Date(iso);return isNaN(d)?'':d.toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})};
+async function orderUpdate(id){
+  const o=S.pos.get(id);const E=S.oe;if(!o||!E||E.id!==id)return;const v=k=>($('#'+k)||{}).value;const err=m=>{const e=$('#omErr');if(e)e.textContent=m};
+  const ch=v('omCh'),ph=cxPhone(v('omPhone')),name=(v('omName')||'').trim(),addr=(v('omAddr')||'').trim(),st=v('omSt'),day=v('omDay');
+  if(v('omPhone')&&v('omPhone').trim()&&!ph)return err('That phone number doesn\'t look right');
+  const lines=E.lines.filter(l=>String(l.n).trim()).map(l=>({...l,n:String(l.n).trim(),q:Math.max(1,Math.round(+l.q||0)),p:r2(+l.p||0),d:+l.d||0}));
+  if(!lines.length)return err('An order needs at least one product');
+  if(lines.some(l=>!(l.p>=0)))return err('Check the prices');
+  if(!day||day>today())return err('Check the date');
+  const sub=r2(lines.reduce((a,l)=>a+l.q*l.p,0));const fee=Math.max(0,r2(parseFloat(v('omFee'))||0));const disc=Math.max(0,r2(parseFloat(v('omDisc'))||0));const total=r2(Math.max(0,sub-disc+fee));
+  const now=new Date().toISOString();
+  const n={...o,ch,day,lines,sub,disc,total,ship:fee,cash:o.pay==='cash'&&v('omPay')==='cash'?Math.max(o.cash||0,total):total,pay:v('omPay'),paid:v('omPaid')==='1',note:(v('omNote')||'').trim(),editedAt:now,editedBy:{id:'mars',name:'Mars'}};
+  if(day!==o.day)n.at=new Date(day+'T12:00:00').toISOString();
+  if(n.paid&&o.paid===false)n.paidAt=now;
+  if(ADDR_CH.has(ch)||o.dl||st){const prev=o.dl||{log:[]};const lg=[...(prev.log||[])];if(st&&st!==prev.st)lg.push({st,at:now,by:'Mars'});else lg.push({st:'edit',at:now,by:'Mars'});n.dl={...prev,name,phone:ph,addr,fee,st:st||prev.st||'new',log:lg};delete n.cust}
+  else if(ph||name)n.cust={name,phone:ph};else delete n.cust;
+  await S.db.doc('pos/'+id).set(n);closeModal();S.oe=null;toast('Saved · '+gel(total));
+}
+function orderVoid(id){const o=S.pos.get(id);if(!o)return;
+  modal(`<h3>Cancel this order?</h3><p class="muted">${esc(custOf(o)?.name||'')} · ${gel(o.total)}. It stays in the list as cancelled and leaves the totals${o.lines.some(l=>l.b)?'; the pieces go back into the store count':''}.</p><label class="field"><span>Why</span><input class="input" id="ovWhy" placeholder="customer cancelled, typed twice…"></label><div class="row mt"><span class="spacer"></span><button class="btn" data-close>Back</button><button class="btn danger" data-act="or_voidgo" data-id="${esc(id)}">Cancel order</button></div>`);$('#ovWhy').focus()}
+/* ---------- customers ---------- */
+function ordCustomers(){
+  const C=customers();const q=(S.ord.cq||'').toLowerCase().trim();const qp=cxPhone(q)||q.replace(/\D/g,'');
+  let L=[...C.M.values()];
+  const rep=L.filter(c=>c.o>=2).length,rec=L.filter(c=>c.l&&c.l>=new Date(Date.now()-90*864e5).toISOString().slice(0,10)).length;
+  if(q)L=L.filter(c=>(qp.length>=3&&(c.p.includes(qp)||c.alt.some(a=>a.includes(qp))))||[c.n,...c.a,c.lp].join(' ').toLowerCase().includes(q));
+  L.sort((a,b)=>String(b.l).localeCompare(String(a.l)));
+  const built=custDocs()[0];
+  return `<div class="kpis"><div class="kpi"><div class="lbl">Customers</div><div class="val num">${fmt(C.M.size)}</div><div class="delta">with a phone</div></div><div class="kpi"><div class="lbl">Came back</div><div class="val num">${fmt(rep)}</div><div class="delta">${C.M.size?Math.round(rep/C.M.size*100):0}% ordered twice or more</div></div><div class="kpi"><div class="lbl">Last 90 days</div><div class="val num">${fmt(rec)}</div><div class="delta">ordered recently</div></div><div class="kpi"><div class="lbl">From the sheets</div><div class="val num">${built?fmt(custDocs().reduce((a,d)=>a+(d.list||[]).length,0)):'—'}</div><div class="delta">${built?'read '+dtS(built.at):'not built yet'}</div></div></div>
+  <div class="toolbar"><input class="input grow" id="cuQ" placeholder="Search name, phone, address…" value="${esc(S.ord.cq||'')}"><button class="btn" data-act="or_rebuild">↻ Rebuild from the sheets</button></div>
+  <div class="panel"><div class="tablewrap"><table><thead><tr><th>Customer</th><th>Phone</th><th class="r">Orders</th><th class="r">Spent</th><th>Last order</th><th class="hm">Address</th></tr></thead><tbody>${L.slice(0,S.ord.call?5000:200).map(c=>`<tr class="click" data-act="or_cust" data-p="${esc(c.p)}"><td><b>${esc(c.n||'—')}</b>${c.lp?`<div class="small muted">${esc(c.lp.slice(0,60))}</div>`:''}</td><td class="num">${esc(fmtPh(c.p))}${c.alt.length?`<div class="small muted">+${c.alt.length}</div>`:''}</td><td class="r num">${c.o}</td><td class="r num">${c.s?gel(c.s):'—'}</td><td class="num">${esc(c.l?dShort(c.l.slice(0,10)):'—')}</td><td class="small hm">${esc(c.a[0]||'')}</td></tr>`).join('')}</tbody></table></div>${L.length>200&&!S.ord.call?`<div class="row mt"><span class="muted small">${L.length} customers</span><span class="spacer"></span><button class="btn" data-act="or_call">Show all</button></div>`:''}</div>`;
+}
+function custModal(p){
+  const c=customers().M.get(p);if(!c)return;
+  const os=[...c.orders].sort((a,b)=>String(b.at).localeCompare(String(a.at)));
+  modal(`<h3>${esc(c.n||'Customer')}</h3><p class="num">${esc(fmtPh(c.p))}${c.alt.length?' · also '+c.alt.map(fmtPh).map(esc).join(', '):''}</p>
+   <div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi"><div class="lbl">Orders</div><div class="val num">${c.o}</div></div><div class="kpi"><div class="lbl">Spent</div><div class="val num">${gel(c.s)}</div></div><div class="kpi"><div class="lbl">Customer since</div><div class="val" style="font-size:16px">${esc(c.f?mLabel(c.f.slice(0,7)):'—')}</div></div></div>
+   ${c.a.length?`<h4>Addresses</h4><div class="flow">${c.a.map(a=>`<div class="ln"><span class="k">📍 ${esc(a)}</span></div>`).join('')}</div>`:''}
+   <h4>Orders</h4><div class="flow">${os.map(o=>`<div class="ln click" data-act="or_open" data-id="${esc(o.id)}" style="cursor:pointer"><span class="k">${chChip(chOf(o))} ${esc(dShort(o.day))} · ${esc(o.lines.map(l=>l.n).join(', ').slice(0,70))}</span><b class="num">${gel(o.total)}</b></div>`).join('')}${[...c.ds.entries()].filter(([d])=>!os.some(o=>o.day===d)).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,30).map(([d,a])=>`<div class="ln"><span class="k muted">${esc(d.length>7?dShort(d):mLabel(d))} · from the sheets</span><span class="num muted">${a?gel(a):''}</span></div>`).join('')}</div>
+   <div class="row mt"><span class="spacer"></span><button class="btn" data-close>Close</button><button class="btn primary" data-act="or_newfor" data-p="${esc(c.p)}">+ New order for ${esc((c.n||'').split(' ')[0]||'them')}</button></div>`,true);
+}
+/* ---------- payment check: orders paid into the bank against the bank statements ----------
+   Checked: card terminal, BOG/TBC transfers, transfers still to come and installments.
+   Not checked: Wolt, Glovo, Extra.ge and courier cash (paid out in bulk), cash and Rezi's personal account. */
+const CHECK_PAYS=new Set(['pos','bog','tbc','pending','installment']);
+const PLATFORM_RE=/wolt|ვოლტ|glovo|გლოვო|extra|ექსტრა|ქვიქშიპერ|quickshipper|today ?deliver|თუდეი|დელივერი|gl ?delivery/i;
+function payCheck(m){
+  const hit=S.mc.get('#pc'+m);if(hit)return hit;
+  const doc=S.sales.get(m);const rows=(doc&&doc.rows||[]).map((r,i)=>({...r,i}));
+  const ord=rows.filter(r=>CHECK_PAYS.has(r.pay)&&(+r.a||0)>0&&r.d);
+  const from=m+'-01',to=addDays(m+'-'+String(daysIn(m)).padStart(2,'0'),7);
+  const IN=[...S.bankin.values()].filter(t=>t&&t.date>=addDays(from,-2)&&t.date<=to).map(t=>({...t,used:false}));
+  const cover={};[...S.bankin.values()].forEach(t=>{const c=cover[t.acct]||(cover[t.acct]={min:t.date,max:t.date,n:0});if(t.date<c.min)c.min=t.date;if(t.date>c.max)c.max=t.date;c.n++});
+  const okAcct=(r,t)=>r.pay==='bog'?t.acct==='bog':r.pay==='tbc'?t.acct==='tbc':true;
+  const okAmt=(r,t)=>{const a=+r.a,tol=Math.max(0.5,a*0.005);return Math.abs(t.gel-a)<=tol||(r.pay==='pos'&&Math.abs(t.gel+(+t.fee||0)-a)<=tol)||(r.pay==='pos'&&Math.abs(t.gel/(1-0.0125)-a)<=Math.max(1,a*0.006))};
+  const dd=(a,b)=>(Date.parse(a)-Date.parse(b))/864e5;
+  const match=[],miss=[];
+  ord.sort((a,b)=>String(a.d).localeCompare(String(b.d))).forEach(r=>{let best=null,bd=99;IN.forEach(t=>{if(t.used||t.dir==='out'||!okAcct(r,t)||!okAmt(r,t))return;const d=dd(t.date,r.d);if(d<-1||d>(r.pay==='pending'||r.pay==='installment'?20:5))return;const ad=Math.abs(d);if(ad<bd){bd=ad;best=t}});
+    if(best){best.used=true;match.push([r,best])}else{const c=r.pay==='bog'?cover.bog:r.pay==='tbc'?cover.tbc:(cover.bog||cover.tbc);miss.push({...r,why:!c?'no statement for that account yet':r.d>c.max?'statement ends '+dShort(c.max):'no matching payment'})}});
+  const left=IN.filter(t=>!t.used&&t.dir!=='out'&&!['owner_in','transfer','loan_in','other_income'].includes(t.cat));
+  const platform=left.filter(t=>PLATFORM_RE.test((t.party||'')+' '+(t.desc||'')));const stray=left.filter(t=>!platform.includes(t)&&t.date>=from&&t.date<=m+'-'+String(daysIn(m)).padStart(2,'0'));
+  const sum=a=>a.reduce((x,r)=>x+(+r.a||+r.gel||0),0);
+  const res={ord,match,miss,platform,stray,cover,sum};S.mc.set('#pc'+m,res);return res;
+}
+function addDays(d,n){const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)}
+function ordPayCheck(){
+  const m=S.month;const R=payCheck(m);const any=S.bankin.size;
+  const covTxt=Object.entries(R.cover).map(([a,c])=>`${esc(ACC[a]?ACC[a].en:a)} ${dShort(c.min)} – ${dShort(c.max)}`).join(' · ');
+  const missReal=R.miss.filter(r=>r.why==='no matching payment');
+  return `<div class="panel"><h2>Did the money arrive?</h2><p class="sub">Orders paid by card terminal, BOG or TBC transfer, installments and transfers still to come, matched to the incoming payments in your uploaded bank statements by amount and date. Wolt, Glovo, Extra.ge, courier cash, cash and your personal account are left out — their bulk payouts are listed apart. ${any?'Statements on file: '+covTxt+'.':''}</p>
+   ${any?'':`<div class="banner">No incoming payments on file yet. Upload a BOG or TBC statement under <a href="#bank" data-go="bank">Bank import</a> — from now on the money coming in is kept for this check (it still doesn't count as extra income).</div>`}</div>
+  <div class="kpis"><div class="kpi"><div class="lbl">Orders to check</div><div class="val num">${R.ord.length}</div><div class="delta">${gel(R.sum(R.ord))}</div></div><div class="kpi"><div class="lbl">Paid in · found</div><div class="val num" style="color:var(--good)">${R.match.length}</div><div class="delta">${gel(R.match.reduce((a,[r])=>a+(+r.a||0),0))}</div></div><div class="kpi"><div class="lbl">Not found in the bank</div><div class="val num ${missReal.length?'neg':''}">${missReal.length}</div><div class="delta">${gel(R.sum(missReal))}${R.miss.length>missReal.length?' · '+(R.miss.length-missReal.length)+' not covered yet':''}</div></div><div class="kpi"><div class="lbl">Bank money with no order</div><div class="val num">${R.stray.length}</div><div class="delta">${gel(R.sum(R.stray))}</div></div></div>
+  <div class="grid g2"><div class="panel"><h2>Not found in the bank</h2>${R.miss.length?`<div class="tablewrap"><table><thead><tr><th>Day</th><th>Order</th><th>Payment</th><th class="r">Amount</th><th>Why</th></tr></thead><tbody>${R.miss.map(r=>`<tr><td class="num">${esc(dShort(r.d))}</td><td><b>${esc(r.c||'')}</b><div class="small muted">${esc(String(r.p||'').slice(0,60))}</div></td><td class="small">${esc(PAYS[r.pay]||r.pay)}</td><td class="r num">${gel(r.a)}</td><td class="small ${r.why==='no matching payment'?'neg':'muted'}">${esc(r.why)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="muted">Everything checked arrived. ✓</div>'}</div>
+   <div class="panel"><h2>Bank money with no order</h2><p class="sub">Incoming payments this month that match no order — a sale nobody wrote down, or a payment for another month.</p>${R.stray.length?`<div class="tablewrap"><table><thead><tr><th>Day</th><th>From</th><th class="r">Amount</th></tr></thead><tbody>${R.stray.sort((a,b)=>a.date.localeCompare(b.date)).map(t=>`<tr><td class="num">${esc(dShort(t.date))} <span class="chip">${esc(ACC[t.acct]?ACC[t.acct].en:t.acct)}</span></td><td class="small">${esc((t.party||'').slice(0,40))}<div class="muted">${esc((t.desc||'').slice(0,70))}</div></td><td class="r num">${gel(t.gel)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="muted">None.</div>'}
+   ${R.platform.length?`<h4 class="mt">Platform & courier payouts</h4><div class="small muted">${R.platform.map(t=>esc(dShort(t.date)+' '+(t.party||'').slice(0,24)+' '+gel(t.gel))).join(' · ')}</div>`:''}</div></div>
+  ${R.match.length?`<details class="panel mt"><summary><b>Matched · ${R.match.length}</b></summary><div class="tablewrap"><table><tbody>${R.match.map(([r,t])=>`<tr><td class="num">${esc(dShort(r.d))}</td><td>${esc(r.c||'')} <span class="muted small">${esc(PAYS[r.pay]||r.pay)}</span></td><td class="r num">${gel(r.a)}</td><td class="small muted">→ ${esc(ACC[t.acct]?ACC[t.acct].en:t.acct)} ${esc(dShort(t.date))} ${gel(t.gel)}</td></tr>`).join('')}</tbody></table></div></details>`:''}`;
+}
+/* ---------- import a month from the order sheet ----------
+   Sheet rows already rung on the register (same amount, same or next day) are not added again; they only lend
+   the customer's phone and address to the register sale. The rest become orders of their own (src 'sheet').
+   Importing twice adds nothing twice. */
+const SHEET_ST={'დასრულებული':'done','აღებული':'out','გამზადებული':'ready','გასამზადებელი':'new'};
+async function importRead(btn){
+  if(!S.backend){toast('Open Mars from its own address to read the sheet');return}
+  btn.disabled=true;btn.textContent='Reading the sheet…';const m=S.month;
+  try{
+    const wb=await S.backend.orders(sheetId());const y=+m.slice(0,4);
+    const tabs=(wb.sheets||[]).filter(s=>{const t=tabYM(s.name,y);return t&&t.y+'-'+String(t.m).padStart(2,'0')===m});
+    if(!tabs.length)throw {message:'No tab for '+mLabel(m)+' in the order sheet'};
+    const rows=[];tabs.forEach(sh=>{const {C,body}=cxTab(sh);const tm=cxMonth(sh.name);body.forEach((r,i)=>{const x=cxRow(r,C,{kind:'main',k:'main',ty:y,tm,td:0,y,m:+m.slice(5),year:y});const a=x?x.amt:0;if(!x||!(a>0))return;
+      const p=parseDateCell(C.date>=0?r[C.date]:'');const dd=p&&p.d?p.d:+(String(C.date>=0?r[C.date]:'').match(/^\s*(\d{1,2})/)||[])[1]||1;
+      rows.push({...x,i,tab:sh.name,day:m+'-'+String(Math.min(dd,daysIn(m))).padStart(2,'0'),c:x.nRaw,pay:normPay(x.pay)})})});
+    S.imp={m,plan:importPlan(m,rows),at:Date.now()};
+  }catch(e){toast(errMsg(e))}
+  btn.disabled=false;render();
+}
+function importPlan(m,rows){
+  const reg=[...S.pos.values()].filter(o=>o&&o.lines&&String(o.day||'').startsWith(m)&&o.src!=='sheet');
+  const done=new Set([...S.pos.values()].filter(o=>o&&o.src==='sheet').map(o=>o.imp));
+  const used=new Set();const dd=(a,b)=>Math.abs(Date.parse(a)-Date.parse(b))/864e5;const alive=o=>o.status!=='void';
+  const find=(a,day,maxd,tol=0.01)=>{let best=null,bd=9,ba=1e9;reg.forEach(o=>{if(used.has(o.id)||!alive(o))return;const da=Math.abs((+o.total||0)-a);if(da>=tol)return;const d=dd(o.day,day);if(d<=maxd&&(d<bd||(d===bd&&da<ba))){bd=d;ba=da;best=o}});return best};
+  const keyOf=r=>hash(m+'|'+r.tab+'|'+r.i+'|'+r.amt+'|'+r.p);
+  const live=rows.filter(r=>!r.cancel),canc=rows.filter(r=>r.cancel);
+  const pairs=[],add=[],conflicts=[],skipped=[],priceDiff=[];const paired=new Set();
+  const pair=(r,o)=>{used.add(o.id);paired.add(r);pairs.push([r,o])};
+  // same day first, then the next day, so a row never takes another day's sale of the same price
+  for(const maxd of [0,1])live.forEach(r=>{if(paired.has(r))return;const o=find(r.amt,r.day,maxd);if(o)pair(r,o)});
+  // several sheet rows of one customer and day rung as one sale (69 + 49 = 118)
+  const grp={};live.filter(r=>!paired.has(r)).forEach(r=>{const k=r.day+'|'+(r.p||r.c);(grp[k]||(grp[k]=[])).push(r)});
+  Object.values(grp).forEach(g=>{if(g.length<2)return;const o=find(r2(g.reduce((a,r)=>a+r.amt,0)),g[0].day,1);if(o)g.forEach(r=>pair(r,o))});
+  // the same sale at a slightly different price (sheet 50, register 55): the register's price stands
+  const sameWay=(a,b)=>a===b||(['pos','bog','tbc'].includes(a)&&['pos','bog','tbc'].includes(b));
+  live.forEach(r=>{if(paired.has(r))return;let best=null,ba=1e9;reg.forEach(o=>{if(used.has(o.id)||!alive(o)||o.day!==r.day||!sameWay(o.pay,r.pay))return;const da=Math.abs((+o.total||0)-r.amt);if(da<=Math.max(5,r.amt*0.1)&&da<ba){ba=da;best=o}});if(best){pair(r,best);priceDiff.push([r,best])}});
+  live.forEach(r=>{if(paired.has(r))return;if(done.has(keyOf(r)))skipped.push(r);else add.push({...r,key:keyOf(r)})});
+  canc.forEach(r=>{const o=find(r.amt,r.day,1);if(o){used.add(o.id);conflicts.push([r,o])}});
+  const attach=[];const seen=new Set();pairs.forEach(([r,o])=>{if(seen.has(o.id))return;seen.add(o.id);if((r.p||(r.a&&!/^(გაიტანს)$/i.test(r.a)))&&!custOf(o))attach.push([r,o])});
+  const regOnly=reg.filter(o=>alive(o)&&!used.has(o.id)&&o.src!=='mars');
+  return {rows,pairs,add,conflicts,attach,skipped,regOnly,priceDiff};
+}
+function sheetCh(r){if(r.pay==='wolt')return 'wolt';if(r.pay==='glovo')return 'glovo';if(r.pay==='extra')return 'extra';return r.p||(r.a&&!/^(ფილიალი)$/i.test(r.a))?'delivery':'shop'}
+function ordImport(){
+  const m=S.month;const I=S.imp&&S.imp.m===m?S.imp.plan:null;const rf=regFrom();
+  const sum=a=>a.reduce((x,r)=>x+(+r.amt||0),0);
+  return `<div class="panel"><h2>Bring ${esc(mLabel(m))} in from the order sheet</h2><p class="sub">Reads the ${esc(mLabel(m))} tab of <b>ასტრომანის შეკვეთები</b> and compares it with the register. Orders already rung on the register are not added twice — they only get the customer's phone and address. Everything else becomes an order here, with its address. You can run it again any time; nothing is added twice.</p>
+   <div class="row"><button class="btn primary" data-act="or_impread">${I?'↻ Read again':'Read the sheet'}</button>${I?`<span class="muted small">${I.rows.length} rows read</span>`:''}<span class="spacer"></span><span class="small muted">Sales book from the register since <b>${esc(mLabel(rf))}</b></span></div></div>
+  ${I?`<div class="kpis"><div class="kpi"><div class="lbl">To add</div><div class="val num">${I.add.length}</div><div class="delta">${gel(sum(I.add))} · not on the register</div></div><div class="kpi"><div class="lbl">Already on the register</div><div class="val num">${I.pairs.length}</div><div class="delta">${I.attach.length} get phone + address</div></div><div class="kpi"><div class="lbl">Cancelled in sheet, sold on register</div><div class="val num ${I.conflicts.length?'neg':''}">${I.conflicts.length}</div><div class="delta">${gel(I.conflicts.reduce((a,[r])=>a+r.amt,0))} · check these</div></div><div class="kpi"><div class="lbl">Only on the register</div><div class="val num">${I.regOnly.length}</div><div class="delta">${gel(I.regOnly.reduce((a,o)=>a+(+o.total||0),0))}</div></div></div>
+   <div class="panel"><h2>To add · ${I.add.length}</h2>${I.add.length?`<div class="tablewrap"><table><tbody>${I.add.map(r=>`<tr><td class="num">${esc(dShort(r.day))}</td><td>${chChip(sheetCh(r))}</td><td><b>${esc(r.c||'')}</b><div class="small muted num">${esc(fmtPh(r.p))}</div></td><td class="small">${esc((r.prod||'').slice(0,50))}<div class="muted">${esc((r.a||'').slice(0,60))}</div></td><td class="small">${esc(PAYS[r.pay]||r.pay)}</td><td class="r num">${gel(r.amt)}</td><td class="small muted">${esc(r.st)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="muted">Nothing new.</div>'}</div>
+   ${I.priceDiff.length?`<div class="panel"><h2>Same sale, different price</h2><p class="sub">The sheet and the register disagree on the price; the register's price is kept.</p><div class="flow">${I.priceDiff.map(([r,o])=>`<div class="ln click" data-act="or_open" data-id="${esc(o.id)}" style="cursor:pointer"><span class="k">${esc(dShort(r.day))} · ${esc(r.prod||'')} · sheet ${gel(r.amt)}</span><b class="num">register ${gel(o.total)}</b></div>`).join('')}</div></div>`:''}
+   ${I.conflicts.length?`<div class="panel"><h2>Check these</h2><p class="sub">Cancelled in the sheet but still a sale on the register. If they really were cancelled, cancel them on the register (or here under Orders) so the stock comes back.</p><div class="flow">${I.conflicts.map(([r,o])=>`<div class="ln click" data-act="or_open" data-id="${esc(o.id)}" style="cursor:pointer"><span class="k">${esc(dShort(r.day))} · ${esc(r.prod||'')} · ${esc(PAYS[r.pay]||r.pay)}</span><b class="num">${gel(r.amt)}</b></div>`).join('')}</div></div>`:''}
+   <div class="row mt"><label class="row small"><input type="checkbox" id="impBook" ${rf<=m?'checked':''}> From ${esc(mLabel(m))} on, take the sales book from the register and these orders (instead of the sheet)</label><span class="spacer"></span><button class="btn primary" data-act="or_impgo" ${I.add.length||I.attach.length?'':'disabled'}>Import ${I.add.length} order${I.add.length===1?'':'s'} + ${I.attach.length} address${I.attach.length===1?'':'es'}</button></div>`:''}`;
+}
+async function importGo(btn){
+  const I=S.imp&&S.imp.plan;const m=S.imp&&S.imp.m;if(!I)return;btn.disabled=true;btn.textContent='Importing…';let n=0;
+  try{
+    for(const r of I.add){const ch=sheetCh(r);const q=Math.max(1,Math.round(r.qty||1));const st=SHEET_ST[r.st]||'done';
+      const o={id:'s'+r.key,src:'sheet',imp:r.key,ch,at:new Date(r.day+'T12:00:00').toISOString(),day:r.day,user:{id:'sheet',name:'Order sheet'},shift:null,device:'sheet',
+        lines:[{b:null,n:r.prod||'—',q,p:r2(r.amt/q),d:0,img:null}],sub:r.amt,disc:0,total:r.amt,pay:r.pay,cash:r.amt,change:0,receipt:false,note:'',status:'ok',no:null,
+        paid:!(r.pay==='pending'||(r.pay==='cod'&&st!=='done'))};
+      if(r.p||(ADDR_CH.has(ch)&&r.a))o.dl={name:r.n||'',phone:r.p||'',addr:r.a||'',fee:0,st,seen:{at:o.at,by:'Order sheet'},log:[{st,at:o.at,by:'Order sheet'}]};
+      await S.db.doc('pos/'+o.id).set(o);n++}
+    for(const [r,o] of I.attach){const ch=o.ch||(r.pay==='extra'?'extra':'delivery');const st=SHEET_ST[r.st]||'done';
+      await S.db.doc('pos/'+o.id).set({...o,ch,dl:{name:r.n||'',phone:r.p||'',addr:r.a||'',fee:o.ship||0,st,seen:{at:o.at,by:'Order sheet'},log:[{st,at:new Date().toISOString(),by:'Order sheet'}]}});n++}
+    if($('#impBook')&&$('#impBook').checked&&regFrom()>m)await saveCfg({regFrom:m});
+    toast('Imported '+I.add.length+' orders and '+I.attach.length+' addresses for '+mLabel(m),7000);S.imp=null;S.ord.tab='list';render();
+  }catch(e){toast(errMsg(e)+' — saved '+n);btn.disabled=false;btn.textContent='Import'}
+}
+async function ordersAct(a,b){
+  const F=S.of;
+  if(a==='or_tab'){S.ord.tab=b.dataset.v;if(S.ord.tab==='new'&&!S.of)S.of=ofNew();S.animate=true;render();window.scrollTo({top:0});if(S.ord.tab==='new'){const f=$('#ofPaste')||$('#ofPhone');if(f)f.focus()}return}
+  if(a==='or_fch'){S.ord.f.ch=b.dataset.v;return render()}
+  if(a==='or_fst'){S.ord.f.st=S.ord.f.st===b.dataset.v&&b.dataset.v.startsWith('st:')?'all':b.dataset.v;S.ord.tab='list';render();if(b.closest('.pipe,.kpi')){const t=$('.ordt');if(t)t.scrollIntoView({behavior:'smooth',block:'start'})}return}
+  if(a==='or_all'){S.ord.all=true;return render()}
+  if(a==='or_call'){S.ord.call=true;return render()}
+  if(a==='or_open')return orderModal(b.dataset.id);
+  if(a==='or_upd')return orderUpdate(b.dataset.id);
+  if(a==='or_void')return orderVoid(b.dataset.id);
+  if(a==='or_unvoid'){const o=S.pos.get(b.dataset.id);if(!o)return;const n={...o,status:'ok'};delete n.voidAt;delete n.voidBy;delete n.voidWhy;await S.db.doc('pos/'+o.id).set(n);closeModal();toast('Order restored');return}
+  if(a==='or_voidgo'){const w=($('#ovWhy')||{}).value||'';if(!w.trim()){$('#ovWhy').focus();return}const o=S.pos.get(b.dataset.id);if(!o)return;await S.db.doc('pos/'+o.id).set({...o,status:'void',voidAt:new Date().toISOString(),voidBy:{id:'mars',name:'Mars'},voidWhy:w.trim()});closeModal();toast('Order cancelled');return}
+  if(a==='or_cust')return custModal(b.dataset.p);
+  if(a==='or_newfor'){const c=customers().M.get(b.dataset.p);closeModal();S.of=ofNew({phone:fmtPh(c.p),name:c.n||'',addr:c.a[0]||''});S.ord.tab='new';S.view!=='orders'?go('orders'):render();return}
+  if(a==='or_rebuild'){b.disabled=true;return rebuildCustomers(b)}
+  if(a==='or_impread')return importRead(b);
+  if(a==='or_impgo')return importGo(b);
+  if(!F)return;
+  if(a==='or_ch'){F.ch=b.dataset.v;F.pay=CH_PAYS[F.ch][0];if(!ADDR_CH.has(F.ch))F.fee='';else if(!F.fee)F.fee='10';return ofPaint()}
+  if(a==='or_add'){const x=S.catalog.get(b.dataset.b);if(!x)return;const l=F.lines.find(l=>l.b===x.b);if(l)l.q=(+l.q||0)+1;else F.lines.push({b:x.b,n:x.n,q:1,p:+(x.sale>0&&x.sale<x.price?x.sale:x.price)||0});F.q='';return ofPaint('ofQ')}
+  if(a==='or_addfree'){const n=F.q.trim();if(!n)return;F.lines.push({b:null,n,q:1,p:''});F.q='';ofPaint();const ins=document.querySelectorAll('[data-k="p"]');if(ins.length)ins[ins.length-1].focus();return}
+  if(a==='or_rm'){F.lines.splice(+b.dataset.i,1);return ofPaint()}
+  if(a==='or_useaddr'){const c=customers().find(F.phone);if(c){F.addr=c.a[+b.dataset.i]||F.addr;const el=$('#ofAddr');if(el)el.value=F.addr}return}
+  if(a==='or_clear'){S.of=ofNew({ch:F.ch});return ofPaint('ofPhone')}
+  if(a==='or_save')return ofSave(b);
+}
+
+function sheetStoreRows(d){return String(d).slice(0,7)>=regFrom()?[]:dayOf(d).rows.filter(r=>!r.reg)}
 function recon(d){
   const sheet=sheetStoreRows(d).map((r,i)=>({i,a:+r.a||0,p:r.p||'',pay:r.pay}));
   const reg=posOrders(d).filter(o=>o.status!=='void').map(o=>({id:o.id,a:+o.total||0,p:o.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '),pay:o.pay,no:o.no,t:tOf(o.at)}));
@@ -4030,8 +4579,9 @@ function recon(d){
   return {sheet,reg,pairs,sheetOnly,regOnly,sa,ra,ok:!sheetOnly.length&&!regOnly.length,diff:r2(ra-sa)};
 }
 function reconPanel(d){
+  if(String(d).slice(0,7)>=regFrom())return '';
   const R=recon(d);const any=R.sheet.length||R.reg.length;
-  return `<div class="panel"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">Sheet vs register</h2><p class="sub" style="margin:2px 0 0">Shop sales typed in the order sheet (customer “ფილიალი”) against what the register recorded, matched by amount. At the end of the day both sides should agree.</p></div><span class="spacer"></span>${any?(R.ok?'<span class="chip good">matches</span>':`<span class="chip bad">differs by ${gel(Math.abs(R.diff))}</span>`):''}</div>
+  return `<div class="panel"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">Sheet vs register</h2><p class="sub" style="margin:2px 0 0">Every order typed in the order sheet (shop, Wolt and delivery) against what the register recorded, matched by amount. At the end of the day both sides should agree.</p></div><span class="spacer"></span>${any?(R.ok?'<span class="chip good">matches</span>':`<span class="chip bad">differs by ${gel(Math.abs(R.diff))}</span>`):''}</div>
    <div class="kpis small3 mt"><div class="kpi"><div class="lbl">Sheet · ფილიალი</div><div class="val num">${gel(R.sa)}</div><div class="delta">${R.sheet.length} row${R.sheet.length===1?'':'s'}</div></div><div class="kpi"><div class="lbl">Register</div><div class="val num">${gel(R.ra)}</div><div class="delta">${R.reg.length} sale${R.reg.length===1?'':'s'}</div></div><div class="kpi"><div class="lbl">Matched</div><div class="val num">${R.pairs.length}</div><div class="delta">${R.sheetOnly.length} only in sheet · ${R.regOnly.length} only on register</div></div></div>
    ${R.sheetOnly.length?`<h3 class="rh3">Only in the sheet</h3><div class="flow">${R.sheetOnly.map(s=>`<div class="ln"><span class="k">${esc(s.p||'—')}<div class="small muted">${esc(PAYS[s.pay]||s.pay||'')}</div></span><span class="v num">${gel(s.a)}</span></div>`).join('')}</div>`:''}
    ${R.regOnly.length?`<h3 class="rh3">Only on the register</h3><div class="flow">${R.regOnly.map(o=>`<div class="ln click" data-act="st_order" data-id="${esc(o.id)}" style="cursor:pointer"><span class="k">${esc(o.p)}<div class="small muted">${o.t} · №${o.no||''} · ${esc(POSPAY[o.pay]||o.pay)}</div></span><span class="v num">${gel(o.a)}</span></div>`).join('')}</div>`:''}
@@ -4573,7 +5123,7 @@ function editTx(id,m){let t=S.tx.get(id);
     (S.scrollMem||(S.scrollMem={}))[S.view]=scrollY;if(S.view!=='add')(S.stack||(S.stack=[])).push(S.view);S.navAnim='push';S.view='add';S.animate=true;render();window.scrollTo({top:0})}
 function bindView(){
   if(S.view==='add')bindAdd();
-  bindStore();bindCount();bindTools();
+  bindStore();bindCount();bindTools();bindOrders();
   const tip=$('#tip');const showTip=(e,html)=>{tip.innerHTML=html;tip.hidden=false;const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8),y=Math.min(e.clientY+14,innerHeight-tip.offsetHeight-8);tip.style.left=Math.max(8,x)+'px';tip.style.top=Math.max(8,y)+'px'};
   const hide=()=>tip.hidden=true;
   document.querySelectorAll('#trendSvg .hit').forEach(h=>{h.addEventListener('pointermove',e=>{const d=trendChart.data[+h.dataset.i];showTip(e,`<div class="t">${esc(d.long)}${d.src?' · '+COGS_SRC[d.src]:''}</div><div class="r"><span>Sales</span><b class="num">${gel(d.sales)}</b></div><div class="r"><span>Cost of goods</span><span class="num">${gel(d.cogs)}</span></div><div class="r"><span>Running costs</span><span class="num">${gel(d.opex)}</span></div><div class="r"><span>Taxes</span><span class="num">${gel(d.tax)}</span></div><div class="r"><span>Net profit</span><b class="num ${d.net<0?'neg':''}">${gel(d.net)}</b></div>`)});h.addEventListener('pointerleave',hide);h.addEventListener('click',()=>{hide();const d=trendChart.data[+h.dataset.i];if(d.isYear)setRange({p:'year',y:d.m});else setMonth(d.m)})});
@@ -4641,6 +5191,7 @@ function readFixedForm(){const list=fixedList().map(f=>({...f}));document.queryS
 async function act(a,b){
   try{
   if(a==='syncSheet'){if(!S.mcp&&!S.backend){toast('Live sync needs Google Drive connected (in Claude) or the hosted version');return}return syncSheet(b)}
+  if(a.startsWith('or_'))return ordersAct(a,b);
   if(a.startsWith('wc_'))return wcAct(a,b);
   if(a.startsWith('tl_'))return toolsAct(a,b);
   if(a.startsWith('rc_'))return rcAct(a,b);
