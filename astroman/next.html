@@ -3845,7 +3845,7 @@ const posInitials=n=>String(n||'').replace(/[^\p{L}\p{N}]/gu,'').slice(0,2).toUp
 function thumb(x,s){s=s||36;return x&&x.img?`<img class="thumb" src="${esc(x.img)}" alt="" loading="lazy" style="width:${s}px;height:${s}px" onerror="this.outerHTML='<span class=\\'thumb ph\\' style=\\'width:${s}px;height:${s}px\\'>${esc(posInitials(x.n))}</span>'">`:`<span class="thumb ph" style="width:${s}px;height:${s}px">${esc(posInitials(x&&x.n))}</span>`}
 function posOrders(day){return [...S.pos.values()].filter(o=>o&&o.lines&&!o.src&&(!day||o.day===day)).sort((a,b)=>String(b.at).localeCompare(String(a.at)))}
 function regDay(d){const L=posOrders(d).filter(o=>o.status!=='void');return {n:L.length,a:L.reduce((s,o)=>s+(+o.total||0),0),L}}
-function storeDir(){return location.origin+location.pathname.replace(/[^/]*$/,'')+'store/'}
+function storeDir(){return location.origin+location.pathname.replace(/[^/]*$/,'')+'store/next.html'}
 function storeLink(){const c=readCreds();const k=S.cfg.pos&&S.cfg.pos.key;if(!c||!k)return '';const b=btoa(unescape(encodeURIComponent(JSON.stringify({u:c.u,k})))).replace(/\+/g,'-').replace(/\//g,'_');return storeDir()+'#connect='+b}
 const storeQ=x=>x.qs!=null?+x.qs||0:(+x.q||0);
 // Receipts (მიღება) are made on the register: `shift` records with kind 'receive' {from:'wh'|'other', at, user, lines[{b,n,q}],
@@ -3864,7 +3864,7 @@ function catLive(x){let q=storeQ(x);const c=String(x.countedAt||'');S.pos.forEac
 function vStore(){
   const T=S.store.tab;
   const tabs=[['live','Live'],['history','History'],['setup','Register setup']];
-  const head=`<div class="pagehead"><div><div class="eyebrow">Store · სალარო</div><h1>Store sales</h1><p>What the consultants ring up on the register, as it happens. Kept apart from the books, like the Optimo pages.</p></div><div class="actions"><a class="btn" href="${esc(storeDir())}" target="_blank" rel="noopener">Open the register ↗</a></div></div>
+  const head=`<div class="pagehead"><div><div class="eyebrow">Store · სალარო</div><h1>Store sales</h1><p>What the consultants ring up on the register, as it happens. Kept apart from the books, like the Optimo pages.</p></div><div class="actions"><a class="btn" href="${esc(storeLink()||storeDir())}" target="_blank" rel="noopener" title="Opens the register already connected on this device">Open the register ↗</a></div></div>
   <div class="tabs" role="tablist">${tabs.map(([k,t])=>`<button role="tab" aria-selected="${T===k}" data-act="st_tab" data-v="${k}">${t}</button>`).join('')}</div>`;
   const body=T==='history'?storeHistory():T==='setup'?storeSetup():storeLive();
   return loadingOr(head+body);
