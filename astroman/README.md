@@ -33,6 +33,10 @@ Every sale goes into the register — shop, Wolt/Glovo and delivery orders alike
 - **Payment check**: bank imports now keep the incoming payments (`bankin`, never counted as income). Orders paid by card terminal, BOG/TBC transfer, installments and transfers still to come are matched to them by amount and date (terminal payments net of the bank's fee); Wolt, Glovo, Extra.ge, courier cash, cash and the personal account are left out. Shows orders whose money never arrived, bank money with no order, and platform/courier payouts apart.
 - **Register**: the payment screen starts with an explicit choice of what kind of sale it is, in a coloured bar (blue shop, orange delivery…); only that kind's payment methods are offered and only delivery/Extra ask for an address. The kind of sale shows on the done screen, today's history, the receipt and the orders board.
 
+## Manager profile on the register
+
+People on the register (Mars → Store sales → Register setup) are Consultants or Managers. A manager logs in with their PIN and rings up sales without being asked to start a shift: if a consultant's shift is open on that computer the sale joins it (so cash still counts in the drawer), otherwise it is saved without a shift and the pay screen warns that cash taken then is outside the drawer count. Manager sales carry `mgr: true`; managers are labelled in the staff table, can fix product prices and counts, and can close a forgotten shift or leave it for later. Test: `node astroman/tools/check-manager.mjs`.
+
 ## Optimo control center
 
 A separate page (Store → Optimo) for Optimo exports: sale history for any period and the stock items list. It shows top items, profit after cost and VAT, stock value, a shopping list sized to the months of stock you want, counts to fix, and money stuck in slow stock. It is stored in its own collection and does not change the profit and loss.
