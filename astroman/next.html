@@ -4076,7 +4076,7 @@ const CHS=[['shop','🏪','Shop'],['delivery','🛵','Delivery'],['wolt','W','Wo
 const CHN=Object.fromEntries(CHS.map(c=>[c[0],c[2]]));
 const CH_PAYS={shop:['pos','cash','bog','tbc','personal','installment','other'],delivery:['cod','bog','tbc','pending','personal','pos','other'],wolt:['wolt'],glovo:['glovo'],extra:['extra']};
 const ADDR_CH=new Set(['delivery','extra']);
-const OST=[['new','New'],['ready','Packed'],['out','With courier'],['done','Delivered']];
+const OST=[['new','New'],['ready','Packed'],['out','Picked up by courier'],['done','Delivered']];
 const OSTN=Object.fromEntries(OST);
 const LATER_PAYS=new Set(['cod','pending']);
 function chOf(o){if(!o)return 'shop';if(o.ch)return o.ch;if(o.pay==='wolt')return 'wolt';if(o.pay==='glovo')return 'glovo';if(o.pay==='extra')return 'extra';return o.dl?'delivery':'shop'}
