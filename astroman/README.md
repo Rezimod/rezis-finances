@@ -43,6 +43,12 @@ An online order typed in Mars (or on another computer) puts a card over the regi
 
 In Mars, Orders opens with a dashboard (totals, orders per day by type, money by type, the delivery pipeline — tap a step to list those orders — best sellers and best customers) above the list, and any order — register, Mars or sheet — can be edited in full: products, quantities, prices, added products, discount, delivery fee, date, type, payment, paid, status, customer; cancelled orders can be restored. Order-type colours are the validated categorical slots 1–5 for dark and light.
 
+## Prices typed by hand, profit and the open-orders strip
+
+- A price typed differently from the catalog (a Wolt/Glovo/Extra price, a discount) is kept on the sale and marked “✎ 400 ₾ · catalog 355 ₾” in Orders. In months kept on the register, gross profit is each piece's own catalog cost against the price it was really sold for; only lines with no known cost (e.g. imported sheet rows) use the cost ratio. The order editor shows the profit of that order.
+- In Mars → New order, a Wolt, Glovo or Extra.ge order takes an item at the last price it was sold for on that platform.
+- The register's sale screen shows a strip with the open online orders (name, status, unpaid); closing a shift first lists the open online orders and asks to look at them or to close anyway.
+
 ## Optimo control center
 
 A separate page (Store → Optimo) for Optimo exports: sale history for any period and the stock items list. It shows top items, profit after cost and VAT, stock value, a shopping list sized to the months of stock you want, counts to fix, and money stuck in slow stock. It is stored in its own collection and does not change the profit and loss.

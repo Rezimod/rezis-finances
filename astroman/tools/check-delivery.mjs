@@ -198,6 +198,20 @@ check('Mars edits any order: qty, price, added product, fee, status, paid', ed.t
 const rid = [...store.values()].find(x => x.c === 'pos' && !x.d.src && x.d.ch === 'wolt').id;
 await page.evaluate(id => orderModal(id), rid); await page.waitForSelector('#oeLines'); await page.fill('#oeLines [data-oe="0"][data-k="p"]', '35'); await page.click('[data-act="or_upd"]'); await page.waitForTimeout(900);
 check('Mars edits a register sale too', store.get('pos/' + rid).d.total === 35);
+
+// a Wolt price above the catalog: profit from the price really charged, and Wolt remembers it
+await page.evaluate(() => { S.of = ofNew({ ch: 'wolt' }); S.ord.tab = 'new'; render() }); await page.waitForSelector('#ofQ');
+await page.fill('#ofQ', 'Vision'); await page.waitForSelector('#ofSug [data-act="or_add"]'); await page.keyboard.press('Enter'); await page.waitForTimeout(150);
+await page.fill('[data-ofl="0"][data-k="p"]', '400'); await page.click('[data-act="or_save"]'); await page.waitForTimeout(900);
+const wo = [...store.values()].find(x => x.c === 'pos' && x.d.src === 'mars' && x.d.ch === 'wolt')?.d;
+const pr = await page.evaluate(id => { const o = S.pos.get(id); return { p: orderProfit(o).profit, note: priceNote(o.lines[0]) } }, wo && wo.id);
+check('Wolt sale at 400 for a 238 telescope: profit from 400 minus its cost 66', wo && wo.total === 400 && pr.p === 334 && pr.note.includes('catalog'), pr);
+await page.evaluate(() => { S.of = ofNew({ ch: 'wolt' }); render() }); await page.waitForSelector('#ofQ');
+await page.fill('#ofQ', 'Vision'); await page.waitForSelector('#ofSug [data-act="or_add"]'); await page.keyboard.press('Enter'); await page.waitForTimeout(150);
+check('next Wolt order: the telescope comes at the last Wolt price', (await page.inputValue('[data-ofl="0"][data-k="p"]')) === '400');
+await page.evaluate(() => { S.cfg = { ...S.cfg, regFrom: today().slice(0, 7) }; S.month = today().slice(0, 7); schedule() }); await page.waitForTimeout(300);
+const gm = await page.evaluate(() => { S.mc = new Map(); mergeRegisterSales(); const M = metrics(S.month); return { src: M.src, gross: Math.round(M.gross), sales: M.sales, ic: itemCogs(M.rows) } });
+check('the month\'s profit is worked out from item costs at the prices charged', gm.src === 'items' && gm.gross > 0 && gm.gross < gm.sales, gm);
 await page.evaluate(() => { S.ord.f.st = 'all'; render() }); await page.waitForTimeout(300);
 await page.setViewportSize({ width: 1366, height: 1500 }); await page.waitForTimeout(1300); await page.screenshot({ path: '/tmp/mars-orders.png' }); await page.setViewportSize({ width: 1366, height: 860 });
 check('no page errors', errors.length === 0, errors.slice(0, 3));

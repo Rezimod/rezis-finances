@@ -1221,7 +1221,7 @@ function optimoOf(m){const d=S.items.get(m);return d&&d.hasCost&&d.revenue>0?d:n
 function yearOptimoFor(m){for(const d of S.itemsYear.values()){if(d.hasCost&&d.revenue>0&&d.from&&d.to&&m>=d.from&&m<=d.to)return d}return null}
 // old order sheets (2021–2023) carry a cost per order line
 function rowCostRatio(rows,sales){if(!sales)return null;let a=0,k=0;for(const r of rows){if(r.k!=null&&r.k!==''&&!isNaN(+r.k)){a+=+r.a||0;k+=+r.k}}return a>=sales*.9&&a>0?k/a:null}
-const COGS_SRC={optimo:'Optimo item costs',year:'Optimo yearly cost ratio',sheet:'cost per order in the sheet',est:'estimated cost ratio'};
+const COGS_SRC={items:'item cost × the price each sale was made at',optimo:'Optimo item costs',year:'Optimo yearly cost ratio',sheet:'cost per order in the sheet',est:'estimated cost ratio'};
 const mIdx=m=>+m.slice(0,4)*12+(+m.slice(5,7));
 // A month with no product report borrows the cost ratio of the nearest one, so stock bought sits on the shelf
 // as an asset and only becomes a cost when it is sold.
@@ -1238,14 +1238,28 @@ function metrics(m){
   const stock=sum('goods'),opex=sum('opex'),tax=sum('tax'),below=sum('below'),otherInc=by.other_income||0,ownerIn=by.owner_in||0;
   let ratio=null,src=null,estFrom='';const O=optimoOf(m);
   if(O){ratio=O.cost/O.revenue;src='optimo'}else{const Y=yearOptimoFor(m);if(Y){ratio=Y.cost/Y.revenue;src='year'}else{const rc=rowCostRatio(rows,sales);if(rc!=null){ratio=rc;src='sheet'}else{const E=estRatio(m);if(E){ratio=E.ratio;src='est';estFrom=E.from}}}}
-  const accurate=(S.cfg.method||'auto')!=='cash'&&ratio!=null;if(!accurate)src=null;
-  const cogs=accurate?sales*ratio:stock;
+  // months kept on the register: each piece's own cost against the price it was really sold for (a Wolt price,
+  // a discount, a typed price); only lines with no known cost fall back to the cost ratio
+  let itemC=null;if(s&&s.virtual){const I=itemCogs(rows);if(I.rev>0){itemC=I;if(ratio==null){ratio=I.cost/I.rev;src='items'}}}
+  const accurate=(S.cfg.method||'auto')!=='cash'&&(ratio!=null);if(!accurate)src=null;
+  let cogs=accurate?sales*ratio:stock;
+  if(accurate&&itemC){cogs=itemC.cost+Math.max(0,sales-itemC.rev)*ratio;src='items'}
   const gross=sales-cogs;const operating=gross+otherInc-opex;const net=operating-tax;
   const stockOut=accurate?stock:0;const cash=net-below-stockOut+ownerIn;
   const fixed=list.filter(t=>t.virtual).reduce((a,t)=>a+t.gel,0);
   const M={m,sales,orders:rows.length,aov:rows.length?sales/rows.length:0,by,stock,cogs,accurate,allAccurate:accurate&&src!=='est',est:src==='est',estFrom,srcs:src?[src]:[],ratio,src,opex,tax,below,stockOut,otherInc,ownerIn,gross,operating,net,cash,fixed,hasSales:!!s,rows,list};
   S.mc.set(m,M);return M;
 }
+function costOf(b){const x=b&&S.catalog.get(b);return x&&+x.cost>0?+x.cost:null}
+function lineRev(l){return Math.max(0,(+l.q||0)*(+l.p||0)-(+l.d||0))}
+// revenue and cost of the lines whose item cost is known; order discounts are spread over the lines
+function itemCogs(rows){let rev=0,cost=0;rows.forEach(r=>{const o=r.reg&&S.pos.get(r.reg);if(!o||o.status==='void'||!o.lines)return;const gross=o.lines.reduce((a,l)=>a+lineRev(l),0);const k=gross>0?Math.max(0,gross-Math.max(0,(+o.disc||0)-o.lines.reduce((a,l)=>a+(+l.d||0),0)))/gross:1;
+  o.lines.forEach(l=>{const c=costOf(l.b);if(c==null)return;rev+=lineRev(l)*k;cost+=c*(+l.q||0)})});return {rev,cost}}
+function orderProfit(o){let rev=0,cost=0,unk=0;o.lines.forEach(l=>{const c=costOf(l.b);if(c==null){unk+=lineRev(l);return}rev+=lineRev(l);cost+=c*(+l.q||0)});return {rev,cost,unk,profit:rev-cost-(+o.disc||0)+o.lines.reduce((a,l)=>a+(+l.d||0),0)}}
+// a price typed differently from the catalog (a platform price, a discount): shown wherever the order is
+function priceNote(l){const x=l.b&&S.catalog.get(l.b);if(!x)return '';const cp=+(x.sale>0&&x.sale<x.price?x.sale:x.price)||0;return cp&&Math.abs(cp-(+l.p||0))>=0.5?` <span class="chip warn" title="Catalog price ${gel(cp)}">✎ ${gel(l.p)} · catalog ${gel(cp)}</span>`:''}
+// the last price an item was sold at on a platform (Wolt, Glovo, Extra.ge)
+function lastPrice(b,ch){let best=null;S.pos.forEach(o=>{if(!o||o.status==='void'||chOf(o)!==ch||!o.lines)return;o.lines.forEach(l=>{if(l.b===b&&(!best||String(o.at)>best.at))best={at:String(o.at),p:+l.p}})});return best}
 function monthsAvailable(){const set=new Set([thisMonth()]);for(const t of S.tx.values())if(t.month)set.add(t.month);for(const k of S.sales.keys())set.add(k);for(const k of S.items.keys())set.add(k);return [...set].sort()}
 function yearMonths(y){const out=[];for(let i=1;i<=12;i++){const m=y+'-'+String(i).padStart(2,'0');if(m<=thisMonth()||S.sales.has(m)||realTxOf(m).length)out.push(m)}return out}
 
@@ -4248,7 +4262,7 @@ function ordDash(L,m){
   const tp=[...topP.values()].sort((a,b)=>b.a-a.a).slice(0,6);const tpMax=Math.max(1,...tp.map(x=>x.a));
   const topC=new Map();live.forEach(o=>{const c=custOf(o);if(!c||!c.phone)return;const x=topC.get(c.phone)||{n:c.name,p:c.phone,a:0,k:0};x.a+=+o.total||0;x.k++;topC.set(c.phone,x)});
   const tc=[...topC.values()].sort((a,b)=>b.a-a.a).slice(0,6);
-  return `<div class="kpis"><div class="kpi"><div class="lbl">Orders · ${esc(mLabel(m))}</div><div class="val num">${fmt(live.length)}</div><div class="delta">${gel(tot)}</div></div>
+  return `<div class="kpis"><div class="kpi"><div class="lbl">Orders · ${esc(mLabel(m))}</div><div class="val num">${fmt(live.length)}</div><div class="delta">${gel(tot)}${(()=>{const M=metrics(m);return M.accurate?' · profit <b>'+gel(M.gross)+'</b>':''})()}</div></div>
    <div class="kpi"><div class="lbl">Average order</div><div class="val num">${live.length?gel(tot/live.length):'—'}</div><div class="delta">${dl.length} delivery & Extra orders</div></div>
    <div class="kpi"><div class="lbl">Still to be paid</div><div class="val num ${un.length?'neg':''}">${gel(un.reduce((a,o)=>a+(+o.total||0),0))}</div><div class="delta">${un.length} order${un.length===1?'':'s'}${un.length?' · <button class="btn sm ghost" style="height:auto;padding:0 4px" data-act="or_fst" data-v="unpaid">see them →</button>':''}</div></div>
    <div class="kpi"><div class="lbl">Deliveries not finished</div><div class="val num ${late.length?'neg':''}">${dl.filter(o=>o.dl.st!=='done').length}</div><div class="delta">${late.length?late.length+' older than 2 days':'none late'}</div></div></div>
@@ -4270,7 +4284,7 @@ function ordList(L){
   const fl=`<div class="toolbar"><input class="input grow" id="orQ" placeholder="Search name, phone, address, product…" value="${esc(F.q||'')}"><div class="pills">${[['all','All'],...CHS.map(c=>[c[0],c[1]+' '+c[2]])].map(([k,t])=>`<button data-act="or_fch" data-v="${k}" aria-pressed="${F.ch===k}">${esc(t)}</button>`).join('')}</div><div class="pills">${[['all','Any'],['open','Not delivered'],['unpaid','Unpaid'],['void','Cancelled'],...(F.st.startsWith('st:')?[[F.st,OSTN[F.st.slice(3)]]]:[])].map(([k,t])=>`<button data-act="or_fst" data-v="${k}" aria-pressed="${F.st===k}">${t}</button>`).join('')}</div></div>`;
   const tr=o=>{const c=chOf(o),cu=custOf(o);return `<tr class="click ${o.status==='void'?'void':''}" data-act="or_open" data-id="${esc(o.id)}"><td class="num">${esc(dShort(o.day))}<div class="small muted">${o.src==='sheet'?'':tOf(o.at)}</div></td><td>${chChip(c)}</td>
    <td>${cu?`<b>${esc(cu.name||'—')}</b><div class="small muted num">${esc(fmtPh(cu.phone))}</div>`:'<span class="muted">—</span>'}</td><td class="small hm">${cu&&cu.addr?esc(cu.addr):''}</td>
-   <td class="small">${esc(o.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '))}</td><td class="small">${esc(PAYS[o.pay]||o.pay)}${unpaid(o)?' <span class="chip bad">unpaid</span>':''}</td>
+   <td class="small">${o.lines.map(l=>esc((l.q>1?l.q+'× ':'')+l.n)+priceNote(l)).join(', ')}</td><td class="small">${esc(PAYS[o.pay]||o.pay)}${unpaid(o)?' <span class="chip bad">unpaid</span>':''}</td>
    <td class="r num"><b>${gel(o.total)}</b>${o.ship?`<div class="small muted">incl. ${gel(o.ship)} delivery</div>`:''}</td><td>${o.status==='void'?'<span class="chip bad">cancelled</span>':o.dl&&o.dl.st?`<span class="chip ${o.dl.st==='done'?'good':'warn'}">${OSTN[o.dl.st]}</span>${o.dl.seen?`<div class="small muted">✓ ${esc(o.dl.seen.by)}</div>`:o.src==='mars'?'<div class="small muted">not seen yet</div>':''}`:''}</td><td class="small muted hm">${srcOf(o)}${o.no?' №'+o.no:''}</td></tr>`};
   return kp+fl+(rows.length?`<div class="panel"><div class="tablewrap"><table class="ordt"><thead><tr><th>Day</th><th>Type</th><th>Customer</th><th class="hm">Address</th><th>Products</th><th>Payment</th><th class="r">Amount</th><th>Status</th><th class="hm">From</th></tr></thead><tbody>${rows.slice(0,S.ord.all?2000:200).map(tr).join('')}</tbody></table></div>${rows.length>200&&!S.ord.all?`<div class="row mt"><button class="btn" data-act="or_all">Show all ${rows.length}</button></div>`:''}</div>`
    :`<div class="panel empty"><b>No orders here</b>${L.length?'Nothing matches the filters.':'Orders rung on the register or typed here appear in this list.'}</div>`);
@@ -4291,7 +4305,7 @@ function ofForm(){
    ${addr?`<label class="field"><span>Address *</span><input class="input" id="ofAddr" value="${esc(F.addr)}" placeholder="city, street, building, flat"></label>`:'<div></div>'}
    <div class="span3" id="ofKnown">${ofKnown()}</div>
    <div class="field span3"><span>Products</span><div class="ofsearch"><input class="input" id="ofQ" placeholder="Search the catalog, or type a name and press Enter" autocomplete="off" value="${esc(F.q)}"><div class="ofsug" id="ofSug"></div></div></div>
-   <div class="span3">${F.lines.length?`<table class="oflines"><thead><tr><th>Product</th><th class="r">Qty</th><th class="r">Price ₾</th><th class="r">Sum</th><th></th></tr></thead><tbody>${F.lines.map((l,i)=>`<tr><td>${esc(l.n)}${l.b?'':' <span class="chip">not in catalog</span>'}</td><td class="r"><input class="input num" data-ofl="${i}" data-k="q" value="${esc(String(l.q))}" inputmode="numeric" style="width:64px;text-align:right"></td><td class="r"><input class="input num" data-ofl="${i}" data-k="p" value="${esc(String(l.p))}" inputmode="decimal" style="width:90px;text-align:right"></td><td class="r num">${gel((+l.q||0)*(+l.p||0))}</td><td class="r"><button class="btn sm ghost" data-act="or_rm" data-i="${i}" aria-label="Remove">✕</button></td></tr>`).join('')}</tbody></table>`:'<div class="muted small">No products yet.</div>'}</div>
+   <div class="span3">${F.lines.length?`<table class="oflines"><thead><tr><th>Product</th><th class="r">Qty</th><th class="r">Price ₾</th><th class="r">Sum</th><th></th></tr></thead><tbody>${F.lines.map((l,i)=>`<tr><td>${esc(l.n)}${l.b?priceNote(l):' <span class="chip">not in catalog</span>'}</td><td class="r"><input class="input num" data-ofl="${i}" data-k="q" value="${esc(String(l.q))}" inputmode="numeric" style="width:64px;text-align:right"></td><td class="r"><input class="input num" data-ofl="${i}" data-k="p" value="${esc(String(l.p))}" inputmode="decimal" style="width:90px;text-align:right"></td><td class="r num">${gel((+l.q||0)*(+l.p||0))}</td><td class="r"><button class="btn sm ghost" data-act="or_rm" data-i="${i}" aria-label="Remove">✕</button></td></tr>`).join('')}</tbody></table>`:'<div class="muted small">No products yet.</div>'}</div>
    ${addr?`<label class="field"><span>Delivery fee ₾</span><input class="input num" id="ofFee" inputmode="decimal" value="${esc(F.fee)}"></label>`:''}
    <label class="field"><span>Payment</span><select class="input" id="ofPay">${pays.map(p=>`<option value="${p}" ${F.pay===p?'selected':''}>${esc(PAYS[p]||p)}${LATER_PAYS.has(p)?' · paid later':''}</option>`).join('')}</select></label>
    ${addr?`<label class="field"><span>Status</span><select class="input" id="ofSt">${OST.map(([k,t])=>`<option value="${k}" ${F.st===k?'selected':''}>${t}</option>`).join('')}</select></label>`:''}
@@ -4378,6 +4392,7 @@ function orderModal(id){
     <label class="field"><span>Name</span><input class="input" id="omName" value="${esc(cu.name||'')}"></label><label class="field"><span>Phone</span><input class="input num" id="omPhone" value="${esc(fmtPh(cu.phone||''))}"></label><label class="field"><span>Discount ₾</span><input class="input num" id="omDisc" value="${esc(String(o.disc||0))}" inputmode="decimal"></label>
     <label class="field span3"><span>Address</span><input class="input" id="omAddr" value="${esc(cu.addr||'')}"></label>
     <label class="field span3"><span>Note</span><input class="input" id="omNote" value="${esc(o.note||'')}"></label></div>
+   <div class="small mt" id="omProfit"></div>
    ${regCash?'<p class="small" style="color:var(--warn);margin:8px 0 0">A cash sale from the register: changing its amount changes what that shift\'s drawer should hold.</p>':''}
    ${o.dl&&o.dl.log&&o.dl.log.length?`<div class="small muted mt">${o.dl.log.map(x=>esc((OSTN[x.st]||({seen:'Seen',paid:'Paid',edit:'Edited'})[x.st]||x.st)+' · '+dtS(x.at)+(x.by?' · '+x.by:''))).join(' → ')}</div>`:''}
    <div class="row mt"><div><div class="small muted">Total</div><b class="num" style="font-size:22px" id="omTot"></b></div><span class="spacer"></span>${o.status!=='void'?`<button class="btn danger" data-act="or_void" data-id="${esc(o.id)}">Cancel order…</button>`:`<button class="btn" data-act="or_unvoid" data-id="${esc(o.id)}">Restore order</button>`}<button class="btn" data-close>Close</button>${o.status!=='void'?`<button class="btn primary" data-act="or_upd" data-id="${esc(o.id)}">Save</button>`:''}</div>
@@ -4386,9 +4401,10 @@ function orderModal(id){
   ['omFee','omDisc'].forEach(k=>{const el=$('#'+k);if(el)el.oninput=oeTot});
   const q=$('#oeQ');q.oninput=()=>{S.oe.q=q.value;oeSug()};q.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const b=$('#oeSug [data-b]');if(b)oeAdd(b.dataset.b);else if(q.value.trim()){S.oe.lines.push({b:null,n:q.value.trim(),q:1,p:0,d:0});q.value='';S.oe.q='';oeSug();oeLines();const ins=document.querySelectorAll('[data-oe][data-k="p"]');if(ins.length)ins[ins.length-1].focus()}}};
 }
-function oeTot(){const E=S.oe;if(!E)return;const sub=E.lines.reduce((a,l)=>a+(+l.q||0)*(+l.p||0),0);const t=sub-(parseFloat(($('#omDisc')||{}).value)||0)+(parseFloat(($('#omFee')||{}).value)||0);const el=$('#omTot');if(el)el.textContent=gel(r2(Math.max(0,t)))}
+function oeTot(){const E=S.oe;if(!E)return;const sub=E.lines.reduce((a,l)=>a+(+l.q||0)*(+l.p||0),0);const disc=parseFloat(($('#omDisc')||{}).value)||0;const t=sub-disc+(parseFloat(($('#omFee')||{}).value)||0);const el=$('#omTot');if(el)el.textContent=gel(r2(Math.max(0,t)));
+  const P=orderProfit({lines:E.lines,disc});const pe=$('#omProfit');if(pe)pe.innerHTML=P.rev||P.unk?`Profit on the products: <b class="num ${P.profit<0?'neg':''}">${gel(P.profit)}</b> <span class="muted">(sold for ${gel(P.rev-disc)}, item cost ${gel(P.cost)}${P.unk?' · '+gel(P.unk)+' of products with no cost in the catalog':''})</span>`:''}
 function oeLines(){const E=S.oe;const box=$('#oeLines');if(!box)return;
-  box.innerHTML=E.lines.map((l,i)=>`<div class="oline"><input class="input" data-oe="${i}" data-k="n" value="${esc(l.n)}"><input class="input num" data-oe="${i}" data-k="q" value="${esc(String(l.q))}" inputmode="numeric" style="text-align:right"><input class="input num" data-oe="${i}" data-k="p" value="${esc(String(l.p))}" inputmode="decimal" style="text-align:right"><span class="sum num">${gel((+l.q||0)*(+l.p||0))}</span><button class="btn sm ghost" data-oerm="${i}" aria-label="Remove">✕</button></div>`).join('')||'<div class="muted small">No products.</div>';
+  box.innerHTML=E.lines.map((l,i)=>`<div class="oline" title="${(()=>{const x=l.b&&S.catalog.get(l.b);return x?'Catalog '+gel(x.price)+(costOf(l.b)?' · cost '+gel(costOf(l.b)):''):''})()}"><input class="input" data-oe="${i}" data-k="n" value="${esc(l.n)}"><input class="input num" data-oe="${i}" data-k="q" value="${esc(String(l.q))}" inputmode="numeric" style="text-align:right"><input class="input num" data-oe="${i}" data-k="p" value="${esc(String(l.p))}" inputmode="decimal" style="text-align:right"><span class="sum num">${gel((+l.q||0)*(+l.p||0))}</span><button class="btn sm ghost" data-oerm="${i}" aria-label="Remove">✕</button></div>`).join('')||'<div class="muted small">No products.</div>';
   box.querySelectorAll('[data-oe]').forEach(el=>el.oninput=()=>{const l=E.lines[+el.dataset.oe];l[el.dataset.k]=el.dataset.k==='n'?el.value:el.value.replace(',','.');const r=el.closest('.oline');if(r)r.querySelector('.sum').textContent=gel((+l.q||0)*(+l.p||0));oeTot()});
   box.querySelectorAll('[data-oerm]').forEach(b=>b.onclick=()=>{E.lines.splice(+b.dataset.oerm,1);oeLines()});oeTot()}
 function oeSug(){const E=S.oe;const box=$('#oeSug');if(!box)return;const q=E.q.trim().toLowerCase();if(!q){box.innerHTML='';return}
@@ -4560,7 +4576,7 @@ async function ordersAct(a,b){
   if(a==='or_impgo')return importGo(b);
   if(!F)return;
   if(a==='or_ch'){F.ch=b.dataset.v;F.pay=CH_PAYS[F.ch][0];if(!ADDR_CH.has(F.ch))F.fee='';else if(!F.fee)F.fee='10';return ofPaint()}
-  if(a==='or_add'){const x=S.catalog.get(b.dataset.b);if(!x)return;const l=F.lines.find(l=>l.b===x.b);if(l)l.q=(+l.q||0)+1;else F.lines.push({b:x.b,n:x.n,q:1,p:+(x.sale>0&&x.sale<x.price?x.sale:x.price)||0});F.q='';return ofPaint('ofQ')}
+  if(a==='or_add'){const x=S.catalog.get(b.dataset.b);if(!x)return;const l=F.lines.find(l=>l.b===x.b);const cp=+(x.sale>0&&x.sale<x.price?x.sale:x.price)||0;const lp=['wolt','glovo','extra'].includes(F.ch)?lastPrice(x.b,F.ch):null;if(l)l.q=(+l.q||0)+1;else F.lines.push({b:x.b,n:x.n,q:1,p:lp?lp.p:cp});if(lp&&Math.abs(lp.p-cp)>=0.5)toast(CHN[F.ch]+' price from the last sale there: '+gel(lp.p)+' (catalog '+gel(cp)+')',5000);F.q='';return ofPaint('ofQ')}
   if(a==='or_addfree'){const n=F.q.trim();if(!n)return;F.lines.push({b:null,n,q:1,p:''});F.q='';ofPaint();const ins=document.querySelectorAll('[data-k="p"]');if(ins.length)ins[ins.length-1].focus();return}
   if(a==='or_rm'){F.lines.splice(+b.dataset.i,1);return ofPaint()}
   if(a==='or_useaddr'){const c=customers().find(F.phone);if(c){F.addr=c.a[+b.dataset.i]||F.addr;const el=$('#ofAddr');if(el)el.value=F.addr}return}

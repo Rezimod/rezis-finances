@@ -68,6 +68,18 @@ await page.click('.ord [data-act="dlPaid"]'); await page.waitForTimeout(300); aw
 check('paid + delivered: done, off the open list', store.get('pos/oM1').d.paid === true && store.get('pos/oM1').d.dl.st === 'done' && !(await page.$('.ord')));
 await page.click('[data-otab="all"]'); await page.fill('#oq', 'ნინო'); await page.waitForTimeout(500);
 check('"all" shows finished orders and search finds them', (await page.$$('.ord')).length === 1);
+// open orders stay in sight on the sale screen, and the shift cannot close without seeing them
+store.set('pos/oS1', { c: 'pos', id: 'oS1', d: { ...store.get('pos/oM1').d, id: 'oS1', no: 70, paid: false, total: 238, lines: [{ b: '111', n: 'x', q: 1, p: 238, d: 0 }], dl: { name: 'ლაშა ბერიძე', phone: '599777666', addr: 'ბათუმი', st: 'ready', seen: { at: new Date().toISOString(), by: 'Irakli' }, log: [] } } });
+await page.evaluate(() => load(false)); await page.click('[data-act="back"]'); await page.waitForTimeout(400);
+const strip = await page.evaluate(() => (document.querySelector('.ostrip') || {}).textContent || '');
+check('sale screen shows a strip with the open online orders', strip.includes('ღია ონლაინ შეკვეთა') && strip.includes('ლაშა'), strip);
+await page.evaluate(() => shiftCloseModal()); await page.waitForTimeout(300);
+check('closing the shift first lists the open online orders', (await page.textContent('#modalRoot')).includes('ონლაინ შეკვეთა ჯერ ღიაა') && (await page.textContent('#modalRoot')).includes('ლაშა'));
+await page.click('#scAny'); await page.waitForTimeout(300);
+check('"close anyway" goes on to the cash count (or the early-close question)', !!(await page.$('#cc')) || !!(await page.$('#earlyGo')));
+if (await page.$('#earlyGo')) { await page.click('#earlyGo'); await page.waitForTimeout(300); }
+check('…and does not ask about the orders twice', !!(await page.$('#cc')));
+await page.evaluate(() => closeModal());
 // manager: edit the price on the register
 await page.evaluate(() => logout()); await page.click('[data-login="u9"]'); await page.click('[data-login-go]'); await page.waitForTimeout(400);
 await page.click('header [data-act="orders"]'); await page.click('[data-otab="all"]'); await page.waitForSelector('.ord [data-act="dlEdit"]');
