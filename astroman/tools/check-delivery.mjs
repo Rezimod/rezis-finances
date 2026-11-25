@@ -162,6 +162,7 @@ await page.waitForTimeout(1300); await page.screenshot({ path: '/tmp/mars-custom
 // the register sees the customer base
 await page.goto(reg); await page.waitForSelector('.card').catch(() => {}); await page.click('[data-login-go]').catch(() => {}); await page.waitForTimeout(800);
 if (await page.$('#ocGo')) await page.click('#ocGo');
+await page.waitForTimeout(400); if (await page.$('#blockRoot [data-ack]')) await page.click('#blockRoot [data-ack="seen"]');
 await page.click('.card[data-add="111"]'); await page.click('[data-act="pay"]'); await page.click('[data-ch="delivery"]'); await page.type('#dlPhone', '599000810'); await page.waitForTimeout(200);
 const rk = await page.evaluate(() => ({ nm: $('#dlName').value, ad: $('#dlAddr').value }));
 check('register: customer from the sheets fills name + address', rk.nm === 'გიორგი ნოზაძე' && rk.ad.includes('ჭავჭავაძის'), rk);
@@ -187,6 +188,17 @@ check('payment check: transfer matched, card/pending missing, unexplained 77, Wo
 await page.evaluate(() => act('or_tab', { dataset: { v: 'pay' } })); await page.waitForTimeout(300);
 await page.setViewportSize({ width: 1366, height: 1500 }); await page.waitForTimeout(1300); await page.screenshot({ path: '/tmp/mars-paycheck.png' }); await page.setViewportSize({ width: 1366, height: 860 });
 await page.evaluate(() => act('or_tab', { dataset: { v: 'list' } })); await page.waitForTimeout(300);
+const mid = [...store.values()].find(x => x.c === 'pos' && x.d.src === 'mars').id;
+await page.evaluate(id => orderModal(id), mid); await page.waitForSelector('#oeLines [data-k="p"]');
+await page.fill('#oeLines [data-oe="0"][data-k="q"]', '2'); await page.fill('#oeLines [data-oe="0"][data-k="p"]', '200'); await page.fill('#omFee', '15'); await page.selectOption('#omSt', 'ready'); await page.selectOption('#omPaid', '1');
+await page.fill('#oeQ', 'მთვარ'); await page.waitForSelector('#oeSug [data-b]'); await page.keyboard.press('Enter'); await page.waitForTimeout(150);
+await page.click('[data-act="or_upd"]'); await page.waitForTimeout(900);
+const ed = store.get('pos/' + mid).d;
+check('Mars edits any order: qty, price, added product, fee, status, paid', ed.total === 2 * 200 + 32 + 15 && ed.lines.length === 2 && ed.dl.st === 'ready' && ed.paid === true && ed.ship === 15, [ed.total, ed.lines.length, ed.dl.st, ed.paid]);
+const rid = [...store.values()].find(x => x.c === 'pos' && !x.d.src && x.d.ch === 'wolt').id;
+await page.evaluate(id => orderModal(id), rid); await page.waitForSelector('#oeLines'); await page.fill('#oeLines [data-oe="0"][data-k="p"]', '35'); await page.click('[data-act="or_upd"]'); await page.waitForTimeout(900);
+check('Mars edits a register sale too', store.get('pos/' + rid).d.total === 35);
+await page.evaluate(() => { S.ord.f.st = 'all'; render() }); await page.waitForTimeout(300);
 await page.setViewportSize({ width: 1366, height: 1500 }); await page.waitForTimeout(1300); await page.screenshot({ path: '/tmp/mars-orders.png' }); await page.setViewportSize({ width: 1366, height: 860 });
 check('no page errors', errors.length === 0, errors.slice(0, 3));
 await b.close();

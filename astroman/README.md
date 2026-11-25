@@ -37,6 +37,12 @@ Every sale goes into the register — shop, Wolt/Glovo and delivery orders alike
 
 People on the register (Mars → Store sales → Register setup) are Consultants or Managers. A manager logs in with their PIN and rings up sales without being asked to start a shift: if a consultant's shift is open on that computer the sale joins it (so cash still counts in the drawer), otherwise it is saved without a shift and the pay screen warns that cash taken then is outside the drawer count. Manager sales carry `mgr: true`; managers are labelled in the staff table, can fix product prices and counts, and can close a forgotten shift or leave it for later. Test: `node astroman/tools/check-manager.mjs`.
 
+## New online orders on the register
+
+An online order typed in Mars (or on another computer) puts a card over the register that cannot be closed or clicked past: the customer, phone, address, products, payment and total, with three answers — 👀 ვნახე (seen), 📦 გამზადებულია (packed), 🛵 კურიერმა წაიღო (picked up). The answer is saved on the order (`dl.seen {at, by}` and the status), so every register clears and Mars shows who saw it. Several new orders come one after another. Orders made on the register itself, and orders imported from the sheet, count as seen. On the 🛵 board any status can be tapped (also back), “ყველა” lists every order of the last 90 days with search, and a manager can edit customer, address, quantities, prices, delivery fee and payment.
+
+In Mars, Orders opens with a dashboard (totals, orders per day by type, money by type, the delivery pipeline — tap a step to list those orders — best sellers and best customers) above the list, and any order — register, Mars or sheet — can be edited in full: products, quantities, prices, added products, discount, delivery fee, date, type, payment, paid, status, customer; cancelled orders can be restored. Order-type colours are the validated categorical slots 1–5 for dark and light.
+
 ## Optimo control center
 
 A separate page (Store → Optimo) for Optimo exports: sale history for any period and the stock items list. It shows top items, profit after cost and VAT, stock value, a shopping list sized to the months of stock you want, counts to fix, and money stuck in slow stock. It is stored in its own collection and does not change the profit and loss.

@@ -46,18 +46,41 @@ check('manager cash sale counts in that shift\'s drawer', s2 && sh && s2.shift =
 // an online order typed in Mars reaches the consultant: sound + pop-up + pulsing button, then status steps
 await page.evaluate(() => logout()); await page.click('[data-login="u1"]'); await page.click('[data-login-go]'); await page.waitForTimeout(500);
 store.set('pos/oM1', { c: 'pos', id: 'oM1', d: { id: 'oM1', src: 'mars', ch: 'delivery', at: new Date().toISOString(), day: new Date().toLocaleDateString('sv'), user: { id: 'mars', name: 'Mars' }, shift: null, device: 'mars', lines: [{ b: '222', n: 'Foreseen 80/600', q: 1, p: 499, d: 0 }], sub: 499, total: 509, pay: 'pending', status: 'ok', no: 50, paid: false, ship: 10, dl: { name: 'ნინო ბერიძე', phone: '599123456', addr: 'ვაკე, ჭავჭავაძის 1', fee: 10, st: 'new', log: [] } } });
-await page.evaluate(() => { window.__beeps = 0; const B = window.beep; window.beep = () => { window.__beeps++ }; return load(false) }); await page.waitForTimeout(600);
-const al = await page.evaluate(() => ({ toast: (document.querySelector('.toast') || {}).textContent || '', pulse: !!document.querySelector('[data-act="orders"].pulse'), beeps: window.__beeps }));
-check('new Mars order: pop-up names it, button pulses, sound plays', al.toast.includes('ახალი ონლაინ შეკვეთა') && al.toast.includes('ნინო') && al.pulse && al.beeps === 1, al);
+await page.evaluate(() => load(false)); await page.waitForTimeout(600);
+const card = await page.evaluate(() => ({ up: !!document.querySelector('#blockRoot .bcard'), txt: (document.querySelector('#blockRoot') || {}).textContent || '' }));
+check('new Mars order: a card covers the register with name, address, items', card.up && card.txt.includes('ნინო ბერიძე') && card.txt.includes('ჭავჭავაძის') && card.txt.includes('Foreseen'), card.txt.slice(0, 120));
+await page.screenshot({ path: '/tmp/mars-register-card.png' });
+await page.keyboard.press('Escape'); await page.mouse.click(30, 400); await page.waitForTimeout(200);
+check('the card cannot be closed by Esc or clicking outside', await page.evaluate(() => !!document.querySelector('#blockRoot .bcard')));
+check('the sale screen behind it cannot be used', await page.evaluate(() => { const c = document.querySelector('.card[data-add]'); if (!c) return true; const r = c.getBoundingClientRect(); const el = document.elementFromPoint(r.x + 10, r.y + 10); return !!el.closest('#blockRoot') }));
+await page.click('#blockRoot [data-ack="ready"]'); await page.waitForTimeout(700);
+check('consultant answers "packed": saved with who saw it, card gone', store.get('pos/oM1').d.dl.st === 'ready' && store.get('pos/oM1').d.dl.seen.by === 'Irakli' && !(await page.$('#blockRoot .bcard')), store.get('pos/oM1').d.dl);
 await page.evaluate(() => load(false)); await page.waitForTimeout(300);
-check('the alert sounds once, not on every refresh', await page.evaluate(() => window.__beeps === 1));
+check('the card does not come back once answered', !(await page.$('#blockRoot .bcard')));
 await page.click('header [data-act="orders"]'); await page.waitForSelector('.ord');
-check('board tags it ახალი! and the button stops pulsing', (await page.textContent('.ord')).includes('ახალი!') && !(await page.$('[data-act="orders"].pulse')));
-await page.click('.ord [data-act="dlStep"]'); await page.waitForTimeout(200); await page.click('.ord [data-act="dlStep"]'); await page.waitForTimeout(700);
-check('consultant marks it packed → picked up by courier', store.get('pos/oM1').d.dl.st === 'out' && (await page.textContent('.ord')).includes('კურიერმა წაიღო'), store.get('pos/oM1').d.dl);
+await page.click('.ord [data-act="dlSet"][data-st="new"]'); await page.waitForTimeout(300);
+check('any status can be set, also back', store.get('pos/oM1').d.dl.st === 'new');
+await page.click('.ord [data-act="dlSet"][data-st="out"]'); await page.waitForTimeout(500);
+check('consultant marks it picked up by courier', store.get('pos/oM1').d.dl.st === 'out' && (await page.textContent('.ord')).includes('კურიერმა წაიღო'), store.get('pos/oM1').d.dl);
+check('consultant cannot edit prices', !(await page.$('.ord [data-act="dlEdit"]')));
 await page.screenshot({ path: '/tmp/mars-register-board.png' });
 await page.click('.ord [data-act="dlPaid"]'); await page.waitForTimeout(300); await page.click('.ord [data-act="dlStep"]'); await page.waitForTimeout(700);
 check('paid + delivered: done, off the open list', store.get('pos/oM1').d.paid === true && store.get('pos/oM1').d.dl.st === 'done' && !(await page.$('.ord')));
+await page.click('[data-otab="all"]'); await page.fill('#oq', 'ნინო'); await page.waitForTimeout(500);
+check('"all" shows finished orders and search finds them', (await page.$$('.ord')).length === 1);
+// manager: edit the price on the register
+await page.evaluate(() => logout()); await page.click('[data-login="u9"]'); await page.click('[data-login-go]'); await page.waitForTimeout(400);
+await page.click('header [data-act="orders"]'); await page.click('[data-otab="all"]'); await page.waitForSelector('.ord [data-act="dlEdit"]');
+await page.click('.ord [data-act="dlEdit"]'); await page.fill('[data-de="0"][data-k="p"]', '450'); await page.fill('#deFee', '0'); await page.click('#deGo'); await page.waitForTimeout(700);
+check('manager edits the price on the register: total recalculated', store.get('pos/oM1').d.total === 450 && store.get('pos/oM1').d.lines[0].p === 450, store.get('pos/oM1').d.total);
+// a second Mars order while the first card is answered: the queue shows them one by one
+['oM2', 'oM3'].forEach((id, k) => store.set('pos/' + id, { c: 'pos', id, d: { ...store.get('pos/oM1').d, id, no: 60 + k, paid: false, total: 32, lines: [{ b: '111', n: 'მთვარის სანათი', q: 1, p: 32, d: 0 }], dl: { name: 'კლიენტი ' + k, phone: '59912345' + k, addr: 'თბილისი', st: 'new', log: [] } } }));
+await page.evaluate(() => load(false)); await page.waitForTimeout(500);
+check('two new orders: one card, says one more is waiting', (await page.textContent('#blockRoot')).includes('კიდევ 1'));
+await page.click('#blockRoot [data-ack="seen"]'); await page.waitForTimeout(400);
+check('after the first, the second card shows', (await page.textContent('#blockRoot')).includes('კლიენტი 1'));
+await page.click('#blockRoot [data-ack="seen"]'); await page.waitForTimeout(400);
+check('"seen" keeps the status new and records who', store.get('pos/oM2').d.dl.st === 'new' && store.get('pos/oM2').d.dl.seen.by === 'ადმინი' && !(await page.$('#blockRoot .bcard')));
 
 // Mars: the role survives a save, and can be given to someone
 const mars = 'file://' + path.join(root, 'index.html');
