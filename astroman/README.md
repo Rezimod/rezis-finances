@@ -13,6 +13,17 @@ This folder holds only the app. It contains **no business data**. All records ar
 - Sales come from the order sheet. Each month is its tab in the sheet; the typed date only sets the day, so a mistyped month (14.11 in the October tab) still counts in October. New orders are pulled in automatically whenever the app is open (at most every 15 minutes), and “Sync now” makes every month of this year match the sheet in one press.
 - The backend keeps a permanent log of every change (sheet `log`) and copies the data sheet to the Drive folder "Astroman Finance backups" every night, keeping 90 days.
 
+## Delivery and online orders (from December 2026)
+
+Every sale goes into the register — shop, Wolt/Glovo and delivery orders alike — and the order sheet is no longer typed.
+
+- **On the register**: pick the products → გადახდა → switch on **🛵 მიწოდება**. Paste the customer's message and the phone, name and address fill in by themselves; a phone that bought before fills the name and last address. The delivery fee (0 / 7 / 10 / 15 ₾ or typed) is added to the total and kept apart as `ship`. Courier cash (`cod`) and transfers still to come (`pending`) are saved as unpaid and never count as cash in the drawer.
+- **🛵 შეკვეთები** (header): open orders with their status — ახალი → გამზადებული → კურიერთან → ჩაბარებული — “თანხა მივიღეთ” when the money arrives, a one-tap copy for the courier, and cancel with a reason. Orders not delivered after 2 days or unpaid after 5 turn red.
+- A delivery order is an ordinary `pos` record with `dl: {name, phone, addr, fee, st, log[]}`, `paid` and `ship`; status and payment changes overwrite the same record (like a void), so the backend needed no change.
+- **Mars**: from `cfg.regFrom` (default `2026-12`) each month's sales are built live from the register instead of the sheet; earlier months still come from the sheet. Open and unpaid delivery orders show under *Needs attention*. The sheet-vs-register check now compares every sheet order of the day, not only “ფილიალი”.
+- **Shifts**: a shift left open from an earlier day is closed at 20:30 of that day when the consultant next logs in (cash counted then), and Mars counts old overnight shifts only to 20:30.
+- Tests: `node astroman/tools/check-delivery.mjs` (fake backend, needs Playwright).
+
 ## Optimo control center
 
 A separate page (Store → Optimo) for Optimo exports: sale history for any period and the stock items list. It shows top items, profit after cost and VAT, stock value, a shopping list sized to the months of stock you want, counts to fix, and money stuck in slow stock. It is stored in its own collection and does not change the profit and loss.

@@ -1375,6 +1375,7 @@ async function applySheet(P,manual){
   const months=P.months.filter(m=>m.m.startsWith(y)&&m.tabs.some(t=>tabYM(t,+y)));
   const seen=new Set(months.map(m=>m.m));const done=[],held=[];
   for(const m of months){
+    if(m.m>=regFrom())continue;
     const old=S.sales.get(m.m);
     if(old&&(old.locked||old.hist))continue;
     if(old&&m.oldTotal!=null&&Math.abs(m.total-m.oldTotal)<0.01&&m.count===m.oldCount)continue;
@@ -1431,7 +1432,7 @@ async function connectBackend(c){
 }
 function backupDocs(){
   const out=[];const add=(c,m)=>m.forEach((v,id)=>{const d={...v};delete d.id;out.push({c,id,d})});
-  add('tx',S.tx);add('sales',S.sales);add('ships',S.ships);add('rules',S.rules);add('items',S.items);add('itemsYear',S.itemsYear);add('optimo',S.optimo);add('loan',S.loan);add('catalog',S.catalog);add('pos',S.pos);add('shift',S.shift);add('site',S.site);out.push({c:'cfg',id:'main',d:S.cfg});return out;
+  add('tx',S.tx);add('sales',new Map([...S.sales].filter(([k,v])=>!(v&&v.virtual))));add('ships',S.ships);add('rules',S.rules);add('items',S.items);add('itemsYear',S.itemsYear);add('optimo',S.optimo);add('loan',S.loan);add('catalog',S.catalog);add('pos',S.pos);add('shift',S.shift);add('site',S.site);out.push({c:'cfg',id:'main',d:S.cfg});return out;
 }
 async function exportBackup(){
   const data=JSON.stringify({app:'astroman-finance',v:1,at:new Date().toISOString(),docs:backupDocs()});
@@ -1462,7 +1463,23 @@ async function boot(){
   db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()},()=>{});
 }
 function setConn(ok,txt){if(ok&&navigator.onLine===false){ok=false;txt='Offline · changes wait on this device'}$('#syncDot').className='dot'+(ok?'':' off');$('#syncTxt').textContent=txt||(ok?'Saved to cloud':'Offline');document.body.classList.toggle('netoff',!ok);$('#netPill').textContent=ok?'':txt||'Offline'}
-let rq=0;function schedule(){S.mc=new Map();if(rq)return;rq=requestAnimationFrame(()=>{rq=0;S.mc=new Map();fillMonthSel();if(S.view==='count'&&document.activeElement&&(document.activeElement.id==='wcQ'||document.activeElement.id==='scQ')){S.wcLate=true;return}if(S.view!=='add'||!S.renderedOnce)render()})}
+let rq=0;
+// From this month on, sales come from the register (shop, Wolt/Glovo and delivery orders alike) instead of the
+// order sheet. Each such month is rebuilt from the register records on every change; it is never stored, so the
+// sheet sync leaves it alone. Change it with cfg.regFrom ('YYYY-MM').
+const REG_FROM_DEFAULT='2026-12';
+function regFrom(){return (S.cfg&&S.cfg.regFrom)||REG_FROM_DEFAULT}
+function regCust(o){if(o.dl)return o.dl.name||'ონლაინ';if(o.pay==='wolt')return 'wolt';if(o.pay==='glovo')return 'glovo';return 'ფილიალი'}
+function mergeRegisterSales(){
+  if(!S.pos||!S.sales)return;const from=regFrom();const by=new Map();
+  S.pos.forEach(o=>{if(!o||!o.lines||!o.day||o.status==='void')return;const m=String(o.day).slice(0,7);if(m<from)return;(by.get(m)||by.set(m,[]).get(m)).push(o)});
+  for(const [k,v] of [...S.sales])if(v&&v.virtual&&!by.has(k))S.sales.delete(k);
+  for(const [m,L] of by){
+    const rows=L.sort((a,b)=>String(a.at).localeCompare(String(b.at))).map(o=>({d:o.day,c:regCust(o),p:o.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '),pay:o.pay,a:+o.total||0,reg:o.id,paid:o.paid!==false,ship:+o.ship||0}));
+    S.sales.set(m,{id:m,rows,source:'Register',virtual:true,locked:true,syncedAt:Date.now()});
+  }
+}
+function schedule(){try{mergeRegisterSales()}catch(e){console.warn(e)}S.mc=new Map();if(rq)return;rq=requestAnimationFrame(()=>{rq=0;S.mc=new Map();fillMonthSel();if(S.view==='count'&&document.activeElement&&(document.activeElement.id==='wcQ'||document.activeElement.id==='scQ')){S.wcLate=true;return}if(S.view!=='add'||!S.renderedOnce)render()})}
 async function saveTx(t){
   if(!S.db)throw {message:'Not connected — open this page in Claude while signed in'};
   const id=t.id&&!String(t.id).startsWith('fx-')?t.id:uid('t');const body={...t};delete body.id;delete body.virtual;
@@ -1635,7 +1652,7 @@ function todayPanel(){
    <div class="tgrid"><div class="tmain">
     <div class="tbig"><div><div class="lbl">Sales${isT?' so far':''}</div><div class="val num">${cu(D.a)}<small>₾</small></div><div class="tsub"><b class="num">${D.n}</b> order${D.n===1?'':'s'}${D.n?` · avg <b class="num">${gel(D.a/D.n)}</b>`:''}</div></div>
      <div class="tring">${ring(D.a,DAY_TARGET)}<span class="num">${pct(D.a,DAY_TARGET)}%</span><small>of ${fmt(DAY_TARGET)} ₾</small></div></div>
-    <div class="cmps"><div class="cmp"><span>Yesterday</span><b class="num">${gel(Y.a)}</b>${pc(D.a,Y.a)}</div><div class="cmp"><span>Last ${new Date(d+'T12:00').toLocaleDateString('en-GB',{weekday:'short'})}</span><b class="num">${gel(W.a)}</b>${pc(D.a,W.a)}</div><div class="cmp"><span>30-day average</span><b class="num">${gel(avg)}</b>${pc(D.a,avg)}</div><div class="cmp"><span>Store register</span><b class="num">${gel(regDay(d).a)}</b>${(()=>{const R=recon(d);return R.sheet.length||R.reg.length?(R.ok?'<em class="flat">= sheet</em>':`<span class="chip warn">sheet ${gel(R.sa)}</span>`):''})()}<a href="#store" data-go="store" class="small">${regDay(d).n} sale${regDay(d).n===1?'':'s'} →</a></div></div>
+    <div class="cmps"><div class="cmp"><span>Yesterday</span><b class="num">${gel(Y.a)}</b>${pc(D.a,Y.a)}</div><div class="cmp"><span>Last ${new Date(d+'T12:00').toLocaleDateString('en-GB',{weekday:'short'})}</span><b class="num">${gel(W.a)}</b>${pc(D.a,W.a)}</div><div class="cmp"><span>30-day average</span><b class="num">${gel(avg)}</b>${pc(D.a,avg)}</div><div class="cmp"><span>Store register</span><b class="num">${gel(regDay(d).a)}</b>${(()=>{if(String(d).slice(0,7)>=regFrom())return '';const R=recon(d);return R.sheet.length||R.reg.length?(R.ok?'<em class="flat">= sheet</em>':`<span class="chip warn">sheet ${gel(R.sa)}</span>`):''})()}<a href="#store" data-go="store" class="small">${regDay(d).n} sale${regDay(d).n===1?'':'s'} →</a></div></div>
     ${Object.keys(pays).length?`<div class="tpays">${Object.entries(pays).sort((a,b)=>b[1].a-a[1].a).map(([k,o])=>`<span><i style="width:${o.a/Math.max(1,D.a)*100}%"></i>${esc(PAYS[k]||k)} <b class="num">${gel(o.a)}</b></span>`).join('')}</div>`:''}
    </div><div class="tlist"><div class="tlh"><span>Orders</span><b>${D.n?'newest first':''}</b></div>${list}</div></div>
    <div class="strip" role="list">${strip.map(x=>{const o=dayOf(x);const dd=new Date(x+'T12:00');return `<button role="listitem" class="sd ${x===d?'on':''} ${o.a>=DAY_TARGET?'hit':''}" data-day="${x}" title="${dLong(x)} · ${gel(o.a)}"><span class="sb"><i style="height:${Math.max(o.a?6:0,o.a/smax*100)}%"></i></span><span class="sl">${dd.toLocaleDateString('en-GB',{weekday:'narrow'})}<b>${dd.getDate()}</b></span><span class="sa num">${!o.a?'—':o.a>=1000?fmt(o.a/1000,1)+'k':fmt(o.a)}</span></button>`}).join('')}</div>
@@ -1758,6 +1775,9 @@ function trendChart(ms,cur){
 }
 function attention(m,M){
   const items=[];const list=M.list;
+  {const od=[...S.pos.values()].filter(o=>o&&o.dl&&o.status!=='void'&&(o.paid===false||o.dl.st!=='done'));
+   if(od.length){const un=od.filter(o=>o.paid===false);const late=od.filter(o=>o.dl.st!=='done'&&(Date.now()-Date.parse(o.at))/864e5>2);const STN={new:'new',ready:'packed',out:'with courier',done:'delivered'};
+    items.push([late.length?'bad':'info','🛵',`<b>${od.length} delivery order${od.length>1?'s':''} open${un.length?' · '+gel(un.reduce((a,o)=>a+(+o.total||0),0))+' still to be paid':''}${late.length?' · '+late.length+' late':''}</b><div class="muted">${od.slice(0,5).map(o=>esc(o.dl.name||'?')+' '+gel(o.total)+' · '+(STN[o.dl.st]||'')+(o.paid===false?' · unpaid':'')).join(' · ')}</div>`,`<a class="btn sm" href="${storeDir()}" target="_blank" rel="noopener">Register</a>`])}}
   if(!M.hasSales)items.push(['bad','!',`<b>No sales loaded for ${mLabel(m)}</b><div class="muted">Sync from your order sheet.</div>`,`<button class="btn sm" data-go="sales">Sync</button>`]);
   const fx=list.filter(t=>t.virtual);
   if(fx.length)items.push(['info','↻',`<b>${gel(fx.reduce((a,t)=>a+t.gel,0))} fixed costs added automatically</b><div class="muted">${fx.map(t=>esc(t.vendor)).join(' · ')}. A real payment from the bank replaces its line.</div>`,`<button class="btn sm" data-act="filterFixed">See</button>`]);
@@ -2099,7 +2119,7 @@ function vSales(){
   const m=S.month,M=metrics(m),doc=S.sales.get(m);
   const q=S.salesQ.toLowerCase();const rows=(doc?.rows||[]).filter(r=>!q||[r.c,r.p,PAYS[r.pay]].join(' ').toLowerCase().includes(q));
   const sid=sheetId();const days=m===thisMonth()?new Date().getDate():daysIn(m);
-  return loadingOr(`<div class="pagehead"><div><div class="eyebrow">${kaM(m)} · ${m.slice(0,4)}</div><h1>Sales</h1><p>From your order sheet <a href="https://docs.google.com/spreadsheets/d/${esc(sid)}/edit" target="_blank" rel="noopener">ასტრომანის შეკვეთები</a>. Each month is its tab in the sheet; one sync makes every month match the sheet.</p></div>
+  return loadingOr(`<div class="pagehead"><div><div class="eyebrow">${kaM(m)} · ${m.slice(0,4)}</div><h1>Sales</h1><p>${doc&&doc.virtual?`From the store register: shop, Wolt/Glovo and delivery orders, live as they are rung up. ${(doc.rows||[]).filter(r=>!r.paid).length?`<b>${gel((doc.rows||[]).filter(r=>!r.paid).reduce((a,r)=>a+r.a,0))} not paid yet.</b>`:''}`:`From your order sheet <a href="https://docs.google.com/spreadsheets/d/${esc(sid)}/edit" target="_blank" rel="noopener">ასტრომანის შეკვეთები</a>. Each month is its tab in the sheet; one sync makes every month match the sheet.`}</p></div>
   <div class="actions">${S.mcp||S.backend?`<button class="btn" data-act="syncSheet" data-label="↻ Sync now">↻ Sync now</button>`:''}<button class="btn" data-act="pickOrders">Upload orders file</button><input type="file" id="ordersFile" accept=".xlsx,.xls,.csv,.ods,.txt,text/plain" hidden></div></div>
   <div class="kpis"><div class="kpi"><div class="lbl">Sales</div><div class="val num">${cu(M.sales)}<small>₾</small></div><div class="delta">${doc?('Updated '+new Date(doc.syncedAt).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})):'Not loaded yet'}</div></div>
   <div class="kpi"><div class="lbl">Orders</div><div class="val num">${cu(M.orders)}</div><div class="delta">${(M.orders/Math.max(1,days)).toFixed(1)} per day</div></div>
@@ -3866,13 +3886,13 @@ function storeHistory(){
   const top=[...items.values()].sort((a,b)=>b.a-a.a).slice(0,15);const max=Math.max(1,...top.map(x=>x.a));
   const byU={};L.forEach(o=>{if(o.status==='void')return;const k=o.user?o.user.name:'?';const u=byU[k]||(byU[k]={n:0,a:0});u.n++;u.a+=o.total});
   const sh=[...S.shift.values()].filter(x=>x&&!x.kind&&String(x.openedAt||'').slice(0,7)===m).sort((a,b)=>String(b.openedAt).localeCompare(String(a.openedAt)));
-  const hrs=x=>Math.max(0,((x.closedAt?Date.parse(x.closedAt):Date.now())-Date.parse(x.openedAt))/36e5);
+  const hrs=x=>{const o=Date.parse(x.openedAt);let c=x.closedAt?Date.parse(x.closedAt):Date.now();if(overnight(x)){const d=new Date(o);c=Math.max(o,new Date(d.getFullYear(),d.getMonth(),d.getDate(),20,30).getTime())}return Math.max(0,(c-o)/36e5)};
   const byC={};sh.forEach(x=>{const k=x.user?x.user.name:'?';const c=byC[k]||(byC[k]={shifts:0,h:0,n:0,a:0,open:0});c.shifts++;c.h+=hrs(x);if(!x.closedAt)c.open++});
   L.forEach(o=>{if(o.status==='void')return;const k=o.user?o.user.name:'?';const c=byC[k]||(byC[k]={shifts:0,h:0,n:0,a:0,open:0});c.n++;c.a+=o.total});
   const salesOf=x=>L.filter(o=>o.shift===x.id&&o.status!=='void');
   const staff=`<div class="panel"><h2>Consultants in ${esc(mLabel(m))}</h2><p class="sub">Hours come from the shifts they open and close on the register; sales are what they rang up.</p>
    ${Object.keys(byC).length?`<div class="tablewrap"><table><thead><tr><th>Consultant</th><th class="r">Shifts</th><th class="r">Hours</th><th class="r">Sales</th><th class="r">Revenue</th><th class="r hm">Avg sale</th><th class="r hm">Per hour</th></tr></thead><tbody>${Object.entries(byC).sort((a,b)=>b[1].a-a[1].a).map(([k,c])=>`<tr><td><b>${esc(k)}</b>${c.open?' <span class="chip good">on shift</span>':''}</td><td class="r num">${c.shifts}</td><td class="r num">${fmt(c.h,1)}</td><td class="r num">${c.n}</td><td class="r num"><b>${gel(c.a)}</b></td><td class="r num hm">${c.n?gel(c.a/c.n):'—'}</td><td class="r num hm">${c.h>=0.5?gel(c.a/c.h):'—'}</td></tr>`).join('')}</tbody></table></div>`:'<div class="muted">No shifts this month.</div>'}
-   ${sh.length?`<h3 class="rh3">Shift log</h3><div class="flow">${sh.slice(0,40).map(x=>{const so=salesOf(x);const E=shiftExpected(x);const diff=x.closedAt?r2(x.closeCash-E):null;return `<div class="ln"><span class="k"><b>${esc(x.user?x.user.name:'?')}</b> · ${esc(dShort(String(x.openedAt).slice(0,10)))} ${tOf(x.openedAt)} → ${x.closedAt?tOf(x.closedAt):'…'}<div class="small muted">${fmt(hrs(x),1)} h · ${so.length} sale${so.length===1?'':'s'} · ${gel(so.reduce((a,o)=>a+o.total,0))}${x.closedAt?' · drawer '+(Math.abs(diff)<0.01?'matched':(diff>0?'+':'−')+gel(Math.abs(diff))):' · open'}</div></span></div>`}).join('')}</div>`:''}</div>`;
+   ${sh.length?`<h3 class="rh3">Shift log</h3><div class="flow">${sh.slice(0,40).map(x=>{const so=salesOf(x);const E=shiftExpected(x);const diff=x.closedAt?r2(x.closeCash-E):null;return `<div class="ln"><span class="k"><b>${esc(x.user?x.user.name:'?')}</b> · ${esc(dShort(String(x.openedAt).slice(0,10)))} ${tOf(x.openedAt)} → ${x.closedAt?tOf(x.closedAt):'…'}<div class="small muted">${fmt(hrs(x),1)} h${overnight(x)?' <b style="color:var(--warn)">· left open overnight, counted to 20:30</b>':''} · ${so.length} sale${so.length===1?'':'s'} · ${gel(so.reduce((a,o)=>a+o.total,0))}${x.closedAt?' · drawer '+(Math.abs(diff)<0.01?'matched':(diff>0?'+':'−')+gel(Math.abs(diff))):' · open'}</div></span></div>`}).join('')}</div>`:''}</div>`;
   return staff+`<div class="kpis"><div class="kpi"><div class="lbl">${esc(mLabel(m))} on the register</div><div class="val num">${cu(tot.a)}<small>₾</small></div><div class="delta">${tot.n} sales · ${rows.length} selling day${rows.length===1?'':'s'}</div></div><div class="kpi"><div class="lbl">Cash</div><div class="val num">${cu(tot.cash)}<small>₾</small></div><div class="delta">${pct(tot.cash,tot.a)}% of sales</div></div><div class="kpi"><div class="lbl">Card terminals</div><div class="val num">${cu(tot.card)}<small>₾</small></div><div class="delta">${pct(tot.card,tot.a)}%${tot.other?' · other '+gel(tot.other):''}</div></div><div class="kpi"><div class="lbl">Average sale</div><div class="val num">${cu(tot.n?tot.a/tot.n:0)}<small>₾</small></div><div class="delta">${tot.v?tot.v+' voided':'no voids'}</div></div></div>
   <div class="grid g3b"><div class="panel"><h2>By day</h2><p class="sub">Pick the month in the sidebar. Tap a day to see its sales.</p>${rows.length?`<div class="tablewrap"><table><thead><tr><th>Day</th><th class="r">Sales</th><th class="r">Register</th><th class="r">Sheet</th><th class="r hm">Cash</th><th class="r hm">Cards</th><th class="r hm">Other</th></tr></thead><tbody>${rows.map(D=>{const R=recon(D.d);return `<tr class="click" data-act="st_day" data-d="${D.d}" style="cursor:pointer"><td>${esc(dShort(D.d))}${D.v?` <span class="chip bad" style="padding:0 6px">${D.v} void</span>`:''}</td><td class="r num">${D.n}</td><td class="r num"><b>${gel(D.a)}</b></td><td class="r num">${gel(R.sa)} ${R.ok?'<span class="chip good" style="padding:0 6px">=</span>':`<span class="chip bad" style="padding:0 6px">${R.diff>0?'+':'−'}${gel(Math.abs(R.diff))}</span>`}</td><td class="r num hm">${gel(D.cash)}</td><td class="r num hm">${gel(D.card)}</td><td class="r num hm">${gel(D.other)}</td></tr>`}).join('')}</tbody><tfoot><tr><td><b>Total</b></td><td class="r num">${tot.n}</td><td class="r num"><b>${gel(tot.a)}</b></td><td class="r num">${gel(rows.reduce((a,D)=>a+recon(D.d).sa,0))}</td><td class="r num hm">${gel(tot.cash)}</td><td class="r num hm">${gel(tot.card)}</td><td class="r num hm">${gel(tot.other)}</td></tr></tfoot></table></div>`:`<div class="empty"><b>No register sales in ${esc(mLabel(m))}</b></div>`}</div>
   <div class="stack"><div class="panel"><h2>Best sellers on the register</h2>${top.length?`<div class="bars">${top.map(x=>`<div class="bar"><div class="name" title="${esc(x.n)}">${esc(x.n)}<span>×${fmt(x.q)}</span></div><div class="track"><div class="fill" style="width:${x.a/max*100}%;background:var(--s1)"></div></div><div class="amt num">${gel(x.a)}</div></div>`).join('')}</div>`:'<div class="muted">—</div>'}</div>
@@ -4019,7 +4039,8 @@ async function storeAct(a,b){
 }
 /* ---------- sheet vs register: the shop's sales typed in the order sheet against the register ---------- */
 const BRANCH=/ფილიალი/i;
-function sheetStoreRows(d){return dayOf(d).rows.filter(r=>BRANCH.test(String(r.c||'')))}
+function overnight(x){if(!x||!x.openedAt)return false;const a=new Date(x.openedAt),b=x.closedAt?new Date(x.closedAt):new Date();return a.toDateString()!==b.toDateString()&&!x.lateClose}
+function sheetStoreRows(d){return String(d).slice(0,7)>=regFrom()?[]:dayOf(d).rows.filter(r=>!r.reg)}
 function recon(d){
   const sheet=sheetStoreRows(d).map((r,i)=>({i,a:+r.a||0,p:r.p||'',pay:r.pay}));
   const reg=posOrders(d).filter(o=>o.status!=='void').map(o=>({id:o.id,a:+o.total||0,p:o.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '),pay:o.pay,no:o.no,t:tOf(o.at)}));
@@ -4030,8 +4051,9 @@ function recon(d){
   return {sheet,reg,pairs,sheetOnly,regOnly,sa,ra,ok:!sheetOnly.length&&!regOnly.length,diff:r2(ra-sa)};
 }
 function reconPanel(d){
+  if(String(d).slice(0,7)>=regFrom())return '';
   const R=recon(d);const any=R.sheet.length||R.reg.length;
-  return `<div class="panel"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">Sheet vs register</h2><p class="sub" style="margin:2px 0 0">Shop sales typed in the order sheet (customer “ფილიალი”) against what the register recorded, matched by amount. At the end of the day both sides should agree.</p></div><span class="spacer"></span>${any?(R.ok?'<span class="chip good">matches</span>':`<span class="chip bad">differs by ${gel(Math.abs(R.diff))}</span>`):''}</div>
+  return `<div class="panel"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">Sheet vs register</h2><p class="sub" style="margin:2px 0 0">Every order typed in the order sheet (shop, Wolt and delivery) against what the register recorded, matched by amount. At the end of the day both sides should agree.</p></div><span class="spacer"></span>${any?(R.ok?'<span class="chip good">matches</span>':`<span class="chip bad">differs by ${gel(Math.abs(R.diff))}</span>`):''}</div>
    <div class="kpis small3 mt"><div class="kpi"><div class="lbl">Sheet · ფილიალი</div><div class="val num">${gel(R.sa)}</div><div class="delta">${R.sheet.length} row${R.sheet.length===1?'':'s'}</div></div><div class="kpi"><div class="lbl">Register</div><div class="val num">${gel(R.ra)}</div><div class="delta">${R.reg.length} sale${R.reg.length===1?'':'s'}</div></div><div class="kpi"><div class="lbl">Matched</div><div class="val num">${R.pairs.length}</div><div class="delta">${R.sheetOnly.length} only in sheet · ${R.regOnly.length} only on register</div></div></div>
    ${R.sheetOnly.length?`<h3 class="rh3">Only in the sheet</h3><div class="flow">${R.sheetOnly.map(s=>`<div class="ln"><span class="k">${esc(s.p||'—')}<div class="small muted">${esc(PAYS[s.pay]||s.pay||'')}</div></span><span class="v num">${gel(s.a)}</span></div>`).join('')}</div>`:''}
    ${R.regOnly.length?`<h3 class="rh3">Only on the register</h3><div class="flow">${R.regOnly.map(o=>`<div class="ln click" data-act="st_order" data-id="${esc(o.id)}" style="cursor:pointer"><span class="k">${esc(o.p)}<div class="small muted">${o.t} · №${o.no||''} · ${esc(POSPAY[o.pay]||o.pay)}</div></span><span class="v num">${gel(o.a)}</span></div>`).join('')}</div>`:''}
