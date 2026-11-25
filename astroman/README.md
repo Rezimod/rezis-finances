@@ -24,6 +24,15 @@ Every sale goes into the register — shop, Wolt/Glovo and delivery orders alike
 - **Shifts**: a shift left open from an earlier day is closed at 20:30 of that day when the consultant next logs in (cash counted then), and Mars counts old overnight shifts only to 20:30.
 - Tests: `node astroman/tools/check-delivery.mjs` (fake backend, needs Playwright).
 
+## Orders, customers and the payment check (Mars → Orders)
+
+- **New order**: the order sheet's columns as a form — type (🏪 Shop, 🛵 Delivery, Wolt, Glovo, Extra.ge), date, phone, name, address (paste the customer's message to fill them), products from the catalog with quantity and price, delivery fee, payment and status. Saved as a `pos` record with `src:'mars'`, so it shows on the register's 🛵 შეკვეთები board and moves stock like a register sale.
+- **Orders**: every order of the month — register, Mars and imported — with type, customer, address, payment, amount and status; filters for type, open, unpaid and cancelled; click to change the status, payment, address or to cancel.
+- **Customers**: one record per phone, built from every order sheet (the main sheet with its hidden tabs, the 2021–22 sheets and the courier's monthly sheets; the schools list is left out; courier rows of other shops are skipped) and topped up live from the orders. Stored as `shift` records of kind `custdb` (250 customers each) because that collection is the one the register can read — so a phone typed on the register fills the name and last address too. “↻ Rebuild from the sheets” reads them again.
+- **Import from sheet**: brings a month in from the order sheet. Rows already rung on the register (same amount, same or next day; several rows that add up to one sale count too) are not added again — they only give the register sale its phone and address. Rows cancelled in the sheet but sold on the register are listed to check. Importing twice adds nothing. Ticking the box moves the sales book for that month onto the register (`cfg.regFrom`).
+- **Payment check**: bank imports now keep the incoming payments (`bankin`, never counted as income). Orders paid by card terminal, BOG/TBC transfer, installments and transfers still to come are matched to them by amount and date (terminal payments net of the bank's fee); Wolt, Glovo, Extra.ge, courier cash, cash and the personal account are left out. Shows orders whose money never arrived, bank money with no order, and platform/courier payouts apart.
+- **Register**: the payment screen starts with an explicit choice of what kind of sale it is, in a coloured bar (blue shop, orange delivery…); only that kind's payment methods are offered and only delivery/Extra ask for an address. The kind of sale shows on the done screen, today's history, the receipt and the orders board.
+
 ## Optimo control center
 
 A separate page (Store → Optimo) for Optimo exports: sale history for any period and the stock items list. It shows top items, profit after cost and VAT, stock value, a shopping list sized to the months of stock you want, counts to fix, and money stuck in slow stock. It is stored in its own collection and does not change the profit and loss.

@@ -15,6 +15,30 @@
  #printRoot table{width:100%;border-collapse:collapse}#printRoot thead{display:table-header-group}#printRoot th{text-align:left;font-size:8.5pt;color:#555;border-bottom:1.5px solid #111;padding:5px 6px}
  #printRoot td{border-bottom:1px solid #ddd;padding:4px 6px;vertical-align:middle}#printRoot tr{break-inside:avoid}#printRoot .im img{width:62px;height:62px;object-fit:contain;display:block}
  #printRoot .r{text-align:right;white-space:nowrap}#printRoot .q{font-weight:700}#printRoot .nt{color:#555;font-size:9pt}@page{size:A4;margin:12mm}}
+
+/* ---------- orders ---------- */
+.ofgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 14px;align-items:end}
+.ofgrid .span2{grid-column:span 2}.ofgrid .span3{grid-column:1/-1}
+@media (max-width:760px){.ofgrid{grid-template-columns:minmax(0,1fr)}.ofgrid .span2,.ofgrid .span3{grid-column:auto}}
+.chsel{display:flex;gap:6px;flex-wrap:wrap}
+.chsel button{display:flex;align-items:center;gap:7px;border:1.5px solid var(--line-2);background:var(--surface);color:var(--ink);border-radius:10px;padding:9px 14px;font-weight:700;cursor:pointer;font-size:14px}
+.chsel button b{font-size:15px}
+.chsel button[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,var(--surface));box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent)}
+.ofsearch{position:relative}
+.ofsug{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:20;background:var(--surface);border:1px solid var(--line-2);border-radius:10px;box-shadow:var(--shadow);overflow:hidden}
+.ofsug:empty{display:none}
+.ofsug button{display:flex;width:100%;justify-content:space-between;gap:10px;padding:9px 12px;border:0;background:none;color:var(--ink);text-align:left;cursor:pointer;font-size:13.5px}
+.ofsug button:hover,.ofsug button:first-child{background:var(--surface-2)}
+.oflines{width:100%;font-size:13.5px}.oflines td,.oflines th{padding:6px 6px;border-bottom:1px solid var(--line)}
+.ofknown{font-size:13px;background:var(--good-bg);color:var(--good);border-radius:9px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip.chx{font-weight:700}
+.chip.ch-shop{background:color-mix(in srgb,#3B82F6 16%,transparent);color:#3B82F6}
+.chip.ch-delivery{background:color-mix(in srgb,#F59E0B 20%,transparent);color:#D97706}
+.chip.ch-wolt{background:color-mix(in srgb,#00C2E8 18%,transparent);color:#0891B2}
+.chip.ch-glovo{background:color-mix(in srgb,#FFC244 25%,transparent);color:#A16207}
+.chip.ch-extra{background:color-mix(in srgb,#8B5CF6 18%,transparent);color:#7C3AED}
+table.ordt td{vertical-align:top}
+tr.void td{opacity:.45;text-decoration:line-through}
 </style>
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.json">
@@ -1105,8 +1129,8 @@ const DEFAULT_RULES=[
  ['საკომისიო','bank_fees',''],['commission','bank_fees',''],['მომსახურების საფასური','bank_fees',''],
  ['ხაზინ','gezi','Treasury'],['treasury','gezi','Treasury'],
 ];
-const IC={tools:'M3 12V4h8l9 9-8 8zM7.5 7.5h.01',count:'M9 4h6v3H9zM7 5.5H5V21h14V5.5h-2M9 14l2 2 4-4',store:'M3 9l1.2-5h15.6L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6',overview:'M3 13h4v8H3zM10 3h4v18h-4zM17 9h4v12h-4z',recap:'M12 3l2.6 5.5 6 .8-4.4 4.1 1.1 5.9L12 16.4l-5.3 2.9 1.1-5.9L3.4 9.3l6-.8z',sales:'M3 17l6-6 4 4 8-8M15 7h6v6',products:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',expenses:'M4 6h16M4 12h16M4 18h10',bank:'M3 10l9-6 9 6M5 10v9h14v-9M9 19v-5h6v5',pl:'M5 4h14v16H5zM9 9h6M9 13h6M9 17h3',imports:'M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7',settings:'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM4 12h2M18 12h2M12 4v2M12 18v2',more:'M5 12h.01M12 12h.01M19 12h.01',optimo:'M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10M7.5 5l9 4',loan:'M3 6h18v12H3zM12 9.5a2.5 2.5 0 1 1 0 5a2.5 2.5 0 1 1 0-5M6.5 9v6M17.5 9v6'};
-const PAGES=[{id:'overview',t:'Overview'},{id:'recap',t:'Recap'},{id:'sales',t:'Sales'},{id:'products',t:'Products'},{id:'expenses',t:'Expenses'},{id:'bank',t:'Bank import'},{id:'pl',t:'Profit & loss'},{id:'imports',t:'Imports'},{id:'loan',t:'Loan'},{id:'optimo',t:'Optimo'},{id:'store',t:'Store sales'},{id:'count',t:'Stock count'},{id:'tools',t:'Tools'},{id:'settings',t:'Settings'}];
+const IC={orders:'M4 7h16l-1.5 11a2 2 0 0 1-2 1.8H7.5a2 2 0 0 1-2-1.8zM8 7V5a4 4 0 0 1 8 0v2',tools:'M3 12V4h8l9 9-8 8zM7.5 7.5h.01',count:'M9 4h6v3H9zM7 5.5H5V21h14V5.5h-2M9 14l2 2 4-4',store:'M3 9l1.2-5h15.6L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6',overview:'M3 13h4v8H3zM10 3h4v18h-4zM17 9h4v12h-4z',recap:'M12 3l2.6 5.5 6 .8-4.4 4.1 1.1 5.9L12 16.4l-5.3 2.9 1.1-5.9L3.4 9.3l6-.8z',sales:'M3 17l6-6 4 4 8-8M15 7h6v6',products:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',expenses:'M4 6h16M4 12h16M4 18h10',bank:'M3 10l9-6 9 6M5 10v9h14v-9M9 19v-5h6v5',pl:'M5 4h14v16H5zM9 9h6M9 13h6M9 17h3',imports:'M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7',settings:'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM4 12h2M18 12h2M12 4v2M12 18v2',more:'M5 12h.01M12 12h.01M19 12h.01',optimo:'M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10M7.5 5l9 4',loan:'M3 6h18v12H3zM12 9.5a2.5 2.5 0 1 1 0 5a2.5 2.5 0 1 1 0-5M6.5 9v6M17.5 9v6'};
+const PAGES=[{id:'overview',t:'Overview'},{id:'recap',t:'Recap'},{id:'sales',t:'Sales'},{id:'orders',t:'Orders'},{id:'products',t:'Products'},{id:'expenses',t:'Expenses'},{id:'bank',t:'Bank import'},{id:'pl',t:'Profit & loss'},{id:'imports',t:'Imports'},{id:'loan',t:'Loan'},{id:'optimo',t:'Optimo'},{id:'store',t:'Store sales'},{id:'count',t:'Stock count'},{id:'tools',t:'Tools'},{id:'settings',t:'Settings'}];
 const DEFAULT_FIXED=[
  {id:'rent',label:'Rent',cat:'rent',gel:1500,account:'bog',match:'',from:'2026-09'},
  {id:'accountant',label:'Accountant',cat:'accounting',gel:200,account:'bog',match:'',from:'2026-09'},
@@ -1118,7 +1142,7 @@ const DEFAULT_FIXED=[
 
 /* ============================== state ============================== */
 const lsGet0=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
-const S={db:null,user:null,canWrite:true,mcp:null,downloads:null,loaded:{},
+const S={ord:{tab:'list',f:{ch:'all',st:'all',q:''}},of:null,imp:null,bankin:new Map(),db:null,user:null,canWrite:true,mcp:null,downloads:null,loaded:{},
   tx:new Map(),loan:new Map(),catalog:new Map(),pos:new Map(),shift:new Map(),site:new Map(),sales:new Map(),ships:new Map(),rules:new Map(),items:new Map(),itemsYear:new Map(),optimo:new Map(),cfg:{},range:null,mc:new Map(),
   view:'overview',month:null,draft:null,bank:null,opt:null,salesPreview:null,filters:{cat:'',acct:'',q:'',all:false},salesQ:'',
   prod:{tab:'popular',sort:'p',dir:-1,q:'',all:false},op:{tab:'overview',rank:'profit',period:'',q:'',cat:'',status:'',sort:'profit',dir:-1,full:false},store:{tab:'live',day:null},cnt:{tab:lsGet0('af.cntTab')||'store',f:'todo',q:'',cat:'',sf:'all',sq:''},counts:new Map(),tools:{tab:lsGet0('af.toolsTab')==='order'?'order':'sale',pct:20,sf:'slow',sq:'',sel:new Set(),of:'now',lead:+lsGet0('af.lead')||2,cover:+lsGet0('af.cover')||3},animate:true};
@@ -1425,14 +1449,14 @@ function vConnect(){
 async function connectBackend(c){
   S.backend=backendDB(c.u,c.k);S.db=S.backend;S.canWrite=true;S.mcp=null;
   const sub=(path,key)=>S.db.collection(path).onSnapshot(snap=>{const m=new Map();snap.docs.forEach(d=>m.set(d.id,{id:d.id,...d.data()}));S[key]=m;S.loaded[key]=true;schedule()});
-  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');sub('catalog','catalog');sub('counts','counts');sub('pos','pos');sub('shift','shift');sub('site','site');
+  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');sub('catalog','catalog');sub('counts','counts');sub('pos','pos');sub('shift','shift');sub('site','site');sub('bankin','bankin');
   S.db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()});
   await S.backend.fromCache();
   try{await S.backend.load(true);S.backend.flush();autoSyncSales()}catch(e){if(e.code==='bad_key'){toast('Wrong secret key. Connect again.');S.view='connect';render();return}toast(errMsg(e));setConn(false,'Offline — showing saved copy')}
 }
 function backupDocs(){
   const out=[];const add=(c,m)=>m.forEach((v,id)=>{const d={...v};delete d.id;out.push({c,id,d})});
-  add('tx',S.tx);add('sales',new Map([...S.sales].filter(([k,v])=>!(v&&v.virtual))));add('ships',S.ships);add('rules',S.rules);add('items',S.items);add('itemsYear',S.itemsYear);add('optimo',S.optimo);add('loan',S.loan);add('catalog',S.catalog);add('pos',S.pos);add('shift',S.shift);add('site',S.site);out.push({c:'cfg',id:'main',d:S.cfg});return out;
+  add('tx',S.tx);add('sales',new Map([...S.sales].filter(([k,v])=>!(v&&v.virtual))));add('ships',S.ships);add('rules',S.rules);add('items',S.items);add('itemsYear',S.itemsYear);add('optimo',S.optimo);add('loan',S.loan);add('catalog',S.catalog);add('pos',S.pos);add('shift',S.shift);add('site',S.site);add('bankin',S.bankin);out.push({c:'cfg',id:'main',d:S.cfg});return out;
 }
 async function exportBackup(){
   const data=JSON.stringify({app:'astroman-finance',v:1,at:new Date().toISOString(),docs:backupDocs()});
@@ -1459,7 +1483,7 @@ async function boot(){
   if(user){try{const w=await user.can('data.write');if(w===false)S.canWrite=false}catch(e){}}
   if(!db){setConn(false,'Sign in to load data');S.loaded.none=true;render();return}
   const sub=(path,key)=>db.collection(path).onSnapshot(snap=>{const m=new Map();snap.docs.forEach(d=>m.set(d.id,{id:d.id,...d.data()}));S[key]=m;S.loaded[key]=true;setConn(true);schedule()},err=>{setConn(false,'Sync paused ('+err.code+')')});
-  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');sub('catalog','catalog');sub('counts','counts');sub('pos','pos');sub('shift','shift');sub('site','site');
+  sub('tx','tx');sub('sales','sales');sub('ships','ships');sub('rules','rules');sub('items','items');sub('itemsYear','itemsYear');sub('optimo','optimo');sub('loan','loan');sub('catalog','catalog');sub('counts','counts');sub('pos','pos');sub('shift','shift');sub('site','site');sub('bankin','bankin');
   db.doc('cfg/main').onSnapshot(d=>{S.cfg=d.exists?{...d.data()}:{};S.loaded.cfg=true;$('#fxTxt').textContent='1 USD = '+fx().toFixed(2)+' ₾';schedule()},()=>{});
 }
 function setConn(ok,txt){if(ok&&navigator.onLine===false){ok=false;txt='Offline · changes wait on this device'}$('#syncDot').className='dot'+(ok?'':' off');$('#syncTxt').textContent=txt||(ok?'Saved to cloud':'Offline');document.body.classList.toggle('netoff',!ok);$('#netPill').textContent=ok?'':txt||'Offline'}
@@ -1469,13 +1493,13 @@ let rq=0;
 // sheet sync leaves it alone. Change it with cfg.regFrom ('YYYY-MM').
 const REG_FROM_DEFAULT='2026-12';
 function regFrom(){return (S.cfg&&S.cfg.regFrom)||REG_FROM_DEFAULT}
-function regCust(o){if(o.dl)return o.dl.name||'ონლაინ';if(o.pay==='wolt')return 'wolt';if(o.pay==='glovo')return 'glovo';return 'ფილიალი'}
+function regCust(o){const c=o.dl||o.cust;if(c&&c.name)return c.name;if(o.ch&&o.ch!=='shop'&&o.ch!=='delivery')return o.ch;if(o.dl)return 'ონლაინ';if(o.pay==='wolt')return 'wolt';if(o.pay==='glovo')return 'glovo';return 'ფილიალი'}
 function mergeRegisterSales(){
   if(!S.pos||!S.sales)return;const from=regFrom();const by=new Map();
   S.pos.forEach(o=>{if(!o||!o.lines||!o.day||o.status==='void')return;const m=String(o.day).slice(0,7);if(m<from)return;(by.get(m)||by.set(m,[]).get(m)).push(o)});
   for(const [k,v] of [...S.sales])if(v&&v.virtual&&!by.has(k))S.sales.delete(k);
   for(const [m,L] of by){
-    const rows=L.sort((a,b)=>String(a.at).localeCompare(String(b.at))).map(o=>({d:o.day,c:regCust(o),p:o.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '),pay:o.pay,a:+o.total||0,reg:o.id,paid:o.paid!==false,ship:+o.ship||0}));
+    const rows=L.sort((a,b)=>String(a.at).localeCompare(String(b.at))).map(o=>({d:o.day,c:regCust(o),p:o.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '),pay:o.pay,a:+o.total||0,reg:o.id,paid:o.paid!==false,ship:+o.ship||0,ch:chOf(o),src:o.src||''}));
     S.sales.set(m,{id:m,rows,source:'Register',virtual:true,locked:true,syncedAt:Date.now()});
   }
 }
@@ -1495,8 +1519,8 @@ function errMsg(e){if(!e)return 'Something went wrong';if(e.code==='quota_exceed
 const svg=(d,s=16)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 function renderShell(){
   $('#menu').innerHTML=PAGES.map((p,i)=>(p.id==='pl'?'<div class="sep"></div><div class="grp">Finance</div>':p.id==='optimo'?'<div class="sep"></div><div class="grp">Store</div>':'')+`<button data-go="${p.id}">${svg(IC[p.id])}${p.t}</button>`).join('');
-  $('#tabbar').innerHTML=[['overview','Overview'],['expenses','Expenses'],['add',''],['optimo','Optimo'],['more','More']].map(([id,t])=>id==='add'?`<button data-go="add" aria-label="New"><span class="plus">+</span></button>`:`<button data-go="${id}">${svg(IC[id],22)}<span>${t}</span></button>`).join('');
-  $('#moreInner').innerHTML='<div class="grab"></div>'+[['recap','Recap'],['sales','Sales'],['products','Products'],['store','Store sales'],['count','Stock count'],['tools','Tools'],['bank','Bank import'],['pl','Profit & loss'],['imports','Imports'],['loan','Loan'],['settings','Settings']].map(([id,t])=>`<button data-go="${id}">${svg(IC[id],20)}${t}</button>`).join('');
+  $('#tabbar').innerHTML=[['overview','Overview'],['orders','Orders'],['add',''],['expenses','Expenses'],['more','More']].map(([id,t])=>id==='add'?`<button data-go="add" aria-label="New"><span class="plus">+</span></button>`:`<button data-go="${id}">${svg(IC[id],22)}<span>${t}</span></button>`).join('');
+  $('#moreInner').innerHTML='<div class="grab"></div>'+[['recap','Recap'],['orders','Orders'],['optimo','Optimo'],['sales','Sales'],['products','Products'],['store','Store sales'],['count','Stock count'],['tools','Tools'],['bank','Bank import'],['pl','Profit & loss'],['imports','Imports'],['loan','Loan'],['settings','Settings']].map(([id,t])=>`<button data-go="${id}">${svg(IC[id],20)}${t}</button>`).join('');
   document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');
     if(!g){const ph=e.target.closest('.pagehead p');if(ph&&!e.target.closest('a,button')&&PHONE())ph.classList.toggle('open');return}
     e.preventDefault();const tab=!!g.closest('#tabbar'),top=(tab&&g.dataset.go!=='add')||!!g.closest('#moreInner,#menu');if(tab)buzz();if(g.dataset.go==='more')return openMore();if(tab&&g.dataset.go==='add')return openActions();
@@ -1545,8 +1569,8 @@ function edgeBack(){let x0=null,y0=0,dx=0,on=false;const m=$('#main');
 function render(){
   S.renderedOnce=true;S.mc=new Map();
   document.querySelectorAll('#menu button,#tabbar button,#moreInner button').forEach(b=>b.setAttribute('aria-current',b.dataset.go===S.view?'page':'false'));
-  if(!['overview','expenses','add','optimo'].includes(S.view))$('#tabbar [data-go=more]').setAttribute('aria-current','page');
-  const v={connect:vConnect,overview:vOverview,sales:vSales,products:vProducts,expenses:vExpenses,bank:vBank,pl:vPL,imports:vImports,loan:vLoan,optimo:vOptimo,store:vStore,count:vCount,tools:vTools,settings:vSettings,add:vAdd}[S.view]||vOverview;
+  if(!['overview','expenses','add','orders'].includes(S.view))$('#tabbar [data-go=more]').setAttribute('aria-current','page');
+  const v={connect:vConnect,overview:vOverview,sales:vSales,orders:vOrders,products:vProducts,expenses:vExpenses,bank:vBank,pl:vPL,imports:vImports,loan:vLoan,optimo:vOptimo,store:vStore,count:vCount,tools:vTools,settings:vSettings,add:vAdd}[S.view]||vOverview;
   const main=$('#main');const y=window.scrollY;
   main.innerHTML=banner()+v();
   const anim=S.animate&&!reduced();main.classList.toggle('anim',anim);
@@ -1775,9 +1799,9 @@ function trendChart(ms,cur){
 }
 function attention(m,M){
   const items=[];const list=M.list;
-  {const od=[...S.pos.values()].filter(o=>o&&o.dl&&o.status!=='void'&&(o.paid===false||o.dl.st!=='done'));
-   if(od.length){const un=od.filter(o=>o.paid===false);const late=od.filter(o=>o.dl.st!=='done'&&(Date.now()-Date.parse(o.at))/864e5>2);const STN={new:'new',ready:'packed',out:'with courier',done:'delivered'};
-    items.push([late.length?'bad':'info','🛵',`<b>${od.length} delivery order${od.length>1?'s':''} open${un.length?' · '+gel(un.reduce((a,o)=>a+(+o.total||0),0))+' still to be paid':''}${late.length?' · '+late.length+' late':''}</b><div class="muted">${od.slice(0,5).map(o=>esc(o.dl.name||'?')+' '+gel(o.total)+' · '+(STN[o.dl.st]||'')+(o.paid===false?' · unpaid':'')).join(' · ')}</div>`,`<a class="btn sm" href="${storeDir()}" target="_blank" rel="noopener">Register</a>`])}}
+  {const od=[...S.pos.values()].filter(o=>o&&o.status!=='void'&&(o.paid===false||(o.dl&&o.dl.st&&o.dl.st!=='done')));
+   if(od.length){const un=od.filter(o=>o.paid===false);const late=od.filter(o=>o.dl&&o.dl.st!=='done'&&(Date.now()-Date.parse(o.at))/864e5>2);const STN={new:'new',ready:'packed',out:'with courier',done:'delivered'};
+    items.push([late.length?'bad':'info','🛵',`<b>${od.length} order${od.length>1?'s':''} open${un.length?' · '+gel(un.reduce((a,o)=>a+(+o.total||0),0))+' still to be paid':''}${late.length?' · '+late.length+' late':''}</b><div class="muted">${od.slice(0,5).map(o=>esc((custOf(o)||{}).name||'?')+' '+gel(o.total)+(o.dl?' · '+(STN[o.dl.st]||''):'')+(o.paid===false?' · unpaid':'')).join(' · ')}</div>`,`<button class="btn sm" data-go="orders">Orders</button>`])}}
   if(!M.hasSales)items.push(['bad','!',`<b>No sales loaded for ${mLabel(m)}</b><div class="muted">Sync from your order sheet.</div>`,`<button class="btn sm" data-go="sales">Sync</button>`]);
   const fx=list.filter(t=>t.virtual);
   if(fx.length)items.push(['info','↻',`<b>${gel(fx.reduce((a,t)=>a+t.gel,0))} fixed costs added automatically</b><div class="muted">${fx.map(t=>esc(t.vendor)).join(' · ')}. A real payment from the bank replaces its line.</div>`,`<button class="btn sm" data-act="filterFixed">See</button>`]);
@@ -2365,6 +2389,7 @@ async function bankSave(btn){
       await saveTx({date:r.date,cat:r.cat,account:B.acct,vendor:r.vendor,note:(r.desc||'').slice(0,200),cur:'GEL',gel:Math.round(r.gel*100)/100,source:'bank',bankKey:r.key});n++}
     if(B.remember){const seen=new Set();for(const r of rows){if(!r.synthetic&&r.cat!=='toloan'&&r.cat!==r.auto&&r.party&&!seen.has(r.party.toLowerCase())){seen.add(r.party.toLowerCase());const match=r.party.toLowerCase().slice(0,40);await S.db.doc('rules/'+hash(match)).set({match,cat:r.cat,vendor:r.party.slice(0,60),dir:r.dir,createdAt:new Date().toISOString()})}}}
     if(B.saveBal&&B.closing&&B.closing.total!=null){const bal={...(S.cfg.balances||{})};let asOf=B.closing.end&&B.closing.end<=today()?B.closing.end:today();if(B.lastDate&&B.lastDate>asOf)asOf=B.lastDate;bal[B.acct]={gel:B.closing.total,asOf,at:new Date().toISOString(),parts:B.closing.parts,source:B.fileName};await saveCfg({balances:bal})}
+    try{for(const r of B.items){if(r.dir!=='in'||r.synthetic)continue;const fm=String(r.desc||'').match(/საკომისიო:\s*GEL\s*([\d.]+)/i);await S.db.doc('bankin/'+r.key).set({acct:B.acct,date:r.date,gel:Math.round(r.gel*100)/100,fee:fm?+fm[1]:0,party:String(r.party||'').slice(0,80),desc:String(r.desc||'').slice(0,160),cat:r.cat||r.ruleCat||'',dir:'in',at:new Date().toISOString()})}}catch(e){console.warn(e)}
     toast('Saved '+n+' rows from '+ACC[B.acct].en+(B.saveBal&&B.closing.total!=null?' · balance '+gel(B.closing.total,2):''));S.bank=null;go('expenses');
   }catch(e){toast(errMsg(e)+' — saved '+n+' of '+rows.length);btn.disabled=false;btn.textContent='Save'}
 }
@@ -3818,7 +3843,7 @@ const POSPAY={cash:'Cash',pos:'Card terminal',bog:'BOG transfer',tbc:'TBC transf
 const POS_CARD=new Set(['pos','card_bog','card_tbc']);
 const posInitials=n=>String(n||'').replace(/[^\p{L}\p{N}]/gu,'').slice(0,2).toUpperCase()||'·';
 function thumb(x,s){s=s||36;return x&&x.img?`<img class="thumb" src="${esc(x.img)}" alt="" loading="lazy" style="width:${s}px;height:${s}px" onerror="this.outerHTML='<span class=\\'thumb ph\\' style=\\'width:${s}px;height:${s}px\\'>${esc(posInitials(x.n))}</span>'">`:`<span class="thumb ph" style="width:${s}px;height:${s}px">${esc(posInitials(x&&x.n))}</span>`}
-function posOrders(day){return [...S.pos.values()].filter(o=>o&&o.lines&&(!day||o.day===day)).sort((a,b)=>String(b.at).localeCompare(String(a.at)))}
+function posOrders(day){return [...S.pos.values()].filter(o=>o&&o.lines&&!o.src&&(!day||o.day===day)).sort((a,b)=>String(b.at).localeCompare(String(a.at)))}
 function regDay(d){const L=posOrders(d).filter(o=>o.status!=='void');return {n:L.length,a:L.reduce((s,o)=>s+(+o.total||0),0),L}}
 function storeDir(){return location.origin+location.pathname.replace(/[^/]*$/,'')+'store/'}
 function storeLink(){const c=readCreds();const k=S.cfg.pos&&S.cfg.pos.key;if(!c||!k)return '';const b=btoa(unescape(encodeURIComponent(JSON.stringify({u:c.u,k})))).replace(/\+/g,'-').replace(/\//g,'_');return storeDir()+'#connect='+b}
@@ -4040,6 +4065,418 @@ async function storeAct(a,b){
 /* ---------- sheet vs register: the shop's sales typed in the order sheet against the register ---------- */
 const BRANCH=/ფილიალი/i;
 function overnight(x){if(!x||!x.openedAt)return false;const a=new Date(x.openedAt),b=x.closedAt?new Date(x.closedAt):new Date();return a.toDateString()!==b.toDateString()&&!x.lateClose}
+
+/* ============================== orders · customers · payment check ==============================
+   Every order is a `pos` record, wherever it was entered: rung on the register, typed here in Mars (src:'mars'),
+   or brought in from the order sheet (src:'sheet'). `ch` says what kind of order it is (shop, delivery, Wolt,
+   Glovo, Extra.ge); delivery and Extra orders carry the customer in `dl` {name, phone, addr, fee, st, log}.
+   The customer base is built from all the order spreadsheets and kept in `shift` records of kind 'custdb'
+   (that collection is the one the register can read), then topped up live from the orders. */
+const CHS=[['shop','🏪','Shop'],['delivery','🛵','Delivery'],['wolt','W','Wolt'],['glovo','G','Glovo'],['extra','E','Extra.ge']];
+const CHN=Object.fromEntries(CHS.map(c=>[c[0],c[2]]));
+const CH_PAYS={shop:['pos','cash','bog','tbc','personal','installment','other'],delivery:['cod','bog','tbc','pending','personal','pos','other'],wolt:['wolt'],glovo:['glovo'],extra:['extra']};
+const ADDR_CH=new Set(['delivery','extra']);
+const OST=[['new','New'],['ready','Packed'],['out','With courier'],['done','Delivered']];
+const OSTN=Object.fromEntries(OST);
+const LATER_PAYS=new Set(['cod','pending']);
+function chOf(o){if(!o)return 'shop';if(o.ch)return o.ch;if(o.pay==='wolt')return 'wolt';if(o.pay==='glovo')return 'glovo';if(o.pay==='extra')return 'extra';return o.dl?'delivery':'shop'}
+const srcOf=o=>o.src==='mars'?'Mars':o.src==='sheet'?'Sheet':'Register';
+const chChip=c=>`<span class="chip chx ch-${c}">${(CHS.find(x=>x[0]===c)||['','',''])[1]} ${esc(CHN[c]||c)}</span>`;
+const fmtPh=p=>/^\d{9}$/.test(p||'')?p.slice(0,3)+' '+p.slice(3,5)+' '+p.slice(5,7)+' '+p.slice(7):(p||'');
+const custOf=o=>o.dl||o.cust||null;
+const unpaid=o=>o.status!=='void'&&o.paid===false;
+const openDl=o=>o.status!=='void'&&o.dl&&o.dl.st&&o.dl.st!=='done';
+
+/* ---------- customer base ---------- */
+const CX_ADDR=/ქუჩ|ქ\.|გამზ|ჩიხ|შესახვ|კორპ|ბინა|სადარბ|მიკრო|დასახლ|კვარტ|უბანი|რაიონ|სოფ|ქალაქ|№|N\s?\d|თბილის|ბათუმ|ქუთაის|რუსთავ|ზუგდიდ|გორი|თელავ|ფოთ|ქობულეთ|ვაკე|საბურთალ|დიდუბ|გლდან|ვარკეთილ|ისან|სამგორ|ნაძალადევ|დიღომ/i;
+const CX_SKIP=/შეჯამება|პარამეტრ|ჩანაწერ|მიმდინარე|form responses|სკოლ|მარაგ|^sheet\d*$/i;
+const CX_NOTCUST=/^(ფილიალი|ფილალი|ფილიალში|wolt|ვოლტი?|glovo|გლოვო|ონლაინ|online|სპონსორი|რეზი|მაღაზია|საიტი|extra|ექსტრა|-|\.+)$/i;
+const CX_KA=[['იანვ',1],['თებ',2],['მარტ',3],['აპრ',4],['მაის',5],['ივნ',6],['ივლ',7],['აგვ',8],['სექტ',9],['ოქტ',10],['ნოემ',11],['დეკ',12]];
+const cxMonth=t=>{for(const [k,v] of CX_KA)if(String(t).includes(k))return v;return 0};
+function cxPhone(v){let d=String(v??'').replace(/\D/g,'');if(d.startsWith('995')&&d.length>=12)d=d.slice(3);if(d.length===10&&d[0]==='0')d=d.slice(1);return /^5\d{8}$/.test(d)?d:''}
+const CX_PRE=/(?:\+?995[\s\-.]*)?\(?5(?:[\s\-.)]*\d){8}(?!\d)/g;
+function cxPhonesIn(cells){const out=[];for(const c of cells){for(const m of String(c??'').matchAll(CX_PRE)){const p=cxPhone(m[0]);if(p&&!out.includes(p))out.push(p)}}return out}
+const cxNum=v=>{if(typeof v==='number')return v;const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.').replace(/[^\d.\-]/g,''));return isFinite(n)?n:0};
+const cxTxt=v=>String(v??'').replace(/\s+/g,' ').trim();
+function cxCols(hdr){
+  const h=hdr.map(c=>cxTxt(c).toLowerCase());const f=re=>h.findIndex(x=>re.test(x));const fl=re=>{let j=-1;h.forEach((x,i)=>{if(re.test(x))j=i});return j};
+  let amt=h.findIndex(x=>x==='თანხა');if(amt<0)amt=f(/ასაღები|cod|ღირებულება|თანხა/);
+  return {name:f(/დამკვეთ|მომხმარებ|client|კლიენტ|მიმღებ/),phone:f(/ტელ|phone|ნომერ/),addr:f(/მისამართ|address/),city:f(/^ქალა/),prod:f(/პროდუქტ/),amt,qty:f(/^რაოდ/),
+    date:f(/შეკვეთის თარიღი|^თარიღი|^date/),status:fl(/სტატუს|status/),pay:f(/გადახდ/),store:f(/მაღაზი|^store/)};
+}
+function cxGuess(rows){
+  const n=Math.min(20,Math.max(0,...rows.slice(0,80).map(r=>r.length)));const sc=f=>{const s=Array(n).fill(0);rows.slice(0,200).forEach(r=>{for(let c=0;c<n;c++)if(f(r[c]))s[c]++});return s};
+  const best=(s,ex=[])=>{let b=-1,v=0;s.forEach((x,i)=>{if(!ex.includes(i)&&x>v){v=x;b=i}});return b};
+  const phone=best(sc(v=>!!cxPhone(v)));const addr=best(sc(v=>CX_ADDR.test(String(v??''))&&String(v).length>6),[phone]);
+  const name=best(sc(v=>/ფილიალი|wolt|ვოლტ/i.test(String(v??''))),[phone,addr]);
+  const amt=best(sc(v=>{const x=cxNum(v);return typeof v!=='string'||/^\s*\d+([.,]\d+)?\s*$/.test(v)?x>=5&&x<50000&&!cxPhone(v):false}),[phone,addr,name]);
+  return {name,phone,addr,city:-1,prod:name>=0?name+1:-1,amt,qty:-1,date:-1,status:best(sc(v=>/დასრულ|გაუქმ|აღებ|გამზად/.test(String(v??'')))),pay:-1,store:-1};
+}
+function cxTab(sh){const v=sh.values||[];let hi=-1;for(let i=0;i<Math.min(6,v.length);i++){const C=cxCols(v[i]);if([C.name,C.phone,C.addr,C.amt].filter(x=>x>=0).length>=2){hi=i;break}}return {C:hi>=0?cxCols(v[hi]):cxGuess(v),body:v.slice(hi+1)}}
+// one order row of any sheet → {p, alt, n, a, d, amt, prod, st, cancel}; null when it is empty
+function cxRow(r,C,ctx){
+  if(!r||!r.some(c=>cxTxt(c)))return null;
+  if(C.store>=0){const st=cxTxt(r[C.store]);if(st&&!/ასტრო|astro/i.test(st))return null}
+  let ph=C.phone>=0?cxPhonesIn([r[C.phone]]):[];if(!ph.length)ph=cxPhonesIn(r.filter((c,i)=>i!==C.amt));
+  let n=C.name>=0?cxTxt(r[C.name]):'';const nRaw=n;if(CX_NOTCUST.test(n))n='';
+  let a=C.addr>=0?cxTxt(r[C.addr]):'';const city=C.city>=0?cxTxt(r[C.city]):'';if(city&&a&&!a.includes(city))a=city+', '+a;else if(!a)a=city;
+  if(/^(\.|-|,|\.\.)$/.test(a))a='';
+  const st=C.status>=0?cxTxt(r[C.status]):'';const cancel=/გაუქმ|cancel|უარი|დაბრუნ/i.test(st);
+  let amt=cxNum(C.amt>=0?r[C.amt]:0);if(amt>20000||cxPhone(amt))amt=0;
+  let d='';const pd=C.date>=0?parseDateCell(r[C.date]):null;
+  let y=(pd&&pd.y)||ctx.ty||ctx.y,m=(pd&&pd.m)||ctx.tm||ctx.m,dd=(pd&&pd.d)||ctx.td||0;
+  if(ctx.kind==='courier'){y=ctx.y;m=ctx.m;dd=ctx.td||dd}
+  if(ctx.kind==='main'&&ctx.tm&&!ctx.ty)y=ctx.year||2026;
+  if(y&&m)d=y+'-'+String(m).padStart(2,'0')+(dd?'-'+String(dd).padStart(2,'0'):'');
+  return {p:ph[0]||'',alt:ph.slice(1),n,nRaw,a:a.slice(0,160),d,amt,prod:C.prod>=0?cxTxt(r[C.prod]).slice(0,120):'',qty:C.qty>=0?cxNum(r[C.qty]):0,pay:C.pay>=0?cxTxt(r[C.pay]):'',st,cancel};
+}
+function cxRows(wb,src){
+  const out=[];
+  for(const sh of (wb.sheets||[])){
+    const name=cxTxt(sh.name);if(CX_SKIP.test(name)||(sh.values||[]).length<2)continue;
+    const {C,body}=cxTab(sh);const ctx={...src,ty:+(name.match(/20\d\d/)||[])[0]||0,tm:cxMonth(name),td:/^\d{1,2}$/.test(name)?+name:0};
+    for(const r of body){const x=cxRow(r,C,ctx);if(x&&x.p)out.push({...x,k:src.k})}
+  }
+  return out;
+}
+function cxBuild(rows){
+  const M=new Map();rows.sort((a,b)=>String(a.d).localeCompare(String(b.d)));
+  for(const r of rows){
+    const c=M.get(r.p)||{p:r.p,n:'',a:[],alt:[],ds:{},k:[]};
+    if(r.n)c.n=r.n;if(r.a){c.a=c.a.filter(x=>x!==r.a);c.a.unshift(r.a);c.a=c.a.slice(0,3)}
+    r.alt.forEach(x=>{if(x!==c.p&&!c.alt.includes(x))c.alt.push(x)});
+    const kk=String(r.k).replace(/_.*/,'');if(!c.k.includes(kk))c.k.push(kk);
+    if(!r.cancel){const day=r.d||'?';c.ds[day]=Math.max(c.ds[day]||0,r.amt||0);if(r.prod)c.lp=r.prod}
+    M.set(r.p,c);
+  }
+  return [...M.values()].map(c=>{const days=Object.keys(c.ds).sort();return {p:c.p,n:c.n,a:c.a,alt:c.alt.slice(0,2),k:c.k,lp:c.lp||'',ds:days.map(d=>[d,Math.round(c.ds[d])])}});
+}
+// the sheets the customer base is read from (owner's order sheets and the courier's monthly sheets)
+const CUST_SOURCES=[['main','1MXZq3Li7W6hfoDGVo9KMYPodS7haezf6TG1CwFmCtdk'],['old2122','1GRz5GrB6dGQSmJgLAQ3RWPhVhR3QnMCBPTKL8xaeFa4',2022],['xlsx2022','1SbTT-PwJyChvTeBt7uAQP52NGT6BV3Vw',2022],['gl_2025_12','1iEFtmjUFWQGY8pIkkmeLFcqeIbGD8-Om7asr6YLyohY'],
+ ['td_2023_12','1U95uKFSHrfGVPy0AMcBG5Y4mTgyPHs9mYesXYlbpsIo'],['td_2024_01','17gyf7i9RTv-I6hUOsCNSwxEKKNKkj27Wt-_FNZnt1oQ'],['td_2024_02','1YifLLPe4q5ULVCc6D-TYX19B5_YXcdxM_gFKdwaLEdc'],['td_2024_03','11nFiS44Lte2KHZgn2_mM3_lWMkTGiu7Ssb2XWzQYGus'],['td_2024_04','1Z4H_5D1KtS_CBIoWQ6teuQtOjGRVscontB161Hdyiho'],['td_2024_05','1uB0tpcGO5AoDa7SWHN4AnA4CtDJpURXGW-MOIDx8CLM'],['td_2024_06','1U7qTSAWyahKSGXtRQD1OEkXYnj9HOBnfvDJRhLoirEo'],['td_2024_07','1OBt5YL62t2ackCJ93E4RX747e8l5q39kbNJwpImL3kc'],['td_2024_08','1ZCxLA97kNyEfPEwtaUIANWK7zIOoEiiBs7Mt7naWplg'],['td_2024_08','1keGxl0Zdl6Z_j0yYbntHC50qMC6Via9n_NMe4ljMYp8'],['td_2024_12','1fkqPfj0JoIGVgHA5kOcaKAovcl4SQZ07nsOKZKMDsJ0'],
+ ['td_2025_01','1vBKlR9xG23CunROwqH9x5ZcqSRJS9XyGUeNYfHKEeUU'],['td_2025_02','1Y76h7IXBbaafxhkwUC2pGf2ELbgElG0xxghpFhcFo9U'],['td_2025_03','1Pnd9HwwdFOAg3HtDKntOYl3t0TWtXi0YLZtSxsdhjx4'],['td_2025_04','1Yvh1J18liOTxxFyVFsqG_kPzu-nMpx0yjMAhcdeUh_c'],['td_2025_05','10qumQJBMsnwsXW9uiBIpL-qnhnnjSjqx_4EeMiy1qhs'],['td_2025_06','1iDTp_jPBdBfWsVE2qhpPTStmMMQUiaVbR1HB9GsIeqU'],['td_2025_07','1c7c3esp1av_WxwnFI1gtlG3YdyZjnwdP8cNEXQWeHxQ'],['td_2025_08','1zNDz4HJkgxjO7OQ_Y4s_3ev9kGXCmgEzUejZowpfL_k'],['td_2025_09','1u_tt9aTKIFqV7cm8k01mNhZpXxsOZ8q5TR2TVnHAy1c'],['td_2025_10','1jPP0Mgmm6v91Q_Z_ZYNJGSzB4qSCgVwHoofmM5CVsig'],['td_2025_11','1ATAYwMGVl5ukzlOzxwO6X0lkK-jB4bYmJqU5k4ZnG7E'],['td_2025_12','1p3x7b16MxomefA9FHzGmhXFV5BiKFxTB-g1cWMgezJ0'],
+ ['td_2026_01','13l6kkvT0xzfj7fyBXVzvckTE2ExCIlmeGgqMjDMx-0w'],['td_2026_02','1giy_YcMpzjTM1jsg_hPOBe1-ZJ0Rh2wV1MHOgfjOANs'],['td_2026_03','19XOnZdUABJ3OROS2iKdTfdwU8h_Rqbv9KPh59FjAvMw'],['td_2026_04','1ABxYfm4xyMOKbFOHrm89mttWpbNmq0SQ36uydbir0IU'],['td_2026_05','1Pj8pBFpp0J1L85tRmkrpPl_9FCMz5pq5uYvFndre8IE'],['td_2026_06','1NM0aJUlsmxfGDOoTJbRinueNvHRP9J-ipeyxrYhrdSk'],['td_2026_07','18vO34sMI41u_mC-y52caUTvLSyQgfQe8Kys7tI-ekEk'],['td_2026_08','1oloHL9ScgH3q29kvknShr01H9UUSxDqWWGv-6SlRXvw']];
+function custSources(){return [...CUST_SOURCES,...((S.cfg&&S.cfg.custSources)||[])]}
+async function rebuildCustomers(btn){
+  if(!S.backend){toast('Open Mars from its own address (not inside Claude) to read the sheets');return}
+  const src=custSources();let i=0,done=0;const rows=[];const failed=[];const set=t=>{if(btn)btn.textContent=t};
+  set('Reading 0 of '+src.length+' sheets…');
+  const work=async()=>{while(i<src.length){const [k,id,yy]=src[i++];const mm=k.match(/^(?:td|gl)_(\d{4})_(\d{2})/);const kind=k.startsWith('td_')||k.startsWith('gl_')?'courier':k==='main'?'main':'old';
+    try{const wb=await S.backend.orders(id);rows.push(...cxRows(wb,{k,kind,y:mm?+mm[1]:yy||2026,m:mm?+mm[2]:0,year:2026}))}catch(e){failed.push(k)}done++;set('Reading '+done+' of '+src.length+' sheets…')}};
+  await Promise.all([work(),work(),work()]);
+  const list=cxBuild(rows);set('Saving '+list.length+' customers…');
+  const at=new Date().toISOString();const N=Math.ceil(list.length/250);
+  for(let j=0;j<N;j++)await S.db.doc('shift/custdb-'+j).set({kind:'custdb',i:j,n:N,at,list:list.slice(j*250,j*250+250)});
+  for(const d of custDocs())if((d.i??0)>=N)await S.db.doc('shift/'+d.id).delete();
+  toast(list.length+' customers from '+(src.length-failed.length)+' sheets'+(failed.length?' · could not read: '+failed.join(', '):''),8000);
+  if(btn){btn.disabled=false;set('↻ Rebuild from the sheets')}render();
+}
+function custDocs(){return [...S.shift.values()].filter(x=>x&&x.kind==='custdb')}
+// phone → {p,n,a[],alt[],o,s,f,l,k[],lp,orders[]}, from the sheets plus every order that names a customer
+function customers(){
+  const hit=S.mc.get('#cust');if(hit)return hit;
+  const M=new Map(),alias=new Map();
+  custDocs().sort((a,b)=>(a.i||0)-(b.i||0)).forEach(d=>(d.list||[]).forEach(c=>{const ds=new Map(c.ds||[]);M.set(c.p,{p:c.p,n:c.n||'',a:[...(c.a||[])],alt:[...(c.alt||[])],k:[...(c.k||[])],lp:c.lp||'',ds,orders:[]});(c.alt||[]).forEach(x=>alias.set(x,c.p))}));
+  [...S.pos.values()].filter(o=>o&&o.status!=='void'&&custOf(o)&&custOf(o).phone).sort((a,b)=>String(a.at).localeCompare(String(b.at))).forEach(o=>{
+    const cu=custOf(o);const p=alias.get(cu.phone)||cu.phone;const c=M.get(p)||{p,n:'',a:[],alt:[],k:[],lp:'',ds:new Map(),orders:[]};
+    if(cu.name)c.n=cu.name;if(cu.addr&&!/^გაიტანს$/i.test(cu.addr)){c.a=c.a.filter(x=>x!==cu.addr);c.a.unshift(cu.addr);c.a=c.a.slice(0,3)}
+    if(!c.k.includes('orders'))c.k.push('orders');c.orders.push(o);
+    const day=o.day||'?';if(!c.ds.has(day))c.ds.set(day,+o.total||0);c.lp=o.lines.map(l=>l.n).join(', ').slice(0,120);M.set(p,c)});
+  M.forEach(c=>{const days=[...c.ds.keys()].filter(d=>d!=='?').sort();c.o=c.ds.size;c.s=[...c.ds.values()].reduce((a,x)=>a+x,0);c.f=days[0]||'';c.l=days[days.length-1]||''});
+  const out={M,alias,find:ph=>{const p=cxPhone(ph);return p?M.get(alias.get(p)||p)||null:null}};S.mc.set('#cust',out);return out;
+}
+
+/* ---------- the page ---------- */
+function vOrders(){
+  const T=S.ord.tab;const m=S.month;
+  const C=customers();const L=monthOrders(m);
+  const tabs=[['list','Orders'],['new','+ New order'],['customers','Customers · '+fmt(C.M.size)],['pay','Payment check'],['import','Import from sheet']];
+  const head=`<div class="pagehead"><div><div class="eyebrow">${esc(mLabel(m))} · შეკვეთები</div><h1>Orders</h1><p>Every order in one place — shop, delivery, Wolt, Glovo and Extra.ge — with the customer's phone and address. Orders typed here show up on the register for the consultants.</p></div><div class="actions"><button class="btn primary" data-act="or_tab" data-v="new">+ New order</button></div></div>
+  <div class="tabs" role="tablist">${tabs.map(([k,t])=>`<button role="tab" aria-selected="${T===k}" data-act="or_tab" data-v="${k}">${t}</button>`).join('')}</div>`;
+  const body=T==='new'?ordNew():T==='customers'?ordCustomers():T==='pay'?ordPayCheck():T==='import'?ordImport():ordList(L);
+  return loadingOr(head+body);
+}
+function monthOrders(m){return [...S.pos.values()].filter(o=>o&&o.lines&&String(o.day||'').startsWith(m)).sort((a,b)=>String(b.at).localeCompare(String(a.at)))}
+function ordList(L){
+  const F=S.ord.f;const q=(F.q||'').toLowerCase();
+  const live=L.filter(o=>o.status!=='void');
+  const by={};live.forEach(o=>{const c=chOf(o);by[c]=(by[c]||0)+(+o.total||0)});
+  const un=live.filter(unpaid),op=live.filter(openDl);
+  const rows=L.filter(o=>(F.ch==='all'||chOf(o)===F.ch)&&(F.st==='all'||(F.st==='unpaid'?unpaid(o):F.st==='open'?openDl(o):F.st==='void'?o.status==='void':true))&&(F.st==='void'||o.status!=='void'||F.showVoid)&&(!q||[custOf(o)?.name,custOf(o)?.phone,custOf(o)?.addr,o.lines.map(l=>l.n).join(' '),o.note,PAYS[o.pay]].join(' ').toLowerCase().includes(q)));
+  const kp=`<div class="kpis"><div class="kpi"><div class="lbl">Orders</div><div class="val num">${fmt(live.length)}</div><div class="delta">${gel(live.reduce((a,o)=>a+(+o.total||0),0))}</div></div>
+   <div class="kpi"><div class="lbl">By type</div><div class="delta" style="line-height:1.7">${CHS.filter(c=>by[c[0]]).map(c=>`${c[1]} ${c[2]} <b class="num">${gel(by[c[0]])}</b>`).join('<br>')||'—'}</div></div>
+   <div class="kpi"><div class="lbl">Still to be paid</div><div class="val num ${un.length?'neg':''}">${gel(un.reduce((a,o)=>a+(+o.total||0),0))}</div><div class="delta">${un.length} order${un.length===1?'':'s'}</div></div>
+   <div class="kpi"><div class="lbl">Deliveries open</div><div class="val num">${op.length}</div><div class="delta">${op.filter(o=>(Date.now()-Date.parse(o.at))/864e5>2).length} late</div></div></div>`;
+  const fl=`<div class="toolbar"><input class="input grow" id="orQ" placeholder="Search name, phone, address, product…" value="${esc(F.q||'')}"><div class="pills">${[['all','All'],...CHS.map(c=>[c[0],c[1]+' '+c[2]])].map(([k,t])=>`<button data-act="or_fch" data-v="${k}" aria-pressed="${F.ch===k}">${esc(t)}</button>`).join('')}</div><div class="pills">${[['all','Any'],['open','Open'],['unpaid','Unpaid'],['void','Cancelled']].map(([k,t])=>`<button data-act="or_fst" data-v="${k}" aria-pressed="${F.st===k}">${t}</button>`).join('')}</div></div>`;
+  const tr=o=>{const c=chOf(o),cu=custOf(o);return `<tr class="click ${o.status==='void'?'void':''}" data-act="or_open" data-id="${esc(o.id)}"><td class="num">${esc(dShort(o.day))}<div class="small muted">${o.src==='sheet'?'':tOf(o.at)}</div></td><td>${chChip(c)}</td>
+   <td>${cu?`<b>${esc(cu.name||'—')}</b><div class="small muted num">${esc(fmtPh(cu.phone))}</div>`:'<span class="muted">—</span>'}</td><td class="small hm">${cu&&cu.addr?esc(cu.addr):''}</td>
+   <td class="small">${esc(o.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '))}</td><td class="small">${esc(PAYS[o.pay]||o.pay)}${unpaid(o)?' <span class="chip bad">unpaid</span>':''}</td>
+   <td class="r num"><b>${gel(o.total)}</b>${o.ship?`<div class="small muted">incl. ${gel(o.ship)} delivery</div>`:''}</td><td>${o.status==='void'?'<span class="chip bad">cancelled</span>':o.dl&&o.dl.st?`<span class="chip ${o.dl.st==='done'?'good':'warn'}">${OSTN[o.dl.st]}</span>`:''}</td><td class="small muted hm">${srcOf(o)}${o.no?' №'+o.no:''}</td></tr>`};
+  return kp+fl+(rows.length?`<div class="panel"><div class="tablewrap"><table class="ordt"><thead><tr><th>Day</th><th>Type</th><th>Customer</th><th class="hm">Address</th><th>Products</th><th>Payment</th><th class="r">Amount</th><th>Status</th><th class="hm">From</th></tr></thead><tbody>${rows.slice(0,S.ord.all?2000:200).map(tr).join('')}</tbody></table></div>${rows.length>200&&!S.ord.all?`<div class="row mt"><button class="btn" data-act="or_all">Show all ${rows.length}</button></div>`:''}</div>`
+   :`<div class="panel empty"><b>No orders here</b>${L.length?'Nothing matches the filters.':'Orders rung on the register or typed here appear in this list.'}</div>`);
+}
+/* ---------- new order ---------- */
+function ofNew(keep){const o={ch:'delivery',day:today(),phone:'',name:'',addr:'',lines:[],fee:'10',pay:'cod',st:'new',note:'',q:'',paste:''};return keep?{...o,...keep}:o}
+function ofTotals(){const F=S.of;const sub=F.lines.reduce((a,l)=>a+(+l.q||0)*(+l.p||0),0);const fee=ADDR_CH.has(F.ch)?Math.max(0,parseFloat(F.fee)||0):0;return {sub:r2(sub),fee,total:r2(sub+fee)}}
+function ordNew(){if(!S.of)S.of=ofNew();return `<div class="grid g3b"><div class="panel" id="ofBox">${ofForm()}</div><div class="stack">${ofSide()}</div></div>`}
+function ofForm(){
+  const F=S.of;const T=ofTotals();const addr=ADDR_CH.has(F.ch);const pays=CH_PAYS[F.ch];if(!pays.includes(F.pay))F.pay=pays[0];
+  return `<h2>New order</h2><p class="sub">${addr?'🛵 Goes out to a customer\'s address — the consultants see it on the register under 🛵 შეკვეთები.':F.ch==='shop'?'🏪 Sold in the shop — no address needed.':'Platform order — the platform\'s courier collects it.'}</p>
+  <div class="ofgrid">
+   <div class="field span2"><span>Type of order</span><div class="chsel">${CHS.map(([k,ic,t])=>`<button data-act="or_ch" data-v="${k}" aria-pressed="${F.ch===k}" class="ch-${k}"><b>${ic}</b>${t}</button>`).join('')}</div></div>
+   <label class="field"><span>Date</span><input class="input" type="date" id="ofDay" value="${esc(F.day)}" max="${today()}"></label>
+   ${addr?`<label class="field span3"><span>Paste the customer's message <span class="muted">— phone, name and address fill in by themselves</span></span><textarea class="input" id="ofPaste" rows="2" placeholder="e.g. ნინო ბერიძე, ვაჟა-ფშაველას 71, ბინა 12, 599 12 34 56">${esc(F.paste)}</textarea></label>`:''}
+   <label class="field"><span>Phone${addr?' *':''}</span><input class="input num" id="ofPhone" inputmode="tel" value="${esc(F.phone)}" placeholder="5XX XX XX XX"></label>
+   <label class="field"><span>Name</span><input class="input" id="ofName" value="${esc(F.name)}"></label>
+   ${addr?`<label class="field"><span>Address *</span><input class="input" id="ofAddr" value="${esc(F.addr)}" placeholder="city, street, building, flat"></label>`:'<div></div>'}
+   <div class="span3" id="ofKnown">${ofKnown()}</div>
+   <div class="field span3"><span>Products</span><div class="ofsearch"><input class="input" id="ofQ" placeholder="Search the catalog, or type a name and press Enter" autocomplete="off" value="${esc(F.q)}"><div class="ofsug" id="ofSug"></div></div></div>
+   <div class="span3">${F.lines.length?`<table class="oflines"><thead><tr><th>Product</th><th class="r">Qty</th><th class="r">Price ₾</th><th class="r">Sum</th><th></th></tr></thead><tbody>${F.lines.map((l,i)=>`<tr><td>${esc(l.n)}${l.b?'':' <span class="chip">not in catalog</span>'}</td><td class="r"><input class="input num" data-ofl="${i}" data-k="q" value="${esc(String(l.q))}" inputmode="numeric" style="width:64px;text-align:right"></td><td class="r"><input class="input num" data-ofl="${i}" data-k="p" value="${esc(String(l.p))}" inputmode="decimal" style="width:90px;text-align:right"></td><td class="r num">${gel((+l.q||0)*(+l.p||0))}</td><td class="r"><button class="btn sm ghost" data-act="or_rm" data-i="${i}" aria-label="Remove">✕</button></td></tr>`).join('')}</tbody></table>`:'<div class="muted small">No products yet.</div>'}</div>
+   ${addr?`<label class="field"><span>Delivery fee ₾</span><input class="input num" id="ofFee" inputmode="decimal" value="${esc(F.fee)}"></label>`:''}
+   <label class="field"><span>Payment</span><select class="input" id="ofPay">${pays.map(p=>`<option value="${p}" ${F.pay===p?'selected':''}>${esc(PAYS[p]||p)}${LATER_PAYS.has(p)?' · paid later':''}</option>`).join('')}</select></label>
+   ${addr?`<label class="field"><span>Status</span><select class="input" id="ofSt">${OST.map(([k,t])=>`<option value="${k}" ${F.st===k?'selected':''}>${t}</option>`).join('')}</select></label>`:''}
+   <label class="field span3"><span>Note</span><input class="input" id="ofNote" value="${esc(F.note)}" placeholder="optional"></label>
+  </div>
+  <div class="row mt"><div><div class="small muted">${T.fee?`Products ${gel(T.sub)} + delivery ${gel(T.fee)}`:'Total'}</div><div class="val num" style="font-size:26px;font-weight:800" id="ofTot">${gel(T.total)}</div></div><span class="spacer"></span><button class="btn ghost" data-act="or_clear">Clear</button><button class="btn primary" data-act="or_save">Save order</button></div>
+  <div class="err" id="ofErr" style="color:var(--bad);font-weight:600;margin-top:6px"></div>`;
+}
+function ofKnown(){const F=S.of;const c=F&&customers().find(F.phone);if(!c)return '';
+  return `<div class="ofknown">✓ <b>${esc(c.n||'Known customer')}</b> · ${c.o} order${c.o===1?'':'s'} · ${gel(c.s)} · last ${esc(c.l?dShort(c.l.slice(0,10)):'—')}${c.a.length?` · ${c.a.map((a,i)=>`<button class="btn sm" data-act="or_useaddr" data-i="${i}">${esc(a.slice(0,48))}</button>`).join(' ')}`:''}</div>`}
+function ofSide(){
+  const L=[...S.pos.values()].filter(o=>o&&o.src==='mars').sort((a,b)=>String(b.at).localeCompare(String(a.at))).slice(0,8);
+  return `<div class="panel"><h2>Typed here recently</h2>${L.length?`<div class="flow">${L.map(o=>`<div class="ln click" data-act="or_open" data-id="${esc(o.id)}" style="cursor:pointer"><span class="k">${chChip(chOf(o))} <b>${esc(custOf(o)?.name||o.lines[0]?.n||'')}</b><div class="small muted">${esc(dShort(o.day))} · ${esc(o.lines.map(l=>l.n).join(', ').slice(0,60))}</div></span><b class="num">${gel(o.total)}</b></div>`).join('')}</div>`:'<div class="muted small">Nothing yet.</div>'}</div>
+  <div class="panel"><h2>Tips</h2><div class="small muted" style="line-height:1.6">Type a phone that bought before and the name and last addresses appear. Courier cash and transfers still to come are saved as unpaid and show under <b>Still to be paid</b> until you mark them paid.</div></div>`;
+}
+const wireActs=root=>{if(root)root.querySelectorAll('[data-act]').forEach(x=>x.onclick=e=>act(x.dataset.act,x,e))};
+function ofPaint(focus){const b=$('#ofBox');if(!b)return;b.innerHTML=ofForm();wireActs(b);bindOrders();if(focus){const el=$('#'+focus);if(el){el.focus();if(el.setSelectionRange&&el.value)el.setSelectionRange(el.value.length,el.value.length)}}}
+function ofSug(){const F=S.of;const box=$('#ofSug');if(!box)return;const q=F.q.trim().toLowerCase();if(!q){box.innerHTML='';return}
+  const L=[...S.catalog.values()].filter(x=>!x.hidden&&String(x.n||'').toLowerCase().includes(q)||String(x.b||'')===q).slice(0,8);
+  box.innerHTML=L.map(x=>`<button data-act="or_add" data-b="${esc(x.b)}"><span>${esc(x.n)}</span><b class="num">${gel(x.sale>0&&x.sale<x.price?x.sale:x.price)}</b></button>`).join('')+`<button data-act="or_addfree"><span>+ Add “${esc(F.q.trim())}” as typed</span></button>`;
+  box.querySelectorAll('[data-act]').forEach(b=>b.onmousedown=e=>{e.preventDefault();act(b.dataset.act,b)});
+}
+function bindOrders(){
+  if(S.view!=='orders')return;
+  const q=$('#orQ');if(q)q.oninput=()=>{S.ord.f.q=q.value;clearTimeout(q.t);q.t=setTimeout(()=>{render();const n=$('#orQ');if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}},250)};
+  const cq=$('#cuQ');if(cq)cq.oninput=()=>{S.ord.cq=cq.value;clearTimeout(cq.t);cq.t=setTimeout(()=>{render();const n=$('#cuQ');if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}},250)};
+  const F=S.of;if(!F||!$('#ofBox'))return;
+  const bindIn=(id,k,after)=>{const el=$('#'+id);if(el)el.oninput=el.onchange=()=>{F[k]=el.value;if(after)after()}};
+  const tot=()=>{const t=$('#ofTot');if(t)t.textContent=gel(ofTotals().total)};
+  bindIn('ofDay','day');bindIn('ofName','name');bindIn('ofAddr','addr');bindIn('ofNote','note');bindIn('ofPay','pay');bindIn('ofSt','st');bindIn('ofFee','fee',tot);
+  bindIn('ofPhone','phone',()=>{const c=customers().find(F.phone);if(c){if(!F.name){F.name=c.n||'';const n=$('#ofName');if(n)n.value=F.name}if(!F.addr&&c.a[0]){F.addr=c.a[0];const a=$('#ofAddr');if(a)a.value=F.addr}}const k=$('#ofKnown');if(k){k.innerHTML=ofKnown();wireActs(k)}});
+  const pa=$('#ofPaste');if(pa)pa.oninput=()=>{F.paste=pa.value;const r=parseOrderMsg(pa.value);if(r.phone){F.phone=fmtPh(r.phone);$('#ofPhone').value=F.phone}if(r.name){F.name=r.name;$('#ofName').value=F.name}if(r.addr){F.addr=r.addr;$('#ofAddr').value=F.addr}$('#ofPhone').dispatchEvent(new Event('input'))};
+  const oq=$('#ofQ');if(oq){oq.oninput=()=>{F.q=oq.value;ofSug()};oq.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const b=$('#ofSug [data-act="or_add"]');act(b?'or_add':'or_addfree',b||oq)}};oq.onblur=()=>setTimeout(()=>{const s=$('#ofSug');if(s)s.innerHTML=''},150);if(F.q)ofSug()}
+  document.querySelectorAll('[data-ofl]').forEach(el=>el.oninput=()=>{const l=F.lines[+el.dataset.ofl];if(!l)return;l[el.dataset.k]=el.value.replace(',','.');const tr=el.closest('tr');if(tr)tr.children[3].textContent=gel((+l.q||0)*(+l.p||0));tot()});
+}
+// same reading of a pasted customer message as on the register
+const OM_ADDR=/ქუჩ|ქ\.|გამზ|ჩიხ|შესახვ|კორპ|ბინა|სადარბ|მიკრო|დასახლ|კვარტ|უბანი|რაიონ|სოფ|ქალაქ|მაღაზ|№|#\s*\d|N\s?\d|street|str\.|ave|თბილის|ბათუმ|ქუთაის|რუსთავ|ზუგდიდ|გორი|თელავ|ფოთ|ქობულეთ|ხაშურ|სამტრედ|ზესტაფონ|მარნეულ|ახალციხ|ოზურგეთ|ბორჯომ|მცხეთ|საგარეჯ|სიღნაღ|ქარელ|წყალტუბ|ჭიათურ|ტყიბულ|ლაგოდეხ|გურჯაან|კასპ|ახმეტ|დუშეთ|წნორ|მარტვილ|სენაკ|ხობ|ლანჩხუთ|ვანი|ბაღდათ|თერჯოლ|საჩხერ|ხარაგაულ|ბოლნის|თეთრიწყ|წალკ|ახალქალაქ|აბაშ|წალენჯიხ|ჩხოროწყ|მესტია|ვაკე|საბურთალ|დიდუბ|გლდან|ვარკეთილ|ისან|სამგორ|ნაძალადევ|დიღომ|ავლაბარ|ვეძის|მთაწმინდ|ორთაჭალ|ლილო|წყნეთ|ბახტრიონ/i;
+function parseOrderMsg(t){
+  const out={};t=String(t||'').replace(/\r/g,'');
+  const pm=t.match(/(?:\+?995[\s\-.]*)?\(?5(?:[\s\-.)]*\d){8}(?!\d)/);if(pm){const p=cxPhone(pm[0]);if(p){out.phone=p;t=t.replace(pm[0],'\n')}}
+  const lab=re=>{const m=t.match(re);return m?m[1].trim():''};const ln=lab(/(?:სახელი|გვარი|name)\s*[:\-–]\s*([^\n]+)/i),la=lab(/(?:მისამართი|address|adress)\s*[:\-–]\s*([^\n]+)/i);
+  let lines=t.split(/\n|;/).map(x=>x.replace(/^(?:სახელი(?:\s*გვარი)?|გვარი|name|მისამართი|address|adress|ტელ(?:ეფონი)?|ნომერი|phone|tel)\s*[:\-–]\s*/i,'').replace(/^[\s,.\-–:]+|[\s,]+$/g,'')).filter(x=>x&&x.length>1);
+  if(!ln)lines=lines.flatMap(x=>{const parts=x.split(',');const h=parts[0].trim();const w=h.split(/\s+/).length;return parts.length>1&&!/\d/.test(h)&&!OM_ADDR.test(h)&&/^[ა-ჰa-zA-Z.\s-]+$/.test(h)&&w>=2&&w<=3?[h,parts.slice(1).join(',').trim()]:[x]});
+  if(la)out.addr=la;if(ln)out.name=ln;
+  if(!out.addr){const al=lines.filter(x=>OM_ADDR.test(x)||(/\d/.test(x)&&/[ა-ჰa-z]{3}/i.test(x)));if(al.length)out.addr=al.join(', ')}
+  if(!out.name){const nm=lines.find(x=>x!==out.addr&&!(out.addr||'').includes(x)&&!/\d/.test(x)&&!OM_ADDR.test(x)&&x.split(/\s+/).length<=4&&/^[ა-ჰa-zA-Z.\s-]+$/.test(x));if(nm)out.name=nm}
+  return out;
+}
+function nextPosNo(){let n=0;S.pos.forEach(o=>{if(o&&o.no>n)n=o.no});return n+1}
+async function ofSave(btn){
+  const F=S.of;const T=ofTotals();const err=m=>{const e=$('#ofErr');if(e)e.textContent=m;toast(m)};
+  const lines=F.lines.filter(l=>l.n&&(+l.q||0)>0);const addr=ADDR_CH.has(F.ch);const ph=cxPhone(F.phone);
+  if(!lines.length)return err('Add at least one product');
+  if(lines.some(l=>!(+l.p>0)))return err('Every product needs a price');
+  if(F.ch==='delivery'&&!ph)return err('Type the customer\'s phone (5XX XX XX XX)');
+  if(F.ch==='delivery'&&!F.addr.trim())return err('Type the delivery address (or “გაიტანს” if they pick it up)');
+  if(F.phone.trim()&&!ph)return err('That phone number doesn\'t look right');
+  if(!F.day||F.day>today())return err('Pick the order date');
+  btn.disabled=true;
+  const now=new Date();const at=F.day===today()?now.toISOString():new Date(F.day+'T12:00:00').toISOString();
+  const o={id:uid('o'),src:'mars',ch:F.ch,at,day:F.day,user:{id:'mars',name:'Mars'},shift:null,device:'mars',
+    lines:lines.map(l=>{const x=l.b&&S.catalog.get(l.b);return {b:l.b||null,n:l.n,q:Math.max(1,Math.round(+l.q)),p:r2(+l.p),d:0,img:x&&x.img||null}}),
+    sub:T.sub,disc:0,total:T.total,pay:F.pay,cash:T.total,change:0,receipt:false,note:F.note.trim(),status:'ok',no:nextPosNo(),paid:!LATER_PAYS.has(F.pay)};
+  if(addr){o.ship=T.fee;o.dl={name:F.name.trim(),phone:ph,addr:F.addr.trim(),fee:T.fee,st:F.st,log:[{st:F.st,at:now.toISOString(),by:'Mars'}]}}
+  else if(ph||F.name.trim())o.cust={name:F.name.trim(),phone:ph};
+  try{await S.db.doc('pos/'+o.id).set(o);S.of=ofNew({ch:F.ch,day:F.day});toast('Saved · '+CHN[o.ch]+' · '+gel(o.total)+(o.paid?'':' · unpaid'));S.mc=new Map();ofPaint('ofPhone');const sd=document.querySelector('.stack');if(sd){sd.innerHTML=ofSide();wireActs(sd)}}
+  catch(e){toast(errMsg(e));btn.disabled=false}
+}
+/* ---------- one order ---------- */
+function orderModal(id){
+  const o=S.pos.get(id);if(!o)return;const c=chOf(o);const cu=custOf(o)||{};const addr=ADDR_CH.has(c);const own=o.src==='mars'||o.src==='sheet';
+  modal(`<h3>${chChip(c)} ${esc(cu.name||'Order')} ${o.no?'<span class="muted">№'+o.no+'</span>':''}</h3>
+   <p class="muted small">${esc(dShort(o.day))}${o.src==='sheet'?'':' · '+tOf(o.at)} · ${esc(srcOf(o))}${o.user&&o.src!=='mars'&&o.src!=='sheet'?' · '+esc(o.user.name):''}${o.status==='void'?' · <b style="color:var(--bad)">cancelled</b> '+esc(o.voidWhy||''):''}</p>
+   <div class="flow">${o.lines.map(l=>`<div class="ln"><span class="k">${esc(l.n)} <span class="muted">× ${l.q}</span></span><span class="num">${gel(l.q*l.p-(+l.d||0))}</span></div>`).join('')}${o.ship?`<div class="ln"><span class="k">Delivery</span><span class="num">${gel(o.ship)}</span></div>`:''}<div class="ln"><span class="k"><b>Total</b></span><b class="num">${gel(o.total)}</b></div></div>
+   <div class="ofgrid mt"><label class="field"><span>Type</span><select class="input" id="omCh">${CHS.map(([k,ic,t])=>`<option value="${k}" ${c===k?'selected':''}>${ic} ${t}</option>`).join('')}</select></label>
+    <label class="field"><span>Payment</span><select class="input" id="omPay">${Object.entries(PAYS).filter(([k])=>k!=='unknown').map(([k,t])=>`<option value="${k}" ${o.pay===k?'selected':''}>${esc(t)}</option>`).join('')}</select></label>
+    <label class="field"><span>Paid</span><select class="input" id="omPaid"><option value="1" ${o.paid!==false?'selected':''}>Paid</option><option value="0" ${o.paid===false?'selected':''}>Not paid yet</option></select></label>
+    <label class="field"><span>Name</span><input class="input" id="omName" value="${esc(cu.name||'')}"></label><label class="field"><span>Phone</span><input class="input num" id="omPhone" value="${esc(fmtPh(cu.phone||''))}"></label>
+    <label class="field"><span>Status</span><select class="input" id="omSt"><option value="">—</option>${OST.map(([k,t])=>`<option value="${k}" ${o.dl&&o.dl.st===k?'selected':''}>${t}</option>`).join('')}</select></label>
+    <label class="field span3"><span>Address</span><input class="input" id="omAddr" value="${esc(cu.addr||'')}"></label>
+    ${own?`<label class="field"><span>Amount ₾</span><input class="input num" id="omTot" value="${esc(String(o.total))}"></label>`:''}
+    <label class="field ${own?'span2':'span3'}"><span>Note</span><input class="input" id="omNote" value="${esc(o.note||'')}"></label></div>
+   ${o.dl&&o.dl.log&&o.dl.log.length?`<div class="small muted mt">${o.dl.log.map(x=>esc((OSTN[x.st]||x.st)+' · '+dtS(x.at)+(x.by?' · '+x.by:''))).join(' → ')}</div>`:''}
+   <div class="row mt">${o.status!=='void'?`<button class="btn danger" data-act="or_void" data-id="${esc(o.id)}">Cancel order…</button>`:''}<span class="spacer"></span><button class="btn" data-close>Close</button>${o.status!=='void'?`<button class="btn primary" data-act="or_upd" data-id="${esc(o.id)}">Save</button>`:''}</div>`,true);
+}
+const dtS=iso=>{const d=new Date(iso);return isNaN(d)?'':d.toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})};
+async function orderUpdate(id){
+  const o=S.pos.get(id);if(!o)return;const v=k=>($('#'+k)||{}).value;
+  const ch=v('omCh'),ph=cxPhone(v('omPhone')),name=(v('omName')||'').trim(),addr=(v('omAddr')||'').trim(),st=v('omSt');
+  if(v('omPhone')&&v('omPhone').trim()&&!ph){toast('That phone number doesn\'t look right');return}
+  const n={...o,ch,pay:v('omPay'),paid:v('omPaid')==='1',note:(v('omNote')||'').trim()};
+  if(n.paid&&o.paid===false)n.paidAt=new Date().toISOString();
+  if($('#omTot')){const t=parseFloat(String(v('omTot')).replace(',','.'));if(isFinite(t)&&t>0&&Math.abs(t-o.total)>=0.01){const f=t/(o.total||t);n.total=r2(t);n.sub=r2(t-(o.ship||0));n.lines=o.lines.length===1?[{...o.lines[0],p:r2((t-(o.ship||0))/o.lines[0].q)}]:o.lines.map(l=>({...l,p:r2(l.p*f)}))}}
+  if(ADDR_CH.has(ch)||o.dl||st){const prev=o.dl||{log:[]};n.dl={...prev,name,phone:ph,addr,fee:prev.fee||o.ship||0,st:st||prev.st||'new',log:[...(prev.log||[]),...(st&&st!==prev.st?[{st,at:new Date().toISOString(),by:'Mars'}]:[])]};delete n.cust}
+  else if(ph||name)n.cust={name,phone:ph};
+  await S.db.doc('pos/'+id).set(n);closeModal();toast('Saved');
+}
+function orderVoid(id){const o=S.pos.get(id);if(!o)return;
+  modal(`<h3>Cancel this order?</h3><p class="muted">${esc(custOf(o)?.name||'')} · ${gel(o.total)}. It stays in the list as cancelled and leaves the totals${o.lines.some(l=>l.b)?'; the pieces go back into the store count':''}.</p><label class="field"><span>Why</span><input class="input" id="ovWhy" placeholder="customer cancelled, typed twice…"></label><div class="row mt"><span class="spacer"></span><button class="btn" data-close>Back</button><button class="btn danger" data-act="or_voidgo" data-id="${esc(id)}">Cancel order</button></div>`);$('#ovWhy').focus()}
+/* ---------- customers ---------- */
+function ordCustomers(){
+  const C=customers();const q=(S.ord.cq||'').toLowerCase().trim();const qp=cxPhone(q)||q.replace(/\D/g,'');
+  let L=[...C.M.values()];
+  const rep=L.filter(c=>c.o>=2).length,rec=L.filter(c=>c.l&&c.l>=new Date(Date.now()-90*864e5).toISOString().slice(0,10)).length;
+  if(q)L=L.filter(c=>(qp.length>=3&&(c.p.includes(qp)||c.alt.some(a=>a.includes(qp))))||[c.n,...c.a,c.lp].join(' ').toLowerCase().includes(q));
+  L.sort((a,b)=>String(b.l).localeCompare(String(a.l)));
+  const built=custDocs()[0];
+  return `<div class="kpis"><div class="kpi"><div class="lbl">Customers</div><div class="val num">${fmt(C.M.size)}</div><div class="delta">with a phone</div></div><div class="kpi"><div class="lbl">Came back</div><div class="val num">${fmt(rep)}</div><div class="delta">${C.M.size?Math.round(rep/C.M.size*100):0}% ordered twice or more</div></div><div class="kpi"><div class="lbl">Last 90 days</div><div class="val num">${fmt(rec)}</div><div class="delta">ordered recently</div></div><div class="kpi"><div class="lbl">From the sheets</div><div class="val num">${built?fmt(custDocs().reduce((a,d)=>a+(d.list||[]).length,0)):'—'}</div><div class="delta">${built?'read '+dtS(built.at):'not built yet'}</div></div></div>
+  <div class="toolbar"><input class="input grow" id="cuQ" placeholder="Search name, phone, address…" value="${esc(S.ord.cq||'')}"><button class="btn" data-act="or_rebuild">↻ Rebuild from the sheets</button></div>
+  <div class="panel"><div class="tablewrap"><table><thead><tr><th>Customer</th><th>Phone</th><th class="r">Orders</th><th class="r">Spent</th><th>Last order</th><th class="hm">Address</th></tr></thead><tbody>${L.slice(0,S.ord.call?5000:200).map(c=>`<tr class="click" data-act="or_cust" data-p="${esc(c.p)}"><td><b>${esc(c.n||'—')}</b>${c.lp?`<div class="small muted">${esc(c.lp.slice(0,60))}</div>`:''}</td><td class="num">${esc(fmtPh(c.p))}${c.alt.length?`<div class="small muted">+${c.alt.length}</div>`:''}</td><td class="r num">${c.o}</td><td class="r num">${c.s?gel(c.s):'—'}</td><td class="num">${esc(c.l?dShort(c.l.slice(0,10)):'—')}</td><td class="small hm">${esc(c.a[0]||'')}</td></tr>`).join('')}</tbody></table></div>${L.length>200&&!S.ord.call?`<div class="row mt"><span class="muted small">${L.length} customers</span><span class="spacer"></span><button class="btn" data-act="or_call">Show all</button></div>`:''}</div>`;
+}
+function custModal(p){
+  const c=customers().M.get(p);if(!c)return;
+  const os=[...c.orders].sort((a,b)=>String(b.at).localeCompare(String(a.at)));
+  modal(`<h3>${esc(c.n||'Customer')}</h3><p class="num">${esc(fmtPh(c.p))}${c.alt.length?' · also '+c.alt.map(fmtPh).map(esc).join(', '):''}</p>
+   <div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi"><div class="lbl">Orders</div><div class="val num">${c.o}</div></div><div class="kpi"><div class="lbl">Spent</div><div class="val num">${gel(c.s)}</div></div><div class="kpi"><div class="lbl">Customer since</div><div class="val" style="font-size:16px">${esc(c.f?mLabel(c.f.slice(0,7)):'—')}</div></div></div>
+   ${c.a.length?`<h4>Addresses</h4><div class="flow">${c.a.map(a=>`<div class="ln"><span class="k">📍 ${esc(a)}</span></div>`).join('')}</div>`:''}
+   <h4>Orders</h4><div class="flow">${os.map(o=>`<div class="ln click" data-act="or_open" data-id="${esc(o.id)}" style="cursor:pointer"><span class="k">${chChip(chOf(o))} ${esc(dShort(o.day))} · ${esc(o.lines.map(l=>l.n).join(', ').slice(0,70))}</span><b class="num">${gel(o.total)}</b></div>`).join('')}${[...c.ds.entries()].filter(([d])=>!os.some(o=>o.day===d)).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,30).map(([d,a])=>`<div class="ln"><span class="k muted">${esc(d.length>7?dShort(d):mLabel(d))} · from the sheets</span><span class="num muted">${a?gel(a):''}</span></div>`).join('')}</div>
+   <div class="row mt"><span class="spacer"></span><button class="btn" data-close>Close</button><button class="btn primary" data-act="or_newfor" data-p="${esc(c.p)}">+ New order for ${esc((c.n||'').split(' ')[0]||'them')}</button></div>`,true);
+}
+/* ---------- payment check: orders paid into the bank against the bank statements ----------
+   Checked: card terminal, BOG/TBC transfers, transfers still to come and installments.
+   Not checked: Wolt, Glovo, Extra.ge and courier cash (paid out in bulk), cash and Rezi's personal account. */
+const CHECK_PAYS=new Set(['pos','bog','tbc','pending','installment']);
+const PLATFORM_RE=/wolt|ვოლტ|glovo|გლოვო|extra|ექსტრა|ქვიქშიპერ|quickshipper|today ?deliver|თუდეი|დელივერი|gl ?delivery/i;
+function payCheck(m){
+  const hit=S.mc.get('#pc'+m);if(hit)return hit;
+  const doc=S.sales.get(m);const rows=(doc&&doc.rows||[]).map((r,i)=>({...r,i}));
+  const ord=rows.filter(r=>CHECK_PAYS.has(r.pay)&&(+r.a||0)>0&&r.d);
+  const from=m+'-01',to=addDays(m+'-'+String(daysIn(m)).padStart(2,'0'),7);
+  const IN=[...S.bankin.values()].filter(t=>t&&t.date>=addDays(from,-2)&&t.date<=to).map(t=>({...t,used:false}));
+  const cover={};[...S.bankin.values()].forEach(t=>{const c=cover[t.acct]||(cover[t.acct]={min:t.date,max:t.date,n:0});if(t.date<c.min)c.min=t.date;if(t.date>c.max)c.max=t.date;c.n++});
+  const okAcct=(r,t)=>r.pay==='bog'?t.acct==='bog':r.pay==='tbc'?t.acct==='tbc':true;
+  const okAmt=(r,t)=>{const a=+r.a,tol=Math.max(0.5,a*0.005);return Math.abs(t.gel-a)<=tol||(r.pay==='pos'&&Math.abs(t.gel+(+t.fee||0)-a)<=tol)||(r.pay==='pos'&&Math.abs(t.gel/(1-0.0125)-a)<=Math.max(1,a*0.006))};
+  const dd=(a,b)=>(Date.parse(a)-Date.parse(b))/864e5;
+  const match=[],miss=[];
+  ord.sort((a,b)=>String(a.d).localeCompare(String(b.d))).forEach(r=>{let best=null,bd=99;IN.forEach(t=>{if(t.used||t.dir==='out'||!okAcct(r,t)||!okAmt(r,t))return;const d=dd(t.date,r.d);if(d<-1||d>(r.pay==='pending'||r.pay==='installment'?20:5))return;const ad=Math.abs(d);if(ad<bd){bd=ad;best=t}});
+    if(best){best.used=true;match.push([r,best])}else{const c=r.pay==='bog'?cover.bog:r.pay==='tbc'?cover.tbc:(cover.bog||cover.tbc);miss.push({...r,why:!c?'no statement for that account yet':r.d>c.max?'statement ends '+dShort(c.max):'no matching payment'})}});
+  const left=IN.filter(t=>!t.used&&t.dir!=='out'&&!['owner_in','transfer','loan_in','other_income'].includes(t.cat));
+  const platform=left.filter(t=>PLATFORM_RE.test((t.party||'')+' '+(t.desc||'')));const stray=left.filter(t=>!platform.includes(t)&&t.date>=from&&t.date<=m+'-'+String(daysIn(m)).padStart(2,'0'));
+  const sum=a=>a.reduce((x,r)=>x+(+r.a||+r.gel||0),0);
+  const res={ord,match,miss,platform,stray,cover,sum};S.mc.set('#pc'+m,res);return res;
+}
+function addDays(d,n){const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)}
+function ordPayCheck(){
+  const m=S.month;const R=payCheck(m);const any=S.bankin.size;
+  const covTxt=Object.entries(R.cover).map(([a,c])=>`${esc(ACC[a]?ACC[a].en:a)} ${dShort(c.min)} – ${dShort(c.max)}`).join(' · ');
+  const missReal=R.miss.filter(r=>r.why==='no matching payment');
+  return `<div class="panel"><h2>Did the money arrive?</h2><p class="sub">Orders paid by card terminal, BOG or TBC transfer, installments and transfers still to come, matched to the incoming payments in your uploaded bank statements by amount and date. Wolt, Glovo, Extra.ge, courier cash, cash and your personal account are left out — their bulk payouts are listed apart. ${any?'Statements on file: '+covTxt+'.':''}</p>
+   ${any?'':`<div class="banner">No incoming payments on file yet. Upload a BOG or TBC statement under <a href="#bank" data-go="bank">Bank import</a> — from now on the money coming in is kept for this check (it still doesn't count as extra income).</div>`}</div>
+  <div class="kpis"><div class="kpi"><div class="lbl">Orders to check</div><div class="val num">${R.ord.length}</div><div class="delta">${gel(R.sum(R.ord))}</div></div><div class="kpi"><div class="lbl">Paid in · found</div><div class="val num" style="color:var(--good)">${R.match.length}</div><div class="delta">${gel(R.match.reduce((a,[r])=>a+(+r.a||0),0))}</div></div><div class="kpi"><div class="lbl">Not found in the bank</div><div class="val num ${missReal.length?'neg':''}">${missReal.length}</div><div class="delta">${gel(R.sum(missReal))}${R.miss.length>missReal.length?' · '+(R.miss.length-missReal.length)+' not covered yet':''}</div></div><div class="kpi"><div class="lbl">Bank money with no order</div><div class="val num">${R.stray.length}</div><div class="delta">${gel(R.sum(R.stray))}</div></div></div>
+  <div class="grid g2"><div class="panel"><h2>Not found in the bank</h2>${R.miss.length?`<div class="tablewrap"><table><thead><tr><th>Day</th><th>Order</th><th>Payment</th><th class="r">Amount</th><th>Why</th></tr></thead><tbody>${R.miss.map(r=>`<tr><td class="num">${esc(dShort(r.d))}</td><td><b>${esc(r.c||'')}</b><div class="small muted">${esc(String(r.p||'').slice(0,60))}</div></td><td class="small">${esc(PAYS[r.pay]||r.pay)}</td><td class="r num">${gel(r.a)}</td><td class="small ${r.why==='no matching payment'?'neg':'muted'}">${esc(r.why)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="muted">Everything checked arrived. ✓</div>'}</div>
+   <div class="panel"><h2>Bank money with no order</h2><p class="sub">Incoming payments this month that match no order — a sale nobody wrote down, or a payment for another month.</p>${R.stray.length?`<div class="tablewrap"><table><thead><tr><th>Day</th><th>From</th><th class="r">Amount</th></tr></thead><tbody>${R.stray.sort((a,b)=>a.date.localeCompare(b.date)).map(t=>`<tr><td class="num">${esc(dShort(t.date))} <span class="chip">${esc(ACC[t.acct]?ACC[t.acct].en:t.acct)}</span></td><td class="small">${esc((t.party||'').slice(0,40))}<div class="muted">${esc((t.desc||'').slice(0,70))}</div></td><td class="r num">${gel(t.gel)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="muted">None.</div>'}
+   ${R.platform.length?`<h4 class="mt">Platform & courier payouts</h4><div class="small muted">${R.platform.map(t=>esc(dShort(t.date)+' '+(t.party||'').slice(0,24)+' '+gel(t.gel))).join(' · ')}</div>`:''}</div></div>
+  ${R.match.length?`<details class="panel mt"><summary><b>Matched · ${R.match.length}</b></summary><div class="tablewrap"><table><tbody>${R.match.map(([r,t])=>`<tr><td class="num">${esc(dShort(r.d))}</td><td>${esc(r.c||'')} <span class="muted small">${esc(PAYS[r.pay]||r.pay)}</span></td><td class="r num">${gel(r.a)}</td><td class="small muted">→ ${esc(ACC[t.acct]?ACC[t.acct].en:t.acct)} ${esc(dShort(t.date))} ${gel(t.gel)}</td></tr>`).join('')}</tbody></table></div></details>`:''}`;
+}
+/* ---------- import a month from the order sheet ----------
+   Sheet rows already rung on the register (same amount, same or next day) are not added again; they only lend
+   the customer's phone and address to the register sale. The rest become orders of their own (src 'sheet').
+   Importing twice adds nothing twice. */
+const SHEET_ST={'დასრულებული':'done','აღებული':'out','გამზადებული':'ready','გასამზადებელი':'new'};
+async function importRead(btn){
+  if(!S.backend){toast('Open Mars from its own address to read the sheet');return}
+  btn.disabled=true;btn.textContent='Reading the sheet…';const m=S.month;
+  try{
+    const wb=await S.backend.orders(sheetId());const y=+m.slice(0,4);
+    const tabs=(wb.sheets||[]).filter(s=>{const t=tabYM(s.name,y);return t&&t.y+'-'+String(t.m).padStart(2,'0')===m});
+    if(!tabs.length)throw {message:'No tab for '+mLabel(m)+' in the order sheet'};
+    const rows=[];tabs.forEach(sh=>{const {C,body}=cxTab(sh);const tm=cxMonth(sh.name);body.forEach((r,i)=>{const x=cxRow(r,C,{kind:'main',k:'main',ty:y,tm,td:0,y,m:+m.slice(5),year:y});const a=x?x.amt:0;if(!x||!(a>0))return;
+      const p=parseDateCell(C.date>=0?r[C.date]:'');const dd=p&&p.d?p.d:+(String(C.date>=0?r[C.date]:'').match(/^\s*(\d{1,2})/)||[])[1]||1;
+      rows.push({...x,i,tab:sh.name,day:m+'-'+String(Math.min(dd,daysIn(m))).padStart(2,'0'),c:x.nRaw,pay:normPay(x.pay)})})});
+    S.imp={m,plan:importPlan(m,rows),at:Date.now()};
+  }catch(e){toast(errMsg(e))}
+  btn.disabled=false;render();
+}
+function importPlan(m,rows){
+  const reg=[...S.pos.values()].filter(o=>o&&o.lines&&String(o.day||'').startsWith(m)&&o.src!=='sheet');
+  const done=new Set([...S.pos.values()].filter(o=>o&&o.src==='sheet').map(o=>o.imp));
+  const used=new Set();const dd=(a,b)=>Math.abs(Date.parse(a)-Date.parse(b))/864e5;
+  const find=(a,day,ok)=>{let best=null,bd=9;reg.forEach(o=>{if(used.has(o.id)||!ok(o))return;if(Math.abs((+o.total||0)-a)>=0.01)return;const d=dd(o.day,day);if(d<=1&&d<bd){bd=d;best=o}});return best};
+  const keyOf=r=>hash(m+'|'+r.tab+'|'+r.i+'|'+r.amt+'|'+r.p);
+  const live=rows.filter(r=>!r.cancel),canc=rows.filter(r=>r.cancel);
+  const pairs=[],add=[],conflicts=[],skipped=[];
+  live.forEach(r=>{const o=find(r.amt,r.day,o=>o.status!=='void');if(o){used.add(o.id);pairs.push([r,o])}});
+  // one register sale for several sheet rows of the same customer and day (69 + 49 = 118)
+  const rest=live.filter(r=>!pairs.some(p=>p[0]===r));const grp={};rest.forEach(r=>{const k=r.day+'|'+(r.p||r.c);(grp[k]||(grp[k]=[])).push(r)});
+  Object.values(grp).forEach(g=>{if(g.length<2)return;const o=find(r2(g.reduce((a,r)=>a+r.amt,0)),g[0].day,o=>o.status!=='void');if(o){used.add(o.id);g.forEach(r=>pairs.push([r,o]))}});
+  live.forEach(r=>{if(pairs.some(p=>p[0]===r))return;if(done.has(keyOf(r)))skipped.push(r);else add.push({...r,key:keyOf(r)})});
+  canc.forEach(r=>{const o=find(r.amt,r.day,o=>o.status!=='void');if(o){used.add(o.id);conflicts.push([r,o])}});
+  const attach=[];const seen=new Set();pairs.forEach(([r,o])=>{if(seen.has(o.id))return;seen.add(o.id);if((r.p||r.a&&!/^(გაიტანს)$/i.test(r.a))&&!custOf(o))attach.push([r,o])});
+  const regOnly=reg.filter(o=>o.status!=='void'&&!used.has(o.id)&&o.src!=='mars');
+  return {rows,pairs,add,conflicts,attach,skipped,regOnly};
+}
+function sheetCh(r){if(r.pay==='wolt')return 'wolt';if(r.pay==='glovo')return 'glovo';if(r.pay==='extra')return 'extra';return r.p||(r.a&&!/^(ფილიალი)$/i.test(r.a))?'delivery':'shop'}
+function ordImport(){
+  const m=S.month;const I=S.imp&&S.imp.m===m?S.imp.plan:null;const rf=regFrom();
+  const sum=a=>a.reduce((x,r)=>x+(+r.amt||0),0);
+  return `<div class="panel"><h2>Bring ${esc(mLabel(m))} in from the order sheet</h2><p class="sub">Reads the ${esc(mLabel(m))} tab of <b>ასტრომანის შეკვეთები</b> and compares it with the register. Orders already rung on the register are not added twice — they only get the customer's phone and address. Everything else becomes an order here, with its address. You can run it again any time; nothing is added twice.</p>
+   <div class="row"><button class="btn primary" data-act="or_impread">${I?'↻ Read again':'Read the sheet'}</button>${I?`<span class="muted small">${I.rows.length} rows read</span>`:''}<span class="spacer"></span><span class="small muted">Sales book from the register since <b>${esc(mLabel(rf))}</b></span></div></div>
+  ${I?`<div class="kpis"><div class="kpi"><div class="lbl">To add</div><div class="val num">${I.add.length}</div><div class="delta">${gel(sum(I.add))} · not on the register</div></div><div class="kpi"><div class="lbl">Already on the register</div><div class="val num">${I.pairs.length}</div><div class="delta">${I.attach.length} get phone + address</div></div><div class="kpi"><div class="lbl">Cancelled in sheet, sold on register</div><div class="val num ${I.conflicts.length?'neg':''}">${I.conflicts.length}</div><div class="delta">${gel(I.conflicts.reduce((a,[r])=>a+r.amt,0))} · check these</div></div><div class="kpi"><div class="lbl">Only on the register</div><div class="val num">${I.regOnly.length}</div><div class="delta">${gel(I.regOnly.reduce((a,o)=>a+(+o.total||0),0))}</div></div></div>
+   <div class="panel"><h2>To add · ${I.add.length}</h2>${I.add.length?`<div class="tablewrap"><table><tbody>${I.add.map(r=>`<tr><td class="num">${esc(dShort(r.day))}</td><td>${chChip(sheetCh(r))}</td><td><b>${esc(r.c||'')}</b><div class="small muted num">${esc(fmtPh(r.p))}</div></td><td class="small">${esc((r.prod||'').slice(0,50))}<div class="muted">${esc((r.a||'').slice(0,60))}</div></td><td class="small">${esc(PAYS[r.pay]||r.pay)}</td><td class="r num">${gel(r.amt)}</td><td class="small muted">${esc(r.st)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="muted">Nothing new.</div>'}</div>
+   ${I.conflicts.length?`<div class="panel"><h2>Check these</h2><p class="sub">Cancelled in the sheet but still a sale on the register. If they really were cancelled, cancel them on the register (or here under Orders) so the stock comes back.</p><div class="flow">${I.conflicts.map(([r,o])=>`<div class="ln click" data-act="or_open" data-id="${esc(o.id)}" style="cursor:pointer"><span class="k">${esc(dShort(r.day))} · ${esc(r.prod||'')} · ${esc(PAYS[r.pay]||r.pay)}</span><b class="num">${gel(r.amt)}</b></div>`).join('')}</div></div>`:''}
+   <div class="row mt"><label class="row small"><input type="checkbox" id="impBook" ${rf<=m?'checked':''}> From ${esc(mLabel(m))} on, take the sales book from the register and these orders (instead of the sheet)</label><span class="spacer"></span><button class="btn primary" data-act="or_impgo" ${I.add.length||I.attach.length?'':'disabled'}>Import ${I.add.length} order${I.add.length===1?'':'s'} + ${I.attach.length} address${I.attach.length===1?'':'es'}</button></div>`:''}`;
+}
+async function importGo(btn){
+  const I=S.imp&&S.imp.plan;const m=S.imp&&S.imp.m;if(!I)return;btn.disabled=true;btn.textContent='Importing…';let n=0;
+  try{
+    for(const r of I.add){const ch=sheetCh(r);const q=Math.max(1,Math.round(r.qty||1));const st=SHEET_ST[r.st]||'done';
+      const o={id:'s'+r.key,src:'sheet',imp:r.key,ch,at:new Date(r.day+'T12:00:00').toISOString(),day:r.day,user:{id:'sheet',name:'Order sheet'},shift:null,device:'sheet',
+        lines:[{b:null,n:r.prod||'—',q,p:r2(r.amt/q),d:0,img:null}],sub:r.amt,disc:0,total:r.amt,pay:r.pay,cash:r.amt,change:0,receipt:false,note:'',status:'ok',no:null,
+        paid:!(r.pay==='pending'||(r.pay==='cod'&&st!=='done'))};
+      if(r.p||(ADDR_CH.has(ch)&&r.a))o.dl={name:r.n||'',phone:r.p||'',addr:r.a||'',fee:0,st,log:[{st,at:o.at,by:'Order sheet'}]};
+      await S.db.doc('pos/'+o.id).set(o);n++}
+    for(const [r,o] of I.attach){const ch=o.ch||(r.pay==='extra'?'extra':'delivery');const st=SHEET_ST[r.st]||'done';
+      await S.db.doc('pos/'+o.id).set({...o,ch,dl:{name:r.n||'',phone:r.p||'',addr:r.a||'',fee:o.ship||0,st,log:[{st,at:new Date().toISOString(),by:'Order sheet'}]}});n++}
+    if($('#impBook')&&$('#impBook').checked&&regFrom()>m)await saveCfg({regFrom:m});
+    toast('Imported '+I.add.length+' orders and '+I.attach.length+' addresses for '+mLabel(m),7000);S.imp=null;S.ord.tab='list';render();
+  }catch(e){toast(errMsg(e)+' — saved '+n);btn.disabled=false;btn.textContent='Import'}
+}
+async function ordersAct(a,b){
+  const F=S.of;
+  if(a==='or_tab'){S.ord.tab=b.dataset.v;if(S.ord.tab==='new'&&!S.of)S.of=ofNew();S.animate=true;render();window.scrollTo({top:0});if(S.ord.tab==='new'){const f=$('#ofPaste')||$('#ofPhone');if(f)f.focus()}return}
+  if(a==='or_fch'){S.ord.f.ch=b.dataset.v;return render()}
+  if(a==='or_fst'){S.ord.f.st=b.dataset.v;return render()}
+  if(a==='or_all'){S.ord.all=true;return render()}
+  if(a==='or_call'){S.ord.call=true;return render()}
+  if(a==='or_open')return orderModal(b.dataset.id);
+  if(a==='or_upd')return orderUpdate(b.dataset.id);
+  if(a==='or_void')return orderVoid(b.dataset.id);
+  if(a==='or_voidgo'){const w=($('#ovWhy')||{}).value||'';if(!w.trim()){$('#ovWhy').focus();return}const o=S.pos.get(b.dataset.id);if(!o)return;await S.db.doc('pos/'+o.id).set({...o,status:'void',voidAt:new Date().toISOString(),voidBy:{id:'mars',name:'Mars'},voidWhy:w.trim()});closeModal();toast('Order cancelled');return}
+  if(a==='or_cust')return custModal(b.dataset.p);
+  if(a==='or_newfor'){const c=customers().M.get(b.dataset.p);closeModal();S.of=ofNew({phone:fmtPh(c.p),name:c.n||'',addr:c.a[0]||''});S.ord.tab='new';S.view!=='orders'?go('orders'):render();return}
+  if(a==='or_rebuild'){b.disabled=true;return rebuildCustomers(b)}
+  if(a==='or_impread')return importRead(b);
+  if(a==='or_impgo')return importGo(b);
+  if(!F)return;
+  if(a==='or_ch'){F.ch=b.dataset.v;F.pay=CH_PAYS[F.ch][0];if(!ADDR_CH.has(F.ch))F.fee='';else if(!F.fee)F.fee='10';return ofPaint()}
+  if(a==='or_add'){const x=S.catalog.get(b.dataset.b);if(!x)return;const l=F.lines.find(l=>l.b===x.b);if(l)l.q=(+l.q||0)+1;else F.lines.push({b:x.b,n:x.n,q:1,p:+(x.sale>0&&x.sale<x.price?x.sale:x.price)||0});F.q='';return ofPaint('ofQ')}
+  if(a==='or_addfree'){const n=F.q.trim();if(!n)return;F.lines.push({b:null,n,q:1,p:''});F.q='';ofPaint();const ins=document.querySelectorAll('[data-k="p"]');if(ins.length)ins[ins.length-1].focus();return}
+  if(a==='or_rm'){F.lines.splice(+b.dataset.i,1);return ofPaint()}
+  if(a==='or_useaddr'){const c=customers().find(F.phone);if(c){F.addr=c.a[+b.dataset.i]||F.addr;const el=$('#ofAddr');if(el)el.value=F.addr}return}
+  if(a==='or_clear'){S.of=ofNew({ch:F.ch});return ofPaint('ofPhone')}
+  if(a==='or_save')return ofSave(b);
+}
+
 function sheetStoreRows(d){return String(d).slice(0,7)>=regFrom()?[]:dayOf(d).rows.filter(r=>!r.reg)}
 function recon(d){
   const sheet=sheetStoreRows(d).map((r,i)=>({i,a:+r.a||0,p:r.p||'',pay:r.pay}));
@@ -4595,7 +5032,7 @@ function editTx(id,m){let t=S.tx.get(id);
     (S.scrollMem||(S.scrollMem={}))[S.view]=scrollY;if(S.view!=='add')(S.stack||(S.stack=[])).push(S.view);S.navAnim='push';S.view='add';S.animate=true;render();window.scrollTo({top:0})}
 function bindView(){
   if(S.view==='add')bindAdd();
-  bindStore();bindCount();bindTools();
+  bindStore();bindCount();bindTools();bindOrders();
   const tip=$('#tip');const showTip=(e,html)=>{tip.innerHTML=html;tip.hidden=false;const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8),y=Math.min(e.clientY+14,innerHeight-tip.offsetHeight-8);tip.style.left=Math.max(8,x)+'px';tip.style.top=Math.max(8,y)+'px'};
   const hide=()=>tip.hidden=true;
   document.querySelectorAll('#trendSvg .hit').forEach(h=>{h.addEventListener('pointermove',e=>{const d=trendChart.data[+h.dataset.i];showTip(e,`<div class="t">${esc(d.long)}${d.src?' · '+COGS_SRC[d.src]:''}</div><div class="r"><span>Sales</span><b class="num">${gel(d.sales)}</b></div><div class="r"><span>Cost of goods</span><span class="num">${gel(d.cogs)}</span></div><div class="r"><span>Running costs</span><span class="num">${gel(d.opex)}</span></div><div class="r"><span>Taxes</span><span class="num">${gel(d.tax)}</span></div><div class="r"><span>Net profit</span><b class="num ${d.net<0?'neg':''}">${gel(d.net)}</b></div>`)});h.addEventListener('pointerleave',hide);h.addEventListener('click',()=>{hide();const d=trendChart.data[+h.dataset.i];if(d.isYear)setRange({p:'year',y:d.m});else setMonth(d.m)})});
@@ -4663,6 +5100,7 @@ function readFixedForm(){const list=fixedList().map(f=>({...f}));document.queryS
 async function act(a,b){
   try{
   if(a==='syncSheet'){if(!S.mcp&&!S.backend){toast('Live sync needs Google Drive connected (in Claude) or the hosted version');return}return syncSheet(b)}
+  if(a.startsWith('or_'))return ordersAct(a,b);
   if(a.startsWith('wc_'))return wcAct(a,b);
   if(a.startsWith('tl_'))return toolsAct(a,b);
   if(a.startsWith('rc_'))return rcAct(a,b);
