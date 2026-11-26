@@ -107,8 +107,20 @@ await page.click('[data-method="pending"]'); await page.click('[data-act="confir
 check('no address → not saved, error shown', (await page.locator('.done').count()) === 0 && (await page.locator('#dlErr').textContent()).length > 0);
 await page.fill('#dlAddr', 'გაიტანს'); await page.click('[data-act="confirm"]'); await page.waitForSelector('.done'); await page.waitForTimeout(600);
 
+// --- online order picked up in the store: no address, no fee, its own steps
+await page.click('[data-act="newSale"]'); await page.click('.card[data-add="111"]'); await page.click('[data-act="pay"]'); await page.click('[data-ch="delivery"]');
+await page.click('[data-dlmode="pick"]'); await page.waitForTimeout(150);
+check('pickup: no address field, no delivery fee', !(await page.$('#dlAddr')) && (await page.textContent('#payTot')).replace(/[^\d.]/g, '') === '32.00');
+await page.fill('#dlPhone', '577123123'); await page.fill('#dlName', 'ელენე ხაგულაშვილი'); await page.click('[data-method="bog"]'); await page.click('[data-act="confirm"]'); await page.waitForSelector('.done'); await page.waitForTimeout(600);
+const pk = [...store.values()].find(x => x.c === 'pos' && x.d.dl && x.d.dl.pick)?.d;
+check('pickup order saved: marked pickup, no fee', pk && pk.dl.addr === 'მაღაზიიდან გაიტანს' && pk.ship === 0 && pk.total === 32, pk && pk.dl);
+await page.click('.done [data-act="orders"]'); await page.waitForSelector('.ord');
+const pkc = await page.evaluate(() => [...document.querySelectorAll('.ord')].map(c => c.textContent).find(t => t.includes('ელენე')) || '');
+check('board: pickup card says so, steps end in გაიტანა, no courier step', pkc.includes('მაღაზიიდან გაიტანს') && pkc.includes('გაიტანა') && !pkc.includes('კურიერმა'), pkc.slice(0, 160));
+await page.click('[data-act="back"]');
+
 // --- plain shop sale still works and is not a delivery
-await page.click('[data-act="newSale"]'); await page.click('.card[data-add="333"]'); await page.click('[data-act="pay"]');
+if (await page.$('[data-act="newSale"]')) await page.click('[data-act="newSale"]'); await page.waitForSelector('.card[data-add="333"]'); await page.click('.card[data-add="333"]'); await page.click('[data-act="pay"]');
 await page.click('[data-method="pos"]'); await page.click('[data-act="confirm"]'); await page.waitForSelector('.done'); await page.waitForTimeout(600);
 const shop = [...store.values()].find(x => x.c === 'pos' && x.d.total === 238)?.d;
 check('shop sale: no delivery block, paid, marked shop', shop && !shop.dl && shop.paid === true && shop.ch === 'shop', shop);
@@ -126,7 +138,7 @@ const mars = 'file://' + path.join(root, 'index.html');
 await page.goto(mars + '#connect=' + link);
 await page.waitForFunction(() => typeof S !== 'undefined' && S.pos && S.pos.size >= 3, null, { timeout: 30000 }).catch(() => {});
 const mk = await page.evaluate(() => { S.cfg = { ...S.cfg, regFrom: today().slice(0, 7) }; schedule(); const m = today().slice(0, 7); const d = S.sales.get(m); return d && { virtual: d.virtual, n: d.rows.length, a: d.rows.reduce((x, r) => x + r.a, 0), unpaid: d.rows.filter(r => !r.paid).length, cs: d.rows.map(r => r.c) } });
-check('Mars builds this month from the register', mk && mk.virtual && mk.n === 4 && mk.a === 509 + 32 + 10 + 238 + 32, mk);
+check('Mars builds this month from the register', mk && mk.virtual && mk.n === 5 && mk.a === 509 + 32 + 10 + 238 + 32 + 32, mk);
 await page.evaluate(() => { S.month = today().slice(0, 7); go('overview') }); await page.waitForTimeout(800);
 const att = await page.evaluate(() => document.body.innerText.includes('still to be paid'));
 check('Mars overview lists the open delivery order', att);
@@ -149,6 +161,12 @@ await page.click('[data-act="or_save"]'); await page.waitForTimeout(1500);
 console.log('   form says:', await page.evaluate(() => ($('#ofErr')||{}).textContent + ' | ' + ($('#toastRoot')||{}).textContent));
 const mo = [...store.values()].find(x => x.c === 'pos' && x.d.src === 'mars')?.d;
 check('Mars order saved as a register record with address', mo && mo.ch === 'delivery' && mo.dl.phone === '511143952' && mo.dl.addr.includes('ბანძა') && mo.total === 248 && mo.paid === false && mo.lines[0].b === '333', mo);
+await page.evaluate(() => { S.of = ofNew({ ch: 'delivery' }); ofPaint() }); await page.click('[data-act="or_pick"][data-v="1"]'); await page.waitForTimeout(100);
+check('Mars form: pickup hides address and fee', !(await page.$('#ofAddr')) && !(await page.$('#ofFee')));
+await page.fill('#ofPhone', '577123123'); await page.fill('#ofQ', 'Vision'); await page.waitForSelector('#ofSug [data-act="or_add"]'); await page.keyboard.press('Enter'); await page.waitForTimeout(150);
+await page.click('[data-act="or_save"]'); await page.waitForTimeout(900);
+const mp = [...store.values()].find(x => x.c === 'pos' && x.d.src === 'mars' && x.d.dl && x.d.dl.pick)?.d;
+check('Mars pickup order saved without address or fee', mp && mp.total === 238 && mp.dl.addr === 'მაღაზიიდან გაიტანს', mp && [mp.total, mp.dl]);
 // shop order: no address field, phone optional
 await page.click('[data-act="or_ch"][data-v="shop"]'); await page.waitForTimeout(100);
 check('Mars form: shop order has no address field', !(await page.$('#ofAddr')));
@@ -162,7 +180,7 @@ await page.waitForTimeout(1300); await page.screenshot({ path: '/tmp/mars-custom
 // the register sees the customer base
 await page.goto(reg); await page.waitForSelector('.card').catch(() => {}); await page.click('[data-login-go]').catch(() => {}); await page.waitForTimeout(800);
 if (await page.$('#ocGo')) await page.click('#ocGo');
-await page.waitForTimeout(400); if (await page.$('#blockRoot [data-ack]')) await page.click('#blockRoot [data-ack="seen"]');
+await page.waitForTimeout(400); for (let i = 0; i < 5 && await page.$('#blockRoot [data-ack]'); i++) { await page.click('#blockRoot [data-ack="seen"]'); await page.waitForTimeout(300); }
 await page.click('.card[data-add="111"]'); await page.click('[data-act="pay"]'); await page.click('[data-ch="delivery"]'); await page.type('#dlPhone', '599000810'); await page.waitForTimeout(200);
 const rk = await page.evaluate(() => ({ nm: $('#dlName').value, ad: $('#dlAddr').value }));
 check('register: customer from the sheets fills name + address', rk.nm === 'გიორგი ნოზაძე' && rk.ad.includes('ჭავჭავაძის'), rk);

@@ -415,6 +415,10 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 .oschip{background:#fff;border:1px solid #F5D49A;border-radius:999px;padding:3px 10px;font-weight:700;font-size:12.5px;color:#7C2D12}
 .oschip.st-new{border-color:var(--bad);color:var(--bad)}
 .osgo{margin-left:auto;font-weight:800}
+.dlmode{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.dlmode button{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:10px 8px;font-weight:800;cursor:pointer;font-size:14px}
+.dlmode button[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+.dlpick{background:#EEF4FF;border:1px solid #BFD3FF;color:#1D4ED8;border-radius:10px;padding:10px 12px;font-weight:600;font-size:13.5px}
 </style>
 </head>
 <body>
@@ -637,7 +641,7 @@ function vSale(){
   const T=totals();const L=filtered();const sel=P.cart.lines[P.sel];const OO=openOrders();
   const modeL={qty:'რაოდენობა',disc:'ფასდაკლება',price:'ფასი'};
   const hint=P.mode==='disc'&&P.sel<0?'მთელ შეკვეთაზე ₾':sel?esc(sel.n):'აირჩიეთ პროდუქტი';
-  return header()+(OO.length?`<button class="ostrip ${OO.some(isLate)?'late':''}" data-act="orders"><b>🛵 ${OO.length} ღია ონლაინ შეკვეთა</b>${OO.slice(0,4).map(o=>`<span class="oschip st-${o.dl.st||'new'}">${esc((o.dl.name||'').split(' ')[0]||'—')} · ${esc(DL_STN[o.dl.st||'new'])}${o.paid===false?' · ₾':''}</span>`).join('')}${OO.length>4?`<span class="oschip">+${OO.length-4}</span>`:''}<span class="osgo">ნახვა →</span></button>`:'')+`<div class="sale">
+  return header()+(OO.length?`<button class="ostrip ${OO.some(isLate)?'late':''}" data-act="orders"><b>🛵 ${OO.length} ღია ონლაინ შეკვეთა</b>${OO.slice(0,4).map(o=>`<span class="oschip st-${o.dl.st||'new'}">${esc((o.dl.name||'').split(' ')[0]||'—')} · ${esc(stName(o,o.dl.st||'new'))}${o.dl.pick?' 🛍':''}${o.paid===false?' · ₾':''}</span>`).join('')}${OO.length>4?`<span class="oschip">+${OO.length-4}</span>`:''}<span class="osgo">ნახვა →</span></button>`:'')+`<div class="sale">
   <section class="cart" aria-label="შეკვეთა">
    ${P.cart.dl?`<div class="cartmode">🛵 ონლაინ შეკვეთა · მიწოდება მისამართზე<button data-act="dlOff" title="ჩვეულებრივი გაყიდვა">✕</button></div>`:''}
    <div class="lines">${P.cart.lines.length?P.cart.lines.map((l,i)=>`<div class="line ${i===P.sel?'sel':''}" data-line="${i}">${pic(l)}
@@ -709,7 +713,7 @@ function bind(){
   const q=$('#q');if(q){q.oninput=()=>{P.q=q.value;renderGridOnly()};q.onkeydown=e=>{if(e.key==='Enter'){const v=q.value.trim();const x=[...P.cat.values()].find(y=>String(y.b)===v&&!y.hidden);if(x){addItem(x);P.q='';render();$('#q').focus()}else{const L=filtered();if(L.length===1){addItem(L[0]);P.q='';render();$('#q').focus()}}}};}
   const cash=$('#cash');if(cash){cash.oninput=()=>{P.pay.cash=cash.value.replace(/[^\d.]/g,'');updatePayHdr()};cash.onkeydown=e=>{if(e.key==='Enter')act('confirm')}}
   const pn=$('#payNote');if(pn)pn.oninput=()=>P.pay.note=pn.value;
-  if(P.view==='pay'){bindDl();document.querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>setCh(b.dataset.ch))}
+  if(P.view==='pay'){bindDl();document.querySelectorAll('[data-dlmode]').forEach(b=>b.onclick=()=>{const d=P.pay.dl;if(!d)return;d.pick=b.dataset.dlmode==='pick';if(d.pick)d.fee='0';else if(d.fee==='0')d.fee=String(DL_FEES[2]);render()});document.querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>setCh(b.dataset.ch))}
   if(P.view==='orders')bindOrders();
   if(P.view==='count')bindCount();
   if(P.view==='recv')bindRecv();
@@ -745,6 +749,10 @@ async function act(a,b){
    Status and payment changes overwrite the same record, like a void does, so no backend change is needed. */
 const DL_ST=[['new','ახალი'],['ready','გამზადებული'],['out','კურიერმა წაიღო'],['done','ჩაბარებულია']];
 const DL_STN=Object.fromEntries(DL_ST);
+const PICK_ST=[['new','ახალი'],['ready','გამზადებული'],['done','გაიტანა']];
+const stepsOf=o=>o&&o.dl&&o.dl.pick?PICK_ST:DL_ST;
+const stName=(o,k)=>(stepsOf(o).find(x=>x[0]===k)||DL_ST.find(x=>x[0]===k)||[k,k])[1];
+const placeOf=o=>o.dl.pick?'🛍 მაღაზიიდან გაიტანს':'📍 '+esc(o.dl.addr||'');
 const DL_FEES=[0,7,10,15];
 const PAY_LATER=new Set(['cod','pending']);
 function normPhone(v){let d=String(v||'').replace(/\D/g,'');if(d.startsWith('995')&&d.length>=12)d=d.slice(3);if(d.length===10&&d[0]==='0')d=d.slice(1);return /^5\d{8}$/.test(d)?d:''}
@@ -767,17 +775,18 @@ function parseOrderText(t){
 }
 // Earlier delivery customers, by phone: name, last address and how many orders.
 function knownCustomers(){const m=new Map();[...P.shift.values()].filter(x=>x&&x.kind==='custdb').forEach(d=>(d.list||[]).forEach(c=>{const ds=c.ds||[];const v={n:ds.length,a:ds.reduce((s,x)=>s+(+x[1]||0),0),name:c.n||'',addr:(c.a||[])[0]||'',last:(ds[ds.length-1]||[])[0]||''};m.set(c.p,v);(c.alt||[]).forEach(x=>{if(!m.has(x))m.set(x,v)})}));[...P.pos.values()].sort((a,b)=>String(a.at).localeCompare(String(b.at))).forEach(o=>{const d=o&&o.dl;if(!d||!d.phone||o.status==='void')return;const c=m.get(d.phone)||{n:0,a:0};c.n++;c.a+=+o.total||0;c.name=d.name||c.name;c.addr=d.addr||c.addr;c.last=o.day;m.set(d.phone,c)});return m}
-function dlFee(){const d=P.pay.dl;return d&&ADDR_CH.has(P.pay.ch||'')?Math.max(0,parseFloat(d.fee)||0):0}
+function dlFee(){const d=P.pay.dl;return d&&!d.pick&&ADDR_CH.has(P.pay.ch||'')?Math.max(0,parseFloat(d.fee)||0):0}
 function payTotal(){return r2(totals().total+dlFee())}
 function dlBlock(){
   const d=P.pay.dl;const on=!!d;
   if(!on)return '';const ex=P.pay.ch==='extra';
   return `<div class="dl on" style="margin-bottom:14px"><div class="dltog" style="cursor:default">📍 ${ex?'მყიდველი (არასავალდებულო)':'ვის და სად მივუტანოთ'}</div>${on?`<div class="dlb">
+   ${ex?'':`<div class="dlmode"><button data-dlmode="addr" aria-pressed="${!d.pick}">🛵 მისამართზე მიტანა</button><button data-dlmode="pick" aria-pressed="${!!d.pick}">🛍 მაღაზიიდან გაიტანს</button></div>`}
    <textarea id="dlPaste" placeholder="ჩასვი კლიენტის შეტყობინება (სახელი, ტელეფონი, მისამართი) — ველებს თავად შევავსებ">${esc(d.paste||'')}</textarea>
    <div class="dlg"><label class="field"><span>ტელეფონი${P.pay.ch==='extra'?'':' *'}</span><input class="input num" id="dlPhone" inputmode="tel" value="${esc(d.phone||'')}" placeholder="5XX XX XX XX"></label><label class="field"><span>სახელი</span><input class="input" id="dlName" value="${esc(d.name||'')}"></label></div>
    <div id="dlKnown">${knownHtml()}</div>
-   <label class="field"><span>მისამართი${P.pay.ch==='extra'?'':' *'} <span class="muted">(ან „გაიტანს“)</span></span><input class="input" id="dlAddr" value="${esc(d.addr||'')}" placeholder="ქალაქი, ქუჩა, სახლი, სადარბაზო, ბინა"></label>
-   <div class="field"><span>მიწოდების ფასი ₾ <span class="muted">— ემატება ჯამს</span></span><div class="dlfee">${DL_FEES.map(f=>`<button data-fee="${f}" aria-pressed="${dlFee()===f}">${f?f+' ₾':'უფასო'}</button>`).join('')}<input class="input num" id="dlFee" inputmode="decimal" style="max-width:90px" value="${esc(String(d.fee??''))}"></div></div>
+   ${d.pick?`<div class="dlpick">🛍 კლიენტი თავად გაიტანს მაღაზიიდან — მისამართი და მიწოდების ფასი არ სჭირდება. მოამზადე და დაელოდე.</div>`:`<label class="field"><span>მისამართი${P.pay.ch==='extra'?'':' *'}</span><input class="input" id="dlAddr" value="${esc(d.addr||'')}" placeholder="ქალაქი, ქუჩა, სახლი, სადარბაზო, ბინა"></label>
+   <div class="field"><span>მიწოდების ფასი ₾ <span class="muted">— ემატება ჯამს</span></span><div class="dlfee">${DL_FEES.map(f=>`<button data-fee="${f}" aria-pressed="${dlFee()===f}">${f?f+' ₾':'უფასო'}</button>`).join('')}<input class="input num" id="dlFee" inputmode="decimal" style="max-width:90px" value="${esc(String(d.fee??''))}"></div></div>`}
    <div class="dlerr" id="dlErr"></div></div>`:''}</div>`;
 }
 function knownHtml(){const d=P.pay.dl;if(!d)return '';const p=normPhone(d.phone);if(!p)return '';const c=knownCustomers().get(p);if(!c)return '';
@@ -794,7 +803,7 @@ function bindDl(){
     const p=normPhone(d.phone);const c=p&&knownCustomers().get(p);if(c&&!d.name){d.name=c.name||'';$('#dlName').value=d.name}dlRefreshKnown()};
   document.querySelectorAll('[data-fee]').forEach(b=>b.onclick=()=>{d.fee=b.dataset.fee;$('#dlFee').value=d.fee;document.querySelectorAll('[data-fee]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));updatePayHdr()});
 }
-function dlCheck(){const d=P.pay.dl;if(!d)return '';if(P.pay.ch==='extra'){if(String(d.phone||'').trim()&&!normPhone(d.phone))return 'ტელეფონი არ არის სწორი';return ''}if(!normPhone(d.phone))return 'ჩაწერე სწორი ტელეფონი (5XX XX XX XX)';if(!String(d.addr||'').trim())return 'ჩაწერე მისამართი ან „გაიტანს“';return ''}
+function dlCheck(){const d=P.pay.dl;if(!d)return '';if(P.pay.ch==='extra'){if(String(d.phone||'').trim()&&!normPhone(d.phone))return 'ტელეფონი არ არის სწორი';return ''}if(!normPhone(d.phone))return 'ჩაწერე სწორი ტელეფონი (5XX XX XX XX)';if(!d.pick&&!String(d.addr||'').trim())return 'ჩაწერე მისამართი ან აირჩიე „მაღაზიიდან გაიტანს“';return ''}
 
 const SALE_CH=[['shop','🏪','მაღაზია','მაღაზიაში გაყიდვა','მისამართი არ სჭირდება'],['delivery','🛵','მიწოდება','ონლაინ შეკვეთა · მიწოდება','მისამართზე წაიღებს კურიერი'],['wolt','W','Wolt','Wolt-ის შეკვეთა','Wolt-ის კურიერი მოვა'],['glovo','G','Glovo','Glovo-ს შეკვეთა','Glovo-ს კურიერი მოვა'],['extra','E','Extra.ge','Extra.ge-ს შეკვეთა','მისამართით']];
 const CH_PAY={shop:['cash','pos','bog','tbc','personal','installment','other'],delivery:['cod','bog','tbc','pending','personal','pos','other'],wolt:['wolt'],glovo:['glovo'],extra:['extra']};
@@ -819,7 +828,7 @@ function confirmSale(){
     cash:isCash?r2(cash):T.total,change:isCash?r2(cash-T.total):0,receipt:false,note:(P.pay.note||'').trim(),status:'ok',no:nextNo()};
   if(P.user.admin)o.mgr=true;
   o.ch=P.pay.ch||'shop';
-  if(D&&(o.ch==='delivery'||normPhone(D.phone)||String(D.addr||'').trim())){const ph=normPhone(D.phone);o.ship=dlFee();o.paid=!PAY_LATER.has(m);o.dl={name:String(D.name||'').trim(),phone:ph,addr:String(D.addr||'').trim(),fee:o.ship,st:'new',seen:{at:o.at,by:P.user.name},log:[{st:'new',at:o.at,by:P.user.name}]};}
+  if(D&&(o.ch==='delivery'||normPhone(D.phone)||String(D.addr||'').trim())){const ph=normPhone(D.phone);o.ship=dlFee();o.paid=!PAY_LATER.has(m);o.dl={name:String(D.name||'').trim(),phone:ph,addr:D.pick?'მაღაზიიდან გაიტანს':String(D.addr||'').trim(),...(D.pick?{pick:true}:{}),fee:o.ship,st:'new',seen:{at:o.at,by:P.user.name},log:[{st:'new',at:o.at,by:P.user.name}]};}
   else{o.paid=m!=='pending';if(D&&o.ch==='extra')o.ship=0}
   P.pay.dl=null;P.pay.ch='shop';P.cart.dl=null;
   push('pos',o.id,o);P.last=o;clearCart();P.view='done';render();
@@ -842,18 +851,18 @@ function showAck(){
   root.innerHTML=`<div class="block" role="alertdialog" aria-modal="true" aria-label="ახალი ონლაინ შეკვეთა"><div class="bcard">
    <div class="bt">🛵 ახალი ონლაინ შეკვეთა${o.src==='mars'?' · Mars-იდან':''}<span class="spacer"></span><span class="muted" style="text-transform:none;font-weight:600">${esc(dtShort(o.at))}</span></div>
    <h2>${esc(o.dl.name||'მყიდველი')}</h2><div class="bph num">${esc(fmtPhone(o.dl.phone))}</div>
-   <div class="badr">📍 ${esc(o.dl.addr||'')}</div>
+   <div class="badr">${placeOf(o)}</div>
    <div class="bitems">${o.lines.map(l=>`<div><span>${esc(l.n)}${l.q>1?' <b>× '+l.q+'</b>':''}</span><b class="num">${gel(l.q*l.p-(+l.d||0))}</b></div>`).join('')}${o.ship?`<div><span class="muted">მიწოდება</span><span class="num">${gel(o.ship)}</span></div>`:''}</div>
    <div class="bsum"><span>${esc(PAYN[o.pay]||o.pay)} · ${o.paid===false?'<b style="font-size:15px;color:var(--bad)">გადასახდელია</b>':'<span style="color:var(--good);font-weight:700">გადახდილია</span>'}</span><b class="num">${gel(o.total)}</b></div>
    ${o.note?`<div class="muted" style="margin:-6px 0 12px">📝 ${esc(o.note)}</div>`:''}
-   <div class="backs"><button data-ack="seen"><span>👀</span>ვნახე</button><button data-ack="ready"><span>📦</span>გამზადებულია</button><button data-ack="out" class="go"><span>🛵</span>კურიერმა წაიღო</button></div>
+   <div class="backs"><button data-ack="seen"><span>👀</span>ვნახე</button><button data-ack="ready"><span>📦</span>გამზადებულია</button>${o.dl.pick?'<button data-ack="done" class="go"><span>🛍</span>გაიტანა</button>':'<button data-ack="out" class="go"><span>🛵</span>კურიერმა წაიღო</button>'}</div>
    ${q.length>1?`<div class="bq">კიდევ ${q.length-1} ახალი შეკვეთა ელოდება</div>`:''}</div></div>`;
   root.querySelectorAll('[data-ack]').forEach(b=>b.onclick=()=>ackOrder(o.id,b.dataset.ack));
 }
 function ackOrder(id,k){
   const o=P.pos.get(id);if(!o||!P.user)return;const at=new Date().toISOString();const st=k==='seen'?(o.dl.st||'new'):k;
   push('pos',id,{...o,dl:{...o.dl,st,seen:{at,by:P.user.name},log:[...(o.dl.log||[]),{st:k==='seen'?'seen':k,at,by:P.user.name}]}});
-  $('#blockRoot').dataset.id='';toast(k==='seen'?'მონიშნულია · ნანახი':DL_STN[k]);render();
+  $('#blockRoot').dataset.id='';toast(k==='seen'?'მონიშნულია · ნანახი':stName(o,k));render();
 }
 // keys typed while the card is up (a barcode scanner, Enter) must not reach the sale screen behind it
 document.addEventListener('keydown',e=>{const r=$('#blockRoot');if(r&&r.innerHTML&&!e.target.closest('#blockRoot')){e.preventDefault();e.stopPropagation()}},true);
@@ -877,10 +886,10 @@ function vOrders(){
   let L=t==='open'?openOrders():t==='unpaid'?unpaid:all.filter(o=>Date.parse(o.at)>=Date.now()-90*864e5);
   if(q)L=L.filter(o=>(qd.length>=3&&String(o.dl.phone||'').includes(qd))||[o.dl.name,o.dl.addr,o.lines.map(l=>l.n).join(' '),o.no].join(' ').toLowerCase().includes(q));
   const adm=P.user&&P.user.admin;
-  const card=o=>{const i=DL_ST.findIndex(s=>s[0]===(o.dl.st||'new'));const nx=DL_ST[i+1];const v=o.status==='void';
-    return `<div class="ord ${!v&&isOpenOrder(o)&&isLate(o)?'late':''}" style="${v?'opacity:.5':''}"><div><div style="margin-bottom:4px">${chTag(chOf(o))}${o.src==='mars'?' <span class="tagch" style="background:#EEE;color:#444">Mars-იდან</span>':''}${o.dl.seen?` <span class="seenby">✓ ${esc(o.dl.seen.by)}</span>`:''}</div><div class="who">${esc(o.dl.name||'—')}<a href="tel:${esc(o.dl.phone)}">${esc(fmtPhone(o.dl.phone))}</a></div><div class="addr">📍 ${esc(o.dl.addr)}</div><div class="items">${esc(o.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '))}</div><div class="small muted">${o.no?'№'+o.no+' · ':''}${esc(dtShort(o.at))} · ${esc(o.user?o.user.name:'')} · ${esc(PAYN[o.pay]||o.pay)}${o.ship?' · მიწოდება '+gel(o.ship):''}${v?' · <b>გაუქმებულია</b>':''}</div></div>
+  const card=o=>{const ST=stepsOf(o);const i=Math.max(0,ST.findIndex(s=>s[0]===(o.dl.st||'new')));const nx=ST[i+1];const v=o.status==='void';
+    return `<div class="ord ${!v&&isOpenOrder(o)&&isLate(o)?'late':''}" style="${v?'opacity:.5':''}"><div><div style="margin-bottom:4px">${chTag(chOf(o))}${o.src==='mars'?' <span class="tagch" style="background:#EEE;color:#444">Mars-იდან</span>':''}${o.dl.seen?` <span class="seenby">✓ ${esc(o.dl.seen.by)}</span>`:''}</div><div class="who">${esc(o.dl.name||'—')}<a href="tel:${esc(o.dl.phone)}">${esc(fmtPhone(o.dl.phone))}</a></div><div class="addr">${placeOf(o)}</div><div class="items">${esc(o.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '))}</div><div class="small muted">${o.no?'№'+o.no+' · ':''}${esc(dtShort(o.at))} · ${esc(o.user?o.user.name:'')} · ${esc(PAYN[o.pay]||o.pay)}${o.ship?' · მიწოდება '+gel(o.ship):''}${v?' · <b>გაუქმებულია</b>':''}</div></div>
      <div class="amt num">${gel(o.total)}<div style="margin-top:4px">${o.paid===false?'<span class="paychip no">გადასახდელია</span>':'<span class="paychip yes">გადახდილია</span>'}</div></div>
-     <div class="acts"><div class="stp">${DL_ST.map((x,j)=>`<button ${v?'disabled':''} data-act="dlSet" data-id="${esc(o.id)}" data-st="${x[0]}" class="${j===i?'on':j<i?'past':''}" title="სტატუსის შეცვლა">${x[1]}</button>`).join('')}</div><span class="spacer"></span>
+     <div class="acts"><div class="stp">${ST.map((x,j)=>`<button ${v?'disabled':''} data-act="dlSet" data-id="${esc(o.id)}" data-st="${x[0]}" class="${j===i?'on':j<i?'past':''}" title="სტატუსის შეცვლა">${x[1]}</button>`).join('')}</div><span class="spacer"></span>
       ${v?'':`${nx?`<button class="btn primary sm" data-act="dlStep" data-id="${esc(o.id)}" data-st="${nx[0]}">→ ${nx[1]}</button>`:''}${o.paid===false?`<button class="btn sm" data-act="dlPaid" data-id="${esc(o.id)}">თანხა მივიღეთ</button>`:''}<button class="btn sm" data-act="dlCopy" data-id="${esc(o.id)}">კოპირება</button>${adm?`<button class="btn sm" data-act="dlEdit" data-id="${esc(o.id)}">✎ რედაქტირება</button>`:''}${o.dl.st!=='done'||adm?`<button class="btn sm" data-act="dlVoid" data-id="${esc(o.id)}" style="color:var(--bad)">გაუქმება</button>`:''}`}</div></div>`};
   return header()+`<div class="backbar"><button class="ibtn" data-act="back">${svg(I.back,20)}</button><h2>🛵 ონლაინ შეკვეთები</h2><span class="spacer"></span><span class="muted">${unpaid.length?`გადასახდელი: <b style="color:var(--bad)">${gel(unpaid.reduce((a,o)=>a+(+o.total||0),0))}</b>`:''}</span></div>
   <div class="ords"><div class="ordtabs">${[['open','ღია',openOrders().length],['unpaid','გადასახდელი',unpaid.length],['all','ყველა',null]].map(([k,n,c])=>`<button data-otab="${k}" aria-pressed="${t===k}">${n}${c!=null?' · '+c:''}</button>`).join('')}<input class="input ordsearch" id="oq" placeholder="ძებნა: სახელი, ტელეფონი, მისამართი…" value="${esc(P.ord.q||'')}"><span class="spacer"></span><button class="btn sm primary" data-act="dlNew">+ ახალი შეკვეთა</button></div>
@@ -912,7 +921,7 @@ async function dlAct(a,b){
   if(a==='dlNew'){P.view='sale';P.cart.dl={};render();toast('აირჩიე პროდუქტები და დააჭირე „გადახდას“ — მიწოდება უკვე ჩართულია');return true}
   if(a==='dlOff'){P.cart.dl=null;P.pay.dl=null;P.pay.ch='shop';render();return true}
   if(a==='dlUseKnown'){const d=P.pay.dl;const c=d&&knownCustomers().get(normPhone(d.phone));if(c){d.addr=c.addr;d.name=d.name||c.name;$('#dlAddr').value=d.addr;$('#dlName').value=d.name;dlRefreshKnown()}return true}
-  if((a==='dlStep'||a==='dlSet')&&o){if(o.dl.st===b.dataset.st)return true;dlUpdate(id,{dl:{st:b.dataset.st,seen:o.dl.seen||{at:new Date().toISOString(),by:P.user.name}}},DL_STN[b.dataset.st]);return true}
+  if((a==='dlStep'||a==='dlSet')&&o){if(o.dl.st===b.dataset.st)return true;dlUpdate(id,{dl:{st:b.dataset.st,seen:o.dl.seen||{at:new Date().toISOString(),by:P.user.name}}},stName(o,b.dataset.st));return true}
   if(a==='dlEdit'&&o&&P.user.admin){dlEditModal(o);return true}
   if(a==='dlPaid'&&o){dlUpdate(id,{paid:true},'გადახდა მონიშნულია');return true}
   if(a==='dlCopy'&&o){const t=courierText(o);try{await navigator.clipboard.writeText(t);toast('დაკოპირდა — ჩასვი კურიერთან')}catch(e){modal('კურიერისთვის',`<textarea class="input" style="min-height:140px">${esc(t)}</textarea>`)}return true}
@@ -999,7 +1008,7 @@ function shiftCloseModal(force,ordersOk){
   const OO=openOrders();
   if(OO.length&&!ordersOk){const todo=OO.filter(o=>(o.dl.st||'new')!=='done');const owe=OO.filter(o=>o.paid===false);
     modal('ცვლის დასრულებამდე',`<div class="bye"><div class="big">🛵</div><h2>${OO.length} ონლაინ შეკვეთა ჯერ ღიაა</h2><div class="muted">${todo.length?todo.length+' არ არის ჩაბარებული':''}${todo.length&&owe.length?' · ':''}${owe.length?owe.length+' გადასახდელია ('+gel(owe.reduce((a,o)=>a+(+o.total||0),0))+')':''}. შეამოწმე, სანამ წახვალ.</div></div>
-     <div class="olist">${OO.map(o=>`<div class="orow"><span class="t">${esc(DL_STN[o.dl.st||'new'])}</span><span><div><b>${esc(o.dl.name||'—')}</b> · ${esc(fmtPhone(o.dl.phone))}</div><div class="d">📍 ${esc(o.dl.addr||'')} · ${esc(o.lines.map(l=>l.n).join(', ').slice(0,50))}${o.paid===false?' · <b style="color:var(--bad)">გადასახდელია</b>':''}</div></span><b class="num">${gel(o.total)}</b></div>`).join('')}</div>
+     <div class="olist">${OO.map(o=>`<div class="orow"><span class="t">${esc(stName(o,o.dl.st||'new'))}</span><span><div><b>${esc(o.dl.name||'—')}</b> · ${esc(fmtPhone(o.dl.phone))}</div><div class="d">${placeOf(o)} · ${esc(o.lines.map(l=>l.n).join(', ').slice(0,50))}${o.paid===false?' · <b style="color:var(--bad)">გადასახდელია</b>':''}</div></span><b class="num">${gel(o.total)}</b></div>`).join('')}</div>
      <div class="row" style="margin-top:12px"><button class="btn primary big" id="scOrd" style="flex:1">შეკვეთების ნახვა</button><button class="btn big" id="scAny">ცვლის დასრულება მაინც</button></div>`,true);
     $('#scOrd').onclick=()=>{closeModal();P.view='orders';P.ord.tab='open';render()};$('#scAny').onclick=()=>{closeModal();shiftCloseModal(force,true)};return}
   const early=minutesEarly();
