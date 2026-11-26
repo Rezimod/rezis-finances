@@ -75,3 +75,13 @@ A point-of-sale page for the shop, in Georgian, modelled on Optimo: the consulta
 - Consultants, PINs, the receipt header and the device link live under Store sales → Register setup.
 - Works offline: the app shell and pictures are cached on the device, sales wait in an outbox until Google confirms them.
 - Installing on the shop's Windows PC: see [store/README.md](store/README.md).
+
+## Phone
+
+Mars and the register are built for an iPhone held in one hand (tested at 390×844):
+- nothing scrolls sideways; the strip under the clock is always covered;
+- the bottom tab bar steps aside while you type and snaps back to the bottom edge after the keyboard closes (fixes the iOS "bar floating mid-screen" bug);
+- buttons, filters and tabs are at least 40px tall, text is at least 12px;
+- the Orders and Customers lists turn into one card per order/person;
+- the register header shrinks to icons, the sale screen stacks products over the cart and keypad, and the pay and orders screens use one column.
+Test: `node astroman/tools/check-phone.mjs`.
