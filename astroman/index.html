@@ -1284,7 +1284,13 @@ function fixedFor(m,real){
   if(m>thisMonth())return [];
   return fixedList().filter(f=>(!f.from||m>=f.from)&&(!f.to||m<=f.to)&&!real.some(t=>fixedMatches(f,t))).map(f=>({id:'fx-'+f.id+'-'+m,virtual:true,recId:f.id,date:m+'-01',month:m,cat:f.cat,gel:+f.gel||0,vendor:f.label,employee:f.employee||'',account:f.account||'bog',note:'Fixed monthly cost · added automatically',source:'fixed',cur:'GEL'}));
 }
-function txOf(m){const real=realTxOf(m);return real.concat(fixedFor(m,real))}
+function platFor(m,real){
+  const s=S.sales&&S.sales.get(m);if(!s||!s.rows)return [];let fee=0,n=0;const by={};
+  for(const r of s.rows){const ch=r.ch;const rate=platRate(ch);if(!rate)continue;const f=Math.max(0,(+r.a||0)-(+r.ship||0))*rate;fee+=f;n++;by[ch]=(by[ch]||0)+1}
+  if(!n)return [];const have=real.filter(t=>t.cat==='platform_fees').reduce((a,t)=>a+(+t.gel||0),0);const left=Math.round((fee-have)*100)/100;if(left<0.5)return [];
+  const who=PLAT_CH.filter(c=>by[c]).map(c=>(CHN[c]||c)+' '+by[c]).join(', ');
+  return [{id:'fx-plat-'+m,virtual:true,auto:'platform',date:m+'-'+String(daysIn(m)).padStart(2,'0'),month:m,cat:'platform_fees',gel:left,vendor:'Wolt · Glovo · Extra commission',account:'bog',note:'Platform share of '+n+' order'+(n===1?'':'s')+' ('+who+')'+(have?' · '+gel(have)+' already entered':'')+' · added automatically',source:'platform',cur:'GEL'}]}
+function txOf(m){const real=realTxOf(m);return real.concat(fixedFor(m,real),platFor(m,real))}
 function allTx(){const ms=new Set([...S.tx.values()].map(t=>t.month));fixedList().forEach(f=>{let m=f.from||thisMonth();while(m<=thisMonth()){ms.add(m);m=addMonth(m,1)}});const out=[];ms.forEach(m=>{if(m)out.push(...txOf(m))});return out}
 
 /* ============================== metrics ============================== */
@@ -1327,7 +1333,14 @@ function lineRev(l){return Math.max(0,(+l.q||0)*(+l.p||0)-(+l.d||0))}
 // revenue and cost of the lines whose item cost is known; order discounts are spread over the lines
 function itemCogs(rows){let rev=0,cost=0;rows.forEach(r=>{const o=r.reg&&S.pos.get(r.reg);if(!o||o.status==='void'||!o.lines)return;const gross=o.lines.reduce((a,l)=>a+lineRev(l),0);const k=gross>0?Math.max(0,gross-Math.max(0,(+o.disc||0)-o.lines.reduce((a,l)=>a+(+l.d||0),0)))/gross:1;
   o.lines.forEach(l=>{const c=costOf(l.b);if(c==null)return;rev+=lineRev(l)*k;cost+=c*(+l.q||0)})});return {rev,cost}}
-function orderProfit(o){let rev=0,cost=0,unk=0;o.lines.forEach(l=>{const c=costOf(l.b);if(c==null){unk+=lineRev(l);return}rev+=lineRev(l);cost+=c*(+l.q||0)});return {rev,cost,unk,profit:rev-cost-(+o.disc||0)+o.lines.reduce((a,l)=>a+(+l.d||0),0)}}
+// Wolt, Glovo and Extra.ge keep a share of every order (18% unless changed in Settings), taken from the price of the goods
+const PLAT_CH=['wolt','glovo','extra'];
+function platRate(ch){if(!PLAT_CH.includes(ch))return 0;const v=S.cfg&&S.cfg.platFee&&S.cfg.platFee[ch];return (v!=null&&v!==''&&!isNaN(+v)?+v:18)/100}
+function goodsOf(o){return Math.max(0,(+o.total||0)-(+o.ship||0))}
+function platFee(o){return Math.round(goodsOf(o)*platRate(chOf(o))*100)/100}
+function orderProfit(o,ch){let rev=0,cost=0,unk=0;o.lines.forEach(l=>{const c=costOf(l.b);if(c==null){unk+=lineRev(l);return}rev+=lineRev(l);cost+=c*(+l.q||0)});
+  const goods=Math.max(0,o.lines.reduce((a,l)=>a+(+l.q||0)*(+l.p||0),0)-(+o.disc||0));const fee=Math.round(goods*platRate(ch||'shop')*100)/100;
+  return {rev,cost,unk,fee,profit:rev-cost-(+o.disc||0)+o.lines.reduce((a,l)=>a+(+l.d||0),0)-fee}}
 // a price typed differently from the catalog (a platform price, a discount): shown wherever the order is
 function priceNote(l){const x=l.b&&S.catalog.get(l.b);if(!x)return '';const cp=+(x.sale>0&&x.sale<x.price?x.sale:x.price)||0;return cp&&Math.abs(cp-(+l.p||0))>=0.5?` <span class="chip warn" title="Catalog price ${gel(cp)}">✎ ${gel(l.p)} · catalog ${gel(cp)}</span>`:''}
 // the last price an item was sold at on a platform (Wolt, Glovo, Extra.ge)
@@ -1924,7 +1937,7 @@ function attention(m,M){
    if(od.length){const un=od.filter(o=>o.paid===false);const late=od.filter(o=>o.dl&&o.dl.st!=='done'&&(Date.now()-Date.parse(o.at))/864e5>2);const STN={new:'new',ready:'packed',out:'with courier',done:'delivered'};
     items.push([late.length?'bad':'info','🛵',`<b>${od.length} order${od.length>1?'s':''} open${un.length?' · '+gel(un.reduce((a,o)=>a+(+o.total||0),0))+' still to be paid':''}${late.length?' · '+late.length+' late':''}</b><div class="muted">${od.slice(0,5).map(o=>esc((custOf(o)||{}).name||'?')+' '+gel(o.total)+(o.dl?' · '+(STN[o.dl.st]||''):'')+(o.paid===false?' · unpaid':'')).join(' · ')}</div>`,`<button class="btn sm" data-go="orders">Orders</button>`])}}
   if(!M.hasSales)items.push(['bad','!',`<b>No sales loaded for ${mLabel(m)}</b><div class="muted">Sync from your order sheet.</div>`,`<button class="btn sm" data-go="sales">Sync</button>`]);
-  const fx=list.filter(t=>t.virtual);
+  const fx=list.filter(t=>t.virtual&&t.source!=='platform');
   if(fx.length)items.push(['info','↻',`<b>${gel(fx.reduce((a,t)=>a+t.gel,0))} fixed costs added automatically</b><div class="muted">${fx.map(t=>esc(t.vendor)).join(' · ')}. A real payment from the bank replaces its line.</div>`,`<button class="btn sm" data-act="filterFixed">See</button>`]);
   if(!S.items.get(m)&&m<=thisMonth()&&m>='2026-01'&&!M.allAccurate)items.push(['warn','▦',`<b>No Optimo item report for ${mLabel(m)}</b><div class="muted">${M.est?`Profit uses an estimated cost of goods (${Math.round(M.ratio*100)}% of sales, from the ${esc(M.estFrom)}). `:''}Upload it for exact profit and best sellers.</div>`,`<button class="btn sm" data-go="products">Upload</button>`]);
   const OD=S.items.get(m);if(OD&&M.hasSales){const diff=M.sales-OD.revenue;if(Math.abs(diff)>=Math.max(50,M.sales*.01))items.push(['warn','≠',diff>0?`<b>${gel(diff)} of sheet orders aren't in Optimo</b><div class="muted">Optimo ${gel(OD.revenue)} vs order sheet ${gel(M.sales)}. Optimo stock counts will be off.</div>`:`<b>Optimo shows ${gel(-diff)} more than the order sheet</b><div class="muted">Some sales were rung up in Optimo but not written in the sheet.</div>`,`<button class="btn sm" data-go="products">Compare</button>`])}
@@ -2244,7 +2257,7 @@ function vExpenses(){
   const gTot=g=>CATS.filter(c=>c.g===g).reduce((s,c)=>s+sumOf(byCat[c.id]||[]),0);
   const max=Math.max(1,...Object.entries(byCat).filter(([c])=>spendG.includes(CAT[c]?.g)).map(([,a])=>sumOf(a)));
   const titles={opex:'Running costs',goods:'Stock & freight',tax:'Taxes',below:'Taken out of the business',income:'Other income',inflow:'Money you put in'};
-  const row=t=>`<button class="erow" data-edit="${t.id}" data-m="${t.month}"><span><span class="et">${esc(t.vendor||t.employee||catLabel(t.cat))}${t.virtual?' <span class="chip fixed">fixed</span>':''}</span><small>${t.virtual?mShort(t.month)+' · added automatically':esc(t.date)+(t.note?' · '+esc(t.note.slice(0,60)):'')}</small></span><b class="num">${t.skipped?'skipped':gel(t.gel)}</b></button>`;
+  const row=t=>`<button class="erow" data-edit="${t.id}" data-m="${t.month}"><span><span class="et">${esc(t.vendor||t.employee||catLabel(t.cat))}${t.virtual?(t.source==='platform'?' <span class="chip fixed">auto</span>':' <span class="chip fixed">fixed</span>'):''}</span><small>${t.virtual?(t.source==='platform'?esc(t.note):mShort(t.month)+' · added automatically'):esc(t.date)+(t.note?' · '+esc(t.note.slice(0,60)):'')}</small></span><b class="num">${t.skipped?'skipped':gel(t.gel)}</b></button>`;
   const groups=order.map(g=>{const cats=CATS.filter(c=>c.g===g&&byCat[c.id]?.length).map(c=>({c,items:byCat[c.id].sort((a,b)=>(b.date||'').localeCompare(a.date||'')),v:sumOf(byCat[c.id])})).sort((a,b)=>b.v-a.v);
     if(!cats.length)return '';
     return `<section class="eg"><div class="eg-h"><span>${titles[g]}</span><b class="num">${gel(gTot(g))}</b></div>${cats.map(({c,items,v})=>`<details class="ecat" ${f.q?'open':''}><summary><span class="nm">${esc(c.en)}<small>${esc(c.ka)}</small></span><span class="cnt">${items.length}</span><span class="eb">${spendG.includes(g)?`<i class="fill" style="width:${v/max*100}%"></i>`:''}</span><b class="num">${gel(v)}</b></summary><div class="elist">${items.map(row).join('')}</div></details>`).join('')}</section>`}).join('');
@@ -3606,6 +3619,9 @@ function vSettings(){
    ${fixed.map((f,i)=>`<tr><td data-l="Name"><input class="input" data-fx="${i}" data-k="label" value="${esc(f.label)}"></td><td data-l="Category"><select class="input" data-fx="${i}" data-k="cat">${catOptions(f.cat)}</select></td><td data-l="Matches payments containing"><input class="input" data-fx="${i}" data-k="match" value="${esc(f.match||'')}" placeholder="any ${esc(catLabel(f.cat).toLowerCase())}"></td><td data-l="From month"><input class="input" type="month" data-fx="${i}" data-k="from" value="${esc(f.from||'')}"></td><td data-l="Amount ₾"><input class="input num" data-fx="${i}" data-k="gel" inputmode="decimal" value="${esc(f.gel)}" style="text-align:right;max-width:110px;margin-left:auto"></td><td class="r"><button class="btn sm ghost" data-rmfx="${i}" aria-label="Remove">✕</button></td></tr>`).join('')}
    </tbody></table></div>
    <div class="row mt"><button class="btn" data-act="addFixed" ${S.canWrite?'':'disabled'}>+ Add fixed cost</button><span class="spacer"></span><button class="btn primary" data-act="saveFixed" ${S.canWrite?'':'disabled'}>Save fixed costs</button></div></div>
+  <div class="panel stack"><h2>Platform commission</h2><p class="sub" style="margin:0">The share Wolt, Glovo and Extra.ge keep from every order, taken from the price of the goods. It comes off each order's profit and is added to every month under “Wolt · Glovo · Extra fees”. Fees you already entered for a month (from an invoice or the bank) count towards it, so nothing is counted twice.</p>
+   <div class="g3 grid" style="gap:10px">${PLAT_CH.map(c=>`<label class="field"><span>${esc(CHN[c]||c)} %</span><input class="input num" data-plat="${c}" inputmode="decimal" value="${Math.round(platRate(c)*1000)/10}"></label>`).join('')}</div>
+   <div><button class="btn primary" data-act="savePlat" ${S.canWrite?'':'disabled'}>Save commission</button></div></div>
   <div class="panel stack"><h2>Balances</h2><p class="sub" style="margin:0">Type what is really in an account right now to correct it. From then on it moves by itself with every sale and expense. Importing a bank statement also sets BOG or TBC.</p>
    <div class="tablewrap"><table><thead><tr><th>Account</th><th class="r">Now, ₾</th><th>Counted from</th></tr></thead><tbody>${BAL_ACC.map(([k,t])=>{const o=liveBalances()[k];return `<tr><td>${t}</td><td class="r"><input class="input num" data-bal="${k}" inputmode="decimal" value="${o?Math.round(o.now*100)/100:''}" placeholder="—" style="text-align:right;max-width:130px;margin-left:auto"></td><td class="small muted">${o?esc(o.asOf):'not set'}</td></tr>`}).join('')}</tbody></table></div>
    <p class="hint" style="margin:0">The bank loan is tracked on its own <a href="#loan" data-go="loan">Loan page</a>, apart from these books.</p>
@@ -4343,7 +4359,7 @@ function ordDash(L,m){
   const tp=[...topP.values()].sort((a,b)=>b.a-a.a).slice(0,6);const tpMax=Math.max(1,...tp.map(x=>x.a));
   const topC=new Map();live.forEach(o=>{const c=custOf(o);if(!c||!c.phone)return;const x=topC.get(c.phone)||{n:c.name,p:c.phone,a:0,k:0};x.a+=+o.total||0;x.k++;topC.set(c.phone,x)});
   const tc=[...topC.values()].sort((a,b)=>b.a-a.a).slice(0,6);
-  return `<div class="kpis"><div class="kpi"><div class="lbl">Orders · ${esc(mLabel(m))}</div><div class="val num">${fmt(live.length)}</div><div class="delta">${gel(tot)}${(()=>{const M=metrics(m);return M.accurate?' · profit <b>'+gel(M.gross)+'</b>':''})()}</div></div>
+  return `<div class="kpis"><div class="kpi"><div class="lbl">Orders · ${esc(mLabel(m))}</div><div class="val num">${fmt(live.length)}</div><div class="delta">${gel(tot)}${(()=>{const M=metrics(m);const pf=live.reduce((a,o)=>a+platFee(o),0);return M.accurate?' · profit <b>'+gel(M.gross-pf)+'</b>'+(pf?' <span class="muted">after '+gel(pf)+' to Wolt/Glovo/Extra</span>':''):''})()}</div></div>
    <div class="kpi"><div class="lbl">Average order</div><div class="val num">${live.length?gel(tot/live.length):'—'}</div><div class="delta">${dl.length} delivery & Extra orders</div></div>
    <div class="kpi"><div class="lbl">Still to be paid</div><div class="val num ${un.length?'neg':''}">${gel(un.reduce((a,o)=>a+(+o.total||0),0))}</div><div class="delta">${un.length} order${un.length===1?'':'s'}${un.length?' · <button class="linkbtn" data-act="or_fst" data-v="unpaid">see them →</button>':''}</div></div>
    <div class="kpi"><div class="lbl">Deliveries not finished</div><div class="val num ${late.length?'neg':''}">${dl.filter(o=>o.dl.st!=='done').length}</div><div class="delta">${late.length?late.length+' older than 2 days':'none late'}</div></div></div>
@@ -4460,7 +4476,7 @@ async function ofSave(btn){
 /* ---------- one order ---------- */
 function orderModal(id){
   const o=S.pos.get(id);if(!o)return;const c=chOf(o);const cu=custOf(o)||{};
-  S.oe={id,lines:o.lines.map(l=>({...l})),q:''};
+  S.oe={id,ch:c,lines:o.lines.map(l=>({...l})),q:''};
   const regCash=!o.src&&o.pay==='cash'&&o.shift;
   modal(`<h3>${chChip(c)} ${esc(cu.name||'Order')} ${o.no?'<span class="muted">№'+o.no+'</span>':''}</h3>
    <p class="muted small">${esc(srcOf(o))}${o.user&&o.src!=='mars'&&o.src!=='sheet'?' · '+esc(o.user.name):''} · entered ${esc(dtS(o.at))}${o.dl&&o.dl.seen?' · seen by '+esc(o.dl.seen.by)+' '+esc(dtS(o.dl.seen.at)):''}${o.editedAt?' · last edited '+esc(dtS(o.editedAt)):''}${o.status==='void'?' · <b style="color:var(--bad)">cancelled</b> '+esc(o.voidWhy||''):''}</p>
@@ -4480,11 +4496,11 @@ function orderModal(id){
    <div class="row mt"><div><div class="small muted">Total</div><b class="num" style="font-size:22px" id="omTot"></b></div><span class="spacer"></span>${o.status!=='void'?`<button class="btn danger" data-act="or_void" data-id="${esc(o.id)}">Cancel order…</button>`:`<button class="btn" data-act="or_unvoid" data-id="${esc(o.id)}">Restore order</button>`}<button class="btn" data-close>Close</button>${o.status!=='void'?`<button class="btn primary" data-act="or_upd" data-id="${esc(o.id)}">Save</button>`:''}</div>
    <div class="err" id="omErr" style="color:var(--bad);font-weight:600"></div>`,true);
   oeLines();
-  ['omFee','omDisc'].forEach(k=>{const el=$('#'+k);if(el)el.oninput=oeTot});
+  ['omFee','omDisc','omCh'].forEach(k=>{const el=$('#'+k);if(el){el.oninput=oeTot;if(k==='omCh')el.onchange=oeTot}});
   const q=$('#oeQ');q.oninput=()=>{S.oe.q=q.value;oeSug()};q.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const b=$('#oeSug [data-b]');if(b)oeAdd(b.dataset.b);else if(q.value.trim()){S.oe.lines.push({b:null,n:q.value.trim(),q:1,p:0,d:0});q.value='';S.oe.q='';oeSug();oeLines();const ins=document.querySelectorAll('[data-oe][data-k="p"]');if(ins.length)ins[ins.length-1].focus()}}};
 }
 function oeTot(){const E=S.oe;if(!E)return;const sub=E.lines.reduce((a,l)=>a+(+l.q||0)*(+l.p||0),0);const disc=parseFloat(($('#omDisc')||{}).value)||0;const t=sub-disc+(parseFloat(($('#omFee')||{}).value)||0);const el=$('#omTot');if(el)el.textContent=gel(r2(Math.max(0,t)));
-  const P=orderProfit({lines:E.lines,disc});const pe=$('#omProfit');if(pe)pe.innerHTML=P.rev||P.unk?`Profit on the products: <b class="num ${P.profit<0?'neg':''}">${gel(P.profit)}</b> <span class="muted">(sold for ${gel(P.rev-disc)}, item cost ${gel(P.cost)}${P.unk?' · '+gel(P.unk)+' of products with no cost in the catalog':''})</span>`:''}
+  const ch=(($('#omCh')||{}).value)||E.ch;const P=orderProfit({lines:E.lines,disc},ch);const pe=$('#omProfit');if(pe)pe.innerHTML=P.rev||P.unk?`Profit on the products: <b class="num ${P.profit<0?'neg':''}">${gel(P.profit)}</b> <span class="muted">(sold for ${gel(P.rev-disc)}, item cost ${gel(P.cost)}${P.fee?' · '+(CHN[ch]||ch)+' keeps '+Math.round(platRate(ch)*100)+'% = '+gel(P.fee):''}${P.unk?' · '+gel(P.unk)+' of products with no cost in the catalog':''})</span>`:''}
 function oeLines(){const E=S.oe;const box=$('#oeLines');if(!box)return;
   box.innerHTML=E.lines.map((l,i)=>`<div class="oline" title="${(()=>{const x=l.b&&S.catalog.get(l.b);return x?'Catalog '+gel(x.price)+(costOf(l.b)?' · cost '+gel(costOf(l.b)):''):''})()}"><input class="input" data-oe="${i}" data-k="n" value="${esc(l.n)}"><input class="input num" data-oe="${i}" data-k="q" value="${esc(String(l.q))}" inputmode="numeric" style="text-align:right"><input class="input num" data-oe="${i}" data-k="p" value="${esc(String(l.p))}" inputmode="decimal" style="text-align:right"><span class="sum num">${gel((+l.q||0)*(+l.p||0))}</span><button class="btn sm ghost" data-oerm="${i}" aria-label="Remove">✕</button></div>`).join('')||'<div class="muted small">No products.</div>';
   box.querySelectorAll('[data-oe]').forEach(el=>el.oninput=()=>{const l=E.lines[+el.dataset.oe];l[el.dataset.k]=el.dataset.k==='n'?el.value:el.value.replace(',','.');const r=el.closest('.oline');if(r)r.querySelector('.sum').textContent=gel((+l.q||0)*(+l.p||0));oeTot()});
@@ -5349,6 +5365,7 @@ async function act(a,b){
   if(a==='disconnect'){if(S.backend&&S.backend.pending()){toast('Some changes are still saving. Wait until it says “Saved to Google”.');return}lsSet('af.backend','');lsSet(CACHE,'');IDB.del(CACHE).catch(()=>{});location.reload();return}
   if(a==='connect'){return}
   if(a==='addFixed'){const f=readFixedForm();f.push({id:uid('f'),label:'New fixed cost',cat:'misc',gel:0,account:'bog',match:'',from:thisMonth()});S.cfg={...S.cfg,fixed:f};return render()}
+  if(a==='savePlat'){const f={};document.querySelectorAll('[data-plat]').forEach(i=>{const v=parseFloat(String(i.value).replace(',','.'));f[i.dataset.plat]=isNaN(v)?18:Math.max(0,Math.min(60,v))});await saveCfg({platFee:f});S.mc=new Map();render();return toast('Commission saved · '+PLAT_CH.map(c=>(CHN[c]||c)+' '+f[c]+'%').join(' · '))}
   if(a==='saveFixed'){const f=readFixedForm().filter(x=>x.label);await saveCfg({fixed:f});return toast('Fixed costs saved · '+gel(f.reduce((s,x)=>s+(+x.gel||0),0))+' a month')}
   }catch(e){toast(errMsg(e))}
 }
