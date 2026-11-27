@@ -69,6 +69,10 @@ tr.void td{opacity:.45;text-decoration:line-through}
 
 .rmline{margin-left:auto;flex:none;opacity:.4;min-width:32px;padding-inline:8px}tr:hover .rmline,.rmline:focus-visible,.rmline.danger{opacity:1}.rmline.danger{color:var(--bad);border-color:var(--bad)}
 @media (max-width:860px){.rmline{opacity:.75}}
+
+.stk{color:var(--muted)}.stk b{color:var(--ink)}.stk.neg,.stk.neg b{color:var(--bad)}
+.oline-st{grid-column:1/-1;margin-top:-2px}
+button.chip{cursor:pointer;border:0;font:inherit}
 </style>
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.json">
@@ -4385,7 +4389,8 @@ function ordDash(L,m){
   const tp=[...topP.values()].sort((a,b)=>b.a-a.a).slice(0,6);const tpMax=Math.max(1,...tp.map(x=>x.a));
   const topC=new Map();live.forEach(o=>{const c=custOf(o);if(!c||!c.phone)return;const x=topC.get(c.phone)||{n:c.name,p:c.phone,a:0,k:0};x.a+=+o.total||0;x.k++;topC.set(c.phone,x)});
   const tc=[...topC.values()].sort((a,b)=>b.a-a.a).slice(0,6);
-  return `<div class="kpis"><div class="kpi"><div class="lbl">Orders · ${esc(mLabel(m))}</div><div class="val num">${fmt(live.length)}</div><div class="delta">${gel(tot)}${(()=>{const M=metrics(m);const pf=live.reduce((a,o)=>a+platFee(o),0);return M.accurate?' · profit <b>'+gel(M.gross-pf)+'</b>'+(pf?' <span class="muted">after '+gel(pf)+' to Wolt/Glovo/Extra</span>':''):''})()}</div></div>
+  const unl=[...S.pos.values()].filter(o=>o.day>=(S.cfg.regFrom||'2026-11')+'-01').flatMap(o=>unlinkedOf(o).map(x=>({o,...x})));
+  return `${unl.length?`<div class="panel row stockbar" style="gap:10px;flex-wrap:wrap;margin-bottom:14px;border-color:var(--accent)"><span class="chip warn">Stock</span><span>${unl.length} product line${unl.length===1?'':'s'} in ${new Set(unl.map(x=>x.o.id)).size} order${new Set(unl.map(x=>x.o.id)).size===1?'':'s'} ${unl.length===1?"isn't":"aren't"} linked to a product, so ${unl.length===1?"it didn't":"they didn't"} come off the store count.</span><span class="spacer"></span><button class="btn amber" data-act="or_linkold">Link them</button></div>`:''}<div class="kpis"><div class="kpi"><div class="lbl">Orders · ${esc(mLabel(m))}</div><div class="val num">${fmt(live.length)}</div><div class="delta">${gel(tot)}${(()=>{const M=metrics(m);const pf=live.reduce((a,o)=>a+platFee(o),0);return M.accurate?' · profit <b>'+gel(M.gross-pf)+'</b>'+(pf?' <span class="muted">after '+gel(pf)+' to Wolt/Glovo/Extra</span>':''):''})()}</div></div>
    <div class="kpi"><div class="lbl">Average order</div><div class="val num">${live.length?gel(tot/live.length):'—'}</div><div class="delta">${dl.length} delivery & Extra orders</div></div>
    <div class="kpi"><div class="lbl">Still to be paid</div><div class="val num ${un.length?'neg':''}">${gel(un.reduce((a,o)=>a+(+o.total||0),0))}</div><div class="delta">${un.length} order${un.length===1?'':'s'}${un.length?' · <button class="linkbtn" data-act="or_fst" data-v="unpaid">see them →</button>':''}</div></div>
    <div class="kpi"><div class="lbl">Deliveries not finished</div><div class="val num ${late.length?'neg':''}">${dl.filter(o=>o.dl.st!=='done').length}</div><div class="delta">${late.length?late.length+' older than 2 days':'none late'}</div></div></div>
@@ -4413,6 +4418,32 @@ function ordList(L){
    :`<div class="panel empty"><b>No orders here</b>${L.length?'Nothing matches the filters.':'Orders rung on the register or typed here appear in this list.'}</div>`);
 }
 /* ---------- new order ---------- */
+// Order lines come off the store count through their barcode (catLive subtracts every sale after the last count, so the
+// store can go below zero until a receipt from the warehouse corrects it). A line typed by hand has no barcode, so it
+// would not come off the stock: these helpers match it to a product and show what the order does to the store count.
+function catMatch(name){const k=nrm(name);if(!k)return null;const all=[...S.catalog.values()].filter(x=>x&&x.b&&!catGone(x.b));
+  const ex=all.filter(x=>nrm(x.n)===k);if(ex.length===1)return ex[0].b;if(ex.length>1)return (ex.find(x=>!x.hidden)||ex[0]).b;
+  if(k.length<6)return null;const inc=all.filter(x=>{const n=nrm(x.n);return n.length>=6&&(n.includes(k)||k.includes(n))});return inc.length===1?inc[0].b:null}
+function stockNote(b,q,already){const x=b&&S.catalog.get(b);if(!x)return '';const now=catLive(x)+(already||0);const after=now-(+q||0);
+  return `<span class="stk ${after<0?'neg':''}" title="Store count now → after this order">store ${now} → <b>${after}</b>${after<0?' (goes below zero until it comes from the warehouse'+(whQ(x)>0?' · '+whQ(x)+' there':'')+')':''}</span>`}
+const unlinkedOf=o=>(o&&o.status!=='void'&&Array.isArray(o.lines)?o.lines.map((l,i)=>({l,i})).filter(({l})=>!l.b&&String(l.n||'').trim()&&!SHIP_LINE.test(l.n)&&!/მიწოდებ|delivery/i.test(l.n)):[]);
+function linkOldModal(){
+  const rows=[...S.pos.values()].filter(o=>o.day>=(S.cfg.regFrom||'2026-11')+'-01').flatMap(o=>unlinkedOf(o).map(x=>({o,...x}))).sort((a,b)=>String(b.o.at).localeCompare(String(a.o.at)));
+  if(!rows.length){closeModal();return toast('Every order line is linked to a product')}
+  const cats=[...S.catalog.values()].filter(x=>x&&x.b&&!catGone(x.b)).sort((a,b)=>String(a.n).localeCompare(String(b.n)));
+  modal(`<h3>Link order lines to products</h3><p class="sub">Each linked line comes off the store count from its order day (sales before the last count were already in it). Leave a box empty to skip a line; the guess is filled in where the name matches.</p>
+   <datalist id="loCats">${cats.map(x=>`<option value="${esc(x.n)} · ${esc(x.b)}">`).join('')}</datalist>
+   <div class="tablewrap"><table><thead><tr><th>Order</th><th>As typed</th><th class="r">Pcs</th><th>Product</th></tr></thead><tbody>
+   ${rows.map((r,k)=>{const g=catMatch(r.l.n);const x=g&&S.catalog.get(g);const cu=custOf(r.o)||{};return `<tr><td class="small">${esc(shortD(r.o.day))} · ${esc(CHN[chOf(r.o)]||'')}${cu.name?'<div class="muted">'+esc(cu.name)+'</div>':''}</td><td><b>${esc(r.l.n)}</b></td><td class="r num">${fmt(+r.l.q||0)}</td><td><input class="input" list="loCats" data-lo="${k}" data-o="${esc(r.o.id)}" data-i="${r.i}" value="${x?esc(x.n+' · '+x.b):''}" placeholder="type to search" style="min-width:220px"></td></tr>`}).join('')}</tbody></table></div>
+   <div class="row mt"><button class="btn primary" data-act="or_linkoldGo">Link and take off stock</button><span class="spacer"></span><button class="btn" data-close>Cancel</button></div>`,true)}
+async function linkOldGo(btn){const by=new Map();let n=0,bad=[];
+  document.querySelectorAll('#modalRoot [data-lo]').forEach(el=>{const v=el.value.trim();if(!v)return;let b=null;const m=v.match(/ · ([^·]+)$/);if(m&&S.catalog.has(m[1].trim()))b=m[1].trim();else{b=catMatch(v)}if(!b){bad.push(v);return}
+    const id=el.dataset.o;(by.get(id)||by.set(id,[]).get(id)).push([+el.dataset.i,b])});
+  if(bad.length)return toast('Not found: '+bad.join(', '));
+  btn.disabled=true;
+  for(const [id,ls] of by){const o=S.pos.get(id);if(!o)continue;const lines=o.lines.map(l=>({...l}));ls.forEach(([i,b])=>{const x=S.catalog.get(b);if(lines[i]&&x){lines[i].b=b;lines[i].img=lines[i].img||x.img||null;n++}});
+    await S.db.doc('pos/'+id).set({...o,lines,editedAt:new Date().toISOString(),editedBy:{id:'mars',name:'Mars'}})}
+  closeModal();S.mc=new Map();toast(n?n+' line'+(n===1?'':'s')+' linked · the store count now includes them':'Nothing linked')}
 function ofNew(keep){const o={ch:'delivery',day:today(),phone:'',name:'',addr:'',lines:[],fee:'10',pay:'cod',st:'new',note:'',q:'',paste:''};return keep?{...o,...keep}:o}
 function ofTotals(){const F=S.of;const sub=F.lines.reduce((a,l)=>a+(+l.q||0)*(+l.p||0),0);const fee=ADDR_CH.has(F.ch)&&!(F.ch==='delivery'&&F.pick)?Math.max(0,parseFloat(F.fee)||0):0;return {sub:r2(sub),fee,total:r2(sub+fee)}}
 function ordNew(){if(!S.of)S.of=ofNew();return `<div class="grid g3b"><div class="panel" id="ofBox">${ofForm()}</div><div class="stack">${ofSide()}</div></div>`}
@@ -4429,7 +4460,7 @@ function ofForm(){
    ${addr&&!F.pick?`<label class="field"><span>Address${F.ch==='delivery'?' *':''}</span><input class="input" id="ofAddr" value="${esc(F.addr)}" placeholder="city, street, building, flat"></label>`:'<div></div>'}
    <div class="span3" id="ofKnown">${ofKnown()}</div>
    <div class="field span3"><span>Products</span><div class="ofsearch"><input class="input" id="ofQ" placeholder="Search the catalog, or type a name and press Enter" autocomplete="off" value="${esc(F.q)}"><div class="ofsug" id="ofSug"></div></div></div>
-   <div class="span3">${F.lines.length?`<table class="oflines"><thead><tr><th>Product</th><th class="r">Qty</th><th class="r">Price ₾</th><th class="r">Sum</th><th></th></tr></thead><tbody>${F.lines.map((l,i)=>`<tr><td>${esc(l.n)}${l.b?priceNote(l):' <span class="chip">not in catalog</span>'}</td><td class="r"><input class="input num" data-ofl="${i}" data-k="q" value="${esc(String(l.q))}" inputmode="numeric" style="width:64px;text-align:right"></td><td class="r"><input class="input num" data-ofl="${i}" data-k="p" value="${esc(String(l.p))}" inputmode="decimal" style="width:90px;text-align:right"></td><td class="r num">${gel((+l.q||0)*(+l.p||0))}</td><td class="r"><button class="btn sm ghost" data-act="or_rm" data-i="${i}" aria-label="Remove">✕</button></td></tr>`).join('')}</tbody></table>`:'<div class="muted small">No products yet.</div>'}</div>
+   <div class="span3">${F.lines.length?`<table class="oflines"><thead><tr><th>Product</th><th class="r">Qty</th><th class="r">Price ₾</th><th class="r">Sum</th><th></th></tr></thead><tbody>${F.lines.map((l,i)=>`<tr><td>${esc(l.n)}${l.b?priceNote(l)+'<div class="small">'+stockNote(l.b,l.q)+'</div>':` <button class="chip warn" data-act="or_relink" data-i="${i}" title="Pick the product so it comes off the store count">not linked to stock · pick</button>`}</td><td class="r"><input class="input num" data-ofl="${i}" data-k="q" value="${esc(String(l.q))}" inputmode="numeric" style="width:64px;text-align:right"></td><td class="r"><input class="input num" data-ofl="${i}" data-k="p" value="${esc(String(l.p))}" inputmode="decimal" style="width:90px;text-align:right"></td><td class="r num">${gel((+l.q||0)*(+l.p||0))}</td><td class="r"><button class="btn sm ghost" data-act="or_rm" data-i="${i}" aria-label="Remove">✕</button></td></tr>`).join('')}</tbody></table>`:'<div class="muted small">No products yet.</div>'}</div>
    ${addr&&!F.pick?`<label class="field"><span>Delivery fee ₾</span><input class="input num" id="ofFee" inputmode="decimal" value="${esc(F.fee)}"></label>`:''}
    <label class="field"><span>Payment</span><select class="input" id="ofPay">${pays.map(p=>`<option value="${p}" ${F.pay===p?'selected':''}>${esc(PAYS[p]||p)}${LATER_PAYS.has(p)?' · paid later':''}</option>`).join('')}</select></label>
    ${addr?`<label class="field"><span>Status</span><select class="input" id="ofSt">${OST.map(([k,t])=>`<option value="${k}" ${F.st===k?'selected':''}>${t}</option>`).join('')}</select></label>`:''}
@@ -4449,7 +4480,8 @@ const wireActs=root=>{if(root)root.querySelectorAll('[data-act]').forEach(x=>x.o
 function ofPaint(focus){const b=$('#ofBox');if(!b)return;b.innerHTML=ofForm();wireActs(b);bindOrders();if(focus){const el=$('#'+focus);if(el){el.focus();if(el.setSelectionRange&&el.value)el.setSelectionRange(el.value.length,el.value.length)}}}
 function ofSug(){const F=S.of;const box=$('#ofSug');if(!box)return;const q=F.q.trim().toLowerCase();if(!q){box.innerHTML='';return}
   const L=[...S.catalog.values()].filter(x=>!x.hidden&&String(x.n||'').toLowerCase().includes(q)||String(x.b||'')===q).slice(0,8);
-  box.innerHTML=L.map(x=>`<button data-act="or_add" data-b="${esc(x.b)}"><span>${esc(x.n)}</span><b class="num">${gel(x.sale>0&&x.sale<x.price?x.sale:x.price)}</b></button>`).join('')+`<button data-act="or_addfree"><span>+ Add “${esc(F.q.trim())}” as typed</span></button>`;
+  const rl=F.relink!=null&&F.lines[F.relink];
+  box.innerHTML=(rl?`<div class="small muted" style="padding:6px 10px">Pick the product for “${esc(rl.n)}”</div>`:'')+L.map(x=>`<button data-act="or_add" data-b="${esc(x.b)}"><span>${esc(x.n)} <small class="muted">store ${catLive(x)}</small></span><b class="num">${gel(x.sale>0&&x.sale<x.price?x.sale:x.price)}</b></button>`).join('')+(rl?'':`<button data-act="or_addfree"><span>+ Add “${esc(F.q.trim())}” as typed (won't come off stock)</span></button>`);
   box.querySelectorAll('[data-act]').forEach(b=>b.onmousedown=e=>{e.preventDefault();act(b.dataset.act,b)});
 }
 function bindOrders(){
@@ -4489,6 +4521,8 @@ async function ofSave(btn){
   if(F.ch==='delivery'&&!F.pick&&!F.addr.trim())return err('Type the delivery address (or “გაიტანს” if they pick it up)');
   if(F.phone.trim()&&!ph)return err('That phone number doesn\'t look right');
   if(!F.day||F.day>today())return err('Pick the order date');
+  lines.forEach(l=>{if(!l.b){const mb=catMatch(l.n);if(mb){l.b=mb;l.n=S.catalog.get(mb).n}}});
+  const free=lines.filter(l=>!l.b);if(free.length&&!F.freeOk){F.freeOk=true;ofPaint();return err('“'+free.map(l=>l.n).join('”, “')+'” '+(free.length===1?'isn\'t':'aren\'t')+' linked to a product, so '+(free.length===1?'it':'they')+' won\'t come off the store count. Tap “pick” next to it — or press Save again to save anyway.')}
   btn.disabled=true;
   const now=new Date();const at=F.day===today()?now.toISOString():new Date(F.day+'T12:00:00').toISOString();
   const o={id:uid('o'),src:'mars',ch:F.ch,at,day:F.day,user:{id:'mars',name:'Mars'},shift:null,device:'mars',
@@ -4496,7 +4530,7 @@ async function ofSave(btn){
     sub:T.sub,disc:0,total:T.total,pay:F.pay,cash:T.total,change:0,receipt:false,note:F.note.trim(),status:'ok',no:nextPosNo(),paid:!LATER_PAYS.has(F.pay)};
   if(addr){o.ship=T.fee;const pk=F.ch==='delivery'&&!!F.pick;o.dl={name:F.name.trim(),phone:ph,addr:pk?'მაღაზიიდან გაიტანს':F.addr.trim(),...(pk?{pick:true}:{}),fee:T.fee,st:F.st,log:[{st:F.st,at:now.toISOString(),by:'Mars'}]}}
   else if(ph||F.name.trim())o.cust={name:F.name.trim(),phone:ph};
-  try{await S.db.doc('pos/'+o.id).set(o);S.of=ofNew({ch:F.ch,day:F.day});toast('Saved · '+CHN[o.ch]+' · '+gel(o.total)+(o.paid?'':' · unpaid'));S.mc=new Map();ofPaint('ofPhone');const sd=document.querySelector('.stack');if(sd){sd.innerHTML=ofSide();wireActs(sd)}}
+  try{await S.db.doc('pos/'+o.id).set(o);S.of=ofNew({ch:F.ch,day:F.day});const neg=o.lines.filter(l=>l.b&&S.catalog.get(l.b)&&catLive(S.catalog.get(l.b))<0);toast('Saved · '+CHN[o.ch]+' · '+gel(o.total)+(o.paid?'':' · unpaid')+(neg.length?' · below zero in the store: '+neg.map(l=>l.n).join(', ')+' — receive from the warehouse':''),neg.length?7000:undefined);S.mc=new Map();ofPaint('ofPhone');const sd=document.querySelector('.stack');if(sd){sd.innerHTML=ofSide();wireActs(sd)}}
   catch(e){toast(errMsg(e));btn.disabled=false}
 }
 /* ---------- one order ---------- */
@@ -4529,13 +4563,16 @@ function orderModal(id){
 function oeTot(){const E=S.oe;if(!E)return;const sub=E.lines.reduce((a,l)=>a+(+l.q||0)*(+l.p||0),0);const disc=parseFloat(($('#omDisc')||{}).value)||0;const t=sub-disc+(parseFloat(($('#omFee')||{}).value)||0);const el=$('#omTot');if(el)el.textContent=gel(r2(Math.max(0,t)));
   const ch=(($('#omCh')||{}).value)||E.ch;const P=orderProfit({lines:E.lines,disc},ch);const pe=$('#omProfit');if(pe)pe.innerHTML=P.rev||P.unk?`Profit on the products: <b class="num ${P.profit<0?'neg':''}">${gel(P.profit)}</b> <span class="muted">(sold for ${gel(P.rev-disc)}, item cost ${gel(P.cost)}${P.fee?' · '+(CHN[ch]||ch)+' keeps '+Math.round(platRate(ch)*100)+'% = '+gel(P.fee):''}${P.unk?' · '+gel(P.unk)+' of products with no cost in the catalog':''})</span>`:''}
 function oeLines(){const E=S.oe;const box=$('#oeLines');if(!box)return;
-  box.innerHTML=E.lines.map((l,i)=>`<div class="oline" title="${(()=>{const x=l.b&&S.catalog.get(l.b);return x?'Catalog '+gel(x.price)+(costOf(l.b)?' · cost '+gel(costOf(l.b)):''):''})()}"><input class="input" data-oe="${i}" data-k="n" value="${esc(l.n)}"><input class="input num" data-oe="${i}" data-k="q" value="${esc(String(l.q))}" inputmode="numeric" style="text-align:right"><input class="input num" data-oe="${i}" data-k="p" value="${esc(String(l.p))}" inputmode="decimal" style="text-align:right"><span class="sum num">${gel((+l.q||0)*(+l.p||0))}</span><button class="btn sm ghost" data-oerm="${i}" aria-label="Remove">✕</button></div>`).join('')||'<div class="muted small">No products.</div>';
+  box.innerHTML=E.lines.map((l,i)=>`<div class="oline" title="${(()=>{const x=l.b&&S.catalog.get(l.b);return x?'Catalog '+gel(x.price)+(costOf(l.b)?' · cost '+gel(costOf(l.b)):''):''})()}"><input class="input" data-oe="${i}" data-k="n" value="${esc(l.n)}"><input class="input num" data-oe="${i}" data-k="q" value="${esc(String(l.q))}" inputmode="numeric" style="text-align:right"><input class="input num" data-oe="${i}" data-k="p" value="${esc(String(l.p))}" inputmode="decimal" style="text-align:right"><span class="sum num">${gel((+l.q||0)*(+l.p||0))}</span><button class="btn sm ghost" data-oerm="${i}" aria-label="Remove">✕</button><div class="oline-st small">${l.b?(S.catalog.get(l.b)?stockNote(l.b,0):''):`<button class="chip warn" data-oelink="${i}">not linked to stock · pick</button>`}</div></div>`).join('')||'<div class="muted small">No products.</div>';
+  box.querySelectorAll('[data-oelink]').forEach(b=>b.onclick=()=>{E.relink=+b.dataset.oelink;const q=$('#oeQ');if(q){q.value=E.lines[E.relink].n;E.q=q.value;q.focus();oeSug()}});
   box.querySelectorAll('[data-oe]').forEach(el=>el.oninput=()=>{const l=E.lines[+el.dataset.oe];l[el.dataset.k]=el.dataset.k==='n'?el.value:el.value.replace(',','.');const r=el.closest('.oline');if(r)r.querySelector('.sum').textContent=gel((+l.q||0)*(+l.p||0));oeTot()});
   box.querySelectorAll('[data-oerm]').forEach(b=>b.onclick=()=>{E.lines.splice(+b.dataset.oerm,1);oeLines()});oeTot()}
 function oeSug(){const E=S.oe;const box=$('#oeSug');if(!box)return;const q=E.q.trim().toLowerCase();if(!q){box.innerHTML='';return}
   box.innerHTML=[...S.catalog.values()].filter(x=>!x.hidden&&String(x.n||'').toLowerCase().includes(q)).slice(0,6).map(x=>`<button data-b="${esc(x.b)}"><span>${esc(x.n)}</span><b class="num">${gel(x.sale>0&&x.sale<x.price?x.sale:x.price)}</b></button>`).join('');
   box.querySelectorAll('[data-b]').forEach(b=>b.onmousedown=e=>{e.preventDefault();oeAdd(b.dataset.b)})}
-function oeAdd(bc){const x=S.catalog.get(bc);if(!x)return;S.oe.lines.push({b:x.b,n:x.n,q:1,p:+(x.sale>0&&x.sale<x.price?x.sale:x.price)||0,d:0,img:x.img||null});const q=$('#oeQ');if(q)q.value='';S.oe.q='';oeSug();oeLines()}
+function oeAdd(bc){const x=S.catalog.get(bc);if(!x)return;const E=S.oe;
+  if(E.relink!=null&&E.lines[E.relink]){const l=E.lines[E.relink];l.b=x.b;l.n=x.n;l.img=x.img||null;E.relink=null;const q=$('#oeQ');if(q)q.value='';E.q='';oeSug();oeLines();return toast('Linked · '+x.n+' comes off the store count')}
+  S.oe.lines.push({b:x.b,n:x.n,q:1,p:+(x.sale>0&&x.sale<x.price?x.sale:x.price)||0,d:0,img:x.img||null});const q=$('#oeQ');if(q)q.value='';S.oe.q='';oeSug();oeLines()}
 const dtS=iso=>{const d=new Date(iso);return isNaN(d)?'':d.toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})};
 async function orderUpdate(id){
   const o=S.pos.get(id);const E=S.oe;if(!o||!E||E.id!==id)return;const v=k=>($('#'+k)||{}).value;const err=m=>{const e=$('#omErr');if(e)e.textContent=m};
@@ -4700,11 +4737,15 @@ async function ordersAct(a,b){
   if(a==='or_rebuild'){b.disabled=true;return rebuildCustomers(b)}
   if(a==='or_impread')return importRead(b);
   if(a==='or_impgo')return importGo(b);
+  if(a==='or_linkold')return linkOldModal();
+  if(a==='or_linkoldGo')return linkOldGo(b);
   if(!F)return;
   if(a==='or_pick'){F.pick=b.dataset.v==='1';if(F.pick)F.fee='0';else if(!+F.fee)F.fee='10';return ofPaint()}
   if(a==='or_ch'){F.ch=b.dataset.v;F.pay=CH_PAYS[F.ch][0];if(!ADDR_CH.has(F.ch))F.fee='';else if(!F.fee)F.fee='10';return ofPaint()}
+  if(a==='or_relink'){F.relink=+b.dataset.i;F.q=(F.lines[F.relink]||{}).n||'';return ofPaint('ofQ')}
+  if(a==='or_add'&&F.relink!=null&&F.lines[F.relink]){const x=S.catalog.get(b.dataset.b);if(!x)return;const l=F.lines[F.relink];l.b=x.b;l.n=x.n;if(!(+l.p>0))l.p=+(x.sale>0&&x.sale<x.price?x.sale:x.price)||0;F.relink=null;F.q='';F.freeOk=false;toast('Linked · '+x.n+' comes off the store count');return ofPaint('ofQ')}
   if(a==='or_add'){const x=S.catalog.get(b.dataset.b);if(!x)return;const l=F.lines.find(l=>l.b===x.b);const cp=+(x.sale>0&&x.sale<x.price?x.sale:x.price)||0;const lp=['wolt','glovo','extra'].includes(F.ch)?lastPrice(x.b,F.ch):null;if(l)l.q=(+l.q||0)+1;else F.lines.push({b:x.b,n:x.n,q:1,p:lp?lp.p:cp});if(lp&&Math.abs(lp.p-cp)>=0.5)toast(CHN[F.ch]+' price from the last sale there: '+gel(lp.p)+' (catalog '+gel(cp)+')',5000);F.q='';return ofPaint('ofQ')}
-  if(a==='or_addfree'){const n=F.q.trim();if(!n)return;F.lines.push({b:null,n,q:1,p:''});F.q='';ofPaint();const ins=document.querySelectorAll('[data-k="p"]');if(ins.length)ins[ins.length-1].focus();return}
+  if(a==='or_addfree'){const n=F.q.trim();if(!n)return;const mb=catMatch(n);if(mb){F.q='';b={dataset:{b:mb}};return act('or_add',b)}F.relink=null;F.lines.push({b:null,n,q:1,p:''});F.q='';ofPaint();const ins=document.querySelectorAll('[data-k="p"]');if(ins.length)ins[ins.length-1].focus();return}
   if(a==='or_rm'){F.lines.splice(+b.dataset.i,1);return ofPaint()}
   if(a==='or_useaddr'){const c=customers().find(F.phone);if(c){F.addr=c.a[+b.dataset.i]||F.addr;const el=$('#ofAddr');if(el)el.value=F.addr}return}
   if(a==='or_clear'){S.of=ofNew({ch:F.ch});return ofPaint('ofPhone')}

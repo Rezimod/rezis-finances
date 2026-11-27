@@ -106,3 +106,11 @@ Test: `node astroman/tools/check-split.mjs`.
 - Tapping **Arrived** opens "Put the shipment in stock": one switch puts every line in the **Warehouse** or the **Store** (it remembers your last choice), and each line can still go elsewhere or be set to 0. Linked products are matched; an empty box creates a new product at 3× landed cost.
 - After that the shipment shows "✓ In stock · N pcs to the warehouse · M to the store" with an **Undo**. Until it's stocked, an arrived shipment shows "Not in stock yet · Put in stock". While in stock, its status can't be moved back.
 Test: `node astroman/tools/check-shipstock.mjs`.
+
+## Online orders and the store count
+
+Every order line linked to a product comes off the store count from the moment it's entered (Mars or the register). There's no floor: with nothing on the shelf the store goes below zero, and the next receipt from the warehouse (მიღება on the register) brings it back.
+- The order form shows each line's effect: "store 1 → −1", in red when it goes below zero, with how many are in the warehouse.
+- A name typed by hand is matched to a product automatically when it's the same name. Otherwise the line shows "not linked to stock · pick"; Save warns once, and a second Save saves it without taking it off stock.
+- Orders entered before this (or imported from the sheet) with typed products: the Orders page shows "N product lines aren't linked … Link them", with the right product guessed where the name matches.
+Test: `node astroman/tools/check-orderstock.mjs`.
