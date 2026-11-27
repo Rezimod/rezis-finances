@@ -1,7 +1,7 @@
 // Mars: opens without internet. The page itself comes from the network when it answers within a few
 // seconds (so updates show up at once) and from the saved copy otherwise; fonts, libraries and
 // product pictures are kept after the first view. The data copy lives in IndexedDB, not here.
-const V = 'mars-v1';
+const V = 'mars-v2';
 const IMG = 'mars-img-v1';
 const IMG_MAX = 600;
 const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-180.png', './brand/mark-light-160.png'];
@@ -28,7 +28,7 @@ self.addEventListener('fetch', e => {
 
 async function pageFirst(req) {
   const c = await caches.open(V);
-  const net = fetch(req).then(r => { if (r && r.ok) c.put('./index.html', r.clone()); return r; });
+  const net = fetch(req, { cache: 'no-cache' }).then(r => { if (r && r.ok) c.put('./index.html', r.clone()); return r; });
   const slow = new Promise(ok => setTimeout(ok, 3500));
   try {
     const r = await Promise.race([net, slow.then(() => null)]);

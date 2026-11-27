@@ -119,3 +119,7 @@ Test: `node astroman/tools/check-orderstock.mjs`.
 
 On the orders board each online order shows its products on the right in a highlighted box ("📦 რა უნდა გაიგზავნოს · N ც."): picture, name in bold, quantity (red when more than one). Tapping a product opens its picture large, with quantity, price, store and warehouse stock; ← / → go through the order's products. The new-order popup shows the pictures too. On a phone the box spans the full width under the customer.
 Test: `node astroman/tools/check-ordcard.mjs`.
+
+## Updates reach every device
+
+GitHub lets browsers keep a page for 10 minutes. Both offline workers now always check the page with the server, so a refresh shows the newest version. The register also checks for a new version every 3 minutes (and when its tab comes back to the front) and reloads by itself when nobody is in the middle of a sale. When releasing, bump `BUILD` in store/index.html.

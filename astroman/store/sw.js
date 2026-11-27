@@ -1,5 +1,5 @@
 // Astroman register: the app shell works offline, product pictures are kept after the first view.
-const V = 'astroman-pos-v9';
+const V = 'astroman-pos-v10';
 const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './icon-180.png', '../brand/mark-black-160.png', '../brand/logo-full-black-240.png'];
 const IMG = 'astroman-pos-img-v1';
 const IMG_MAX = 900;
@@ -23,7 +23,9 @@ self.addEventListener('fetch', e => {
 
 async function networkFirst(req) {
   const c = await caches.open(V);
-  try { const r = await fetch(req); if (r && r.ok) c.put(req, r.clone()); return r; }
+  const page = req.mode === 'navigate' || /\/(index\.html)?$/.test(new URL(req.url).pathname);
+  // the page is always checked with the server, so a new version shows on the next load (GitHub lets browsers keep it 10 minutes)
+  try { const r = await fetch(req, page ? { cache: 'no-cache' } : undefined); if (r && r.ok) c.put(req, r.clone()); return r; }
   catch (e) { const hit = await c.match(req, { ignoreSearch: true }); if (hit) return hit; if (req.mode === 'navigate') return c.match('./index.html'); throw e; }
 }
 async function staleWhileRevalidate(req) {
