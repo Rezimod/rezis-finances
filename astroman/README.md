@@ -85,3 +85,17 @@ Mars and the register are built for an iPhone held in one hand (tested at 390×8
 - the Orders and Customers lists turn into one card per order/person;
 - the register header shrinks to icons, the sale screen stacks products over the cart and keypad, and the pay and orders screens use one column.
 Test: `node astroman/tools/check-phone.mjs`.
+
+## Wolt · Glovo · Extra.ge commission
+
+The platforms keep 18% of the goods on every order (the delivery fee is left out). Change the rate per platform under Settings → Platform commission.
+- Each order's profit (order window, Orders page) is shown after the platform's share.
+- Every month gets an automatic "Wolt · Glovo · Extra fees" running cost. If fees for that month were already entered (an invoice, the bank), only the missing part is added, so nothing is counted twice.
+Test: `node astroman/tools/check-platform.mjs`.
+
+## Part cash, part card
+
+Rare, so it stays out of the way: on the register's pay screen, under the payment methods, there's one dashed link "₾ + 💳 ნაწილი ნაღდით, ნაწილი ბარათით?" (shop sales only).
+The consultant types the cash part; the rest goes to the terminal, BOG or TBC (one tap). Saved as `pay:'split'` with `parts:{cash, pos|bog|tbc}`.
+The drawer expects only the cash part; the receipt prints both lines; Mars counts each part in its own place, and the payment check looks for the card/transfer part in the bank. The manager can change the cash part in the Mars order window.
+Test: `node astroman/tools/check-split.mjs`.

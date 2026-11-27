@@ -1209,7 +1209,7 @@ const CAT=Object.fromEntries(CATS.map(c=>[c.id,c]));
 const GROUPS={goods:'Stock & freight',opex:'Running costs',tax:'Taxes',below:'Money out of the business',income:'Other income',inflow:'Money into the business',ignore:'Not counted'};
 const ACCOUNTS=[{id:'bog',en:'BOG'},{id:'tbc',en:'TBC'},{id:'cash',en:'Cash · სალარო'},{id:'personal',en:'Rezi personal'},{id:'unknown',en:'Not set'}];
 const ACC=Object.fromEntries(ACCOUNTS.map(a=>[a.id,a]));
-const PAYS={pos:'Card terminal',bog:'BOG transfer',tbc:'TBC transfer',wolt:'Wolt',glovo:'Glovo',cash:'Cash',personal:'Rezi personal account',extra:'Extra.ge',cod:'Cash on delivery',pending:'Awaiting transfer',installment:'Installments',other:'Other',unknown:'Not recorded'};
+const PAYS={pos:'Card terminal',bog:'BOG transfer',tbc:'TBC transfer',wolt:'Wolt',glovo:'Glovo',cash:'Cash',personal:'Rezi personal account',extra:'Extra.ge',cod:'Cash on delivery',pending:'Awaiting transfer',installment:'Installments',other:'Other',split:'Cash + card',unknown:'Not recorded'};
 const KA_MONTHS=['იანვარი','თებერვალი','მარტი','აპრილი','მაისი','ივნისი','ივლისი','აგვისტო','სექტემბერი','ოქტომბერი','ნოემბერი','დეკემბერი'];
 const EN_MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DEFAULT_RULES=[
@@ -1625,7 +1625,7 @@ function mergeRegisterSales(){
   S.pos.forEach(o=>{if(!o||!o.lines||!o.day||o.status==='void')return;const m=String(o.day).slice(0,7);if(m<from)return;(by.get(m)||by.set(m,[]).get(m)).push(o)});
   for(const [k,v] of [...S.sales])if(v&&v.virtual&&!by.has(k))S.sales.delete(k);
   for(const [m,L] of by){
-    const rows=L.sort((a,b)=>String(a.at).localeCompare(String(b.at))).map(o=>({d:o.day,c:regCust(o),p:o.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '),pay:o.pay,a:+o.total||0,reg:o.id,paid:o.paid!==false,ship:+o.ship||0,ch:chOf(o),src:o.src||''}));
+    const rows=L.sort((a,b)=>String(a.at).localeCompare(String(b.at))).map(o=>({d:o.day,c:regCust(o),p:o.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '),pay:o.pay,...(o.pay==='split'&&o.parts?{parts:o.parts}:{}),a:+o.total||0,reg:o.id,paid:o.paid!==false,ship:+o.ship||0,ch:chOf(o),src:o.src||''}));
     S.sales.set(m,{id:m,rows,source:'Register',virtual:true,locked:true,syncedAt:Date.now()});
   }
 }
@@ -3976,7 +3976,10 @@ function pullToRefresh(){const el=document.createElement('div');el.className='pt
 /* ============================== store register (POS) ============================== */
 // The register (astroman/store/) writes `pos` (one record per sale) and `shift` records with its own limited
 // key; the catalog it sells from is the `catalog` collection, managed here. Nothing here touches the books.
-const POSPAY={cash:'Cash',pos:'Card terminal',bog:'BOG transfer',tbc:'TBC transfer',wolt:'Wolt',glovo:'Glovo',extra:'Extra.ge',cod:'Cash on delivery',personal:'Rezi personal account',pending:'Awaiting transfer',installment:'Installments',other:'Other',card_bog:'BOG terminal',card_tbc:'TBC terminal',transfer:'Transfer'};
+const POSPAY={cash:'Cash',pos:'Card terminal',bog:'BOG transfer',tbc:'TBC transfer',wolt:'Wolt',glovo:'Glovo',extra:'Extra.ge',cod:'Cash on delivery',personal:'Rezi personal account',pending:'Awaiting transfer',installment:'Installments',other:'Other',card_bog:'BOG terminal',card_tbc:'TBC terminal',transfer:'Transfer',split:'Cash + card'}
+// a sale paid partly in cash and partly by card/transfer: pay:'split', parts {cash:…, pos|bog|tbc:…}
+function payParts(o){if(o&&o.pay==='split'&&o.parts)return Object.entries(o.parts).map(([k,v])=>[k,+v||0]).filter(x=>x[1]>0);return [[o.pay,+o.total||0]]}
+function payLabel(o){return o&&o.pay==='split'&&o.parts?payParts(o).map(([k,v])=>(POSPAY[k]||k)+' '+gel(v,v%1?2:0)).join(' + '):(POSPAY[o.pay]||o.pay)};
 const POS_CARD=new Set(['pos','card_bog','card_tbc']);
 const posInitials=n=>String(n||'').replace(/[^\p{L}\p{N}]/gu,'').slice(0,2).toUpperCase()||'·';
 function thumb(x,s){s=s||36;return x&&x.img?`<img class="thumb" src="${esc(x.img)}" alt="" loading="lazy" style="width:${s}px;height:${s}px" onerror="this.outerHTML='<span class=\\'thumb ph\\' style=\\'width:${s}px;height:${s}px\\'>${esc(posInitials(x.n))}</span>'">`:`<span class="thumb ph" style="width:${s}px;height:${s}px">${esc(posInitials(x&&x.n))}</span>`}
@@ -4008,7 +4011,7 @@ function vStore(){
 }
 function storeLive(){
   const t=today();const d=S.store.day&&S.store.day<=t?S.store.day:t;const isT=d===t;const R=regDay(d);const all=posOrders(d);
-  const by={};R.L.forEach(o=>{by[o.pay]=(by[o.pay]||0)+o.total});
+  const by={};R.L.forEach(o=>payParts(o).forEach(([k,v])=>{by[k]=(by[k]||0)+v}));
   const byU={};R.L.forEach(o=>{const k=o.user?o.user.name:'?';const u=byU[k]||(byU[k]={n:0,a:0});u.n++;u.a+=o.total});
   const shifts=[...S.shift.values()].filter(s=>s&&!s.kind&&(s.day===d||(!s.closedAt&&isT))).sort((a,b)=>String(b.openedAt).localeCompare(String(a.openedAt)));
   const drawer=shifts.filter(s=>!s.closedAt).reduce((a,s)=>a+shiftExpected(s),0);
@@ -4031,18 +4034,18 @@ function storeLive(){
 }
 function dtShort(iso){if(!iso)return '—';const d=new Date(iso);return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
 function tOf(iso){const d=new Date(iso);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
-function shiftExpected(s){let cash=0;S.pos.forEach(o=>{if(o.shift===s.id&&o.status!=='void'&&o.pay==='cash')cash+=+o.total||0});const mv=(s.moves||[]).reduce((a,m)=>a+(m.kind==='in'?1:-1)*(+m.gel||0),0);return r2((+s.openCash||0)+cash+mv)}
-function storeOrderRow(o){return `<div class="orow click ${o.status==='void'?'void':''}" data-act="st_order" data-id="${esc(o.id)}" style="cursor:pointer"><span class="ob"><span class="op">${esc(o.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '))}</span><small>${tOf(o.at)} · №${o.no||''} · ${esc(o.user?o.user.name:'?')}${o.status==='void'?' · <b style="color:var(--bad)">voided</b>':''}${o.note?' · '+esc(o.note):''}</small></span><span class="chip">${esc(POSPAY[o.pay]||o.pay)}</span><b class="num">${gel(o.total,o.total%1?2:0)}</b></div>`}
+function shiftExpected(s){let cash=0;S.pos.forEach(o=>{if(o.shift===s.id&&o.status!=='void')payParts(o).forEach(([k,v])=>{if(k==='cash')cash+=v})});const mv=(s.moves||[]).reduce((a,m)=>a+(m.kind==='in'?1:-1)*(+m.gel||0),0);return r2((+s.openCash||0)+cash+mv)}
+function storeOrderRow(o){return `<div class="orow click ${o.status==='void'?'void':''}" data-act="st_order" data-id="${esc(o.id)}" style="cursor:pointer"><span class="ob"><span class="op">${esc(o.lines.map(l=>(l.q>1?l.q+'× ':'')+l.n).join(', '))}</span><small>${tOf(o.at)} · №${o.no||''} · ${esc(o.user?o.user.name:'?')}${o.status==='void'?' · <b style="color:var(--bad)">voided</b>':''}${o.note?' · '+esc(o.note):''}</small></span><span class="chip">${esc(payLabel(o))}</span><b class="num">${gel(o.total,o.total%1?2:0)}</b></div>`}
 function storeOrderModal(id){
   const o=S.pos.get(id);if(!o)return;
-  modal(`<h3>Receipt №${o.no||''} · ${gel(o.total,2)}</h3><p class="sub">${dtShort(o.at)} · ${esc(o.user?o.user.name:'?')} · ${esc(POSPAY[o.pay]||o.pay)}${o.pay==='cash'?' · given '+gel(o.cash,2)+', change '+gel(o.change,2):''}${o.note?' · '+esc(o.note):''}</p>
+  modal(`<h3>Receipt №${o.no||''} · ${gel(o.total,2)}</h3><p class="sub">${dtShort(o.at)} · ${esc(o.user?o.user.name:'?')} · ${esc(payLabel(o))}${o.pay==='cash'?' · given '+gel(o.cash,2)+', change '+gel(o.change,2):''}${o.note?' · '+esc(o.note):''}</p>
    <div class="flow">${o.lines.map(l=>`<div class="ln"><span class="k row" style="gap:8px">${thumb(l,34)}<span><b>${esc(l.n)}</b><div class="small muted">${l.q} × ${gel(l.p,2)}${l.d?' − '+gel(l.d,2):''} · ${esc(l.b)}</div></span></span><span class="v num">${gel(Math.max(0,l.q*l.p-(+l.d||0)),2)}</span></div>`).join('')}${o.disc?`<div class="ln"><span class="k">Discount</span><span class="v num">−${gel(o.disc,2)}</span></div>`:''}</div>
    ${o.status==='void'?`<p class="hint">Voided ${dtShort(o.voidAt)} by ${esc(o.voidBy?o.voidBy.name:'?')}: ${esc(o.voidWhy||'')}</p>`:''}
    <div class="row mt">${o.status!=='void'?`<button class="btn danger" data-act="st_void" data-id="${esc(o.id)}">Void this sale</button>`:''}<span class="spacer"></span><button class="btn" data-close>Close</button></div>`);
 }
 function storeHistory(){
   const m=S.month;const L=posOrders().filter(o=>(o.day||'').startsWith(m));
-  const days=new Map();L.forEach(o=>{const D=days.get(o.day)||(days.set(o.day,{d:o.day,n:0,a:0,cash:0,card:0,other:0,v:0}),days.get(o.day));if(o.status==='void'){D.v++;return}D.n++;D.a+=o.total;if(o.pay==='cash')D.cash+=o.total;else if(POS_CARD.has(o.pay))D.card+=o.total;else D.other+=o.total});
+  const days=new Map();L.forEach(o=>{const D=days.get(o.day)||(days.set(o.day,{d:o.day,n:0,a:0,cash:0,card:0,other:0,v:0}),days.get(o.day));if(o.status==='void'){D.v++;return}D.n++;D.a+=o.total;payParts(o).forEach(([k,v])=>{if(k==='cash')D.cash+=v;else if(POS_CARD.has(k))D.card+=v;else D.other+=v})});
   const rows=[...days.values()].sort((a,b)=>b.d.localeCompare(a.d));const tot=rows.reduce((t,D)=>({n:t.n+D.n,a:t.a+D.a,cash:t.cash+D.cash,card:t.card+D.card,other:t.other+D.other,v:t.v+D.v}),{n:0,a:0,cash:0,card:0,other:0,v:0});
   const items=new Map();L.forEach(o=>{if(o.status==='void')return;o.lines.forEach(l=>{const it=items.get(l.b)||{b:l.b,n:l.n,q:0,a:0,img:l.img};it.q+=l.q;it.a+=Math.max(0,l.q*l.p-(+l.d||0));items.set(l.b,it)})});
   const top=[...items.values()].sort((a,b)=>b.a-a.a).slice(0,15);const max=Math.max(1,...top.map(x=>x.a));
@@ -4381,7 +4384,7 @@ function ordList(L){
   const fl=`<div class="toolbar"><input class="input grow" id="orQ" placeholder="Search name, phone, address, product…" value="${esc(F.q||'')}"><div class="pills">${[['all','All'],...CHS.map(c=>[c[0],c[1]+' '+c[2]])].map(([k,t])=>`<button data-act="or_fch" data-v="${k}" aria-pressed="${F.ch===k}">${esc(t)}</button>`).join('')}</div><div class="pills">${[['all','Any'],['open','Not delivered'],['unpaid','Unpaid'],['void','Cancelled'],...(F.st.startsWith('st:')?[[F.st,OSTN[F.st.slice(3)]]]:[])].map(([k,t])=>`<button data-act="or_fst" data-v="${k}" aria-pressed="${F.st===k}">${t}</button>`).join('')}</div></div>`;
   const tr=o=>{const c=chOf(o),cu=custOf(o);return `<tr class="click ${o.status==='void'?'void':''}" data-act="or_open" data-id="${esc(o.id)}"><td class="num">${esc(dShort(o.day))}<div class="small muted">${o.src==='sheet'?'':tOf(o.at)}</div></td><td>${chChip(c)}</td>
    <td${cu?'':' class="nocust"'}>${cu?`<b>${esc(cu.name||'—')}</b><div class="small muted num">${esc(fmtPh(cu.phone))}</div>`:'<span class="muted">—</span>'}</td><td class="small hm">${o.dl&&o.dl.pick?'🛍 Picks up in store':cu&&cu.addr?esc(cu.addr):''}</td>
-   <td class="small">${o.lines.map(l=>esc((l.q>1?l.q+'× ':'')+l.n)+priceNote(l)).join(', ')}</td><td class="small">${esc(PAYS[o.pay]||o.pay)}${unpaid(o)?' <span class="chip bad">unpaid</span>':''}</td>
+   <td class="small">${o.lines.map(l=>esc((l.q>1?l.q+'× ':'')+l.n)+priceNote(l)).join(', ')}</td><td class="small">${esc(payLabel(o))}${unpaid(o)?' <span class="chip bad">unpaid</span>':''}</td>
    <td class="r num"><b>${gel(o.total)}</b>${o.ship?`<div class="small muted">incl. ${gel(o.ship)} delivery</div>`:''}</td><td>${o.status==='void'?'<span class="chip bad">cancelled</span>':o.dl&&o.dl.st?`<span class="chip ${o.dl.st==='done'?'good':'warn'}">${stLbl(o,o.dl.st)}</span>${o.dl.seen?`<div class="small muted">✓ ${esc(o.dl.seen.by)}</div>`:o.src==='mars'?'<div class="small muted">not seen yet</div>':''}`:''}</td><td class="small muted hm">${srcOf(o)}${o.no?' №'+o.no:''}</td></tr>`};
   return kp+fl+(rows.length?`<div class="panel"><div class="tablewrap"><table class="ordt"><thead><tr><th>Day</th><th>Type</th><th>Customer</th><th class="hm">Address</th><th>Products</th><th>Payment</th><th class="r">Amount</th><th>Status</th><th class="hm">From</th></tr></thead><tbody>${rows.slice(0,S.ord.all?2000:200).map(tr).join('')}</tbody></table></div>${rows.length>200&&!S.ord.all?`<div class="row mt"><button class="btn" data-act="or_all">Show all ${rows.length}</button></div>`:''}</div>`
    :`<div class="panel empty"><b>No orders here</b>${L.length?'Nothing matches the filters.':'Orders rung on the register or typed here appear in this list.'}</div>`);
@@ -4484,7 +4487,8 @@ function orderModal(id){
    <div class="ofgrid mt"><label class="field"><span>Type</span><select class="input" id="omCh">${CHS.map(([k,ic,t])=>`<option value="${k}" ${c===k?'selected':''}>${ic} ${t}</option>`).join('')}</select></label>
     <label class="field"><span>Date</span><input class="input" type="date" id="omDay" value="${esc(o.day)}" max="${today()}"></label>
     <label class="field"><span>Delivery fee ₾</span><input class="input num" id="omFee" value="${esc(String(o.ship||0))}" inputmode="decimal"></label>
-    <label class="field"><span>Payment</span><select class="input" id="omPay">${Object.entries(PAYS).filter(([k])=>k!=='unknown').map(([k,t])=>`<option value="${k}" ${o.pay===k?'selected':''}>${esc(t)}</option>`).join('')}</select></label>
+    <label class="field"><span>Payment</span><select class="input" id="omPay" onchange="const f=document.getElementById('omSplitF');if(f)f.hidden=this.value!=='split'">${Object.entries(PAYS).filter(([k])=>k!=='unknown').map(([k,t])=>`<option value="${k}" ${o.pay===k?'selected':''}>${esc(t)}</option>`).join('')}</select></label>
+    <label class="field" id="omSplitF" ${o.pay==='split'?'':'hidden'}><span>Of which cash · rest by ${esc(POSPAY[Object.keys(o.parts||{}).find(k=>k!=='cash')||'pos'])}</span><input class="input num" id="omSplitCash" inputmode="decimal" value="${esc(String((o.parts&&o.parts.cash)||''))}"></label>
     <label class="field"><span>Paid</span><select class="input" id="omPaid"><option value="1" ${o.paid!==false?'selected':''}>Paid</option><option value="0" ${o.paid===false?'selected':''}>Not paid yet</option></select></label>
     <label class="field"><span>Status</span><select class="input" id="omSt"><option value="">—</option>${OST.map(([k,t])=>`<option value="${k}" ${o.dl&&o.dl.st===k?'selected':''}>${t}</option>`).join('')}</select></label>
     <label class="field"><span>Name</span><input class="input" id="omName" value="${esc(cu.name||'')}"></label><label class="field"><span>Phone</span><input class="input num" id="omPhone" value="${esc(fmtPh(cu.phone||''))}"></label><label class="field"><span>Discount ₾</span><input class="input num" id="omDisc" value="${esc(String(o.disc||0))}" inputmode="decimal"></label>
@@ -4521,6 +4525,7 @@ async function orderUpdate(id){
   const sub=r2(lines.reduce((a,l)=>a+l.q*l.p,0));const fee=Math.max(0,r2(parseFloat(v('omFee'))||0));const disc=Math.max(0,r2(parseFloat(v('omDisc'))||0));const total=r2(Math.max(0,sub-disc+fee));
   const now=new Date().toISOString();
   const n={...o,ch,day,lines,sub,disc,total,ship:fee,cash:o.pay==='cash'&&v('omPay')==='cash'?Math.max(o.cash||0,total):total,pay:v('omPay'),paid:v('omPaid')==='1',note:(v('omNote')||'').trim(),editedAt:now,editedBy:{id:'mars',name:'Mars'}};
+  if(n.pay==='split'){const c=Math.min(total,Math.max(0,parseFloat(v('omSplitCash'))||0));const card=Object.keys(o.parts||{}).find(k=>k!=='cash')||'pos';n.parts={cash:r2(c),[card]:r2(total-c)};n.cash=r2(c)}else delete n.parts;
   if(day!==o.day)n.at=new Date(day+'T12:00:00').toISOString();
   if(n.paid&&o.paid===false)n.paidAt=now;
   if(ADDR_CH.has(ch)||o.dl||st){const prev=o.dl||{log:[]};const lg=[...(prev.log||[])];if(st&&st!==prev.st)lg.push({st,at:now,by:'Mars'});else lg.push({st:'edit',at:now,by:'Mars'});n.dl={...prev,name,phone:ph,addr,fee,st:st||prev.st||'new',log:lg};delete n.cust}
@@ -4558,7 +4563,7 @@ const PLATFORM_RE=/wolt|ვოლტ|glovo|გლოვო|extra|ექსტრ
 function payCheck(m){
   const hit=S.mc.get('#pc'+m);if(hit)return hit;
   const doc=S.sales.get(m);const rows=(doc&&doc.rows||[]).map((r,i)=>({...r,i}));
-  const ord=rows.filter(r=>CHECK_PAYS.has(r.pay)&&(+r.a||0)>0&&r.d);
+  const ord=rows.flatMap(r=>r.pay==='split'&&r.parts?Object.entries(r.parts).map(([k,v])=>({...r,pay:k,a:+v||0,split:true})):[r]).filter(r=>CHECK_PAYS.has(r.pay)&&(+r.a||0)>0&&r.d);
   const from=m+'-01',to=addDays(m+'-'+String(daysIn(m)).padStart(2,'0'),7);
   const IN=[...S.bankin.values()].filter(t=>t&&t.date>=addDays(from,-2)&&t.date<=to).map(t=>({...t,used:false}));
   const cover={};[...S.bankin.values()].forEach(t=>{const c=cover[t.acct]||(cover[t.acct]={min:t.date,max:t.date,n:0});if(t.date<c.min)c.min=t.date;if(t.date>c.max)c.max=t.date;c.n++});
@@ -4699,7 +4704,7 @@ function reconPanel(d){
   return `<div class="panel"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">Sheet vs register</h2><p class="sub" style="margin:2px 0 0">Every order typed in the order sheet (shop, Wolt and delivery) against what the register recorded, matched by amount. At the end of the day both sides should agree.</p></div><span class="spacer"></span>${any?(R.ok?'<span class="chip good">matches</span>':`<span class="chip bad">differs by ${gel(Math.abs(R.diff))}</span>`):''}</div>
    <div class="kpis small3 mt"><div class="kpi"><div class="lbl">Sheet · ფილიალი</div><div class="val num">${gel(R.sa)}</div><div class="delta">${R.sheet.length} row${R.sheet.length===1?'':'s'}</div></div><div class="kpi"><div class="lbl">Register</div><div class="val num">${gel(R.ra)}</div><div class="delta">${R.reg.length} sale${R.reg.length===1?'':'s'}</div></div><div class="kpi"><div class="lbl">Matched</div><div class="val num">${R.pairs.length}</div><div class="delta">${R.sheetOnly.length} only in sheet · ${R.regOnly.length} only on register</div></div></div>
    ${R.sheetOnly.length?`<h3 class="rh3">Only in the sheet</h3><div class="flow">${R.sheetOnly.map(s=>`<div class="ln"><span class="k">${esc(s.p||'—')}<div class="small muted">${esc(PAYS[s.pay]||s.pay||'')}</div></span><span class="v num">${gel(s.a)}</span></div>`).join('')}</div>`:''}
-   ${R.regOnly.length?`<h3 class="rh3">Only on the register</h3><div class="flow">${R.regOnly.map(o=>`<div class="ln click" data-act="st_order" data-id="${esc(o.id)}" style="cursor:pointer"><span class="k">${esc(o.p)}<div class="small muted">${o.t} · №${o.no||''} · ${esc(POSPAY[o.pay]||o.pay)}</div></span><span class="v num">${gel(o.a)}</span></div>`).join('')}</div>`:''}
+   ${R.regOnly.length?`<h3 class="rh3">Only on the register</h3><div class="flow">${R.regOnly.map(o=>`<div class="ln click" data-act="st_order" data-id="${esc(o.id)}" style="cursor:pointer"><span class="k">${esc(o.p)}<div class="small muted">${o.t} · №${o.no||''} · ${esc(payLabel(o))}</div></span><span class="v num">${gel(o.a)}</span></div>`).join('')}</div>`:''}
    ${!any?'<div class="muted">No shop sales on this day in either place.</div>':''}</div>`;
 }
 
