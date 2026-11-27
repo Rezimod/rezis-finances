@@ -99,3 +99,10 @@ Rare, so it stays out of the way: on the register's pay screen, under the paymen
 The consultant types the cash part; the rest goes to the terminal, BOG or TBC (one tap). Saved as `pay:'split'` with `parts:{cash, pos|bog|tbc}`.
 The drawer expects only the cash part; the receipt prints both lines; Mars counts each part in its own place, and the payment check looks for the card/transfer part in the bank. The manager can change the cash part in the Mars order window.
 Test: `node astroman/tools/check-split.mjs`.
+
+## Shipments: delete a product, put arrivals in stock
+
+- Each product row in a shipment's "Cost per product" has a ✕ (tap twice). It deletes that line from the supplier order it came from, so the shipment's costs re-split over what's left.
+- Tapping **Arrived** opens "Put the shipment in stock": one switch puts every line in the **Warehouse** or the **Store** (it remembers your last choice), and each line can still go elsewhere or be set to 0. Linked products are matched; an empty box creates a new product at 3× landed cost.
+- After that the shipment shows "✓ In stock · N pcs to the warehouse · M to the store" with an **Undo**. Until it's stocked, an arrived shipment shows "Not in stock yet · Put in stock". While in stock, its status can't be moved back.
+Test: `node astroman/tools/check-shipstock.mjs`.

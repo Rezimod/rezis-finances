@@ -66,6 +66,9 @@ tr.void td{opacity:.45;text-decoration:line-through}
 .pipe button.warn b{color:var(--warn)}
 .oline{display:grid;grid-template-columns:minmax(0,1fr) 70px 100px 90px 32px;gap:6px;align-items:center;margin-bottom:6px}
 .oline .sum{text-align:right}
+
+.rmline{margin-left:auto;flex:none;opacity:.4;min-width:32px;padding-inline:8px}tr:hover .rmline,.rmline:focus-visible,.rmline.danger{opacity:1}.rmline.danger{color:var(--bad);border-color:var(--bad)}
+@media (max-width:860px){.rmline{opacity:.75}}
 </style>
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.json">
@@ -3237,7 +3240,7 @@ function vShipView(s){
   const basisSeg=`<div class="seg" role="group" aria-label="Split freight by">${BASES.map(([k,t])=>`<button data-act="shipBasis" data-v="${k}" aria-pressed="${(s.basis||'auto')===k}">${t}</button>`).join('')}</div>`;
   const prods=`<div class="panel" style="padding-bottom:6px"><div class="row" style="flex-wrap:wrap;gap:8px"><div><h2 style="margin:0">Cost per product</h2><p class="sub" style="margin:2px 0 0">Freight and transport split by <b>${C.basis==='weight'?'weight':C.basis==='qty'?'pieces':'value'}</b>${C.weightGap?' (some products have no weight, so by value)':''}; customs${C.vIn?' and VAT':''} by customs value. Tap a product to link it to the store and set its selling price.</p></div><span class="spacer"></span>${basisSeg}</div>
    ${C.lines.length?`<div class="tablewrap mt"><table class="mstack"><thead><tr><th>Product</th><th class="r">Pcs</th><th class="r">Goods</th><th class="r">Fee</th><th class="r">Freight &amp; transport</th><th class="r">Customs${C.vIn?' + VAT':''}</th><th class="r">Landed</th><th class="r">Each</th><th class="r">Sells for</th></tr></thead><tbody>
-    ${C.lines.map((l,j)=>{const oc=optimoCost(l.sku);const L=SL[j],x=L.x;return `<tr class="click" data-act="shipLink" data-i="${j}" title="Link to a product and set its price"><td class="mn" style="min-width:180px"><div class="row" style="gap:10px;align-items:flex-start;flex-wrap:nowrap">${thumb(x||{n:l.n},36)}<div style="min-width:0">${esc(l.n||'—')}${l.personal?' <span class="chip below">not Astroman</span>':''}<div class="small muted">${esc(l.sup?shortSup(l.sup):(l.legacy?'entered on the shipment':''))}${l.fixed?' · own customs':''}${l.kg?' · '+fmt(l.kg,1)+' kg':''}${oc&&oc.cost?' · Optimo '+gel(oc.cost,2):''}</div><div class="small" style="margin-top:3px">${x?`<span class="up">→ ${esc(x.n)}</span> <span class="muted">${esc(x.b)} · ${esc(x.cat||'სხვადასხვა')} · store ${catLive(x)} · warehouse ${whQ(x)}</span>`:'<span class="chip warn">Not linked · tap to link</span>'}</div></div></div></td>
+    ${C.lines.map((l,j)=>{const oc=optimoCost(l.sku);const L=SL[j],x=L.x;return `<tr class="click" data-act="shipLink" data-i="${j}" title="Link to a product and set its price"><td class="mn" style="min-width:180px"><div class="row" style="gap:10px;align-items:flex-start;flex-wrap:nowrap">${thumb(x||{n:l.n},36)}<div style="min-width:0">${esc(l.n||'—')}${l.personal?' <span class="chip below">not Astroman</span>':''}<div class="small muted">${esc(l.sup?shortSup(l.sup):(l.legacy?'entered on the shipment':''))}${l.fixed?' · own customs':''}${l.kg?' · '+fmt(l.kg,1)+' kg':''}${oc&&oc.cost?' · Optimo '+gel(oc.cost,2):''}</div><div class="small" style="margin-top:3px">${x?`<span class="up">→ ${esc(x.n)}</span> <span class="muted">${esc(x.b)} · ${esc(x.cat||'სხვადასხვა')} · store ${catLive(x)} · warehouse ${whQ(x)}</span>`:'<span class="chip warn">Not linked · tap to link</span>'}</div></div><button class="btn sm ghost rmline" data-rmline="${j}" title="Delete this product from the shipment" aria-label="Delete ${esc(l.n||'product')} from the shipment">✕</button></div></td>
      <td class="r num" data-l="Pcs">${fmt(l.q)}</td><td class="r num" data-l="Goods">${D$(l.goods,R)}</td><td class="r num" data-l="Fee">${l.fee?D$(l.fee,R):'·'}</td><td class="r num" data-l="Freight">${l.freight+l.local?D$(l.freight+l.local,R):'·'}</td><td class="r num" data-l="Customs">${l.duty+(C.vIn?l.vat:0)?D$(l.duty+(C.vIn?l.vat:0),R):'·'}</td>
      <td class="r num" data-l="Landed">${UGs(l.landed,R)}</td><td class="r num" data-l="Each"><b>${l.q?UGs(l.unit,R,2):'—'}</b>${l.q&&l.goodsUnit?`<div class="small muted">+${Math.round((l.unit/l.goodsUnit-1)*100)}%</div>`:''}</td>
      <td class="r num" data-l="Sells for"><b style="color:var(--accent)">${l.q?gel(L.each):'—'}</b><div class="small muted">${!l.q?'':L.price?(l.unit?'×'+fmt(L.price/l.unit,1)+' cost':'')+(Math.abs(L.price-l.unit*MARKUP)>=1?' · 300% '+gel(Math.round(l.unit*MARKUP)):''):'300% · no price yet'}</div></td></tr>`}).join('')}</tbody>
@@ -3251,9 +3254,24 @@ function vShipView(s){
    <div class="kpi"><div class="lbl">Landed cost</div>${kv(C.landed)}${C.units?`<div class="delta">${D$(C.landed/C.units,R,2)} a piece on average</div>`:''}</div>
    <div class="kpi"><div class="lbl">Sells for</div><div class="val num" style="color:var(--accent)">${cu(ST.v)}<small> ₾</small></div><div class="delta">300% of landed: ${gel(ST.v3)}${ST.np?' · '+ST.np+' without a price':''}</div></div></div>`;
   return `<div class="pagehead"><div><button class="linkbtn eyebrow" data-act="impBack">← All imports</button><h1><span class="tk">${svg(TRUCK,22)}</span>${esc(s.forwarder||'Shipment')}${s.personal?' <span class="chip below">not Astroman</span>':''}</h1><p>${esc(meta)}${s.note?' · '+esc(s.note):''}</p></div><div class="actions"><button class="btn" data-act="shipEdit">Edit shipment</button><button class="btn amber" data-act="shipAddOrders">+ Add orders</button></div></div>
-   ${stepBtns}${C.miss.length?`<div class="row" style="gap:6px;margin:-4px 0 14px">${C.miss.map(m=>`<span class="chip warn">${esc(m)}</span>`).join('')}</div>`:''}
+   ${stepBtns}${shipStockBar(s,C)}${C.miss.length?`<div class="row" style="gap:6px;margin:-4px 0 14px">${C.miss.map(m=>`<span class="chip warn">${esc(m)}</span>`).join('')}</div>`:''}
    ${kp}${prods}<div class="grid g2 mt">${costs}${pays}</div><div class="mt">${ords}</div>`;
 }
+
+// after "Arrived": put the goods in stock (warehouse or store), or show where they went
+function shipStockBar(s,C){if(s.personal||C.st!=='arrived')return '';const L=C.lines.filter(l=>!l.personal&&l.q>0);if(!L.length&&!s.stocked)return '';
+  if(s.stocked){const d=s.stocked.lines||[];const w=d.filter(x=>x.to==='qw').reduce((a,x)=>a+x.q,0),st=d.filter(x=>x.to==='qs').reduce((a,x)=>a+x.q,0);
+    return `<div class="panel row stockbar good" style="gap:10px;flex-wrap:wrap;margin-bottom:14px"><span class="chip good">✓ In stock</span><span>${esc(shortD(String(s.stocked.at).slice(0,10)))} · ${[w?fmt(w)+' pcs to the warehouse':'',st?fmt(st)+' pcs to the store':''].filter(Boolean).join(' · ')||'nothing added'}</span><span class="spacer"></span><button class="btn sm ghost" data-act="shipUnstock">Undo</button></div>`}
+  return `<div class="panel row stockbar" style="gap:10px;flex-wrap:wrap;margin-bottom:14px;border-color:var(--accent)"><span class="chip warn">Not in stock yet</span><span>${fmt(L.reduce((a,l)=>a+l.q,0))} pcs arrived but aren't counted in the store or warehouse.</span><span class="spacer"></span><button class="btn amber" data-act="shipStock">Put in stock</button></div>`}
+async function unstockShip(id){const s=S.ships.get(id);if(!s||!s.stocked)return;const now=new Date().toISOString();
+  for(const x of s.stocked.lines||[]){const cur=S.catalog.get(x.b);if(!cur)continue;const patch={[x.to]:(x.to==='qs'?storeQ(cur):whQ(cur))-x.q};if(x.to==='qw')patch.qwT=now;await saveCat(x.b,patch)}
+  const {id:_,stocked,...rest}=s;await S.db.doc('ships/'+id).set({...rest,unstockedAt:now});toast('Taken back out of stock')}
+// delete one product line from a shipment: it is removed from the supplier order it came from
+async function rmShipLine(sid,j){const s=S.ships.get(sid);if(!s)return;const l=shipCalc(s).lines[j];if(!l)return;
+  if(l.legacy){await putShip(sid,{...s,usd:0,qty:0,item:'',sku:''});return toast('Deleted from the shipment')}
+  const o=S.ships.get(l.orderId);if(!o||!Array.isArray(o.lines)||!o.lines[l.li])return toast('Could not find that line in its order');
+  const lines=o.lines.slice();lines.splice(l.li,1);await putShip(o.id,{...o,lines});S.mc=new Map();
+  const c=orderCalc({...o,lines});toast('Deleted '+(l.n||'product')+' · '+shortSup(o.supplier||'order')+' now '+(c.cur==='GEL'?gel(c.total,2):money(c.total,c.cur))+(s.stocked?' · stock was not changed':''))}
 
 /* ---------- save helpers ---------- */
 async function putShip(id,d){const b={...d};delete b.id;b.updatedAt=new Date().toISOString();await S.db.doc('ships/'+id).set(b)}
@@ -3576,15 +3594,18 @@ function bindImports(){
   document.querySelectorAll('#main label.ck').forEach(l=>l.addEventListener('click',e=>e.stopPropagation()));
   document.querySelectorAll('#main [data-gsel]').forEach(c=>{c.onclick=e=>e.stopPropagation();c.onchange=()=>{c.dataset.gsel.split(',').filter(Boolean).forEach(id=>c.checked?I.sel.add(id):I.sel.delete(id));render()}});
   const all=$('#oselAll');if(all)all.onchange=()=>{document.querySelectorAll('#main [data-osel]').forEach(c=>all.checked?I.sel.add(c.dataset.osel):I.sel.delete(c.dataset.osel));render()};
+  document.querySelectorAll('#main [data-rmline]').forEach(b=>b.onclick=async e=>{e.stopPropagation();if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Delete?';b.classList.add('danger');return}b.disabled=true;try{await rmShipLine(impState().ship,+b.dataset.rmline)}catch(x){toast(errMsg(x))}});
   document.querySelectorAll('#main [data-rmorder]').forEach(b=>b.onclick=async e=>{e.stopPropagation();if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Tap again';return}try{await setOrderShip([b.dataset.rmorder],'');toast('Taken out of this shipment')}catch(x){toast(errMsg(x))}});
   bindUnlink();
 }
 
 // moving a shipment along: each step records its day once; stepping back clears the later days
 async function setShipStatus(id,st){const s=S.ships.get(id);if(!s)return;const b={...s,status:st};const i=stIdx(st);
+  if(s.stocked&&i<3){toast('These goods are already in stock. Tap “Undo” first, then change the status.');return}
   if(i>=1&&!b.shippedAt)b.shippedAt=today();if(i>=2&&!b.customsAt)b.customsAt=today();if(i>=3&&!b.arrivedAt)b.arrivedAt=today();
   if(i<3)b.arrivedAt='';if(i<2)b.customsAt='';if(i<1)b.shippedAt='';
-  await putShip(id,b);toast(stLabel(st)+(i>=1?' · '+shortD(i===3?b.arrivedAt:i===2?b.customsAt:b.shippedAt):''))}
+  await putShip(id,b);toast(stLabel(st)+(i>=1?' · '+shortD(i===3?b.arrivedAt:i===2?b.customsAt:b.shippedAt):''));
+  if(i===3&&shipSt(s)!=='arrived'&&!b.personal&&!b.stocked&&shipCalc(b).lines.some(l=>!l.personal&&l.q>0))stockShipModal(id)}
 async function impAct(a,b){const I=impState();
   if(a==='newOrder')return orderModal(null,b&&b.dataset.ship?{shipId:b.dataset.ship}:null);
   if(a==='newShip')return shipModal();
@@ -3605,6 +3626,8 @@ async function impAct(a,b){const I=impState();
   if(a==='payShip')return payModal({shipId:I.ship});
   if(a==='linkShip')return linkModal({shipId:I.ship});
   if(a==='shipSt')return setShipStatus(I.ship,b.dataset.v);
+  if(a==='shipStock')return stockShipModal(I.ship);
+  if(a==='shipUnstock'){if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Tap again to take it back out of stock';return}b.disabled=true;try{await unstockShip(I.ship)}catch(e){toast(errMsg(e))}return}
   if(a==='shipLink'){const s=S.ships.get(I.ship);const l=s&&shipCalc(s).lines[+b.dataset.i];if(l)wayLinkModal({item:l.n,sku:l.sku,qty:l.q,land:l.landed,refs:[{o:l.orderId||'',s:s.id,li:l.li}]});return}
   if(a==='shipBasis'){const s=S.ships.get(I.ship);if(s)await putShip(I.ship,{...s,basis:b.dataset.v});return}
   return false}
@@ -4716,12 +4739,15 @@ function stockShipModal(id){
   const s=S.ships.get(id);if(!s)return;if(s.stocked){toast('Already put in stock on '+String(s.stocked.at).slice(0,10));return}
   const L=shipCalc(s).lines.filter(l=>!l.personal);
   const cats=[...S.catalog.values()].filter(x=>x.b).sort((a,b)=>a.n.localeCompare(b.n));
-  modal(`<h3>Put the shipment in stock</h3><p class="sub">${esc(s.forwarder||'Shipment')} · arrived ${esc(s.arrivedAt||'')} · ${L.length} line${L.length===1?'':'s'}. Each line is added to the warehouse or the store. A line whose barcode is on the register is matched already; an empty product box makes a new product. The landed cost per piece becomes the product cost; a new product gets 3× that as its price.</p>
+  let dto='qw';try{dto=localStorage.getItem('mars.skTo')==='qs'?'qs':'qw'}catch(e){}
+  modal(`<h3>Put the shipment in stock</h3><p class="sub">${esc(s.forwarder||'Shipment')} · arrived ${esc(shortD(s.arrivedAt||today()))} · ${L.length} product${L.length===1?'':'s'} · ${fmt(L.reduce((a,l)=>a+l.q,0))} pcs. Linked products are matched already; an empty product box makes a new product. Set pieces to 0 to leave a line out.</p>
+   <div class="row" style="gap:10px;flex-wrap:wrap;margin-bottom:12px"><b>Where does it go?</b><div class="seg" role="group" aria-label="Put everything in"><button data-skall="qw" aria-pressed="${dto==='qw'}">🏬 Warehouse</button><button data-skall="qs" aria-pressed="${dto==='qs'}">🛍 Store</button></div><span class="small muted">for every line · change single lines below</span></div>
    <datalist id="skCats">${cats.map(x=>`<option value="${esc(x.n)} · ${esc(x.b)}">`).join('')}</datalist>
    <div class="tablewrap"><table><thead><tr><th>From the invoice</th><th>Product on the register</th><th class="r">Pieces</th><th>Where</th></tr></thead><tbody>
-   ${L.map((l,i)=>{const m=l.sku&&S.catalog.get(String(l.sku));const unit=l.q?l.landed/l.q:0;return `<tr><td><b>${esc(l.n)}</b><div class="small muted">${l.sku?'barcode '+esc(l.sku)+' · ':''}${gel(unit,2)} landed each</div></td><td><input class="input" list="skCats" data-sk="${i}" value="${m?esc(m.n+' · '+m.b):''}" placeholder="type to search · empty = new product"></td><td class="r"><input class="input num" data-skq="${i}" inputmode="numeric" value="${l.q}" style="max-width:80px"></td><td><select class="input" data-skw="${i}"><option value="qw">Warehouse</option><option value="qs">Store</option></select></td></tr>`}).join('')}</tbody></table></div>
+   ${L.map((l,i)=>{const lb=wayProduct(l.sku);const m=(lb&&S.catalog.get(lb))||(l.sku&&S.catalog.get(String(l.sku)));const unit=l.q?l.landed/l.q:0;return `<tr><td><b>${esc(l.n)}</b><div class="small muted">${l.sku?'barcode '+esc(l.sku)+' · ':''}${gel(unit,2)} landed each</div></td><td><input class="input" list="skCats" data-sk="${i}" value="${m?esc(m.n+' · '+m.b):''}" placeholder="type to search · empty = new product"></td><td class="r"><input class="input num" data-skq="${i}" inputmode="numeric" value="${l.q}" style="max-width:80px"></td><td><select class="input" data-skw="${i}"><option value="qw" ${dto==='qw'?'selected':''}>Warehouse</option><option value="qs" ${dto==='qs'?'selected':''}>Store</option></select></td></tr>`}).join('')}</tbody></table></div>
    <label class="row"><input type="checkbox" id="skCost" checked> Write the landed cost as the product cost</label>
-   <div class="row"><button class="btn primary" data-act="st_stockGo" data-id="${esc(id)}">Put in stock</button><span class="spacer"></span><button class="btn" data-close>Cancel</button></div>`,true);
+   <div class="row"><button class="btn primary" data-act="st_stockGo" data-id="${esc(id)}">Put in stock</button><span class="spacer"></span><button class="btn" data-close>Later</button></div>`,true);
+  document.querySelectorAll('#modalRoot [data-skall]').forEach(b=>b.onclick=()=>{const v=b.dataset.skall;try{localStorage.setItem('mars.skTo',v)}catch(e){}document.querySelectorAll('#modalRoot [data-skall]').forEach(x=>x.setAttribute('aria-pressed',x===b));document.querySelectorAll('#modalRoot [data-skw]').forEach(x=>x.value=v)});
 }
 async function stockShipGo(id){
   const s=S.ships.get(id);if(!s||s.stocked)return;const L=shipCalc(s).lines.filter(l=>!l.personal);const writeCost=$('#skCost').checked;const done=[];
@@ -4732,7 +4758,8 @@ async function stockShipGo(id){
     else{b=l.sku&&!S.catalog.has(String(l.sku))?String(l.sku):'I'+uid('').slice(0,8);await saveCat(b,{b,n:l.n,cat:'სხვადასხვა',price:unit>0?Math.round(unit*MARKUP):0,sale:null,cost:writeCost?r2(unit):0,vat:'',q:0,qs:to==='qs'?q:0,qw:to==='qw'?q:0,min:0,sold:0,img:null,big:null,wooId:null,hidden:false,countedAt:new Date().toISOString(),nameEdited:true,priceEdited:true,costEdited:writeCost,storeNote:'from shipment '+(s.arrivedAt||'')})}
     done.push({b,q,to,n:l.n})}
   if(!done.length){toast('Nothing to add');return}
-  const {id:_,...rest}=s;await S.db.doc('ships/'+id).set({...rest,stocked:{at:new Date().toISOString(),lines:done}});closeModal();toast(done.length+' line'+(done.length===1?'':'s')+' added to stock');
+  const {id:_,...rest}=s;await S.db.doc('ships/'+id).set({...rest,stocked:{at:new Date().toISOString(),lines:done}});closeModal();
+  const w=done.filter(x=>x.to==='qw').reduce((a,x)=>a+x.q,0),st=done.filter(x=>x.to==='qs').reduce((a,x)=>a+x.q,0);toast('In stock · '+[w?w+' pcs to the warehouse':'',st?st+' pcs to the store':''].filter(Boolean).join(' · '));
 }
 
 /* ---------- duplicates ---------- */
