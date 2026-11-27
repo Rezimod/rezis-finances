@@ -114,3 +114,8 @@ Every order line linked to a product comes off the store count from the moment i
 - A name typed by hand is matched to a product automatically when it's the same name. Otherwise the line shows "not linked to stock · pick"; Save warns once, and a second Save saves it without taking it off stock.
 - Orders entered before this (or imported from the sheet) with typed products: the Orders page shows "N product lines aren't linked … Link them", with the right product guessed where the name matches.
 Test: `node astroman/tools/check-orderstock.mjs`.
+
+## Register: products on an online order
+
+On the orders board each online order shows its products on the right in a highlighted box ("📦 რა უნდა გაიგზავნოს · N ც."): picture, name in bold, quantity (red when more than one). Tapping a product opens its picture large, with quantity, price, store and warehouse stock; ← / → go through the order's products. The new-order popup shows the pictures too. On a phone the box spans the full width under the customer.
+Test: `node astroman/tools/check-ordcard.mjs`.
