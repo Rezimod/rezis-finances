@@ -50,13 +50,14 @@ const geo = await page.evaluate(() => { const o = document.querySelector('.ord')
 check('products sit to the right of the customer details', geo.prodLeft >= geo.infoRight - 1, geo);
 check('product pictures shown', await page.locator('.oprod img').count() === 2);
 check('quantity above 1 is marked', /× 2/.test(await page.textContent('.opq.many')));
+check('order type colour stripe', await page.evaluate(() => getComputedStyle(document.querySelector('.ord.ch-wolt')).borderLeftWidth) === '6px');
 await page.screenshot({ path: '/tmp/ordcard-desktop.png' });
 await page.click('.oprod >> nth=0');  await page.waitForSelector('.ppic img');
 const t = await page.textContent('#modalRoot');
 check('tapping a product opens its picture with qty, price, stock', /Foreseen/.test(t) && /499/.test(t) && /მაღაზიაში/.test(t) && /საწყობში/.test(t), t.slice(0, 200));
-await page.screenshot({ path: '/tmp/ordcard-pic.png' });
-await page.click('[data-pp="1"]'); await page.waitForTimeout(150);
-check('next arrow shows the second product', /მთვარის/.test(await page.textContent('#modalRoot h3')));
+await page.waitForTimeout(800); await page.screenshot({ path: '/tmp/ordcard-pic.png' });
+await page.keyboard.press('ArrowRight'); await page.waitForTimeout(150);
+check('→ key shows the second product', /მთვარის/.test(await page.textContent('#modalRoot h3')));
 await page.keyboard.press('Escape');
 await page.setViewportSize({ width: 390, height: 844 }); await page.waitForTimeout(300);
 const pw = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, w: document.querySelector('.oprods').getBoundingClientRect().width }));

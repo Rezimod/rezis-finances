@@ -73,6 +73,8 @@ tr.void td{opacity:.45;text-decoration:line-through}
 .stk{color:var(--muted)}.stk b{color:var(--ink)}.stk.neg,.stk.neg b{color:var(--bad)}
 .oline-st{grid-column:1/-1;margin-top:-2px}
 button.chip{cursor:pointer;border:0;font:inherit}
+
+.brand[data-go],.tbrand[data-go]{cursor:pointer}.brand[data-go]:hover img{opacity:.85}
 </style>
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.json">
@@ -1142,7 +1144,7 @@ body:has(.wcs) .toast{bottom:auto;top:calc(14px + env(safe-area-inset-top,0px));
 
 <div class="app">
   <aside class="rail">
-    <div class="brand"><img class="lt" src="brand/logo-full-light-240.png" alt="Astroman"><img class="dk" src="brand/logo-full-black-240.png" alt="Astroman"><small>Mars · control center</small></div>
+    <div class="brand" data-go="overview" role="link" tabindex="0" title="Overview" aria-label="Astroman · go to Overview"><img class="lt" src="brand/logo-full-light-240.png" alt="Astroman"><img class="dk" src="brand/logo-full-black-240.png" alt="Astroman"><small>Mars · control center</small></div>
     <nav class="menu" id="menu" aria-label="Sections"></nav>
     <div class="foot">
       <div><span class="dot off" id="syncDot"></span><span id="syncTxt">Connecting…</span></div>
@@ -1153,7 +1155,7 @@ body:has(.wcs) .toast{bottom:auto;top:calc(14px + env(safe-area-inset-top,0px));
   <div class="content">
     <div class="topbar">
       <button class="iconbtn" id="topBack" aria-label="Back" hidden>‹</button>
-      <img class="tbrand" src="brand/mark-light-160.png" alt="">
+      <img class="tbrand" data-go="overview" src="brand/mark-light-160.png" alt="Overview" title="Overview">
       <button class="toptitle" id="topTitle" tabindex="-1" aria-hidden="true"><b></b><small></small></button>
       <div class="monthdial">
         <label for="monthSel">Month</label>
@@ -1654,9 +1656,10 @@ function renderShell(){
   $('#menu').innerHTML=PAGES.map((p,i)=>(p.id==='pl'?'<div class="sep"></div><div class="grp">Finance</div>':p.id==='optimo'?'<div class="sep"></div><div class="grp">Store</div>':'')+`<button data-go="${p.id}">${svg(IC[p.id])}${p.t}</button>`).join('');
   $('#tabbar').innerHTML=[['overview','Overview'],['orders','Orders'],['add',''],['expenses','Expenses'],['more','More']].map(([id,t])=>id==='add'?`<button data-go="add" aria-label="New"><span class="plus">+</span></button>`:`<button data-go="${id}">${svg(IC[id],22)}<span>${t}</span></button>`).join('');
   $('#moreInner').innerHTML='<div class="grab"></div>'+[['recap','Recap'],['orders','Orders'],['optimo','Optimo'],['sales','Sales'],['products','Products'],['store','Store sales'],['count','Stock count'],['tools','Tools'],['bank','Bank import'],['pl','Profit & loss'],['imports','Imports'],['loan','Loan'],['settings','Settings']].map(([id,t])=>`<button data-go="${id}">${svg(IC[id],20)}${t}</button>`).join('');
+  document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches&&e.target.matches('.brand[data-go]'))e.target.click()});
   document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');
     if(!g){const ph=e.target.closest('.pagehead p');if(ph&&!e.target.closest('a,button')&&PHONE())ph.classList.toggle('open');return}
-    e.preventDefault();const tab=!!g.closest('#tabbar'),top=(tab&&g.dataset.go!=='add')||!!g.closest('#moreInner,#menu');if(tab)buzz();if(g.dataset.go==='more')return openMore();if(tab&&g.dataset.go==='add')return openActions();
+    e.preventDefault();const tab=!!g.closest('#tabbar'),top=(tab&&g.dataset.go!=='add')||!!g.closest('#moreInner,#menu,.brand')||g.classList.contains('tbrand');if(tab)buzz();if(g.dataset.go==='more')return openMore();if(tab&&g.dataset.go==='add')return openActions();
     if(tab&&g.dataset.go===S.view&&S.view!=='add')return window.scrollTo({top:0,behavior:'smooth'});
     closeMore(true);go(g.dataset.go,top?'tab':undefined)});
   $('#topBack').onclick=()=>goBack();$('#topSearch').onclick=()=>openSearch();$('#topTitle').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
